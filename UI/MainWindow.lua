@@ -31,6 +31,7 @@ local ROWS = {
     { key = "experience", label = "Experience" },
     { key = "training", label = "Training points" },
     { key = "foods", label = "Eats" },
+    { key = "food", label = "Food" },
 }
 
 --------------------------------------------------------------------------------
@@ -72,6 +73,11 @@ function UI:Build()
     self.emptyLabel = empty
 
     self:BuildStatus()
+    self:BuildFeedButton()
+
+    -- The Feed button lives outside the window (see BuildFeedButton), so it
+    -- has to be told when the window goes.
+    frame:HookScript("OnHide", function() UI:PlaceFeedButton(nil) end)
 
     local footer = Theme.CreateLabel(frame, "small", "muted")
     footer:SetPoint("BOTTOMLEFT", PADDING, 14)
@@ -127,6 +133,58 @@ function UI:BuildStatus()
     end
 end
 
+--- The Feed button. It is a secure action button, because casting Feed Pet
+--- is protected, and it belongs to UIParent rather than to this window: a
+--- window holding a secure button cannot be closed or moved in combat. It is
+--- anchored over the window only while out of combat, and let go of as
+--- combat starts, which PLAYER_REGEN_DISABLED fires just before.
+function UI:BuildFeedButton()
+    local button = Widgets.CreateButton(UIParent, "Feed", nil, {
+        name = "BlackthornesPetsFeedButton",
+        template = "SecureActionButtonTemplate",
+        primary = true,
+        width = 90,
+        height = 22,
+    })
+    button:SetFrameStrata("DIALOG")
+    button:RegisterForClicks("AnyUp", "AnyDown")
+    button:Hide()
+    self.feedButton = button
+
+    ns.RegisterEvent(self, "PLAYER_REGEN_DISABLED", function() UI:PlaceFeedButton(nil, true) end)
+end
+
+local function InCombat()
+    if type(InCombatLockdown) ~= "function" then return false end
+    local ok, locked = pcall(InCombatLockdown)
+    return ok and locked == true
+end
+
+--- Point the Feed button at a stack of food and put it over the window, or,
+--- with no stack, take it away. Does nothing in combat, when the game will
+--- not allow it, unless `beforeCombat` says combat is only about to start.
+function UI:PlaceFeedButton(stack, beforeCombat)
+    local button = self.feedButton
+    if not button then return end
+    if InCombat() and not beforeCombat then return end
+
+    if stack and self.frame and self.frame:IsShown() then
+        button:SetAttribute("type", "macro")
+        button:SetAttribute("macrotext", ns.Food:FeedMacro(stack))
+        button:SetText("Feed " .. stack.name)
+        button:ClearAllPoints()
+        button:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", -PADDING, 10)
+        button:SetFrameLevel(self.frame:GetFrameLevel() + 10)
+        button:Show()
+        self.feedStack = stack
+    else
+        button:Hide()
+        button:ClearAllPoints()
+        button:SetAttribute("macrotext", nil)
+        self.feedStack = nil
+    end
+end
+
 --- Fill the status rows from a PetStatus reading, hiding the ones with
 --- nothing to say and closing up the gaps.
 function UI:ShowStatus(status)
@@ -146,6 +204,16 @@ function UI:ShowStatus(status)
         values.experience = PetStatus:ExperienceText(status)
         values.training = PetStatus:TrainingText(status)
         values.foods = PetStatus:FoodText(status)
+
+        if status.foods then
+            local stacks = ns.Food:Scan(status)
+            values.food = ns.Food:Summary(stacks)
+            self:PlaceFeedButton(stacks[1])
+        else
+            self:PlaceFeedButton(nil)
+        end
+    else
+        self:PlaceFeedButton(nil)
     end
 
     local y = -(HEADER + 18)

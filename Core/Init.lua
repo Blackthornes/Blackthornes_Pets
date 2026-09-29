@@ -245,6 +245,9 @@ local DEFAULTS = {
     -- 125% damage.
     feedWarning = true,
     feedWarnOnlyUnhappy = false,
+
+    -- The warning when the bags hold little food the pet will eat.
+    lowFoodWarning = true,
 }
 
 -- Per character, because pets are: a hunter's stable and a warlock's demons

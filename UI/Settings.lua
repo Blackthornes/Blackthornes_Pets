@@ -25,7 +25,7 @@ local COLUMN_WIDTH = 330
 local CONTROL_X = 150
 
 local WIDTH = COLUMN_WIDTH + PADDING * 2
-local HEIGHT = 480
+local HEIGHT = 540
 
 local ROW_HEIGHT = 50
 local ROW_GAP = -6
@@ -208,7 +208,15 @@ function SettingsUI:BuildColumn()
     end, false)
     controls.feedWarnOnlyUnhappy:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local advanced = CreateSection(frame, "ADVANCED", { anchor = unhappyRow })
+    local lowFoodRow = CreateRow(frame, unhappyRow, "Low food warning",
+        ("A warning in chat when you have fewer than %d food your pet will eat."):format(ns.Food.LOW_FOOD))
+
+    controls.lowFoodWarning = Widgets.CreateCheckbox(lowFoodRow, "Warn me", function(checked)
+        ns.db.lowFoodWarning = checked
+    end, true)
+    controls.lowFoodWarning:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local advanced = CreateSection(frame, "ADVANCED", { anchor = lowFoodRow })
 
     local debugRow = CreateRow(frame, advanced, "Debug output",
         "Extra messages in chat, to help track down a problem.")
@@ -233,6 +241,7 @@ function SettingsUI:Refresh()
     controls.minimap:SetChecked(not ns.db.minimapHidden)
     controls.feedWarning:SetChecked(ns.db.feedWarning ~= false)
     controls.feedWarnOnlyUnhappy:SetChecked(ns.db.feedWarnOnlyUnhappy == true)
+    controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
     controls.debug:SetChecked(ns.db.debug == true)
 end
 
