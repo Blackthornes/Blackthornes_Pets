@@ -54,5 +54,24 @@ inside a pcall; a `..` inside a pcall proves nothing. The probe now prints "(sec
 that. A pet frame or health warning cannot read the pet's health as a number;
 it has to hand the value straight to a status bar or find another source.
 
+**The classic mechanics are all there, under `C_PetInfo`.** The third run
+(Durotar, level 7 Boar, no stable open) listed these pet-like calls:
+
+- `C_PetInfo.GetPetHappiness`, `C_PetInfo.GetPetLoyalty`,
+  `C_PetInfo.GetPetFoodTypes`, `C_PetInfo.GetPetTrainingPoints`
+- `C_PlayerInfo.GetPetStableCreatureDisplayInfoID`
+- `C_StableInfo`: `BuyStableSlot`, `ClosePetStables`, `GetActivePetList`,
+  `GetAvailablePetSpecInfos`, `GetNextStableSlotCost`, `GetNumActivePets`,
+  `GetNumStablePets`, `GetNumStableSlots`, `GetStablePetFoodTypes`,
+  `GetStablePetInfo`, `GetStabledPetList`, `IsAtStableMaster`,
+  `IsBonusPetSlotAvailable`, `IsPetFavorite`, `PickupStablePet`,
+  `SetPetFavorite`, `SetPetSlot`
+
+`GetNumActivePets` returned 1 and `GetNumStablePets` 0. What the four
+`C_PetInfo` calls return is not recorded yet; the probe now reads them, and
+summarises `GetActivePetList`, at the bottom of its output.
+
+`canaccesstable` is also a global on this client, next to `issecretvalue`.
+
 Still to probe: a warlock with a demon out, and a hunter at the stable
 master with the stable open.

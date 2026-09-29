@@ -29,13 +29,18 @@ local APIS = {
     "IsSpellKnown", "C_Spell.GetSpellName", "GetSpellInfo",
     "C_Container.GetContainerItemInfo", "GetItemCount", "C_Item.GetItemCount",
     "C_Spell.GetSpellInfo", "UnitPowerType",
+    "C_PetInfo.GetPetHappiness", "C_PetInfo.GetPetLoyalty",
+    "C_PetInfo.GetPetFoodTypes", "C_PetInfo.GetPetTrainingPoints",
+    "C_StableInfo.GetActivePetList", "C_StableInfo.IsAtStableMaster",
 }
 
 -- Words that mark a call as a classic pet mechanic. The first run on a
 -- hunter found GetPetHappiness and friends absent while the pet frame still
 -- showed a happiness face, so the client may keep them under other names.
 -- Battle pets are left out: they are a different system.
-local HINTS = { "happi", "loyal", "diet", "petfood", "stable", "trainingpoint", "feedpet" }
+-- The second run found them in C_PetInfo. "Stable" is matched with its capital
+-- so Adjustable, TasksTable and canaccesstable stay out of the list.
+local HINTS = { "happi", "loyal", "diet", "petfood", "trainingpoint", "feedpet" }
 local SKIP = { C_PetJournal = true, C_PetBattles = true }
 
 local function Resolve(path)
@@ -74,6 +79,31 @@ local function Text(value)
     return ok and text or "(secret)"
 end
 
+--- A table a call returned, as its size and up to eight of its fields, so a
+--- list of pets or a pet's info can be read without a second probe. A list
+--- shows its first entry's fields.
+local function Summary(tbl)
+    local ok, text = pcall(function()
+        local count = 0
+        for _ in pairs(tbl) do count = count + 1 end
+        local sample, label = tbl, "table of " .. count
+        if type(tbl[1]) == "table" then
+            sample, label = tbl[1], label .. ", first"
+        end
+        local keys = {}
+        for key in pairs(sample) do keys[#keys + 1] = Text(key) end
+        table.sort(keys)
+        local parts = {}
+        for i = 1, math.min(#keys, 8) do
+            local value = sample[keys[i]]
+            if value == nil then value = sample[tonumber(keys[i])] end
+            parts[i] = keys[i] .. "=" .. (type(value) == "table" and "table" or Text(value))
+        end
+        return label .. (#parts > 0 and (": " .. table.concat(parts, ", ")) or "")
+    end)
+    return ok and text or "a table (unreadable)"
+end
+
 --- Call a global (or a dotted C_ path) inside a pcall and join what it
 --- returns, or say why not.
 local function Read(name, ...)
@@ -81,7 +111,7 @@ local function Read(name, ...)
     local results = { pcall(Resolve(name), ...) }
     if not results[1] then return "raised" end
     if #results == 1 then return "nothing" end
-    if type(results[2]) == "table" then return "a table" end
+    if type(results[2]) == "table" then return Summary(results[2]) end
 
     local parts = {}
     for i = 2, #results do parts[#parts + 1] = Text(results[i]) end
@@ -89,6 +119,7 @@ local function Read(name, ...)
 end
 
 local function Hinted(name)
+    if name:find("Stable", 1, true) then return true end
     local lower = name:lower()
     for _, hint in ipairs(HINTS) do
         if lower:find(hint, 1, true) then return true end
@@ -156,6 +187,11 @@ function Probe:Run()
     Line("has", #present > 0 and table.concat(present, ", ") or "none of them")
     Line("missing", #missing > 0 and table.concat(missing, ", ") or "nothing")
 
+    -- The long list first, so the readings people look for end up at the
+    -- bottom of the chat window.
+    local calls = PetCalls()
+    Line("pet-like calls", #calls > 0 and table.concat(calls, ", ") or "none found")
+
     Line("class", Read("UnitClass", "player"))
     Line("level", Read("UnitLevel", "player"))
 
@@ -164,21 +200,21 @@ function Probe:Run()
     Line("pet family", Read("UnitCreatureFamily", "pet"))
     Line("pet level", Read("UnitLevel", "pet"))
     Line("pet UI", Read("HasPetUI"))
-    Line("happiness", Read("GetPetHappiness"))
-    Line("loyalty", Read("GetPetLoyalty"))
     Line("experience", Read("GetPetExperience"))
-    Line("food types", Read("GetPetFoodTypes"))
-    Line("stable slots", Read("GetNumStableSlots"))
-
     Line("pet health", Read("UnitHealth", "pet") .. " / " .. Read("UnitHealthMax", "pet"))
     Line("pet power", Read("UnitPowerType", "pet") .. "; " .. Read("UnitPower", "pet")
         .. " / " .. Read("UnitPowerMax", "pet"))
     Line("happiness face", HappinessFace())
+
     Line("active pets", Read("C_StableInfo.GetNumActivePets"))
     Line("stabled pets", Read("C_StableInfo.GetNumStablePets"))
+    Line("at stable", Read("C_StableInfo.IsAtStableMaster"))
+    Line("active list", Read("C_StableInfo.GetActivePetList"))
 
-    local calls = PetCalls()
-    Line("pet-like calls", #calls > 0 and table.concat(calls, ", ") or "none found")
+    Line("happiness", Read("C_PetInfo.GetPetHappiness"))
+    Line("loyalty", Read("C_PetInfo.GetPetLoyalty"))
+    Line("food types", Read("C_PetInfo.GetPetFoodTypes"))
+    Line("training points", Read("C_PetInfo.GetPetTrainingPoints"))
 end
 
 ns.RegisterCommand("probe", "check what this client supports for pets (reads only)", function()
