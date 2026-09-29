@@ -25,7 +25,7 @@ local COLUMN_WIDTH = 330
 local CONTROL_X = 150
 
 local WIDTH = COLUMN_WIDTH + PADDING * 2
-local HEIGHT = 330
+local HEIGHT = 480
 
 local ROW_HEIGHT = 50
 local ROW_GAP = -6
@@ -190,7 +190,25 @@ function SettingsUI:BuildColumn()
     end, { width = 100, height = 20 })
     reset:SetPoint("TOPLEFT", CONTROL_X, 0)
 
-    local advanced = CreateSection(frame, "ADVANCED", { anchor = positionRow })
+    local hunter = CreateSection(frame, "HUNTER PET", { anchor = positionRow })
+
+    local feedRow = CreateRow(frame, hunter, "Feed warning",
+        "A warning in chat and on screen when your pet is no longer happy.")
+
+    controls.feedWarning = Widgets.CreateCheckbox(feedRow, "Warn me", function(checked)
+        ns.db.feedWarning = checked
+    end, true)
+    controls.feedWarning:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local unhappyRow = CreateRow(frame, feedRow, "Only when unhappy",
+        "Stay quiet while the pet is content, and warn only once it is unhappy.")
+
+    controls.feedWarnOnlyUnhappy = Widgets.CreateCheckbox(unhappyRow, "Enabled", function(checked)
+        ns.db.feedWarnOnlyUnhappy = checked
+    end, false)
+    controls.feedWarnOnlyUnhappy:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local advanced = CreateSection(frame, "ADVANCED", { anchor = unhappyRow })
 
     local debugRow = CreateRow(frame, advanced, "Debug output",
         "Extra messages in chat, to help track down a problem.")
@@ -213,6 +231,8 @@ function SettingsUI:Refresh()
 
     local controls = self.controls
     controls.minimap:SetChecked(not ns.db.minimapHidden)
+    controls.feedWarning:SetChecked(ns.db.feedWarning ~= false)
+    controls.feedWarnOnlyUnhappy:SetChecked(ns.db.feedWarnOnlyUnhappy == true)
     controls.debug:SetChecked(ns.db.debug == true)
 end
 

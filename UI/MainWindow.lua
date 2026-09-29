@@ -1,6 +1,6 @@
 -- Blackthornes Pets -- UI/MainWindow.lua
--- The pets window: where the hunter's stable and the warlock's demons will be
--- shown once there are pet features. For now it is the frame they will go in.
+-- The pets window: the pet that is out and how it is doing. The hunter's
+-- stable and the warlock's demons will join it here.
 --
 -- It is what a click on the minimap button and a bare /bpet open. Built like
 -- the settings window (same header, palette and row heights) so the two read
@@ -17,6 +17,21 @@ local PADDING = 18
 local HEADER = 36
 local WIDTH = 520
 local HEIGHT = 360
+
+-- The status rows: a label on the left, its value beside it.
+local ROW_HEIGHT = 24
+local VALUE_X = 150
+
+-- In the order they are shown. A row whose value the client does not give
+-- (a demon has no happiness) is hidden, and the rows below close up.
+local ROWS = {
+    { key = "pet", label = "Pet" },
+    { key = "happiness", label = "Happiness" },
+    { key = "loyalty", label = "Loyalty" },
+    { key = "experience", label = "Experience" },
+    { key = "training", label = "Training points" },
+    { key = "foods", label = "Eats" },
+}
 
 --------------------------------------------------------------------------------
 -- Construction
@@ -53,8 +68,10 @@ function UI:Build()
 
     local empty = Theme.CreateLabel(frame, "normal", "muted")
     empty:SetPoint("CENTER", 0, 0)
-    empty:SetText("Nothing here yet.")
+    empty:SetText("No pet out.")
     self.emptyLabel = empty
+
+    self:BuildStatus()
 
     local footer = Theme.CreateLabel(frame, "small", "muted")
     footer:SetPoint("BOTTOMLEFT", PADDING, 14)
@@ -96,6 +113,58 @@ function UI:BuildHeader()
     divider:SetPoint("TOPRIGHT", header, "BOTTOMRIGHT")
 end
 
+function UI:BuildStatus()
+    self.rows = {}
+    for _, spec in ipairs(ROWS) do
+        local label = Theme.CreateLabel(self.frame, "small", "muted")
+        label:SetText(spec.label)
+
+        local value = Theme.CreateLabel(self.frame, "normal", "text")
+        value:SetWidth(WIDTH - VALUE_X - PADDING)
+        value:SetWordWrap(true)
+
+        self.rows[spec.key] = { label = label, value = value }
+    end
+end
+
+--- Fill the status rows from a PetStatus reading, hiding the ones with
+--- nothing to say and closing up the gaps.
+function UI:ShowStatus(status)
+    local PetStatus = ns.PetStatus
+    local values = {}
+
+    if status.exists then
+        local pet = status.name or "Your pet"
+        local details = {}
+        if status.family and status.family ~= status.name then details[#details + 1] = status.family end
+        if status.level then details[#details + 1] = "level " .. status.level end
+        if #details > 0 then pet = pet .. ", " .. table.concat(details, ", ") end
+
+        values.pet = pet
+        values.happiness = PetStatus:HappinessText(status)
+        values.loyalty = PetStatus:LoyaltyText(status)
+        values.experience = PetStatus:ExperienceText(status)
+        values.training = PetStatus:TrainingText(status)
+        values.foods = PetStatus:FoodText(status)
+    end
+
+    local y = -(HEADER + 18)
+    for _, spec in ipairs(ROWS) do
+        local row = self.rows[spec.key]
+        local text = values[spec.key]
+        row.label:SetShown(text ~= nil)
+        row.value:SetShown(text ~= nil)
+        if text then
+            row.label:SetPoint("TOPLEFT", PADDING, y - 1)
+            row.value:SetPoint("TOPLEFT", VALUE_X, y)
+            row.value:SetText(text)
+            y = y - ROW_HEIGHT
+        end
+    end
+
+    self.emptyLabel:SetShown(not status.exists)
+end
+
 --------------------------------------------------------------------------------
 -- Filling it in
 --------------------------------------------------------------------------------
@@ -129,8 +198,11 @@ function UI:Refresh()
 
     if self:HasPetClass() then
         self.footer:SetText(ns.VersionLabel())
+        self:ShowStatus(ns.PetStatus:Read())
     else
         self.footer:SetText("Pets is for hunters and warlocks.")
+        self:ShowStatus({ exists = false })
+        self.emptyLabel:Hide()
     end
 end
 

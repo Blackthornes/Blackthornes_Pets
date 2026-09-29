@@ -239,6 +239,12 @@ local DEFAULTS = {
     minimapAngle = math.rad(260),
     minimapGap = 16,
     minimapHidden = false,
+
+    -- The warning when a hunter's pet needs feeding: on, and by default as
+    -- soon as the pet is no longer happy, since only a happy pet does its
+    -- 125% damage.
+    feedWarning = true,
+    feedWarnOnlyUnhappy = false,
 }
 
 -- Per character, because pets are: a hunter's stable and a warlock's demons
