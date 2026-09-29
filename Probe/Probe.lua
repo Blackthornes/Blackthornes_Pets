@@ -28,15 +28,27 @@ local APIS = {
     "C_StableInfo.GetNumActivePets", "C_StableInfo.GetNumStablePets",
     "IsSpellKnown", "C_Spell.GetSpellName", "GetSpellInfo",
     "C_Container.GetContainerItemInfo", "GetItemCount", "C_Item.GetItemCount",
+    "C_Spell.GetSpellInfo", "UnitPowerType",
 }
 
-local function Has(path)
+-- Words that mark a call as a classic pet mechanic. The first run on a
+-- hunter found GetPetHappiness and friends absent while the pet frame still
+-- showed a happiness face, so the client may keep them under other names.
+-- Battle pets are left out: they are a different system.
+local HINTS = { "happi", "loyal", "diet", "petfood", "stable", "trainingpoint", "feedpet" }
+local SKIP = { C_PetJournal = true, C_PetBattles = true }
+
+local function Resolve(path)
     local value = _G
     for part in path:gmatch("[^.]+") do
-        if type(value) ~= "table" then return false end
+        if type(value) ~= "table" then return nil end
         value = value[part]
     end
-    return type(value) == "function"
+    return value
+end
+
+local function Has(path)
+    return type(Resolve(path)) == "function"
 end
 
 local function Line(label, value)
@@ -44,17 +56,66 @@ local function Line(label, value)
     ns.PrintRaw(("  |c%s%s|r  %s"):format(ns.COLORS.muted, label, ok and text or "(unreadable)"))
 end
 
---- Call a global by name inside a pcall and join what it returns, or say why
---- not.
+--- Call a global (or a dotted C_ path) inside a pcall and join what it
+--- returns, or say why not.
 local function Read(name, ...)
     if not Has(name) then return "absent" end
-    local results = { pcall(_G[name], ...) }
+    local results = { pcall(Resolve(name), ...) }
     if not results[1] then return "raised" end
     if #results == 1 then return "nothing" end
+    if type(results[2]) == "table" then return "a table" end
 
     local parts = {}
     for i = 2, #results do parts[#parts + 1] = tostring(results[i]) end
     return table.concat(parts, ", ")
+end
+
+local function Hinted(name)
+    local lower = name:lower()
+    for _, hint in ipairs(HINTS) do
+        if lower:find(hint, 1, true) then return true end
+    end
+    return false
+end
+
+--- Every global function, and every function in a C_ namespace, whose name
+--- looks like a classic pet mechanic.
+local function PetCalls()
+    local found = {}
+    for key, value in pairs(_G) do
+        if type(key) == "string" then
+            if type(value) == "function" and Hinted(key) then
+                found[#found + 1] = key
+            elseif type(value) == "table" and key:sub(1, 2) == "C_" and not SKIP[key] then
+                for inner, fn in pairs(value) do
+                    if type(inner) == "string" and type(fn) == "function"
+                        and (Hinted(inner) or Hinted(key)) then
+                        found[#found + 1] = key .. "." .. inner
+                    end
+                end
+            end
+        end
+    end
+    table.sort(found)
+    return found
+end
+
+--- Whether the default pet frame's happiness face is showing, and which part
+--- of its texture it shows (the texture coordinates pick the face).
+local function HappinessFace()
+    local face = _G.PetFrameHappiness
+    if type(face) ~= "table" then return "absent" end
+    local ok, shown = pcall(face.IsShown, face)
+    if not ok then return "raised" end
+    local texture = _G.PetFrameHappinessTexture or face
+    local okCoord, coords = pcall(function() return { texture:GetTexCoord() } end)
+    local text = shown and "shown" or "hidden"
+    if okCoord and #coords > 0 then
+        local parts = {}
+        for i, v in ipairs(coords) do parts[i] = ("%.3f"):format(v) end
+        text = text .. ", coords " .. table.concat(parts, " ")
+    end
+    return text
 end
 
 function Probe:Run()
@@ -86,6 +147,16 @@ function Probe:Run()
     Line("experience", Read("GetPetExperience"))
     Line("food types", Read("GetPetFoodTypes"))
     Line("stable slots", Read("GetNumStableSlots"))
+
+    Line("pet health", Read("UnitHealth", "pet") .. " / " .. Read("UnitHealthMax", "pet"))
+    Line("pet power", Read("UnitPowerType", "pet") .. "; " .. Read("UnitPower", "pet")
+        .. " / " .. Read("UnitPowerMax", "pet"))
+    Line("happiness face", HappinessFace())
+    Line("active pets", Read("C_StableInfo.GetNumActivePets"))
+    Line("stabled pets", Read("C_StableInfo.GetNumStablePets"))
+
+    local calls = PetCalls()
+    Line("pet-like calls", #calls > 0 and table.concat(calls, ", ") or "none found")
 end
 
 ns.RegisterCommand("probe", "check what this client supports for pets (reads only)", function()
