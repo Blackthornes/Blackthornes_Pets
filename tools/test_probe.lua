@@ -28,4 +28,27 @@ suite.check("reads the pet's level", text:find("pet level|r  11", 1, true), text
 suite.check("reads happiness", text:find("happiness|r  3, 125, 0", 1, true), text)
 suite.check("a call that raises says so", text:find("pet name|r  raised", 1, true), text)
 
+suite.check("a missing happiness face says so",
+    text:find("happiness face|r  absent", 1, true), text)
+
+ns = env.Load()
+_G.C_StableInfo = { GetNumActivePets = function() return 1 end }
+_G.C_PetJournal = { GetPetStableInfo = function() end }
+_G.GetPetHappinessLevel = function() return 2 end
+_G.PetFrameHappiness = {
+    IsShown = function() return true end,
+    GetTexCoord = function() return 0.375, 0.5624, 0, 0.359375 end,
+}
+ns.HandleSlash("probe")
+text = env.ChatText()
+suite.check("reads a dotted C_ call", text:find("active pets|r  1", 1, true), text)
+suite.check("reads the happiness face",
+    text:find("happiness face|r  shown, coords 0.375 0.562 0.000 0.359", 1, true), text)
+suite.check("finds pet calls under other names",
+    text:find("GetPetHappinessLevel", 1, true), text)
+suite.check("finds them inside C_ namespaces",
+    text:find("C_StableInfo.GetNumActivePets", 1, true), text)
+suite.check("leaves battle pets out",
+    not text:find("C_PetJournal", 1, true), text)
+
 suite.done()

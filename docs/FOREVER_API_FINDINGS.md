@@ -4,7 +4,45 @@ Found with `/bpet probe` in the game, not taken from documentation.
 Tradeskills and Equipment keep files like this one for professions, the
 auction house, gear and talents; read them too before relying on any API.
 
-Nothing has been probed here yet. The first entry should come from `/bpet
-probe` on a hunter with a pet out and on a warlock with a demon out, and say
-which pet calls answer (happiness, loyalty, experience, food types, the
-stable) and what they return.
+## Hunter, level 10, Boar out (first probe, 2026-09-29)
+
+`/bpet probe` on an orc hunter in Durotar with a level 7 Boar out.
+
+**Present:** `UnitClass`, `UnitLevel`, `UnitExists`, `UnitName`,
+`UnitCreatureFamily`, `UnitHealth`, `UnitHealthMax`, `UnitPower`,
+`UnitPowerMax`, `HasPetUI`, `GetPetExperience`, `GetPetActionInfo`,
+`C_StableInfo.GetStablePetInfo`, `C_StableInfo.GetNumActivePets`,
+`C_StableInfo.GetNumStablePets`, `IsSpellKnown`, `C_Spell.GetSpellName`,
+`C_Container.GetContainerItemInfo`, `C_Item.GetItemCount`.
+
+**Absent:** `HasPetSpells`, `GetPetHappiness`, `GetPetLoyalty`,
+`GetPetFoodTypes`, `GetPetTrainingPoints`, `GetNumStablePets`,
+`GetStablePetInfo`, `GetNumStableSlots`, `GetSpellInfo`, `GetItemCount`.
+
+What they returned:
+
+| Call | Returned |
+| --- | --- |
+| `UnitClass("player")` | `Hunter, HUNTER, 3` |
+| `UnitName("pet")` | `Boar` |
+| `UnitCreatureFamily("pet")` | `Boar, 5` (name and family id, the retail shape) |
+| `UnitLevel("pet")` | `7` (player 10) |
+| `HasPetUI()` | `true, true` |
+| `GetPetExperience()` | `0, 1125` (current, needed for next level) |
+
+What that means for features:
+
+- **The stable is the retail one.** Use `C_StableInfo`, never the classic
+  `GetNumStablePets` / `GetStablePetInfo` / `GetNumStableSlots`.
+- **No happiness, loyalty, diet or training-point calls under their classic
+  names.** Yet the default pet frame still draws a happiness face beside the
+  pet portrait. So either the mechanic lives under another name or only the
+  frame is left. The probe now reads `PetFrameHappiness` and lists every
+  global or `C_` function whose name looks like happiness, loyalty, diet,
+  food, stable or training points; the next run answers it.
+- **Pet experience works**, so a pet XP bar needs nothing new.
+- **Spell and item lookups are the modern ones:** `C_Spell.*` and
+  `C_Item.GetItemCount`, not `GetSpellInfo` or `GetItemCount`.
+
+Still to probe: a warlock with a demon out, and a hunter at the stable
+master with the stable open.
