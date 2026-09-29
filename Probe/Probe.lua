@@ -56,6 +56,14 @@ local function Line(label, value)
     ns.PrintRaw(("  |c%s%s|r  %s"):format(ns.COLORS.muted, label, ok and text or "(unreadable)"))
 end
 
+--- A client value as plain text. In instances and on some units Forever hands
+--- back secret values, and even tostring of one stays secret and raises when
+--- joined, so anything that will not become a plain string reads "(secret)".
+local function Text(value)
+    local ok, text = pcall(function() return "" .. tostring(value) end)
+    return ok and text or "(secret)"
+end
+
 --- Call a global (or a dotted C_ path) inside a pcall and join what it
 --- returns, or say why not.
 local function Read(name, ...)
@@ -66,7 +74,7 @@ local function Read(name, ...)
     if type(results[2]) == "table" then return "a table" end
 
     local parts = {}
-    for i = 2, #results do parts[#parts + 1] = tostring(results[i]) end
+    for i = 2, #results do parts[#parts + 1] = Text(results[i]) end
     return table.concat(parts, ", ")
 end
 
@@ -109,10 +117,14 @@ local function HappinessFace()
     if not ok then return "raised" end
     local texture = _G.PetFrameHappinessTexture or face
     local okCoord, coords = pcall(function() return { texture:GetTexCoord() } end)
-    local text = shown and "shown" or "hidden"
+    local okShown, text = pcall(function() return shown and "shown" or "hidden" end)
+    if not okShown then text = "(secret)" end
     if okCoord and #coords > 0 then
         local parts = {}
-        for i, v in ipairs(coords) do parts[i] = ("%.3f"):format(v) end
+        for i, v in ipairs(coords) do
+            local okFormat, part = pcall(string.format, "%.3f", v)
+            parts[i] = okFormat and Text(part) or "(secret)"
+        end
         text = text .. ", coords " .. table.concat(parts, " ")
     end
     return text

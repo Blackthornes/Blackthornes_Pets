@@ -51,4 +51,17 @@ suite.check("finds them inside C_ namespaces",
 suite.check("leaves battle pets out",
     not text:find("C_PetJournal", 1, true), text)
 
+-- A secret value: tostring hands back the value itself, and joining it
+-- raises, which is what the client did on the first run of the wider probe.
+ns = env.Load()
+local secret = newproxy(true)
+getmetatable(secret).__tostring = function(self) return self end
+getmetatable(secret).__concat = function() error("attempt to concatenate a secret value") end
+_G.UnitHealth = function() return secret end
+_G.UnitHealthMax = function() return 100 end
+ns.HandleSlash("probe")
+text = env.ChatText()
+suite.check("a secret value reads as secret instead of raising",
+    text:find("pet health|r  (secret) / 100", 1, true), text)
+
 suite.done()
