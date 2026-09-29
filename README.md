@@ -10,9 +10,12 @@ LibStub, matching
 and [Blackthornes Farmer](https://github.com/Blackthornes/Blackthornes_Farmer).
 They share a palette and a framework on purpose.
 
-So far it is the frame the pet features will go in: a pets window, a settings
-window, a minimap button and `/bpet probe`, which checks which pet calls the
-client supports.
+So far the pets window shows the pet that is out: its happiness (and the
+damage that costs), loyalty, experience, training points and what it eats. A
+hunter gets a warning in chat and on screen when the pet stops being happy,
+which can be turned off or limited to an unhappy pet in the settings window.
+There is also a minimap button and `/bpet probe`, which checks which pet calls
+the client supports.
 
 ## Install
 

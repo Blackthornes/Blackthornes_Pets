@@ -17,9 +17,11 @@ It never ships: `.pkgmeta` leaves it out of the zip and
 ## What this addon is for
 
 Everything around pets for **hunters and warlocks**: the hunter's pet and
-stable, the warlock's demons. No pet feature exists yet; the repo is the
-framework, an empty pets window, settings, a minimap button and a read-only
-`/bpet probe` for the pet calls.
+stable, the warlock's demons. The first feature is the pet status panel in
+the pets window and the hunter's feed warning (`Logic/PetStatus.lua`), built
+on the `C_PetInfo` calls the probe found. Beside it: settings, a minimap
+button and a read-only `/bpet probe` for the pet calls. The feature ideas are
+in the project's brainstorm, not in the repo.
 
 ## How this repo was set up
 
