@@ -1,0 +1,25 @@
+## Interface: 16001
+## Title: Blackthornes Pets
+## Notes: Looks after everything to do with pets for hunters and warlocks.
+## Author: Blackthornes
+## Version: @project-version@
+## X-License: MIT
+## SavedVariables: BlackthornesPetsDB
+## SavedVariablesPerCharacter: BlackthornesPetsCharDB
+## IconTexture: Interface\Icons\Ability_Hunter_BeastTaming
+
+# Filled in once the project exists on each site. The packager reads these
+# to know where to upload; a line that stays commented is simply skipped.
+# X-Curse-Project-ID: 
+# X-Wago-ID: 
+# X-WoWI-ID: 
+
+Core\Init.lua
+
+UI\Theme.lua
+UI\Widgets.lua
+UI\Minimap.lua
+UI\Settings.lua
+UI\MainWindow.lua
+
+Probe\Probe.lua
