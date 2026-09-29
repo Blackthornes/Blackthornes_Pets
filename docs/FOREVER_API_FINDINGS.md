@@ -44,5 +44,12 @@ What that means for features:
 - **Spell and item lookups are the modern ones:** `C_Spell.*` and
   `C_Item.GetItemCount`, not `GetSpellInfo` or `GetItemCount`.
 
+**Pet health is a secret value, even in town out of combat.** The widened
+probe's second run (in Razor Hill, next to the hunter trainer) stopped at the
+pet health line: `UnitHealth("pet")` came back secret, and even `tostring` of
+it raised when joined. The probe now prints "(secret)" for any value like
+that. A pet frame or health warning cannot read the pet's health as a number;
+it has to hand the value straight to a status bar or find another source.
+
 Still to probe: a warlock with a demon out, and a hunter at the stable
 master with the stable open.
