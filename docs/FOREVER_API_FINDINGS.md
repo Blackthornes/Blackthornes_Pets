@@ -71,6 +71,31 @@ it has to hand the value straight to a status bar or find another source.
 `C_PetInfo` calls return is not recorded yet; the probe now reads them, and
 summarises `GetActivePetList`, at the bottom of its output.
 
+**What they return (fourth run, same Boar, now level 8, out of combat, not
+at a stable).** They use the classic return shapes, except the food types,
+which come back as a table:
+
+| Call | Returned | Reading |
+| --- | --- | --- |
+| `C_PetInfo.GetPetHappiness()` | `1, 75, -10` | happiness level (1 unhappy, 2 content, 3 happy), damage percent, loyalty rate |
+| `C_PetInfo.GetPetLoyalty()` | `Rebellious` | the loyalty level's name only, no number |
+| `C_PetInfo.GetPetFoodTypes()` | `{ "Meat", "Fish", "Cheese", "Bread", "Fungus", "Fruit" }` | a list, not several return values |
+| `C_PetInfo.GetPetTrainingPoints()` | `0, 5` | classic order is total points, points spent |
+| `GetPetExperience()` | `92, 1350` | current, needed |
+| `UnitPowerType("pet")` | `2, FOCUS` | the pet runs on focus, max 100 |
+| `UnitHealthMax("pet")` | `231` | readable; only the current health is secret |
+| `UnitPower("pet")` | secret | current focus is secret too |
+| `C_StableInfo.IsAtStableMaster()` | `false` | |
+| `C_StableInfo.GetActivePetList()` | a list of 1 | fields include `creatureID`, `displayID`, `experience`, `experienceNeeded`, `familyName`, `happinessLevel`, `icon`, `isExotic` (the probe shows the first eight) |
+
+The pet frame's happiness face was shown, and the pet frame drew it red,
+which matches level 1. The active list's `experience=0,
+experienceNeeded=1125` was out of date against `GetPetExperience`, so read
+experience from `GetPetExperience`.
+
+The training points order still needs one check: a pet that has learned
+something from a trainer should show its spent points move.
+
 `canaccesstable` is also a global on this client, next to `issecretvalue`.
 
 Still to probe: a warlock with a demon out, and a hunter at the stable
