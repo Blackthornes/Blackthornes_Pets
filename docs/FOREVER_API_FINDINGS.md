@@ -46,8 +46,11 @@ What that means for features:
 
 **Pet health is a secret value, even in town out of combat.** The widened
 probe's second run (in Razor Hill, next to the hunter trainer) stopped at the
-pet health line: `UnitHealth("pet")` came back secret, and even `tostring` of
-it raised when joined. The probe now prints "(secret)" for any value like
+pet health line: `UnitHealth("pet")` came back secret. `tostring` of it
+stays secret, and so does joining it with `..` (the client allows that);
+only `table.concat` and comparisons raise. So a check that a value is plain
+has to use `issecretvalue` where the client has it, or try `table.concat`
+inside a pcall; a `..` inside a pcall proves nothing. The probe now prints "(secret)" for any value like
 that. A pet frame or health warning cannot read the pet's health as a number;
 it has to hand the value straight to a status bar or find another source.
 

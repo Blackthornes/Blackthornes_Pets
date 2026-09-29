@@ -57,10 +57,20 @@ local function Line(label, value)
 end
 
 --- A client value as plain text. In instances and on some units Forever hands
---- back secret values, and even tostring of one stays secret and raises when
---- joined, so anything that will not become a plain string reads "(secret)".
+--- back secret values. tostring of one stays secret, and so does joining it
+--- with "..", which the client allows; only table.concat and comparisons
+--- raise. So ask the client first, where it can say, and otherwise prove the
+--- text survives table.concat before handing it on.
 local function Text(value)
-    local ok, text = pcall(function() return "" .. tostring(value) end)
+    local isSecret = _G.issecretvalue
+    if type(isSecret) == "function" then
+        local ok, secret = pcall(isSecret, value)
+        if not ok or secret then return "(secret)" end
+    end
+    local ok, text = pcall(function()
+        local plain = tostring(value)
+        return table.concat({ plain })
+    end)
     return ok and text or "(secret)"
 end
 
