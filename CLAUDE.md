@@ -19,7 +19,10 @@ It never ships: `.pkgmeta` leaves it out of the zip and
 Everything around pets for **hunters and warlocks**: the hunter's pet and
 stable, the warlock's demons. The first feature is the pet status panel in
 the pets window and the hunter's feed warning (`Logic/PetStatus.lua`), built
-on the `C_PetInfo` calls the probe found. Beside it: settings, a minimap
+on the `C_PetInfo` calls the probe found, and the food helper
+(`Logic/Food.lua`, `Data/PetFood.lua`): food in the bags by diet, a secure
+Feed button kept outside the window so the window still closes in combat,
+and a low food warning. Beside it: settings, a minimap
 button and a read-only `/bpet probe` for the pet calls. The feature ideas are
 in the project's brainstorm, not in the repo.
 

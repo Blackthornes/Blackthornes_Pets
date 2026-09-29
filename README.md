@@ -11,9 +11,13 @@ and [Blackthornes Farmer](https://github.com/Blackthornes/Blackthornes_Farmer).
 They share a palette and a framework on purpose.
 
 So far the pets window shows the pet that is out: its happiness (and the
-damage that costs), loyalty, experience, training points and what it eats. A
-hunter gets a warning in chat and on screen when the pet stops being happy,
-which can be turned off or limited to an unhappy pet in the settings window.
+damage that costs), loyalty, experience, training points and what it eats. The
+window also shows the food in your bags the pet will eat, best first, with a
+Feed button that feeds it the lowest-level food that still does full good. A
+hunter gets a warning in chat and in raid-warning text when the pet stops
+being happy, and another when food it eats runs low; both can be changed in
+the settings window. Which diet each food is comes from `Data/PetFood.lua`,
+by English item name: a food missing from it is not offered.
 There is also a minimap button and `/bpet probe`, which checks which pet calls
 the client supports.
 

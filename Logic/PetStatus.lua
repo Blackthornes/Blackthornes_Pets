@@ -196,6 +196,31 @@ function PetStatus:WarnBelow()
     return 3
 end
 
+--- Put a message where it cannot be missed: the big raid-warning text in the
+--- middle of the screen, with its sound. The first run of the feed warning
+--- used the red error line near the top, which fades too fast to notice.
+--- Falls back on that line if this client has no raid warning frame.
+function PetStatus:Alert(message)
+    local frame = _G.RaidWarningFrame
+    local add = _G.RaidNotice_AddMessage
+    local shown = false
+    if type(frame) == "table" and type(add) == "function" then
+        local color = type(ChatTypeInfo) == "table" and ChatTypeInfo.RAID_WARNING
+            or { r = 1, g = 0.82, b = 0.35 }
+        shown = pcall(add, frame, message, color)
+    end
+    if not shown then
+        local errors = _G.UIErrorsFrame
+        if type(errors) == "table" and type(errors.AddMessage) == "function" then
+            shown = pcall(errors.AddMessage, errors, message, 1, 0.82, 0.35)
+        end
+    end
+    if type(PlaySound) == "function" and type(SOUNDKIT) == "table" and SOUNDKIT.RAID_WARNING then
+        pcall(PlaySound, SOUNDKIT.RAID_WARNING)
+    end
+    return shown
+end
+
 --- Look at the pet and warn once when it has dropped below the line. It does
 --- not repeat while the pet stays there, and warns again only after the pet
 --- has been fed back above it, or has dropped a further level.
@@ -215,13 +240,7 @@ function PetStatus:CheckFeed(status)
     local name = status.name or "Your pet"
     local message = ("%s is %s. Feed it."):format(name, HAPPINESS[level].name:lower())
     ns.Warn(message)
-
-    -- The red line across the middle of the screen, where it can be seen
-    -- mid-fight, if this client has it.
-    local errors = _G.UIErrorsFrame
-    if type(errors) == "table" and type(errors.AddMessage) == "function" then
-        pcall(errors.AddMessage, errors, message, 1, 0.82, 0.35)
-    end
+    PetStatus:Alert(message)
     return true
 end
 
@@ -232,6 +251,9 @@ end
 function PetStatus:Update()
     local status = self:Read()
     self:CheckFeed(status)
+    if ns.Food then
+        ns.Food:CheckLow(status, ns.Food:Scan(status))
+    end
     if ns.UI and ns.UI.Refresh then
         pcall(ns.UI.Refresh, ns.UI)
     end

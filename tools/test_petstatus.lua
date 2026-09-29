@@ -74,6 +74,23 @@ PetStatus:CheckFeed()
 happiness = 2
 suite.check("fed and let slip, it warns again", PetStatus:CheckFeed() == true)
 
+-- Where the client has the raid warning frame, the warning goes there, with
+-- its sound, rather than on the red error line that fades too fast.
+local raid, sounds = {}, {}
+_G.RaidWarningFrame = {}
+_G.RaidNotice_AddMessage = function(_, text) raid[#raid + 1] = text end
+_G.SOUNDKIT = { RAID_WARNING = 8959 }
+_G.PlaySound = function(id) sounds[#sounds + 1] = id end
+local before = #shown
+happiness = 3
+PetStatus:CheckFeed()
+happiness = 1
+PetStatus:CheckFeed()
+suite.check("the warning goes to the raid warning frame", raid[1] == "Boar is unhappy. Feed it.", raid[1])
+suite.check("not the error line", #shown == before)
+suite.check("with the raid warning sound", sounds[1] == 8959)
+_G.RaidWarningFrame, _G.RaidNotice_AddMessage, _G.SOUNDKIT, _G.PlaySound = nil, nil, nil, nil
+
 -- Only when unhappy.
 happiness = 3
 PetStatus:CheckFeed()

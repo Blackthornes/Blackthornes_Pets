@@ -231,11 +231,13 @@ local HOVER_TIME = 0.12
 --
 -- opts: width, height; primary (gold-tinted, gold edge, gold text, for the
 -- one button on a screen that does the main thing); danger (lights red under
--- the mouse, for a close button); labelKey (the label's resting colour).
+-- the mouse, for a close button); labelKey (the label's resting colour);
+-- name and template, for a button built on one of the game's templates (a
+-- secure action button, say, which must then be given no onClick).
 function Widgets.CreateButton(parent, text, onClick, opts)
     opts = opts or {}
 
-    local button = CreateFrame("Button", nil, parent)
+    local button = CreateFrame("Button", opts.name, parent, opts.template)
     button:SetSize(opts.width or 80, opts.height or 22)
 
     local baseKey = opts.primary and "rowActive" or "row"

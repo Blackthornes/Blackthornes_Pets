@@ -16,7 +16,10 @@
 
 Core\Init.lua
 
+Data\PetFood.lua
+
 Logic\PetStatus.lua
+Logic\Food.lua
 
 UI\Theme.lua
 UI\Widgets.lua
