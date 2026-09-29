@@ -133,6 +133,33 @@ suite.check("the settings page shows the low food warning on", box:GetChecked())
 box:GetScript("OnClick")(box)
 suite.check("and unticking turns it off", ns.db.lowFoodWarning == false)
 
+-- A client whose slot info has no itemName and whose item cache is empty
+-- still gives the name in the item link.
+_G.C_Item = nil
+bags[0] = { [3] = { itemID = 117, stackCount = 4,
+    hyperlink = "|cffffffff|Hitem:117::::::::9:::::|h[Tough Jerky]|h|r" } }
+stacks = Food:Scan()
+suite.check("the name comes from the link", #stacks == 1 and stacks[1].name == "Tough Jerky",
+    stacks[1] and stacks[1].name)
+
+-- /bpet food says what it sees in each slot.
+bags[1] = { [2] = { itemID = 4536, stackCount = 20, hyperlink = "|h[Shiny Red Apple]|h" },
+    [5] = { itemID = 2589, stackCount = 10, hyperlink = "|h[Linen Cloth]|h" },
+    [6] = { itemID = 9999, stackCount = 5, hyperlink = "|h[Scorpid Surprise]|h" } }
+env.chat = {}
+ns.HandleSlash("food")
+local report = env.ChatText()
+suite.check("the report names what the pet eats", report:find("Boar (level 9) eats Meat, Fish, Bread", 1, true), report)
+suite.check("food it eats is listed with the count", report:find("Tough Jerky|r  Meat x4, full", 1, true), report)
+suite.check("food of another diet says why", report:find("Shiny Red Apple|r  Fruit, which it does not eat", 1, true), report)
+suite.check("everything else is on one line", report:find("not in the food list:|r Linen Cloth", 1, true), report)
+suite.check("and it adds up", report:find("pieces your pet will eat", 1, true), report)
+
+_G.UnitExists = function() return false end
+env.chat = {}
+ns.HandleSlash("food")
+suite.check("with no pet out it says so", env.ChatText():find("no pet out", 1, true))
+
 _G.C_Container, _G.C_Item, _G.C_PetInfo = nil, nil, nil
 _G.UnitExists, _G.UnitName, _G.UnitLevel = nil, nil, nil
 

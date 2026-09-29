@@ -70,6 +70,12 @@ end
 --- The item's name and level, from the slot's info or the item cache.
 local function NameAndLevel(info)
     local name = Plain(info.itemName)
+    -- The item link carries the name in brackets, for a client whose slot
+    -- info has no itemName.
+    local link = Plain(info.hyperlink)
+    if type(name) ~= "string" and type(link) == "string" then
+        name = link:match("|h%[(.-)%]|h") or link:match("%[(.-)%]")
+    end
     local level
     local getInfo = (C_Item and C_Item.GetItemInfo) or _G.GetItemInfo
     local id = Plain(info.itemID)
@@ -83,6 +89,23 @@ local function NameAndLevel(info)
     if type(name) ~= "string" then name = nil end
     if type(level) ~= "number" then level = nil end
     return name, level
+end
+
+--- One bag slot: the stack as Scan lists it if the pet will eat it, or nil
+--- and why not, which /bpet food prints.
+function Food:Inspect(bag, slot, info, status, eats)
+    local name, level = NameAndLevel(info)
+    if not name then return nil, "no name from the client", name, level end
+    local diet = ns.PetFood.byName[name]
+    if not diet then return nil, "not in the food list", name, level end
+    if not eats[diet] then return nil, ("%s, which it does not eat"):format(diet), name, level end
+    local effect = self:Effect(level, status.level)
+    if effect == "refused" then return nil, "too low level", name, level end
+    return {
+        bag = bag, slot = slot, itemID = Plain(info.itemID),
+        name = name, level = level, diet = diet, effect = effect,
+        count = tonumber(Plain(info.stackCount)) or 1,
+    }, nil, name, level
 end
 
 --- Every stack in the bags the pet will eat, as { bag, slot, itemID, name,
@@ -101,18 +124,8 @@ function Food:Scan(status)
         for slot = 1, NumSlots(bag) do
             local info = SlotItem(bag, slot)
             if info then
-                local name, level = NameAndLevel(info)
-                local diet = name and ns.PetFood.byName[name]
-                if diet and eats[diet] then
-                    local effect = self:Effect(level, status.level)
-                    if effect ~= "refused" then
-                        stacks[#stacks + 1] = {
-                            bag = bag, slot = slot, itemID = Plain(info.itemID),
-                            name = name, level = level, diet = diet, effect = effect,
-                            count = tonumber(Plain(info.stackCount)) or 1,
-                        }
-                    end
-                end
+                local stack = self:Inspect(bag, slot, info, status, eats)
+                if stack then stacks[#stacks + 1] = stack end
             end
         end
     end
@@ -201,6 +214,74 @@ function Food:FeedMacro(stack)
     if not stack then return nil end
     return ("/cast %s\n/use %d %d"):format(self:FeedSpellName(), stack.bag, stack.slot)
 end
+
+--------------------------------------------------------------------------------
+-- /bpet food: what the helper sees in each bag slot, and why it did or did not
+-- count it. Reads only.
+--------------------------------------------------------------------------------
+
+function Food:Report()
+    local status = ns.PetStatus:Read()
+    if not status.exists then
+        ns.Print("food: no pet out.")
+        return
+    end
+    if not status.foods then
+        ns.Print("food: the client did not say what your pet eats.")
+        return
+    end
+
+    local eats = {}
+    for _, diet in ipairs(status.foods) do eats[diet] = true end
+    ns.Print(("food: %s (level %s) eats %s"):format(status.name or "your pet",
+        tostring(status.level or "?"), table.concat(status.foods, ", ")))
+
+    local slots, items, found = 0, 0, 0
+    local unlisted, seen = {}, {}
+    for bag = FIRST_BAG, LAST_BAG do
+        local count = NumSlots(bag)
+        slots = slots + count
+        for slot = 1, count do
+            local info = SlotItem(bag, slot)
+            if info then
+                items = items + 1
+                local stack, why, name, level = self:Inspect(bag, slot, info, status, eats)
+                local label = ("%s%s"):format(name or ("item " .. tostring(Plain(info.itemID) or "?")),
+                    level and (" (level " .. level .. ")") or "")
+                if stack then
+                    found = found + stack.count
+                    ns.PrintRaw(("  |c%s%s|r  %s x%d, %s"):format(ns.COLORS.good, label,
+                        stack.diet, stack.count, self:EffectLabel(stack.effect)))
+                elseif why == "not in the food list" then
+                    if not seen[name] then
+                        seen[name] = true
+                        unlisted[#unlisted + 1] = name
+                    end
+                else
+                    ns.PrintRaw(("  |c%s%s|r  %s"):format(ns.COLORS.muted, label, why))
+                end
+            end
+        end
+    end
+
+    -- On one line, since most of a bag is not food: if a food is missing from
+    -- Data/PetFood.lua, this is where it shows up.
+    if #unlisted > 0 then
+        table.sort(unlisted)
+        ns.PrintRaw(("  |c%snot in the food list:|r %s"):format(ns.COLORS.muted, table.concat(unlisted, ", ")))
+    end
+
+    if slots == 0 then
+        ns.Print("food: could not read your bags on this client.")
+    else
+        ns.Print(("food: %d items in %d slots, %d pieces your pet will eat."):format(
+            items, slots, found))
+    end
+end
+
+ns.RegisterCommand("food", "list the food in your bags and whether your pet will eat it (reads only)", function()
+    Food:Report()
+end)
 
 --------------------------------------------------------------------------------
 -- Keeping up with the bags
