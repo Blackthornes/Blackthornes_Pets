@@ -32,6 +32,8 @@ local APIS = {
     "C_PetInfo.GetPetHappiness", "C_PetInfo.GetPetLoyalty",
     "C_PetInfo.GetPetFoodTypes", "C_PetInfo.GetPetTrainingPoints",
     "C_StableInfo.GetActivePetList", "C_StableInfo.IsAtStableMaster",
+    "IsPlayerSpell", "GetNumCrafts", "GetCraftInfo", "GetCraftDisplaySkillLine",
+    "TooltipDataProcessor.AddTooltipPostCall",
 }
 
 -- Words that mark a call as a classic pet mechanic. The first run on a
@@ -215,6 +217,14 @@ function Probe:Run()
     Line("loyalty", Read("C_PetInfo.GetPetLoyalty"))
     Line("food types", Read("C_PetInfo.GetPetFoodTypes"))
     Line("training points", Read("C_PetInfo.GetPetTrainingPoints"))
+
+    -- Which way the taming tooltip can tell a known skill. 17254 is the spell
+    -- a hunter learns for Bite (Rank 1), 7370 for Charge (Rank 1). The craft
+    -- calls answer only while the Beast Training window is open.
+    Line("knows Bite 1", Read("IsPlayerSpell", 17254) .. "; " .. Read("IsSpellKnown", 17254))
+    Line("knows Charge 1", Read("IsPlayerSpell", 7370) .. "; " .. Read("IsSpellKnown", 7370))
+    Line("craft window", Read("GetCraftDisplaySkillLine") .. "; " .. Read("GetNumCrafts")
+        .. "; first " .. Read("GetCraftInfo", 1))
 end
 
 ns.RegisterCommand("probe", "check what this client supports for pets (reads only)", function()

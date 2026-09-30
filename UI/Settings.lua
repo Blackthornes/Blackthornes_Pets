@@ -25,7 +25,7 @@ local COLUMN_WIDTH = 330
 local CONTROL_X = 150
 
 local WIDTH = COLUMN_WIDTH + PADDING * 2
-local HEIGHT = 590
+local HEIGHT = 646
 
 local ROW_HEIGHT = 50
 local ROW_GAP = -6
@@ -225,7 +225,15 @@ function SettingsUI:BuildColumn()
     end, true)
     controls.quickFeed:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local advanced = CreateSection(frame, "ADVANCED", { anchor = quickFeedRow })
+    local tamingRow = CreateRow(frame, quickFeedRow, "Taming skills",
+        "On a beast's tooltip, the pet skills taming it teaches: green if you know them, red if not.")
+
+    controls.tamingTooltip = Widgets.CreateCheckbox(tamingRow, "Show them", function(checked)
+        ns.db.tamingTooltip = checked
+    end, true)
+    controls.tamingTooltip:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local advanced = CreateSection(frame, "ADVANCED", { anchor = tamingRow })
 
     local debugRow = CreateRow(frame, advanced, "Debug output",
         "Extra messages in chat, to help track down a problem.")
@@ -252,6 +260,7 @@ function SettingsUI:Refresh()
     controls.feedWarnOnlyUnhappy:SetChecked(ns.db.feedWarnOnlyUnhappy == true)
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
+    controls.tamingTooltip:SetChecked(ns.db.tamingTooltip ~= false)
     controls.debug:SetChecked(ns.db.debug == true)
 end
 

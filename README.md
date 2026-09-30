@@ -20,6 +20,13 @@ hunter gets a warning in chat and in raid-warning text when the pet stops
 being happy, and another when food it eats runs low; both can be changed in
 the settings window. Which diet each food is comes from `Data/PetFood.lua`,
 by English item name: a food missing from it is not offered.
+
+For a hunter, a tameable beast's tooltip lists the pet skills taming it would
+teach, green for a skill you already know and red for one you don't. Which
+beast teaches what comes from Classic 1.12's own table, in
+`Data/BeastSkills.lua`. Opening the Beast Training window once lets the addon
+read every skill you know; `/bpet taming` lists them.
+
 There is also a minimap button and `/bpet probe`, which checks which pet calls
 the client supports.
 
@@ -67,6 +74,7 @@ inside it. If they differ, the client ignores the folder and says nothing.
 /bpet probe      check what this client supports for pets; it only reads
 /bpet settings   open the settings window (so does right-clicking the minimap button)
 /bpet minimap    show or hide the minimap button
+/bpet taming     list the pet skills this hunter knows
 ```
 
 The settings window is also under the game's Options > AddOns.
@@ -78,7 +86,7 @@ The settings window is also under the game's Options > AddOns.
 | Folder | What is in it |
 |---|---|
 | `Core/` | Namespace, module registry, event dispatch, slash commands, saved variables |
-| `Data/` | Everything read from the game (none yet) |
+| `Data/` | Tables the addon reads: pet food diets and what taming each beast teaches |
 | `Logic/` | The pet rules, kept apart from the game so they can be tested (none yet) |
 | `UI/` | Theme, widgets, the minimap button, the pets window and the settings window |
 | `Probe/` | `/bpet probe`, which checks what the running game actually supports instead of guessing |

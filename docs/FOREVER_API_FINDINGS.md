@@ -111,5 +111,12 @@ something from a trainer should show its spent points move.
 - `ObjectiveTrackerFrame` exists and gives its edges, so a button can be
   placed above the quest list.
 
-Still to probe: a warlock with a demon out, and a hunter at the stable
-master with the stable open.
+**Taming skills (not yet probed, 2026-09-30).** The beast tooltip asks two
+ways whether the hunter knows a pet skill: `IsPlayerSpell` / `IsSpellKnown`
+on the spell the hunter learns for it (17254 is Bite (Rank 1), 7370 Charge
+(Rank 1)), and the classic craft calls `GetNumCrafts` / `GetCraftInfo` while
+the Beast Training window is open (events `CRAFT_SHOW`, `CRAFT_UPDATE`). The
+probe's last three lines answer which of these Forever has; record them here.
+
+Still to probe: a warlock with a demon out, a hunter at the stable master
+with the stable open, and the taming lines above.
