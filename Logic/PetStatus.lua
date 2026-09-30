@@ -252,7 +252,9 @@ function PetStatus:Update()
     local status = self:Read()
     self:CheckFeed(status)
     if ns.Food then
-        ns.Food:CheckLow(status, ns.Food:Scan(status))
+        local stacks = ns.Food:Scan(status)
+        ns.Food:CheckLow(status, stacks)
+        if ns.FeedButton then ns.FeedButton:Update(status, stacks) end
     end
     if ns.UI and ns.UI.Refresh then
         pcall(ns.UI.Refresh, ns.UI)

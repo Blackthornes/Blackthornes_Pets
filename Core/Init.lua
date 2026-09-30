@@ -248,6 +248,9 @@ local DEFAULTS = {
 
     -- The warning when the bags hold little food the pet will eat.
     lowFoodWarning = true,
+
+    -- The small Feed button above the quest tracker while the pet is hungry.
+    quickFeed = true,
 }
 
 -- Per character, because pets are: a hunter's stable and a warlock's demons

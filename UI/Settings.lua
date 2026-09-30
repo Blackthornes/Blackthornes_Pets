@@ -25,7 +25,7 @@ local COLUMN_WIDTH = 330
 local CONTROL_X = 150
 
 local WIDTH = COLUMN_WIDTH + PADDING * 2
-local HEIGHT = 540
+local HEIGHT = 590
 
 local ROW_HEIGHT = 50
 local ROW_GAP = -6
@@ -216,7 +216,16 @@ function SettingsUI:BuildColumn()
     end, true)
     controls.lowFoodWarning:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local advanced = CreateSection(frame, "ADVANCED", { anchor = lowFoodRow })
+    local quickFeedRow = CreateRow(frame, lowFoodRow, "Feed button by quests",
+        "A small Feed button above the quest list while your pet needs feeding.")
+
+    controls.quickFeed = Widgets.CreateCheckbox(quickFeedRow, "Show it", function(checked)
+        ns.db.quickFeed = checked
+        if ns.Food then ns.Food:Update() end
+    end, true)
+    controls.quickFeed:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local advanced = CreateSection(frame, "ADVANCED", { anchor = quickFeedRow })
 
     local debugRow = CreateRow(frame, advanced, "Debug output",
         "Extra messages in chat, to help track down a problem.")
@@ -242,6 +251,7 @@ function SettingsUI:Refresh()
     controls.feedWarning:SetChecked(ns.db.feedWarning ~= false)
     controls.feedWarnOnlyUnhappy:SetChecked(ns.db.feedWarnOnlyUnhappy == true)
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
+    controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
     controls.debug:SetChecked(ns.db.debug == true)
 end
 

@@ -277,6 +277,9 @@ function Food:Report()
         ns.Print(("food: %d items in %d slots, %d pieces your pet will eat."):format(
             items, slots, found))
     end
+    if ns.UI and ns.UI.FeedButtonState then
+        ns.Print("food: " .. ns.UI:FeedButtonState() .. ".")
+    end
 end
 
 ns.RegisterCommand("food", "list the food in your bags and whether your pet will eat it (reads only)", function()
@@ -289,7 +292,9 @@ end)
 
 function Food:Update()
     local status = ns.PetStatus:Read()
-    self:CheckLow(status, self:Scan(status))
+    local stacks = self:Scan(status)
+    self:CheckLow(status, stacks)
+    if ns.FeedButton then ns.FeedButton:Update(status, stacks) end
     if ns.UI and ns.UI.Refresh then
         pcall(ns.UI.Refresh, ns.UI)
     end

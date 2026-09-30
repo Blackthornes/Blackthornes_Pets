@@ -109,6 +109,9 @@ UI:Show()
 suite.check("the window has a food row",
     UI.rows.food.value:GetText():find("Tough Jerky (full), 30 in bags", 1, true), UI.rows.food.value:GetText())
 suite.check("the Feed button is shown", UI.feedButton:IsShown())
+suite.check("on a layer above the window, which rises when clicked",
+    UI.feedButton:GetFrameStrata() == "FULLSCREEN_DIALOG" and UI.frame:GetFrameStrata() == "DIALOG",
+    UI.feedButton:GetFrameStrata())
 suite.check("and names the food", UI.feedButton.label:GetText() == "Feed Tough Jerky", UI.feedButton.label:GetText())
 
 bags[0] = {}
