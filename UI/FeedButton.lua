@@ -62,7 +62,7 @@ local function Tracker()
     return tracker
 end
 
---- Put the button just above the tracker's top right corner. It is placed by
+--- Put the button just above the tracker's top left corner. It is placed by
 --- screen position rather than anchored to the tracker, so the tracker stays
 --- free to move itself in combat.
 function FeedButton:Place()
@@ -71,12 +71,12 @@ function FeedButton:Place()
 
     local tracker = Tracker()
     if tracker then
-        local ok, right, top, scale = pcall(function()
-            return tracker:GetRight(), tracker:GetTop(),
+        local ok, left, top, scale = pcall(function()
+            return tracker:GetLeft(), tracker:GetTop(),
                 tracker:GetEffectiveScale() / UIParent:GetEffectiveScale()
         end)
-        if ok and type(right) == "number" and type(top) == "number" and type(scale) == "number" then
-            button:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", right * scale, top * scale + GAP)
+        if ok and type(left) == "number" and type(top) == "number" and type(scale) == "number" then
+            button:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left * scale, top * scale + GAP)
             return
         end
     end
