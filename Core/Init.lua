@@ -251,6 +251,9 @@ local DEFAULTS = {
 
     -- The small Feed button above the quest tracker while the pet is hungry.
     quickFeed = true,
+
+    -- On a tameable beast's tooltip, the pet skills taming it would teach.
+    tamingTooltip = true,
 }
 
 -- Per character, because pets are: a hunter's stable and a warlock's demons

@@ -24,7 +24,11 @@ on the `C_PetInfo` calls the probe found, and the food helper
 Feed button kept outside the window so the window still closes in combat,
 a low food warning, and a small Feed button above the quest tracker while the
 pet is hungry (`UI/FeedButton.lua`, placed by screen position rather than
-anchored to the tracker, so the tracker can still move in combat). Beside it: settings, a minimap
+anchored to the tracker, so the tracker can still move in combat), and the
+taming skills on a beast's tooltip (`Logic/Taming.lua`,
+`UI/TamingTooltip.lua`), from `Data/BeastSkills.lua`, which is generated from
+the vmangos world database's copy of Classic 1.12's CreatureSpellData, never
+typed by hand. Beside it: settings, a minimap
 button and a read-only `/bpet probe` for the pet calls. The feature ideas are
 in the project's brainstorm, not in the repo.
 

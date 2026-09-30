@@ -17,9 +17,11 @@
 Core\Init.lua
 
 Data\PetFood.lua
+Data\BeastSkills.lua
 
 Logic\PetStatus.lua
 Logic\Food.lua
+Logic\Taming.lua
 
 UI\Theme.lua
 UI\Widgets.lua
@@ -27,5 +29,6 @@ UI\Minimap.lua
 UI\Settings.lua
 UI\MainWindow.lua
 UI\FeedButton.lua
+UI\TamingTooltip.lua
 
 Probe\Probe.lua
