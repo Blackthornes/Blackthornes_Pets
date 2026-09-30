@@ -98,5 +98,18 @@ something from a trainer should show its spent points move.
 
 `canaccesstable` is also a global on this client, next to `issecretvalue`.
 
+**Feeding (2026-09-30, a hunter with a scorpid).**
+
+- A secure action button whose macro is `/cast Feed Pet` then `/use <bag>
+  <slot>` feeds the pet: Feed Pet takes the food the `/use` names. The spell
+  name comes from `C_Spell.GetSpellName(6991)`.
+- `C_Container.GetContainerItemInfo` gave no `itemName` for the food, so
+  names are read from `hyperlink` (`|h[Name]|h`), with the item cache after.
+- Just after login the bags read empty, or items come back with no name,
+  until the client sends them (`BAG_UPDATE_DELAYED`), so a scan then says
+  nothing about how much food there is.
+- `ObjectiveTrackerFrame` exists and gives its edges, so a button can be
+  placed above the quest list.
+
 Still to probe: a warlock with a demon out, and a hunter at the stable
 master with the stable open.
