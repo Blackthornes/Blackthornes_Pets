@@ -65,10 +65,32 @@ function Taming:NpcID(guid)
     return ok and id or nil
 end
 
---- The skills taming this creature teaches, lowest spell id first; an empty
---- list when it teaches none or is not a beast we know.
+--- The Classic skill of this name and rank, for the spell a hunter learns.
+local function ClassicSkill(name, rank)
+    for _, skill in pairs(ns.BeastSkills.SKILLS) do
+        if skill.name == name and skill.rank == rank then return skill end
+    end
+    return nil
+end
+
+--- The skills taming this creature teaches; an empty list when it teaches
+--- none or is not a beast we know. A beast this account has tamed on Forever
+--- (Logic/TameRecord.lua) is answered from what the game showed then, ahead of
+--- the Classic table.
 function Taming:SkillsFor(npcID)
     local out = {}
+    local tamed = ns.TameRecord and ns.TameRecord:Get(npcID)
+    if tamed and type(tamed.skills) == "table" then
+        for _, skill in ipairs(tamed.skills) do
+            local classic = ClassicSkill(skill.name, skill.rank)
+            out[#out + 1] = {
+                name = skill.name, rank = skill.rank,
+                teach = classic and classic.teach, seen = true,
+            }
+        end
+        return out
+    end
+
     local data = ns.BeastSkills
     local list = data and npcID and data.BEASTS[npcID]
     if not list then return out end
@@ -103,7 +125,7 @@ function Taming:Knows(skill)
     if record and record.known[Key(skill.name, skill.rank)] then return true end
 
     local spellSays
-    for _, api in ipairs({ "IsPlayerSpell", "IsSpellKnown" }) do
+    for _, api in ipairs(skill.teach and { "IsPlayerSpell", "IsSpellKnown" } or {}) do
         local known = Call(api, skill.teach)
         if known == true then return true end
         if known == false then spellSays = false end
