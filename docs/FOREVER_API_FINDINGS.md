@@ -118,5 +118,31 @@ on the spell the hunter learns for it (17254 is Bite (Rank 1), 7370 Charge
 the Beast Training window is open (events `CRAFT_SHOW`, `CRAFT_UPDATE`). The
 probe's last three lines answer which of these Forever has; record them here.
 
-Still to probe: a warlock with a demon out, a hunter at the stable master
-with the stable open, and the taming lines above.
+**Warlock, level 20, Voidwalker out (2026-09-30, Orgrimmar, out of combat).**
+The probe was the version from before the taming lines, so it says nothing
+about them.
+
+| Call | Returned |
+| --- | --- |
+| `UnitClass("player")` | `Warlock, WARLOCK, 9` |
+| `UnitName("pet")` | the demon's own name |
+| `UnitCreatureFamily("pet")` | `Voidwalker, 16` |
+| `UnitLevel("pet")` | `20` (player 20) |
+| `HasPetUI()` | `true, false` (a hunter's pet gives `true, true`) |
+| `GetPetExperience()` | `0, 0` |
+| `UnitHealth("pet")` / `UnitHealthMax("pet")` | secret / `1293` |
+| `UnitPowerType` / `UnitPower` / `UnitPowerMax` | `0, MANA` / secret / `377` |
+| `PetFrameHappiness` | present, hidden |
+| `C_StableInfo.GetNumActivePets` / `GetNumStablePets` | `0` / `0` |
+| `C_StableInfo.GetActivePetList()` | an empty table |
+| `C_PetInfo.GetPetHappiness()` / `GetPetLoyalty()` | nothing |
+| `C_PetInfo.GetPetFoodTypes()` | an empty table |
+| `C_PetInfo.GetPetTrainingPoints()` | `0, 0` |
+
+So a demon has no happiness, loyalty, diet, experience or stable entry, and
+its current health and mana are secret, like a hunter pet's. Its family comes
+from `UnitCreatureFamily`, and the second value of `HasPetUI` tells a hunter's
+pet (`true`) from a demon (`false`).
+
+Still to probe: a hunter at the stable master with the stable open, and the
+taming lines above (on a hunter).
