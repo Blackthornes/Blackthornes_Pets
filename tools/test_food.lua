@@ -102,6 +102,27 @@ Food.warnedLow = nil
 suite.check("turned off it says nothing", Food:CheckLow(status, stacks) == false)
 ns.db.lowFoodWarning = true
 
+-- Just after login: the bags read empty, or items come back without names,
+-- before the client has sent them. That is not a lack of food.
+Food.warnedLow = nil
+local saved = _G.C_Container.GetContainerNumSlots
+_G.C_Container.GetContainerNumSlots = function() return 0 end
+stacks = Food:Scan(status)
+suite.check("bags that read empty are not trusted", stacks.incomplete == true)
+suite.check("so no warning", Food:CheckLow(status, stacks) == false)
+_G.C_Container.GetContainerNumSlots = saved
+bags[2] = { [1] = { itemID = 5555, stackCount = 1 } }
+stacks = Food:Scan(status)
+suite.check("an item with no name yet is not trusted either", stacks.incomplete == true)
+suite.check("so no warning then", Food:CheckLow(status, stacks) == false)
+bags[2] = {}
+Food.bagsReady = false
+stacks = Food:Scan(status)
+suite.check("nor before the bags are ready", not stacks.incomplete and Food:CheckLow(status, stacks) == false)
+Food.bagsReady = true
+suite.check("and once they are, it warns", Food:CheckLow(status, stacks) == true)
+Food.bagsReady = nil
+
 -- The window: a Food row and the Feed button over it.
 bags[0] = { [3] = { itemID = 117, stackCount = 30 } }
 local UI = ns.UI

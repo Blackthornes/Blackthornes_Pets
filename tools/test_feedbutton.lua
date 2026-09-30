@@ -24,10 +24,10 @@ _G.C_Container = {
 }
 _G.C_Item = { GetItemInfo = function() return "Tough Jerky", nil, 1, 5 end }
 
--- The quest tracker, with its top right corner at 1200, 700.
+-- The quest tracker, with its top left corner at 950, 700.
 _G.ObjectiveTrackerFrame = env.Stub({ _shown = true })
 function ObjectiveTrackerFrame:IsVisible() return self._shown end
-function ObjectiveTrackerFrame:GetRight() return 1200 end
+function ObjectiveTrackerFrame:GetLeft() return 950 end
 function ObjectiveTrackerFrame:GetTop() return 700 end
 
 local function Refresh() ns.Food:Update() end
@@ -41,9 +41,9 @@ suite.check("a content pet does, by default", button:IsShown())
 suite.check("it feeds the food", (button:GetAttribute("macrotext") or ""):find("/use 0 3", 1, true),
     button:GetAttribute("macrotext"))
 local point, relativeTo, relativePoint, x, y = unpack(button._point)
-suite.check("just above the tracker's top right",
-    point == "BOTTOMRIGHT" and relativeTo == UIParent and relativePoint == "BOTTOMLEFT"
-        and x == 1200 and y == 704, table.concat({ tostring(point), tostring(relativePoint), tostring(x), tostring(y) }, " "))
+suite.check("just above the tracker's top left",
+    point == "BOTTOMLEFT" and relativeTo == UIParent and relativePoint == "BOTTOMLEFT"
+        and x == 950 and y == 704, table.concat({ tostring(point), tostring(relativePoint), tostring(x), tostring(y) }, " "))
 
 ns.db.feedWarnOnlyUnhappy = true
 Refresh()

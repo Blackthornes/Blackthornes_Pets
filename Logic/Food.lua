@@ -111,7 +111,9 @@ end
 --- Every stack in the bags the pet will eat, as { bag, slot, itemID, name,
 --- count, level, diet, effect }, best first: food that feeds fully before
 --- food that does less, and among those the lowest level first, so the
---- better food is kept for later.
+--- better food is kept for later. `stacks.incomplete` is true when the
+--- client has not yet told the addon what is in the bags (just after login,
+--- when the bags read empty and items come back without names).
 function Food:Scan(status)
     status = status or ns.PetStatus:Read()
     local stacks = {}
@@ -120,15 +122,23 @@ function Food:Scan(status)
     local eats = {}
     for _, diet in ipairs(status.foods) do eats[diet] = true end
 
+    local slots = 0
     for bag = FIRST_BAG, LAST_BAG do
-        for slot = 1, NumSlots(bag) do
+        local count = NumSlots(bag)
+        slots = slots + count
+        for slot = 1, count do
             local info = SlotItem(bag, slot)
             if info then
-                local stack = self:Inspect(bag, slot, info, status, eats)
-                if stack then stacks[#stacks + 1] = stack end
+                local stack, why = self:Inspect(bag, slot, info, status, eats)
+                if stack then
+                    stacks[#stacks + 1] = stack
+                elseif why == "no name from the client" then
+                    stacks.incomplete = true
+                end
             end
         end
     end
+    if slots == 0 then stacks.incomplete = true end
 
     local rank = { full = 1, half = 2, low = 3 }
     table.sort(stacks, function(a, b)
@@ -170,6 +180,9 @@ end
 function Food:CheckLow(status, stacks)
     if not (ns.db and ns.db.lowFoodWarning) then return false end
     if not (status and status.exists and status.foods) then return false end
+    -- Just after login the bags can read empty before the client has sent
+    -- them; that is not a lack of food.
+    if self.bagsReady == false or stacks.incomplete then return false end
 
     local total = self:Count(stacks)
     if total >= LOW_FOOD then
@@ -300,8 +313,25 @@ function Food:Update()
     end
 end
 
+-- How long after login before the bags are trusted, if the client has not
+-- said they are ready by then.
+local BAGS_SETTLE = 10
+
 function Food:OnEnable()
-    local function OnBags() Food:Update() end
+    -- No low food warning until the client has sent the bags.
+    self.bagsReady = false
+    local function Ready()
+        if Food.bagsReady then return end
+        Food.bagsReady = true
+        Food:Update()
+    end
+    if C_Timer and C_Timer.After then
+        C_Timer.After(BAGS_SETTLE, Ready)
+    else
+        self.bagsReady = true
+    end
+
+    local function OnBags() Food.bagsReady = true; Food:Update() end
     ns.RegisterEvent(self, "BAG_UPDATE_DELAYED", OnBags)
     -- Leaving combat: the Feed button can only be pointed at new food then.
     ns.RegisterEvent(self, "PLAYER_REGEN_ENABLED", OnBags)
