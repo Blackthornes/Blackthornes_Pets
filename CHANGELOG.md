@@ -12,9 +12,9 @@ game needs a full restart after installing it.
 - The pets window (`/bpet`, or click the minimap button) shows the pet that
   is out: its happiness and the damage that costs, loyalty, experience,
   training points and what it eats.
-- The window lists the food in your bags the pet will eat, best first, with
-  a Feed button that feeds it the lowest-level food that still does full
-  good.
+- The window shows the best food in your bags the pet will eat and how much
+  is left, with a Feed button that feeds it the lowest-level food that still
+  does full good.
 - While the pet needs feeding, a small Feed button sits just above the quest
   tracker, so it can be fed without opening the window.
 - A warning in chat and in raid-warning text when the pet stops being happy
