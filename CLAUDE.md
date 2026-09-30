@@ -65,8 +65,8 @@ Nothing here calls the other addons yet, and nothing calls this one. If that
 changes, write down the global and the calls in both repos' `CLAUDE.md`, the
 way Farmer and Tradeskills do for prices and goals.
 
-There is no CurseForge project yet, so the TOC's `X-Curse-Project-ID` line is
-commented out and no release has been made.
+The CurseForge project ID is **1720056** (Trent created it 2026-09-30), on the
+TOC's `X-Curse-Project-ID` line. The first release is 0.1.0.
 
 ## Trent's standing rules (all the addons)
 
