@@ -146,7 +146,10 @@ function UI:BuildFeedButton()
         width = 90,
         height = 22,
     })
-    button:SetFrameStrata("DIALOG")
+    -- A layer above the window's own. On the same layer, the window rises
+    -- over the button whenever it is opened or clicked, since the game
+    -- brings a toplevel window to the front.
+    button:SetFrameStrata("FULLSCREEN_DIALOG")
     button:RegisterForClicks("AnyUp", "AnyDown")
     button:Hide()
     self.feedButton = button
@@ -183,6 +186,21 @@ function UI:PlaceFeedButton(stack, beforeCombat)
         button:SetAttribute("macrotext", nil)
         self.feedStack = nil
     end
+end
+
+--- One line on where the Feed button is, for /bpet food.
+function UI:FeedButtonState()
+    local button = self.feedButton
+    if not button then return "the Feed button was not built" end
+    local ok, text = pcall(function()
+        local shown = button:IsShown() and "shown" or "hidden"
+        local visible = button:IsVisible() and "visible" or "not visible"
+        return ("Feed button %s, %s, layer %s %s, window %s %s"):format(shown, visible,
+            tostring(button:GetFrameStrata()), tostring(button:GetFrameLevel()),
+            self.frame and tostring(self.frame:GetFrameStrata()) or "-",
+            self.frame and tostring(self.frame:GetFrameLevel()) or "-")
+    end)
+    return ok and text or "could not read the Feed button"
 end
 
 --- Fill the status rows from a PetStatus reading, hiding the ones with

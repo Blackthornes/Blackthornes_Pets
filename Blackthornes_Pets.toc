@@ -26,5 +26,6 @@ UI\Widgets.lua
 UI\Minimap.lua
 UI\Settings.lua
 UI\MainWindow.lua
+UI\FeedButton.lua
 
 Probe\Probe.lua

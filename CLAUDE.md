@@ -22,7 +22,9 @@ the pets window and the hunter's feed warning (`Logic/PetStatus.lua`), built
 on the `C_PetInfo` calls the probe found, and the food helper
 (`Logic/Food.lua`, `Data/PetFood.lua`): food in the bags by diet, a secure
 Feed button kept outside the window so the window still closes in combat,
-and a low food warning. Beside it: settings, a minimap
+a low food warning, and a small Feed button above the quest tracker while the
+pet is hungry (`UI/FeedButton.lua`, placed by screen position rather than
+anchored to the tracker, so the tracker can still move in combat). Beside it: settings, a minimap
 button and a read-only `/bpet probe` for the pet calls. The feature ideas are
 in the project's brainstorm, not in the repo.
 
