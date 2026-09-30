@@ -28,7 +28,10 @@ anchored to the tracker, so the tracker can still move in combat), and the
 taming skills on a beast's tooltip (`Logic/Taming.lua`,
 `UI/TamingTooltip.lua`), from `Data/BeastSkills.lua`, which is generated from
 the vmangos world database's copy of Classic 1.12's CreatureSpellData, never
-typed by hand. Beside it: settings, a minimap
+typed by hand. `Logic/TameRecord.lua` records, account wide, what a beast
+teaches on Forever by reading the new pet's bar right after Tame Beast;
+Trent's `/bpet tamed` output is how new Forever beasts get into the data.
+Beside it: settings, a minimap
 button and a read-only `/bpet probe` for the pet calls. The feature ideas are
 in the project's brainstorm, not in the repo.
 

@@ -26,6 +26,10 @@ teach, green for a skill you already know and red for one you don't. Which
 beast teaches what comes from Classic 1.12's own table, in
 `Data/BeastSkills.lua`. Opening the Beast Training window once lets the addon
 read every skill you know; `/bpet taming` lists them.
+Beasts new to WoW: Forever aren't in the Classic table, so the addon writes
+down what a beast really teaches each time you tame one (a freshly tamed pet
+knows exactly those skills), and shows that on the beast's tooltip from then
+on. `/bpet tamed` lists everything recorded so far.
 
 There is also a minimap button and `/bpet probe`, which checks which pet calls
 the client supports.
@@ -75,6 +79,7 @@ inside it. If they differ, the client ignores the folder and says nothing.
 /bpet settings   open the settings window (so does right-clicking the minimap button)
 /bpet minimap    show or hide the minimap button
 /bpet taming     list the pet skills this hunter knows
+/bpet tamed      list the beasts you have tamed and what each taught
 ```
 
 The settings window is also under the game's Options > AddOns.
