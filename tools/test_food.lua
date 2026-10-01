@@ -123,6 +123,46 @@ Food.bagsReady = true
 suite.check("and once they are, it warns", Food:CheckLow(status, stacks) == true)
 Food.bagsReady = nil
 
+-- At login the link can read "[]" before the client has the item: an empty
+-- name is no name, so the scan asks the client for it and does not warn.
+Food.warnedLow = nil
+local requested
+_G.C_Item.RequestLoadItemDataByID = function(id) requested = id end
+bags[2] = { [1] = { itemID = 5555, stackCount = 1, hyperlink = "|cffffffff|Hitem:5555::|h[]|h|r" } }
+stacks = Food:Scan(status)
+suite.check("a link with an empty name is not trusted", stacks.incomplete == true)
+suite.check("the client is asked for that item", requested == 5555, requested)
+suite.check("and there is no warning", Food:CheckLow(status, stacks) == false)
+
+-- Scans that keep finding unnamed items try again, but not forever.
+local scans = 0
+local realScan = Food.Scan
+Food.Scan = function(self, ...) scans = scans + 1; return realScan(self, ...) end
+Food.retries, Food.retryPending = 0, nil
+Food:Update()
+suite.check("unnamed items are read again, a limited number of times",
+    scans > 1 and scans <= 20, scans)
+Food.Scan = realScan
+bags[2] = {}
+Food:Update()
+suite.check("a full read resets the retries", Food.retries == 0, Food.retries)
+_G.C_Item.RequestLoadItemDataByID = nil
+
+-- The first bag update at login does not open the warning: only the wait
+-- after the loading screen does, and a newer wait replaces an older one.
+local timers = {}
+local realTimer = _G.C_Timer
+_G.C_Timer = { After = function(_, fn) timers[#timers + 1] = fn end }
+Food:Settle()
+Food:Settle()
+suite.check("waiting after a loading screen", Food.bagsReady == false)
+timers[1]()
+suite.check("an older wait does not end it", Food.bagsReady == false)
+timers[2]()
+suite.check("the newest wait does", Food.bagsReady == true)
+_G.C_Timer = realTimer
+Food.bagsReady, Food.warnedLow = nil, nil
+
 -- The window: a Food row and the Feed button over it.
 bags[0] = { [3] = { itemID = 117, stackCount = 30 } }
 local UI = ns.UI
