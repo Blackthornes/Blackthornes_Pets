@@ -86,9 +86,17 @@ local function NameAndLevel(info)
             level = Plain(itemLevel)
         end
     end
-    if type(name) ~= "string" then name = nil end
+    -- Before the client has the item, the link reads "[]": no name yet.
+    if type(name) ~= "string" or name == "" then name = nil end
     if type(level) ~= "number" then level = nil end
     return name, level
+end
+
+--- Ask the client to load an item it has not sent yet; GET_ITEM_INFO_RECEIVED
+--- follows, and the bags are read again.
+local function RequestItem(id)
+    local fn = C_Item and C_Item.RequestLoadItemDataByID
+    if type(fn) == "function" and id then pcall(fn, id) end
 end
 
 --- One bag slot: the stack as Scan lists it if the pet will eat it, or nil
@@ -134,6 +142,7 @@ function Food:Scan(status)
                     stacks[#stacks + 1] = stack
                 elseif why == "no name from the client" then
                     stacks.incomplete = true
+                    RequestItem(Plain(info.itemID))
                 end
             end
         end
@@ -307,32 +316,74 @@ function Food:Update()
     local status = ns.PetStatus:Read()
     local stacks = self:Scan(status)
     self:CheckLow(status, stacks)
+    self:RetryIncomplete(stacks)
     if ns.FeedButton then ns.FeedButton:Update(status, stacks) end
     if ns.UI and ns.UI.Refresh then
         pcall(ns.UI.Refresh, ns.UI)
     end
 end
 
--- How long after login before the bags are trusted, if the client has not
--- said they are ready by then.
+-- How long after the loading screen before the bags are trusted. The first
+-- bag update at login can come before the client has sent the items, so it
+-- is not enough on its own.
 local BAGS_SETTLE = 10
 
-function Food:OnEnable()
-    -- No low food warning until the client has sent the bags.
+-- While items still have no name, read the bags again this often, at most
+-- this many times, in case the client never says it has loaded them.
+local RETRY_EVERY, RETRIES = 2, 15
+
+--- No low food warning until BAGS_SETTLE seconds after the loading screen.
+--- A later loading screen starts the wait again, and only the newest wait
+--- counts.
+function Food:Settle()
+    if not (C_Timer and C_Timer.After) then
+        self.bagsReady = true
+        return
+    end
     self.bagsReady = false
-    local function Ready()
-        if Food.bagsReady then return end
+    self.settleToken = (self.settleToken or 0) + 1
+    local token = self.settleToken
+    C_Timer.After(BAGS_SETTLE, function()
+        if Food.settleToken ~= token then return end
         Food.bagsReady = true
         Food:Update()
-    end
-    if C_Timer and C_Timer.After then
-        C_Timer.After(BAGS_SETTLE, Ready)
-    else
-        self.bagsReady = true
-    end
+    end)
+end
 
-    local function OnBags() Food.bagsReady = true; Food:Update() end
+--- Read the bags again shortly when a scan found items with no name yet.
+function Food:RetryIncomplete(stacks)
+    if not stacks.incomplete then
+        self.retries = 0
+        return
+    end
+    if self.retryPending or (self.retries or 0) >= RETRIES then return end
+    if not (C_Timer and C_Timer.After) then return end
+    self.retries = (self.retries or 0) + 1
+    self.retryPending = true
+    C_Timer.After(RETRY_EVERY, function()
+        Food.retryPending = nil
+        Food:Update()
+    end)
+end
+
+function Food:OnEnable()
+    self:Settle()
+
+    local function OnBags() Food:Update() end
     ns.RegisterEvent(self, "BAG_UPDATE_DELAYED", OnBags)
     -- Leaving combat: the Feed button can only be pointed at new food then.
     ns.RegisterEvent(self, "PLAYER_REGEN_ENABLED", OnBags)
+    -- Logging in or a /reload: wait for the bags again.
+    ns.RegisterEvent(self, "PLAYER_ENTERING_WORLD", function(_, _, isLogin, isReload)
+        if isLogin or isReload then Food:Settle() end
+    end)
+    -- An item the bags held without a name has arrived.
+    ns.RegisterEvent(self, "GET_ITEM_INFO_RECEIVED", function()
+        if Food.retryPending or not (C_Timer and C_Timer.After) then return end
+        Food.retryPending = true
+        C_Timer.After(0.5, function()
+            Food.retryPending = nil
+            Food:Update()
+        end)
+    end)
 end

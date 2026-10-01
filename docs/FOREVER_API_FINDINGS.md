@@ -107,7 +107,11 @@ something from a trainer should show its spent points move.
   names are read from `hyperlink` (`|h[Name]|h`), with the item cache after.
 - Just after login the bags read empty, or items come back with no name,
   until the client sends them (`BAG_UPDATE_DELAYED`), so a scan then says
-  nothing about how much food there is.
+  nothing about how much food there is. The first `BAG_UPDATE_DELAYED` is not
+  enough: the "no food" warning still showed at login after it, so the
+  warning now waits ten seconds after the loading screen, an item link that
+  reads `[]` counts as no name, and unnamed items are asked for
+  (`C_Item.RequestLoadItemDataByID`) and read again.
 - `ObjectiveTrackerFrame` exists and gives its edges, so a button can be
   placed above the quest list.
 
