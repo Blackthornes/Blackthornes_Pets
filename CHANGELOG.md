@@ -4,6 +4,17 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.2.0
+
+For WoW: Forever (interface 16001). This version adds a file, so fully
+restart the game after updating; `/reload` is not enough.
+
+- Beasts new to WoW: Forever aren't in the Classic table, so each time you
+  tame a beast the addon writes down what it really teaches and shows that on
+  the beast's tooltip from then on. `/bpet tamed` lists every beast recorded.
+- Fixed: right after logging in, the food warning could say the bags held
+  nothing the pet would eat before the game had finished loading them.
+
 ## 0.1.0
 
 The first release, for WoW: Forever (interface 16001). A new addon, so the
