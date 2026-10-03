@@ -24,7 +24,9 @@ on the `C_PetInfo` calls the probe found, and the food helper
 Feed button kept outside the window so the window still closes in combat,
 a low food warning, and a small Feed button above the quest tracker while the
 pet is hungry (`UI/FeedButton.lua`, placed by screen position rather than
-anchored to the tracker, so the tracker can still move in combat), and the
+anchored to the tracker, so the tracker can still move in combat), a "Feed
+pet" key binding (`Bindings.xml`, `UI/FeedKey.lua`: a hidden secure button
+the key clicks, kept on the same food out of combat), and the
 taming skills on a beast's tooltip (`Logic/Taming.lua`,
 `UI/TamingTooltip.lua`), from `Data/BeastSkills.lua`, which is generated from
 the vmangos world database's copy of Classic 1.12's CreatureSpellData, never
@@ -49,8 +51,8 @@ smallest), so check them before inventing a convention:
 - **Palette** is the house one (`ns.COLORS`), with `good` and `bad` in
   Tradeskills' profit green and loss red. `UI/Theme.lua`, `UI/Widgets.lua`,
   `UI/Minimap.lua` and `UI/Settings.lua` are Equipment's with the gear parts
-  taken out. The minimap button starts at 260 degrees, clear of Farmer's and
-  Tradeskills' at 200 and Equipment's at 230.
+  taken out. The minimap button starts at 260 degrees, clear of Tradeskills'
+  at 170, Farmer's at 200 and Equipment's at 230.
 - **Tools** (`syntaxcheck`, `lintcalls`, `runtests`, `check_release`,
   `check_package` and their tests, `link.ps1`) are Equipment's with the names
   changed. If one of them gets a fix in a sister repo, bring it here too.
