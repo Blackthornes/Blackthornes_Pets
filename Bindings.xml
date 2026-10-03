@@ -1,0 +1,6 @@
+<!-- Blackthornes Pets: key bindings, under Options, Keybindings, AddOns.
+     Names are set in UI/FeedKey.lua. The client loads this file by itself;
+     it is not listed in the TOC. -->
+<Bindings>
+    <Binding name="CLICK BlackthornesPetsFeedKey:LeftButton" header="BLACKTHORNESPETS" category="ADDONS"/>
+</Bindings>

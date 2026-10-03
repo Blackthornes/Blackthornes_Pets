@@ -56,6 +56,8 @@ expect("the README is refused", with_({"README.md": "# Readme\n"}), False)
 expect("the Claude notes are refused", with_({"CLAUDE.md": "# Notes\n"}), False)
 expect("the Claude notes are refused anywhere",
        with_({"Core/CLAUDE.md": "# Notes\n"}), False)
+expect("the key bindings are allowed",
+       with_({"Bindings.xml": "<Bindings>\n</Bindings>\n"}), True)
 expect("a probe is allowed", with_({"Probe/Probe.lua": "local _, ns = ...\n"}), True)
 expect("a folder the addon does not have is refused",
        with_({"Scratch/Notes.lua": "local _, ns = ...\n"}), False)

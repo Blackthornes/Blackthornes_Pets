@@ -302,6 +302,9 @@ function Food:Report()
     if ns.UI and ns.UI.FeedButtonState then
         ns.Print("food: " .. ns.UI:FeedButtonState() .. ".")
     end
+    if ns.FeedKey then
+        ns.Print("food: " .. ns.FeedKey:State())
+    end
 end
 
 ns.RegisterCommand("food", "list the food in your bags and whether your pet will eat it (reads only)", function()
@@ -318,6 +321,7 @@ function Food:Update()
     self:CheckLow(status, stacks)
     self:RetryIncomplete(stacks)
     if ns.FeedButton then ns.FeedButton:Update(status, stacks) end
+    if ns.FeedKey then ns.FeedKey:Update(status, stacks) end
     if ns.UI and ns.UI.Refresh then
         pcall(ns.UI.Refresh, ns.UI)
     end

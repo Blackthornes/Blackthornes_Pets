@@ -30,6 +30,7 @@ UI\Minimap.lua
 UI\Settings.lua
 UI\MainWindow.lua
 UI\FeedButton.lua
+UI\FeedKey.lua
 UI\TamingTooltip.lua
 
 Probe\Probe.lua

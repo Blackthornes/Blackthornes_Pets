@@ -15,7 +15,7 @@ local MinimapButton = ns.NewModule("MinimapButton")
 
 local Theme = ns.Theme
 
--- Further round than Farmer's and Tradeskills' 200 degrees and Equipment's
+-- Further round than Tradeskills' 170 degrees, Farmer's 200 and Equipment's
 -- 230, so the four buttons do not start stacked on one another.
 local DEFAULT_ANGLE = math.rad(260)
 local ICON = [[Interface\Icons\Ability_Hunter_BeastTaming]]
