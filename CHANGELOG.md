@@ -4,6 +4,16 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.3.0
+
+For WoW: Forever (interface 16001). This version adds files, so fully
+restart the game after updating; `/reload` is not enough.
+
+- A Feed pet key binding under Options, Keybindings, AddOns. It feeds the
+  same food the Feed buttons would pick, hungry or not, so you can top your
+  pet up. With no pet or no food it eats, it says why in chat. `/bpet food`
+  shows which key is set and what it feeds.
+
 ## 0.2.0
 
 For WoW: Forever (interface 16001). This version adds a file, so fully
