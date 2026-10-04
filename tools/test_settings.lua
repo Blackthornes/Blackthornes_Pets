@@ -40,6 +40,17 @@ suite.check("options is not listed twice in help",
         end
     end)())
 
+-- The house frame: the plate and close gem, without the portrait.
+local trim = SettingsUI.frame.titan
+suite.check("settings wears the house frame", trim ~= nil)
+suite.check("with the name on the plate", trim and trim.plate.label:GetText() == "Blackthornes Pets")
+-- A stub answers any field it lacks with a function, so "no portrait"
+-- means no portrait frame.
+suite.check("and no portrait", trim and type(trim.portrait) ~= "table")
+trim.closeButton:GetScript("OnClick")(trim.closeButton)
+suite.check("the close gem closes it", not SettingsUI.frame:IsShown())
+SettingsUI:Show()
+
 local controls = SettingsUI.controls
 
 -- The minimap checkbox.

@@ -73,6 +73,29 @@ way Farmer and Tradeskills do for prices and goals.
 The CurseForge project ID is **1720056** (Trent created it 2026-09-30), on the
 TOC's `X-Curse-Project-ID` line. The first release is 0.1.0.
 
+## The house frame (Titanforged)
+
+Trent picked this look for all four addons on 2026-10-04 from two mockups
+(the other was "Arcane Glass"), and Tradeskills got it first. It's the
+game's own window shape with the light turned up: a gold metal rim with
+corner gems, a round portrait with the addon's emblem, the name on a plate
+across the top edge and a red close gem. Buttons are raised metal with gold
+labels, and the main action is solid gold with dark "ink" lettering; a
+primary button given its own dark `baseColor` keeps a gold label, or it
+reads as an empty box (Tradeskills' first bug with the look, checked in
+`tools/test_titanforged.lua`).
+
+It lives in `UI/Titanforged.lua` (`Titanforged:Dress(frame, opts)`,
+`:Opened(frame)`), with the art in `Media/Frame/*.tga`, drawn by
+`tools/make_frame_art.py`. All are Tradeskills' copies; Pets' emblem is the
+**paw** (`EMBLEM = "paw"`), whose shape was redrawn here so its four toes
+stay apart at the 36 px the portrait shows it. The pets window wears the
+full frame; Settings has the plate and close gem but no portrait, which
+would sit over its first heading. The Feed buttons keep their place and
+secure setup and only wear the shared button look. Pets has no Window
+effects setting, so `Motion.Level()` is always "full" and the glint always
+runs; if one is added, the glint and portrait light already follow it.
+
 ## Trent's standing rules (all the addons)
 
 - **"Always check that it's clear to post."** Anything that goes public (a

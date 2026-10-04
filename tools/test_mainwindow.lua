@@ -28,6 +28,15 @@ _G.UnitClass = function() error("secret value") end
 UI:Refresh()
 suite.check("an unreadable class is not an error", UI.subtitle:GetText() == "")
 
+-- The house frame: the name on the plate, the paw in the portrait, and a
+-- close gem in place of the old X.
+local trim = UI.frame.titan
+suite.check("the window wears the house frame", trim ~= nil)
+suite.check("its name is on the plate", trim and trim.plate.label:GetText() == "Blackthornes Pets")
+suite.check("with the portrait", trim and type(trim.portrait) == "table")
+trim.closeButton:GetScript("OnClick")(trim.closeButton)
+suite.check("the close gem closes it", not UI.frame:IsShown())
+
 -- /bpet window.
 UI:Hide()
 ns.HandleSlash("window")

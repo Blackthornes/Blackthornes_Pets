@@ -14,7 +14,11 @@ local Theme = ns.Theme
 local Widgets = ns.Widgets
 
 local PADDING = 18
-local HEADER = 36
+-- From the window's top to the gold rule under the header row.
+local HEADER = 44
+-- The metal rim sits on the window's edge and reaches this far inward, with
+-- room to spare (UI/Titanforged.lua).
+local EDGE_PAD = 11
 local WIDTH = 520
 local HEIGHT = 360
 
@@ -51,7 +55,26 @@ function UI:Build()
     frame:RegisterForDrag("LeftButton")
 
     Theme.Fill(frame, "window")
-    Theme.Border(frame, "borderLit")
+
+    -- The house frame (UI/Titanforged.lua): a gold rim with corner gems, the
+    -- paw in a round portrait, the name on a plate and a red close gem.
+    if ns.Titanforged then
+        local trim = ns.Titanforged:Dress(frame, {
+            title = "Blackthornes Pets",
+            portrait = true,
+            close = function() UI:Hide() end,
+        })
+        self.trim = trim
+
+        -- Kept on the screen whole: the portrait and plate reach out past
+        -- the top left, and the corner gems past every edge.
+        local left, right, top, bottom = ns.Titanforged.Reach(trim)
+        if frame.SetClampRectInsets then
+            frame:SetClampRectInsets(-left, right, top, -bottom)
+        end
+    else
+        Theme.Border(frame, "borderLit")
+    end
 
     frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
     frame:SetScript("OnDragStop", function(self)
@@ -88,35 +111,35 @@ function UI:Build()
     return frame
 end
 
+--- The header row. The window's name is on the plate across the top edge
+--- and the close gem sits on the top right corner (UI/Titanforged.lua), so
+--- the row holds whose pets these are and the Settings button, clear of the
+--- portrait on the left.
 function UI:BuildHeader()
     local frame = self.frame
 
-    local header = Theme.CreatePanel(frame, "header", false)
-    header:SetPoint("TOPLEFT")
-    header:SetPoint("TOPRIGHT")
-    header:SetHeight(HEADER)
-    Theme.HouseHeader(header, 20)
+    local header = CreateFrame("Frame", nil, frame)
+    header:SetPoint("TOPLEFT", EDGE_PAD, -EDGE_PAD)
+    header:SetPoint("TOPRIGHT", -EDGE_PAD, -EDGE_PAD)
+    header:SetHeight(HEADER - EDGE_PAD)
 
-    local title = Theme.CreateLabel(header, "title", "accent")
-    title:SetPoint("LEFT", PADDING, 0)
-    title:SetText("Blackthornes Pets")
+    -- A gold rule under it, bright at the left and fading out to the right.
+    local rule = header:CreateTexture(nil, "ARTWORK")
+    rule:SetPoint("BOTTOMLEFT")
+    rule:SetPoint("BOTTOMRIGHT")
+    rule:SetHeight(1)
+    Theme.SetGradientAlpha(rule, "HORIZONTAL", "accent", 0.6, 0.05)
 
+    -- Past the portrait, which reaches 48 pixels into the window.
     local subtitle = Theme.CreateLabel(header, "small", "muted")
-    subtitle:SetPoint("LEFT", title, "RIGHT", 10, -1)
+    subtitle:SetPoint("LEFT", header, "LEFT", 48, -4)
     self.subtitle = subtitle
 
-    local close = Widgets.CreateButton(header, "X", function() UI:Hide() end,
-        { width = 22, height = 20, danger = true })
-    close:SetPoint("RIGHT", -PADDING + 4, 0)
-
+    -- Below the close gem on the corner.
     local settings = Widgets.CreateButton(header, "Settings", function()
         if ns.SettingsUI then ns.SettingsUI:Toggle() end
     end, { width = 70, height = 20 })
-    settings:SetPoint("RIGHT", close, "LEFT", -6, 0)
-
-    local divider = Theme.CreateDivider(frame, "borderLit")
-    divider:SetPoint("TOPLEFT", header, "BOTTOMLEFT")
-    divider:SetPoint("TOPRIGHT", header, "BOTTOMRIGHT")
+    settings:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
 end
 
 function UI:BuildStatus()
@@ -234,7 +257,7 @@ function UI:ShowStatus(status)
         self:PlaceFeedButton(nil)
     end
 
-    local y = -(HEADER + 18)
+    local y = -(HEADER + 14)
     for _, spec in ipairs(ROWS) do
         local row = self.rows[spec.key]
         local text = values[spec.key]
@@ -316,6 +339,8 @@ function UI:Show()
         self:RestorePosition()
         self.frame:Show()
         ns.Motion:Open(self.frame)
+        -- A light runs round the portrait as it opens.
+        if ns.Titanforged then ns.Titanforged:Opened(self.frame) end
     end
     self:Refresh()
 end

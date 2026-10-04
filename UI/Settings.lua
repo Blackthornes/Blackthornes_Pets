@@ -17,7 +17,11 @@ local Theme = ns.Theme
 local Widgets = ns.Widgets
 
 local PADDING = 18
-local HEADER = 36
+-- From the window's top to the gold rule under the header row.
+local HEADER = 44
+-- The metal rim sits on the window's edge and reaches this far inward, with
+-- room to spare (UI/Titanforged.lua).
+local EDGE_PAD = 11
 
 local COLUMN_WIDTH = 330
 -- Where the controls start: room for a label like "Minimap button" in the
@@ -70,8 +74,17 @@ local function CreateRow(parent, anchor, labelText, description)
     label:SetWidth(CONTROL_X - 8)
     label:SetText(labelText)
 
+    -- Never cut short: a label too long for the room before the control
+    -- wraps onto a second line, and the hint and the row move down for it.
+    local extra = 0
+    if Theme.TextWidth("small", labelText) > CONTROL_X - 8 then
+        label:SetWordWrap(true)
+        extra = 13
+        row:SetHeight(ROW_HEIGHT + extra)
+    end
+
     local hint = Theme.CreateLabel(row, "tiny", "dim")
-    hint:SetPoint("TOPLEFT", 0, -25)
+    hint:SetPoint("TOPLEFT", 0, -25 - extra)
     hint:SetWidth(COLUMN_WIDTH)
     hint:SetWordWrap(true)
     hint:SetText(description or "")
@@ -107,7 +120,24 @@ function SettingsUI:Build()
     frame:RegisterForDrag("LeftButton")
 
     Theme.Fill(frame, "window")
-    Theme.Border(frame, "borderLit")
+
+    -- The house frame (UI/Titanforged.lua): the gold rim, the name on a
+    -- plate and the red close gem. No portrait: on a window this narrow it
+    -- would sit over the first section's heading.
+    if ns.Titanforged then
+        local trim = ns.Titanforged:Dress(frame, {
+            title = TITLE,
+            close = function() SettingsUI:Hide() end,
+        })
+        self.trim = trim
+
+        local left, right, top, bottom = ns.Titanforged.Reach(trim)
+        if frame.SetClampRectInsets then
+            frame:SetClampRectInsets(-left, right, top, -bottom)
+        end
+    else
+        Theme.Border(frame, "borderLit")
+    end
 
     frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
     frame:SetScript("OnDragStop", function(self)
@@ -136,35 +166,31 @@ function SettingsUI:Build()
     return frame
 end
 
+--- The header row. The addon's name is on the plate across the top edge
+--- and the close gem sits on the top right corner (UI/Titanforged.lua), so
+--- the row says which page this is and which version is running.
 function SettingsUI:BuildHeader()
     local frame = self.frame
 
-    local header = Theme.CreatePanel(frame, "header", false)
-    header:SetPoint("TOPLEFT")
-    header:SetPoint("TOPRIGHT")
-    header:SetHeight(HEADER)
-    Theme.HouseHeader(header, 20)
+    local header = CreateFrame("Frame", nil, frame)
+    header:SetPoint("TOPLEFT", EDGE_PAD, -EDGE_PAD)
+    header:SetPoint("TOPRIGHT", -EDGE_PAD, -EDGE_PAD)
+    header:SetHeight(HEADER - EDGE_PAD)
 
-    local title = Theme.CreateLabel(header, "title", "accent")
-    title:SetPoint("LEFT", PADDING, 0)
-    title:SetText(TITLE)
+    -- A gold rule under it, bright at the left and fading out to the right.
+    local rule = header:CreateTexture(nil, "ARTWORK")
+    rule:SetPoint("BOTTOMLEFT")
+    rule:SetPoint("BOTTOMRIGHT")
+    rule:SetHeight(1)
+    Theme.SetGradientAlpha(rule, "HORIZONTAL", "accent", 0.6, 0.05)
 
     local subtitle = Theme.CreateLabel(header, "small", "muted")
-    subtitle:SetPoint("LEFT", title, "RIGHT", 10, -1)
+    subtitle:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", PADDING - EDGE_PAD, 7)
     subtitle:SetText("Settings")
 
     local version = Theme.CreateLabel(header, "tiny", "dim", "RIGHT")
     version:SetText(ns.VersionLabel())
-
-    local close = Widgets.CreateButton(header, "X", function() SettingsUI:Hide() end,
-        { width = 22, height = 20, danger = true })
-    close:SetPoint("RIGHT", -PADDING + 4, 0)
-
-    version:SetPoint("RIGHT", close, "LEFT", -10, 0)
-
-    local divider = Theme.CreateDivider(frame, "borderLit")
-    divider:SetPoint("TOPLEFT", header, "BOTTOMLEFT")
-    divider:SetPoint("TOPRIGHT", header, "BOTTOMRIGHT")
+    version:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -(PADDING - EDGE_PAD), 8)
 end
 
 function SettingsUI:BuildColumn()

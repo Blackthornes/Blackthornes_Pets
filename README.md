@@ -96,9 +96,10 @@ The settings window is also under the game's Options > AddOns.
 | `Core/` | Namespace, module registry, event dispatch, slash commands, saved variables |
 | `Data/` | Tables the addon reads: pet food diets and what taming each beast teaches |
 | `Logic/` | The pet rules, kept apart from the game so they can be tested (none yet) |
-| `UI/` | Theme, widgets, the minimap button, the pets window, the settings window and the Feed pet key |
+| `UI/` | Theme, widgets, the house window frame, the minimap button, the pets window, the settings window and the Feed pet key |
+| `Media/` | The window frame's art (`Frame/*.tga`), drawn by `tools/make_frame_art.py` |
 | `Probe/` | `/bpet probe`, which checks what the running game actually supports instead of guessing |
-| `tools/` | Checks, tests and the link script. Not shipped to the client |
+| `tools/` | Checks, tests, the frame art script and the link script. Not shipped to the client |
 | `docs/` | What the Forever client actually does, found with `/bpet probe`. Not shipped |
 
 `Bindings.xml` names the Feed pet key binding; the client loads it by itself,
