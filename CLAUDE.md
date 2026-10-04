@@ -1,13 +1,13 @@
 # Notes for Claude
 
-Read this before working in this repo. Trent runs one Claude project per
+Read this before working in this repo. The owner runs one Claude project per
 addon: this one (**Blackthornes_Pets**), **Blackthornes_Equipment**
 (`Blackthornes/Blackthornes_Equipment`), **Blackthornes_Tradeskills**
 (`Blackthornes/Blackthornes_Tradeskills`) and **Blackthornes_Farmer**
 (`Blackthornes/Blackthornes_Farmer`). The projects cannot read each other's
 memory, so what one needs to know about another lives in the repos, in this
 file and in theirs. Keep them current: when a change here leans on something
-new in another addon, or a standing rule from Trent applies to all of them,
+new in another addon, or a standing rule from the owner applies to all of them,
 add it to each file.
 
 Nothing private goes in this file (no local paths, emails or account names).
@@ -32,7 +32,7 @@ taming skills on a beast's tooltip (`Logic/Taming.lua`,
 the vmangos world database's copy of Classic 1.12's CreatureSpellData, never
 typed by hand. `Logic/TameRecord.lua` records, account wide, what a beast
 teaches on Forever by reading the new pet's bar right after Tame Beast;
-Trent's `/bpet tamed` output is how new Forever beasts get into the data.
+The owner's `/bpet tamed` output is how new Forever beasts get into the data.
 Beside it: settings, a minimap
 button and a read-only `/bpet probe` for the pet calls. The feature ideas are
 in the project's brainstorm, not in the repo.
@@ -70,12 +70,12 @@ Nothing here calls the other addons yet, and nothing calls this one. If that
 changes, write down the global and the calls in both repos' `CLAUDE.md`, the
 way Farmer and Tradeskills do for prices and goals.
 
-The CurseForge project ID is **1720056** (Trent created it 2026-09-30), on the
+The CurseForge project ID is **1720056** (the owner created it 2026-09-30), on the
 TOC's `X-Curse-Project-ID` line. The first release is 0.1.0.
 
 ## The house frame (Titanforged)
 
-Trent picked this look for all four addons on 2026-10-04 from two mockups
+The owner picked this look for all four addons on 2026-10-04 from two mockups
 (the other was "Arcane Glass"), and Tradeskills got it first. It's the
 game's own window shape with the light turned up: a gold metal rim with
 corner gems, a round portrait with the addon's emblem, the name on a plate
@@ -96,19 +96,19 @@ secure setup and only wear the shared button look. Pets has no Window
 effects setting, so `Motion.Level()` is always "full" and the glint always
 runs; if one is added, the glint and portrait light already follow it.
 
-## Trent's standing rules (all the addons)
+## The owner's standing rules (all the addons)
 
 - **"Always check that it's clear to post."** Anything that goes public (a
   release, a CurseForge page, a post) is checked for private or unexpected
-  content first, and nothing is published or uploaded without Trent's
+  content first, and nothing is published or uploaded without the owner's
   go-ahead. He tags releases himself.
 - **Keep his data safe.** Never commit saved variables, tokens or anything
   from his machine; the upload keys are repository secrets he sets himself,
   so never ask him to paste one anywhere.
 - **Changelogs come from git history.** Work out what changed since the last
   tag from the merged PRs and commits (`git log vX.Y.Z..origin/main --merges`);
-  never ask Trent what went in. Claude drafts the CHANGELOG section in a PR;
-  Trent merges, pulls `main`, tags and pushes.
+  never ask the owner what went in. Claude drafts the CHANGELOG section in a PR;
+  The owner merges, pulls `main`, tags and pushes.
 - **Every reply that ships code ends with the GitHub Desktop steps,** naming
   the branch: merge the PR on github.com (Ready for review, then Merge pull
   request); in GitHub Desktop switch **Current branch** to **main** and click
@@ -120,7 +120,7 @@ runs; if one is added, the glint and portrait light already follow it.
 - **CurseForge descriptions are features only.** Leave out privacy notes and
   any explanation of public emotes or their switches. Those belong in the
   README and CHANGELOG.
-- **Forever is not retail for classes either.** Trent: "keep in mind this is
+- **Forever is not retail for classes either.** The owner: "keep in mind this is
   WoW: Forever." Hunters have classic-style talent trees, held on Forever in
   one trait tree per class (see Equipment's findings). Never assume a retail
   or classic pet API exists (happiness, loyalty, the stable, demon summons):
