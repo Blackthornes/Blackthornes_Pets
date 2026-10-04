@@ -24,6 +24,15 @@ Theme.colors = {
     borderLit = { 0.302, 0.333, 0.388 },
 
     accent    = { 0.784, 0.643, 0.302 },   -- #C8A44D
+    -- Titanforged (2026-10-04, Tradeskills' palette): the lit gold of a
+    -- hovered edge, the gold of a button's label, the dark ink on a gold
+    -- button, the dark well a panel sits recessed in, and the dim metal edge
+    -- of a button at rest.
+    accentHi  = { 0.945, 0.831, 0.533 },   -- #F1D488
+    gilt      = { 0.941, 0.824, 0.494 },   -- #F0D27E
+    ink       = { 0.110, 0.078, 0.024 },   -- #1C1406
+    well      = { 0.039, 0.047, 0.063 },   -- #0A0C10
+    metal     = { 0.541, 0.427, 0.180 },   -- #8A6D2E
     good      = { 0.310, 0.820, 0.545 },   -- #4FD18B, an upgrade
     warn      = { 0.910, 0.757, 0.353 },
     loss      = { 0.898, 0.376, 0.310 },   -- #E5604F, a downgrade, or a close button under the mouse
@@ -162,6 +171,57 @@ function Theme.TextWidth(size, text)
     return math.ceil(width or 0)
 end
 
+--- Sink a panel into the window, as the game's inset panels sit: a darker
+--- well, a shadow falling from its top edge and a faint light along its foot.
+function Theme.Recess(frame)
+    if frame.background then frame.background:SetColorTexture(Theme.Unpack("well")) end
+
+    local shadow = frame:CreateTexture(nil, "BACKGROUND", nil, 3)
+    shadow:SetPoint("TOPLEFT", 1, -1)
+    shadow:SetPoint("TOPRIGHT", -1, -1)
+    shadow:SetHeight(14)
+    shadow:SetColorTexture(0, 0, 0, 1)
+    local ok = type(CreateColor) == "function" and type(shadow.SetGradient) == "function"
+        and pcall(shadow.SetGradient, shadow, "VERTICAL", CreateColor(0, 0, 0, 0), CreateColor(0, 0, 0, 0.6))
+    if not ok then shadow:Hide() end
+
+    local foot = frame:CreateTexture(nil, "BORDER", nil, 2)
+    foot:SetPoint("BOTTOMLEFT", 1, 0)
+    foot:SetPoint("BOTTOMRIGHT", -1, 0)
+    foot:SetHeight(1)
+    foot:SetColorTexture(1, 1, 1, 0.05)
+
+    if frame.borderTextures then
+        Theme.SetBorderColor(frame, "border", 0.8)
+        -- The top edge in shadow, so the panel reads as sunk rather than raised.
+        local top = frame.borderTextures[1]
+        if top then top:SetColorTexture(0.016, 0.020, 0.028, 1) end
+    end
+    return shadow
+end
+
+--- A button's metal: a light along its top half and a shade along its
+--- bottom, over whatever fill it has, so it reads as raised and pressable.
+function Theme.Bevel(frame)
+    local shine = frame:CreateTexture(nil, "BORDER", nil, -1)
+    shine:SetPoint("TOPLEFT", 1, -1)
+    shine:SetPoint("TOPRIGHT", -1, -1)
+    shine:SetPoint("BOTTOM", frame, "CENTER")
+    shine:SetColorTexture(1, 1, 1, 0.06)
+
+    local shade = frame:CreateTexture(nil, "BORDER", nil, -1)
+    shade:SetPoint("BOTTOMLEFT", 1, 1)
+    shade:SetPoint("BOTTOMRIGHT", -1, 1)
+    shade:SetPoint("TOP", frame, "CENTER")
+    shade:SetColorTexture(0, 0, 0, 0.22)
+
+    if type(CreateColor) == "function" and type(shine.SetGradient) == "function" then
+        pcall(shine.SetGradient, shine, "VERTICAL", CreateColor(1, 1, 1, 0.02), CreateColor(1, 1, 1, 0.12))
+        pcall(shade.SetGradient, shade, "VERTICAL", CreateColor(0, 0, 0, 0.35), CreateColor(0, 0, 0, 0.02))
+    end
+    return shine, shade
+end
+
 function Theme.CreateDivider(parent, key)
     local divider = parent:CreateTexture(nil, "ARTWORK")
     divider:SetColorTexture(Theme.Unpack(key or "border"))
@@ -227,4 +287,82 @@ function Theme.HeaderGlow(frame, height, alpha)
 
     if not ok then glow:Hide() end
     return glow
+end
+
+--- Shade a texture in one palette colour from `fromAlpha` to `toAlpha`
+--- ("VERTICAL" runs bottom to top, "HORIZONTAL" left to right). A faint
+--- flat fill where the client draws no gradient. Tradeskills' own.
+function Theme.SetGradientAlpha(texture, orientation, key, fromAlpha, toAlpha)
+    local r, g, b = Theme.Unpack(key or "accent")
+    texture:SetColorTexture(1, 1, 1, 1)
+
+    local ok = false
+    if type(CreateColor) == "function" and type(texture.SetGradient) == "function" then
+        ok = pcall(texture.SetGradient, texture, orientation,
+            CreateColor(r, g, b, fromAlpha), CreateColor(r, g, b, toAlpha))
+    end
+
+    if not ok then
+        texture:SetColorTexture(r, g, b, math.max(fromAlpha, toAlpha) * 0.4)
+    end
+    return ok
+end
+
+--- A soft glow round the outside of a frame, `spread` pixels wide, drawn
+--- added so it lights what is behind it. Tradeskills' and Farmer's: the
+--- buttons glow under the mouse with it.
+function Theme.Halo(frame, spread, alpha, key)
+    spread = spread or 6
+    local sides = {}
+
+    for _, side in ipairs({ "TOP", "BOTTOM", "LEFT", "RIGHT" }) do
+        local halo = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+        pcall(halo.SetBlendMode, halo, "ADD")
+
+        if side == "TOP" or side == "BOTTOM" then
+            local out = side == "TOP" and 1 or -1
+            halo:SetPoint(side .. "LEFT", frame, side .. "LEFT", 0, out * spread)
+            halo:SetPoint(side .. "RIGHT", frame, side .. "RIGHT", 0, out * spread)
+            halo:SetHeight(spread)
+        else
+            local out = side == "LEFT" and -1 or 1
+            halo:SetPoint("TOP" .. side, frame, "TOP" .. side, out * spread, 0)
+            halo:SetPoint("BOTTOM" .. side, frame, "BOTTOM" .. side, out * spread, 0)
+            halo:SetWidth(spread)
+        end
+
+        halo.side = side
+        sides[#sides + 1] = halo
+    end
+
+    frame.haloTextures = sides
+    frame.haloRest = alpha or 0.12
+    frame.haloKey = key
+    Theme.SetHalo(frame, frame.haloRest, key)
+    return sides
+end
+
+--- Relight a halo drawn by Theme.Halo: `alpha` at the frame's edge, in the
+--- palette colour `key` (the halo's own colour unless given).
+function Theme.SetHalo(frame, alpha, key)
+    local sides = frame and frame.haloTextures
+    if not sides then return end
+
+    key = key or frame.haloKey or "accent"
+    alpha = math.max(0, tonumber(alpha) or 0)
+
+    for _, halo in ipairs(sides) do
+        -- The bright end sits against the frame: the bottom of the band
+        -- above it, the top of the band below, and so on.
+        if halo.side == "TOP" then
+            Theme.SetGradientAlpha(halo, "VERTICAL", key, alpha, 0)
+        elseif halo.side == "BOTTOM" then
+            Theme.SetGradientAlpha(halo, "VERTICAL", key, 0, alpha)
+        elseif halo.side == "LEFT" then
+            Theme.SetGradientAlpha(halo, "HORIZONTAL", key, 0, alpha)
+        else
+            Theme.SetGradientAlpha(halo, "HORIZONTAL", key, alpha, 0)
+        end
+        halo:SetShown(alpha > 0)
+    end
 end
