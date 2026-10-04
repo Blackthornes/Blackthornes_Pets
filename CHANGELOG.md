@@ -4,6 +4,20 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.4.0
+
+For WoW: Forever (interface 16001). This version adds files, so fully
+restart the game after updating; `/reload` is not enough.
+
+- New look: the pets window wears a gold metal frame with corner gems, a
+  round portrait holding a gold paw, a title plate across the top and a red
+  gem to close it. Settings gets the plate and close gem. Buttons are raised
+  gold-edged metal and the Feed buttons are solid gold. A light runs round
+  the portrait as the window opens and a glint slides along the rim.
+- Settings labels too long for their space wrap instead of being cut off.
+- The quick Feed button above the quest tracker keeps its place and works
+  the same in combat; only its look changes.
+
 ## 0.3.0
 
 For WoW: Forever (interface 16001). This version adds files, so fully
