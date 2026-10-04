@@ -1,4 +1,4 @@
--- The Titanforged window frame (Trent's pick, 2026-10-04), outside WoW.
+-- The Titanforged window frame (picked 2026-10-04), outside WoW.
 -- Ported from Tradeskills' test of the same name.
 --
 -- What must hold:
