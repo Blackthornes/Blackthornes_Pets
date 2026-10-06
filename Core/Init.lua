@@ -237,7 +237,7 @@ local DEFAULTS = {
     -- Tradeskills' (200 degrees) and Equipment's (230), so the four do not
     -- start stacked.
     minimapAngle = math.rad(260),
-    minimapGap = 16,
+    minimapGap = 16, -- kept for old saves; the button now sits on the ring
     minimapHidden = false,
 
     -- The warning when a hunter's pet needs feeding: on, and by default as
