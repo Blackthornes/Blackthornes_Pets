@@ -267,7 +267,14 @@ function UI:ShowStatus(status)
             row.label:SetPoint("TOPLEFT", PADDING, y - 1)
             row.value:SetPoint("TOPLEFT", VALUE_X, y)
             row.value:SetText(text)
-            y = y - ROW_HEIGHT
+            -- A value that wraps onto a second line pushes the rows below
+            -- down, rather than running into the next one.
+            local step = ROW_HEIGHT
+            local ok, height = pcall(row.value.GetStringHeight, row.value)
+            if ok and type(height) == "number" and height + 10 > step then
+                step = math.ceil(height + 10)
+            end
+            y = y - step
         end
     end
 

@@ -97,6 +97,13 @@ bags[0], bags[2] = {}, {}
 stacks = Food:Scan(status)
 suite.check("and warns again when it runs out", Food:CheckLow(status, stacks) == true)
 suite.check("saying there is none", env.ChatText():find("You have no food Boar will eat.", 1, true))
+-- Another pet called out gets its own warning.
+_G.UnitName = function() return "Wolf" end
+local wolf = ns.PetStatus:Read()
+suite.check("another pet is told about too", Food:CheckLow(wolf, stacks) == true)
+suite.check("by its name", env.ChatText():find("You have no food Wolf will eat.", 1, true))
+suite.check("once", Food:CheckLow(wolf, stacks) == false)
+_G.UnitName = function() return "Boar" end
 ns.db.lowFoodWarning = false
 Food.warnedLow = nil
 suite.check("turned off it says nothing", Food:CheckLow(status, stacks) == false)

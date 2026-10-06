@@ -230,6 +230,11 @@ function PetStatus:CheckFeed(status)
     local level = status.exists and status.happiness
     if not level then return false end
 
+    -- Another pet called out starts afresh: a warning about the last one
+    -- says nothing about this one.
+    if self.warnedPet ~= status.name then self.warnedAt = nil end
+    self.warnedPet = status.name
+
     if level >= self:WarnBelow() then
         self.warnedAt = nil
         return false

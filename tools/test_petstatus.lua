@@ -74,6 +74,15 @@ PetStatus:CheckFeed()
 happiness = 2
 suite.check("fed and let slip, it warns again", PetStatus:CheckFeed() == true)
 
+-- Another pet called out while the last one was being warned about gets its
+-- own warning, even at the same happiness.
+_G.UnitName = function() return "Wolf" end
+suite.check("a different hungry pet is warned about too", PetStatus:CheckFeed() == true)
+suite.check("by its own name", env.ChatText():find("Wolf is content. Feed it.", 1, true), env.ChatText())
+suite.check("and only once", PetStatus:CheckFeed() == false)
+_G.UnitName = function() return "Boar" end
+PetStatus:CheckFeed()
+
 -- Where the client has the raid warning frame, the warning goes there, with
 -- its sound, rather than on the red error line that fades too fast.
 local raid, sounds = {}, {}
