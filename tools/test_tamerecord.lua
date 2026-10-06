@@ -39,6 +39,16 @@ end
 suite.check("Tame Beast is known by its id", Record:IsTameBeast(1515))
 suite.check("another spell is not it", not Record:IsTameBeast(133))
 
+-- A spell id the client made secret raises when compared; it is not Tame
+-- Beast, and casting it records nothing.
+local secretSpell = newproxy(true)
+getmetatable(secretSpell).__tostring = function(self) return self end
+getmetatable(secretSpell).__eq = function() error("secret value") end
+getmetatable(secretSpell).__lt = function() error("secret value") end
+suite.check("a secret spell id is not Tame Beast", Record:IsTameBeast(secretSpell) == false)
+Record:OnCastStart("UNIT_SPELLCAST_START", "player", "cast", secretSpell)
+suite.check("and casting it remembers nothing", Record.pending == nil)
+
 -- A pet showing up without a tame (called back, say) is not recorded.
 petOut = true
 suite.check("a pet that was not just tamed is not recorded", Record:Capture() == nil)

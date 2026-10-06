@@ -78,6 +78,15 @@ suite.check("training points go below zero",
 suite.check("and it lists what the pet eats",
     rows.foods.value:GetText() == "Meat, Fish, Cheese, Bread, Fungus, Fruit", rows.foods.value:GetText())
 
+-- A value that wraps onto two lines pushes the next row down past it.
+local foodsY = rows.foods.value._point[3]
+suite.check("one line a row", rows.food.value._point[3] == foodsY - 24, rows.food.value._point[3])
+rows.foods.value.GetStringHeight = function() return 28 end
+UI:Refresh()
+suite.check("a wrapped value moves the next row down",
+    rows.food.value._point[3] == foodsY - 38, rows.food.value._point[3])
+rows.foods.value.GetStringHeight = nil
+
 -- A warlock's demon has none of the hunter rows: they hide and close up.
 _G.UnitClass = function() return "Warlock", "WARLOCK" end
 _G.UnitName = function() return "Grel'zok" end

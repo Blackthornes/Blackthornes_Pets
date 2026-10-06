@@ -193,6 +193,10 @@ function Food:CheckLow(status, stacks)
     -- them; that is not a lack of food.
     if self.bagsReady == false or stacks.incomplete then return false end
 
+    -- Another pet may eat other food, so it gets its own warning.
+    if self.warnedPet ~= status.name then self.warnedLow = nil end
+    self.warnedPet = status.name
+
     local total = self:Count(stacks)
     if total >= LOW_FOOD then
         self.warnedLow = nil

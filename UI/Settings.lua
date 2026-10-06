@@ -231,6 +231,8 @@ function SettingsUI:BuildColumn()
 
     controls.feedWarnOnlyUnhappy = Widgets.CreateCheckbox(unhappyRow, "Enabled", function(checked)
         ns.db.feedWarnOnlyUnhappy = checked
+        -- The Feed button by the quests follows the same line.
+        if ns.Food then ns.Food:Update() end
     end, false)
     controls.feedWarnOnlyUnhappy:SetPoint("TOPLEFT", CONTROL_X, -2)
 

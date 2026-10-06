@@ -42,10 +42,13 @@ local function SpellName(id)
     return Call(C_Spell and C_Spell.GetSpellName, id)
 end
 
---- Is this spell Tame Beast?
+--- Is this spell Tame Beast? A spell id the client made secret is not: it
+--- raises when compared, and every spell the player casts comes through here.
 function TameRecord:IsTameBeast(spellID)
+    spellID = Plain(spellID)
+    if type(spellID) ~= "number" then return false end
     if spellID == TAME_BEAST then return true end
-    local name = type(spellID) == "number" and SpellName(spellID)
+    local name = SpellName(spellID)
     return name ~= nil and name == SpellName(TAME_BEAST)
 end
 
@@ -67,7 +70,7 @@ end
 
 --- Tame Beast has started: remember who is being tamed.
 function TameRecord:OnCastStart(_, unit, _, spellID)
-    if unit ~= "player" or not self:IsTameBeast(spellID) then return end
+    if Plain(unit) ~= "player" or not self:IsTameBeast(spellID) then return end
     local guid = Call(_G.UnitGUID, "target")
     local npcID = ns.Taming:NpcID(guid)
     if not npcID then return end
