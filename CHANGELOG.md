@@ -4,6 +4,20 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.4.2
+
+For WoW: Forever (interface 16001). No files were added, so `/reload` is
+enough after updating.
+
+- Fixed a Lua error from the tame recorder when the game hid a spell's id
+  (it happens in instances).
+- Each pet now gets its own feed warning and low food warning, so calling
+  out a different pet no longer skips them.
+- In the pets window, a value long enough to wrap onto a second line no
+  longer runs into the row below.
+- Ticking **Only when unhappy** now moves the Feed button by the quests
+  straight away.
+
 ## 0.4.1
 
 For WoW: Forever (interface 16001). Nothing in the addon itself changed, so
