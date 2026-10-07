@@ -75,11 +75,15 @@ end
 
 --- The skills taming this creature teaches; an empty list when it teaches
 --- none or is not a beast we know. A beast this account has tamed on Forever
---- (Logic/TameRecord.lua) is answered from what the game showed then, ahead of
---- the Classic table.
+--- (Logic/TameRecord.lua), or one shipped as tamed there
+--- (Data/ForeverBeasts.lua), is answered from what the game showed then,
+--- ahead of the Classic table.
 function Taming:SkillsFor(npcID)
     local out = {}
     local tamed = ns.TameRecord and ns.TameRecord:Get(npcID)
+    if not (tamed and type(tamed.skills) == "table") then
+        tamed = ns.ForeverBeasts and npcID and ns.ForeverBeasts.TAMED[npcID]
+    end
     if tamed and type(tamed.skills) == "table" then
         for _, skill in ipairs(tamed.skills) do
             local classic = ClassicSkill(skill.name, skill.rank)

@@ -34,6 +34,13 @@ down what a beast really teaches each time you tame one (a freshly tamed pet
 knows exactly those skills), and shows that on the beast's tooltip from then
 on. `/bpet tamed` lists everything recorded so far.
 
+The Pet Compendium (`/bpet compendium`, or the button in the pets window and
+in Settings) lists every beast a hunter can tame: its family and diet, level,
+zone and spot, rank and respawn, and what taming it teaches, with filters for
+what you can tame now, rares, skills you lack and what WoW: Forever has shown.
+Classic's list comes from `tools/make_compendium.py`; Forever's findings from
+`tools/forever_beasts.py` (see the top of each for how to rerun them).
+
 There is also a minimap button and `/bpet probe`, which checks which pet calls
 the client supports.
 
@@ -83,6 +90,7 @@ inside it. If they differ, the client ignores the folder and says nothing.
 /bpet minimap    show or hide the minimap button
 /bpet taming     list the pet skills this hunter knows
 /bpet tamed      list the beasts you have tamed and what each taught
+/bpet compendium open the Pet Compendium; add words to search it (/bpet compendium fox)
 ```
 
 The settings window is also under the game's Options > AddOns.

@@ -29,7 +29,7 @@ local COLUMN_WIDTH = 330
 local CONTROL_X = 150
 
 local WIDTH = COLUMN_WIDTH + PADDING * 2
-local HEIGHT = 646
+local HEIGHT = 736
 
 local ROW_HEIGHT = 50
 local ROW_GAP = -6
@@ -261,7 +261,18 @@ function SettingsUI:BuildColumn()
     end, true)
     controls.tamingTooltip:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local advanced = CreateSection(frame, "ADVANCED", { anchor = tamingRow })
+    local compendium = CreateSection(frame, "PET COMPENDIUM", { anchor = tamingRow })
+
+    local compendiumRow = CreateRow(frame, compendium, "Pet Compendium",
+        "Every beast you can tame: what it teaches, its level, where it lives and how rare it is. Also /bpet compendium.")
+
+    local openCompendium = Widgets.CreateButton(compendiumRow, "Open it", function()
+        if ns.CompendiumUI then ns.CompendiumUI:Toggle() end
+    end, { width = 100, height = 20, primary = true })
+    openCompendium:SetPoint("TOPLEFT", CONTROL_X, 0)
+    controls.openCompendium = openCompendium
+
+    local advanced = CreateSection(frame, "ADVANCED", { anchor = compendiumRow })
 
     local debugRow = CreateRow(frame, advanced, "Debug output",
         "Extra messages in chat, to help track down a problem.")
