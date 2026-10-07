@@ -35,6 +35,7 @@ Theme.colors = {
     metal     = { 0.541, 0.427, 0.180 },   -- #8A6D2E
     good      = { 0.310, 0.820, 0.545 },   -- #4FD18B, an upgrade
     warn      = { 0.910, 0.757, 0.353 },
+    rare      = { 0.722, 0.808, 0.957 },   -- a rare beast, the silver of the game's rare dragon
     loss      = { 0.898, 0.376, 0.310 },   -- #E5604F, a downgrade, or a close button under the mouse
 
     text      = { 0.902, 0.910, 0.925 },   -- #E6E8EC

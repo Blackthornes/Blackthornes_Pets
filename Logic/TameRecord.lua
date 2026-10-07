@@ -74,12 +74,45 @@ function TameRecord:OnCastStart(_, unit, _, spellID)
     local guid = Call(_G.UnitGUID, "target")
     local npcID = ns.Taming:NpcID(guid)
     if not npcID then return end
+    local zone, x, y = self:Where()
     self.pending = {
         npcID = npcID,
         name = Call(_G.UnitName, "target"),
         level = Call(_G.UnitLevel, "target"),
+        zone = zone, x = x, y = y,
         at = Now(),
     }
+end
+
+--- The zone the hunter is in and their spot on its map (0-100), as the
+--- beast's home for the Pet Compendium. Any of the three may be nil: inside
+--- a dungeon the client gives no position, and a secret value is no answer.
+function TameRecord:Where()
+    local map = _G.C_Map
+    if type(map) ~= "table" then return nil end
+    local mapID = Call(map.GetBestMapForUnit, "player")
+    if type(mapID) ~= "number" then return Call(_G.GetZoneText), nil, nil end
+
+    local zone
+    local info = Call(map.GetMapInfo, mapID)
+    if type(info) == "table" then
+        local ok, name = pcall(function() return info.name end)
+        zone = ok and Plain(name) or nil
+    end
+    zone = zone or Call(_G.GetZoneText)
+
+    local x, y
+    local ok, px, py = pcall(function()
+        local position = map.GetPlayerMapPosition(mapID, "player")
+        if position then return position:GetXY() end
+    end)
+    px, py = Plain(px), Plain(py)
+    if ok and type(px) == "number" and type(py) == "number" and (px > 0 or py > 0) then
+        x = math.floor(px * 1000 + 0.5) / 10
+        y = math.floor(py * 1000 + 0.5) / 10
+    end
+    if type(zone) ~= "string" or zone == "" then zone = nil end
+    return zone, x, y
 end
 
 --- The creature id in the pet's GUID ("Pet-0-1-2-3-4512-...", or a
@@ -160,6 +193,12 @@ function TameRecord:Capture()
 
     local old = store[pending.npcID]
     if old and type(old.skills) == "table" and #old.skills > #skills then
+        -- Kept, but a record from before the Compendium learns where the
+        -- beast lives and what it is.
+        if not old.zone and pending.zone then
+            old.zone, old.x, old.y = pending.zone, pending.x, pending.y
+        end
+        old.family = old.family or Call(_G.UnitCreatureFamily, "pet")
         return old
     end
 
@@ -168,8 +207,12 @@ function TameRecord:Capture()
         level = pending.level,
         skills = skills,
         seen = type(time) == "function" and time() or 0,
+        -- Where it was tamed and what it is, for the Pet Compendium.
+        family = Call(_G.UnitCreatureFamily, "pet"),
+        zone = pending.zone, x = pending.x, y = pending.y,
     }
     store[pending.npcID] = record
+    if ns.Compendium then ns.Compendium:Invalidate() end
     ns.Print(("recorded what %s teaches: %s"):format(record.name or "the beast",
         #skills > 0 and self:SkillText(skills) or "nothing"))
     return record
@@ -223,8 +266,14 @@ function TameRecord:Lines()
         for i, skill in ipairs(record.skills or {}) do
             spells[i] = ("%s %d [%d]"):format(skill.name, skill.rank, skill.spell or 0)
         end
-        lines[#lines + 1] = ("%d %s (%s): %s"):format(id, record.name or "?",
-            tostring(record.level or "?"), #spells > 0 and table.concat(spells, ", ") or "nothing")
+        local where = ""
+        if record.zone then
+            where = record.x and (" in %s %.1f, %.1f"):format(record.zone, record.x, record.y)
+                or (" in %s"):format(record.zone)
+        end
+        lines[#lines + 1] = ("%d %s (%s)%s%s: %s"):format(id, record.name or "?",
+            tostring(record.level or "?"), record.family and (", " .. record.family) or "", where,
+            #spells > 0 and table.concat(spells, ", ") or "nothing")
     end
     return lines
 end

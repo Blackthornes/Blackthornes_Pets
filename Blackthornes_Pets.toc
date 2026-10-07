@@ -18,11 +18,15 @@ Core\Init.lua
 
 Data\PetFood.lua
 Data\BeastSkills.lua
+Data\Compendium.lua
+Data\ForeverBeasts.lua
 
 Logic\PetStatus.lua
 Logic\Food.lua
 Logic\Taming.lua
 Logic\TameRecord.lua
+Logic\Waypoints.lua
+Logic\Compendium.lua
 
 UI\Theme.lua
 UI\Widgets.lua
@@ -33,5 +37,6 @@ UI\MainWindow.lua
 UI\FeedButton.lua
 UI\FeedKey.lua
 UI\TamingTooltip.lua
+UI\CompendiumWindow.lua
 
 Probe\Probe.lua

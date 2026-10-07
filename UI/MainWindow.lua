@@ -140,6 +140,13 @@ function UI:BuildHeader()
         if ns.SettingsUI then ns.SettingsUI:Toggle() end
     end, { width = 70, height = 20 })
     settings:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
+
+    -- Every beast a hunter can tame (UI/CompendiumWindow.lua).
+    local compendium = Widgets.CreateButton(header, "Pet Compendium", function()
+        if ns.CompendiumUI then ns.CompendiumUI:Toggle() end
+    end, { width = 110, height = 20 })
+    compendium:SetPoint("RIGHT", settings, "LEFT", -8, 0)
+    self.compendiumButton = compendium
 end
 
 function UI:BuildStatus()
