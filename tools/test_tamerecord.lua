@@ -83,6 +83,56 @@ suite.check("someone else's tame is ignored", Record.pending == nil)
 Record:OnCastStart("UNIT_SPELLCAST_START", "player", "cast", 133)
 suite.check("another spell is ignored", Record.pending == nil)
 
+-- A tame that failed, then the old pet called back within the minute: the
+-- old pet's skills are not the beast's. Its GUID names another creature.
+local pet = {}
+_G.UnitGUID = function(unit)
+    if unit == "target" then return target.guid end
+    if unit == "pet" then return pet.guid end
+end
+_G.UnitName = function(unit)
+    if unit == "target" then return target.name end
+    if unit == "pet" then return pet.name end
+end
+_G.UnitLevel = function(unit)
+    if unit == "target" then return target.level end
+    if unit == "pet" then return pet.level end
+end
+clock = 200
+target.guid, target.name, target.level = "Creature-0-1-2-3-4514-00001", "Ashmane Boar", 13
+Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
+pet.guid, pet.name, pet.level = "Pet-0-1-2-3-3099-0000ABCD", "Fang", 20
+suite.check("a pet called back after a failed tame is not recorded",
+    Record:Capture() == nil and not ns.db.tamedBeasts[4514])
+suite.check("and the failed tame is let go", Record.pending == nil)
+
+-- With no GUID to go on, a pet whose name and level both differ is another pet.
+Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
+pet.guid = nil
+suite.check("nor one whose name and level are another pet's",
+    Record:Capture() == nil and not ns.db.tamedBeasts[4514])
+
+-- An interrupted tame is forgotten at once.
+Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
+Record:OnCastFailed("UNIT_SPELLCAST_INTERRUPTED", "player", "cast", 1515)
+suite.check("an interrupted tame is forgotten", Record.pending == nil)
+Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
+Record:OnCastFailed("UNIT_SPELLCAST_INTERRUPTED", "player", "cast", 133)
+suite.check("another spell's interruption does not touch it", Record.pending ~= nil)
+
+-- The beast itself, its GUID now a pet's, is recorded.
+pet.guid, pet.name, pet.level = "Pet-0-1-2-3-4514-0000ABCE", "Ashmane Boar", 13
+local tamed = Record:Capture()
+suite.check("the tamed beast is recorded by its pet GUID",
+    tamed and ns.db.tamedBeasts[4514] == tamed)
+-- And with no GUID, the same name is enough.
+target.guid = "Creature-0-1-2-3-4515-00001"
+Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
+pet.guid, pet.level = nil, 99
+suite.check("without a GUID the beast's name is enough",
+    Record:Capture() ~= nil and ns.db.tamedBeasts[4515] ~= nil)
+ns.db.tamedBeasts[4514], ns.db.tamedBeasts[4515] = nil, nil
+
 -- The tooltip answers from the record, and finds Classic's teach spell.
 local skills = Taming:SkillsFor(4512)
 suite.check("a recorded beast's skills come from the record",
