@@ -4,6 +4,30 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.5.0
+
+For WoW: Forever (interface 16001). Files were added, so restart the game
+fully after updating (`/reload` is not enough).
+
+- New **Pet Compendium** (`/bpet compendium`, or the button in the pets
+  window and in Settings) lists every beast a hunter can tame: the 535
+  from Classic plus the beasts and skills WoW: Forever has added, like the
+  fox family and the new rares. Each row shows the family, level (red when
+  above yours), zone and spot, rank, and what taming it teaches (green if
+  you know it, red if not). Hover a row for the diet, other zones, spawn
+  count, rare respawn time and source. Click a row to pin the beast on
+  your map, or a heading to sort by it.
+- Filter the Compendium by family, search names, zones and skills, or tick
+  Tameable now, Rares only, Teaches me something new or Seen on Forever.
+  Beasts with Forever data are tagged **Forever** in green, and Forever's
+  data always wins over Classic's. Nothing is guessed: a detail no source
+  gives shows "Not known yet".
+- Your own tames now also remember the beast's family, zone and spot, and
+  feed the Compendium.
+- Fixed a failed or interrupted Tame Beast recording your old pet's skills
+  as what that beast teaches when you called the old pet back soon after.
+  A pet is now only recorded when it is the beast being tamed.
+
 ## 0.4.3
 
 For WoW: Forever (interface 16001). No files were added, so `/reload` is
