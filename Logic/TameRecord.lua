@@ -82,6 +82,40 @@ function TameRecord:OnCastStart(_, unit, _, spellID)
     }
 end
 
+--- The creature id in the pet's GUID ("Pet-0-1-2-3-4512-...", or a
+--- "Creature-" one), or nil when the client does not say.
+local function PetNpcID()
+    local guid = Call(_G.UnitGUID, "pet")
+    if type(guid) ~= "string" then return nil end
+    local kind, npc = guid:match("^(%a+)%-%d+%-%d+%-%d+%-%d+%-(%d+)%-")
+    if kind == "Pet" or kind == "Creature" then return tonumber(npc) end
+    return nil
+end
+
+--- Is the pet that is out the beast being tamed? A tame that failed leaves
+--- `pending` behind, and the hunter's old pet called back within the minute
+--- must not be written down as what that beast teaches. The pet's GUID names
+--- its creature, which settles it; without one, a pet whose name and level
+--- both differ from the beast's is another pet.
+function TameRecord:IsTamedPet(pending)
+    local npcID = PetNpcID()
+    if npcID then return npcID == pending.npcID end
+    local name = Call(_G.UnitName, "pet")
+    local level = Call(_G.UnitLevel, "pet")
+    local nameDiffers = type(name) == "string" and type(pending.name) == "string"
+        and name ~= pending.name
+    local levelDiffers = type(level) == "number" and type(pending.level) == "number"
+        and level ~= pending.level
+    return not (nameDiffers and levelDiffers)
+end
+
+--- Tame Beast was interrupted: forget the beast, so no later pet is taken
+--- for it.
+function TameRecord:OnCastFailed(_, unit, _, spellID)
+    if Plain(unit) ~= "player" or not self:IsTameBeast(spellID) then return end
+    self.pending = nil
+end
+
 --- The skills on the pet's action bar: { spell, name, rank } each, leaving
 --- out Attack, Follow and the other commands the bar also carries.
 function TameRecord:PetSkills()
@@ -119,6 +153,7 @@ function TameRecord:Capture()
     if Call(_G.UnitExists, "pet") ~= true then return nil end
 
     self.pending = nil
+    if not self:IsTamedPet(pending) then return nil end
     local skills = self:PetSkills()
     local store = Store()
     if not store then return nil end
@@ -163,6 +198,9 @@ function TameRecord:OnEnable()
     for _, event in ipairs({ "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_START" }) do
         ns.RegisterEvent(self, event, self.OnCastStart)
     end
+    -- Not UNIT_SPELLCAST_FAILED: pressing Tame Beast again mid-tame fails
+    -- that press, while the tame itself carries on.
+    ns.RegisterEvent(self, "UNIT_SPELLCAST_INTERRUPTED", self.OnCastFailed)
     ns.RegisterEvent(self, "UNIT_PET", self.OnPet)
 end
 
