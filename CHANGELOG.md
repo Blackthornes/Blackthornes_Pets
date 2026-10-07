@@ -4,6 +4,15 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.4.4
+
+For WoW: Forever (interface 16001). No files were added, so `/reload` is
+enough after updating.
+
+- Fixed a failed or interrupted Tame Beast recording your old pet's skills
+  as what that beast teaches when you called the old pet back soon after.
+  A pet is now only recorded when it is the beast being tamed.
+
 ## 0.4.3
 
 For WoW: Forever (interface 16001). No files were added, so `/reload` is
