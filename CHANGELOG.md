@@ -4,6 +4,24 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.6.0
+
+For WoW: Forever (interface 16001). Files were added, so restart the game
+fully after updating (`/reload` is not enough).
+
+- New **beast arrow**: Shift-click a beast in the Pet Compendium to bring
+  up a gold dial that turns as you turn and points at the beast's spot,
+  with its name and level on the plate, the distance in yards and a green
+  check once you are there. A plain click still pins the map. A beast with
+  a zone but no spot points at the middle of the zone and says so; one in
+  a dungeon or on the other continent only gets its zone named. The
+  Compendium has an **Arrow** button, Settings has a Beast arrow row, and
+  `/bpet arrow on|off|clear|check|reset` works too. It is off by default,
+  hides inside dungeons and closes with its red gem.
+- Only one Blackthornes arrow is on screen at a time: with Farmer's goal
+  arrow or Equipment's quest arrow also showing, the one turned on or
+  aimed most recently is drawn and the others wait.
+
 ## 0.5.0
 
 For WoW: Forever (interface 16001). Files were added, so restart the game
