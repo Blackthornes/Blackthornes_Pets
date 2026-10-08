@@ -254,6 +254,11 @@ local DEFAULTS = {
 
     -- On a tameable beast's tooltip, the pet skills taming it would teach.
     tamingTooltip = true,
+    -- The beast arrow: a dial that points at a beast picked in the Pet
+    -- Compendium (Logic/BeastArrow.lua). Off unless turned on; where it was
+    -- dragged to is beastArrowX and beastArrowY. The beast it follows is
+    -- kept per character (arrowBeast).
+    beastArrow = false,
 }
 
 -- Per character, because pets are: a hunter's stable and a warlock's demons

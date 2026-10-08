@@ -41,6 +41,15 @@ what you can tame now, rares, skills you lack and what WoW: Forever has shown.
 Classic's list comes from `tools/make_compendium.py`; Forever's findings from
 `tools/forever_beasts.py` (see the top of each for how to rerun them).
 
+Shift-click a beast in the compendium and the **beast arrow** points the way
+to it: a gold dial that turns as you turn, with the distance in yards and a
+green check once you are there. A beast with a zone and no spot points at
+the middle of the zone and says so. The compendium's **Arrow** button,
+`/bpet arrow` or Settings shows or hides it; its red gem closes it, and it
+hides inside dungeons. It is Farmer's goal arrow and Equipment's quest
+arrow brought over, and only one of the three is on screen at a time: the
+one aimed last shows, and the others wait until it is put away.
+
 There is also a minimap button and `/bpet probe`, which checks which pet calls
 the client supports.
 
@@ -91,6 +100,7 @@ inside it. If they differ, the client ignores the folder and says nothing.
 /bpet taming     list the pet skills this hunter knows
 /bpet tamed      list the beasts you have tamed and what each taught
 /bpet compendium open the Pet Compendium; add words to search it (/bpet compendium fox)
+/bpet arrow      an arrow to a beast from the compendium (on, off, clear, check, reset)
 ```
 
 The settings window is also under the game's Options > AddOns.
