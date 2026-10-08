@@ -79,9 +79,31 @@ smallest), so check them before inventing a convention:
   Equipment's files of the same name record what the Forever client does for
   their areas; read them before relying on an API.
 
-Nothing here calls the other addons yet, and nothing calls this one. If that
-changes, write down the global and the calls in both repos' `CLAUDE.md`, the
-way Farmer and Tradeskills do for prices and goals.
+Nothing here calls the other addons, and nothing calls this one, apart
+from the shared arrow table below. If that changes, write down the global
+and the calls in both repos' `CLAUDE.md`, the way Farmer and Tradeskills do
+for prices and goals.
+
+The beast arrow (the owner asked 2026-10-08): `Logic/BeastArrow.lua` and
+`UI/BeastArrow.lua` are Equipment's quest arrow (itself Farmer's goal
+arrow) brought over as a copy, and `tools/make_arrow_art.py` draws the same
+`Media/Arrow/*.tga`. Shift-click a beast in the compendium to follow it
+(`BeastArrow:Follow`, the beast kept per character in `arrowBeast`); it
+points at the compendium's spot, so Forever's wins where there is one, and
+never makes up a coordinate. Off by default (`beastArrow`, account wide;
+spot `beastArrowX`/`beastArrowY`); the compendium's Arrow button, `/bpet
+arrow` and a Settings row turn it on. A fix to the dial belongs in all
+three addons. Not yet seen in game; `/bpet arrow check` reports what it
+reads.
+
+Only one Blackthornes arrow is on screen at a time (the owner asked
+2026-10-08): Farmer's goal arrow, Equipment's quest arrow and Pets' beast
+arrow agree through one global table, `_G.BlackthornesArrows`
+(`wants[addon]` while that arrow has something to show, `claims[addon]` the
+`GetTime()` it was last turned on or aimed). The one wanting to show with
+the latest claim is drawn; the others wait hidden. The lines are the same
+in each dial's file (`ArrowUI:Claim`, `ArrowUI.Wins`); a change to them
+belongs in all three.
 
 The CurseForge project ID is **1720056** (the owner created it 2026-09-30), on the
 TOC's `X-Curse-Project-ID` line. The first release is 0.1.0.

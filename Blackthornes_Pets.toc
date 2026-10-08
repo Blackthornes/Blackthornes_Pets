@@ -27,6 +27,7 @@ Logic\Taming.lua
 Logic\TameRecord.lua
 Logic\Waypoints.lua
 Logic\Compendium.lua
+Logic\BeastArrow.lua
 
 UI\Theme.lua
 UI\Widgets.lua
@@ -38,5 +39,6 @@ UI\FeedButton.lua
 UI\FeedKey.lua
 UI\TamingTooltip.lua
 UI\CompendiumWindow.lua
+UI\BeastArrow.lua
 
 Probe\Probe.lua

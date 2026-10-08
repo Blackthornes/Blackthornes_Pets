@@ -29,7 +29,7 @@ local COLUMN_WIDTH = 330
 local CONTROL_X = 150
 
 local WIDTH = COLUMN_WIDTH + PADDING * 2
-local HEIGHT = 736
+local HEIGHT = 792
 
 local ROW_HEIGHT = 50
 local ROW_GAP = -6
@@ -101,6 +101,7 @@ function SettingsUI:ResetPositions()
     ns.db.settingsX = nil
     ns.db.settingsY = nil
     self:RestorePosition()
+    if ns.BeastArrowUI and ns.BeastArrowUI.frame then ns.BeastArrowUI:ResetPosition() end
 end
 
 --------------------------------------------------------------------------------
@@ -209,7 +210,7 @@ function SettingsUI:BuildColumn()
     controls.minimap:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local positionRow = CreateRow(frame, minimapRow, "Window position",
-        "Moves this window back to the middle of the screen, if it ends up off screen.")
+        "Moves this window and the beast arrow back where they started, if one ends up off screen.")
 
     local reset = Widgets.CreateButton(positionRow, "Put it back", function()
         SettingsUI:ResetPositions()
@@ -272,7 +273,28 @@ function SettingsUI:BuildColumn()
     openCompendium:SetPoint("TOPLEFT", CONTROL_X, 0)
     controls.openCompendium = openCompendium
 
-    local advanced = CreateSection(frame, "ADVANCED", { anchor = compendiumRow })
+    -- The beast arrow, as the compendium's Arrow button and /bpet arrow
+    -- switch it, and /bpet arrow check as a button.
+    local arrowRow = CreateRow(frame, compendiumRow, "Beast arrow",
+        "A dial that points the way to a beast. Shift-click one in the compendium to aim it.")
+    controls.beastArrow = Widgets.CreateCheckbox(arrowRow, "Show it", function(checked)
+        if ns.BeastArrow then ns.BeastArrow:SetOn(checked) end
+    end, false)
+    controls.beastArrow:SetPoint("TOPLEFT", CONTROL_X, -2)
+    controls.beastArrowCheck = Widgets.CreateButton(arrowRow, "Check", function()
+        ns.HandleSlash("arrow check")
+    end, { width = 64, height = 20 })
+    controls.beastArrowCheck:SetPoint("TOPLEFT", CONTROL_X + 96, 0)
+    controls.beastArrowCheck:HookScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:AddLine("Check the beast arrow", Theme.Unpack("accent"))
+        GameTooltip:AddLine("Lists in chat what the arrow can read where you stand: your spot, your facing, the map. Same as /bpet arrow check.",
+            1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    controls.beastArrowCheck:HookScript("OnLeave", function() GameTooltip:Hide() end)
+
+    local advanced = CreateSection(frame, "ADVANCED", { anchor = arrowRow })
 
     local debugRow = CreateRow(frame, advanced, "Debug output",
         "Extra messages in chat, to help track down a problem.")
@@ -301,6 +323,11 @@ function SettingsUI:Refresh()
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
     controls.tamingTooltip:SetChecked(ns.db.tamingTooltip ~= false)
     controls.debug:SetChecked(ns.db.debug == true)
+    controls.beastArrow:SetChecked(ns.db.beastArrow == true)
+end
+
+function SettingsUI:OnBeastArrowChanged()
+    self:Refresh()
 end
 
 --------------------------------------------------------------------------------

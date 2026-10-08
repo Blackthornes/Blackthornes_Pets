@@ -6,7 +6,9 @@
 -- It wears the whole house frame, like the pets window: the paw in the
 -- portrait, the name on the plate and the close gem. Above the list is the
 -- option bar (the family chooser, the search, then the tick boxes), and the
--- list's headings sort it. A click on a beast pins it on the map. The
+-- list's headings sort it. A click on a beast pins it on the map; a
+-- Shift-click points the beast arrow at it (UI/BeastArrow.lua), and the
+-- Arrow button by Settings shows or hides that arrow. The
 -- choices are kept, account wide, in BlackthornesPetsDB.compendium.
 
 local _, ns = ...
@@ -128,7 +130,7 @@ function CompendiumUI:Build()
     hint:SetPoint("BOTTOMLEFT", PADDING, 12)
     hint:SetWidth(WIDTH - PADDING * 2)
     hint:SetWordWrap(true)
-    hint:SetText(("Click a beast to pin it on your map. %s marks what WoW: Forever has shown; "
+    hint:SetText(("Click a beast to pin it on your map, Shift-click to point the arrow at it. %s marks what WoW: Forever has shown; "
         .. "the rest is Classic 1.12."):format(Colored("good", "Forever")))
     self.hint = hint
 
@@ -158,6 +160,29 @@ function CompendiumUI:BuildHeader()
         if ns.SettingsUI then ns.SettingsUI:Toggle() end
     end, { width = 70, height = 20 })
     settings:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
+
+    -- The beast arrow: lit green while it is up.
+    local arrow = Widgets.CreateButton(header, "Arrow", function()
+        if ns.BeastArrow then ns.HandleSlash(ns.BeastArrow.IsOn() and "arrow off" or "arrow on") end
+    end, { width = 60, height = 20 })
+    arrow:SetPoint("RIGHT", settings, "LEFT", -8, 0)
+    arrow:HookScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:AddLine("Beast arrow", Theme.Unpack("accent"))
+        GameTooltip:AddLine("A dial that turns as you turn, pointing the way to a beast. Shift-click a beast to aim it. Click again to hide it.",
+            1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    arrow:HookScript("OnLeave", function() GameTooltip:Hide() end)
+    self.arrowButton = arrow
+    self:OnBeastArrowChanged()
+end
+
+--- The beast arrow turned on or off: relight its button.
+function CompendiumUI:OnBeastArrowChanged()
+    if self.arrowButton and self.arrowButton.SetLabelColor then
+        self.arrowButton:SetLabelColor(ns.BeastArrow and ns.BeastArrow.IsOn() and "good" or "gilt")
+    end
 end
 
 --- The option bar: the family chooser and the search on one line, the tick
@@ -333,7 +358,13 @@ function CompendiumUI:BuildRow(index)
     row:RegisterForClicks("LeftButtonUp")
     row:SetScript("OnClick", function(self)
         local entry = rawget(self, "entry")
-        if entry then ns.Compendium:Pin(entry) end
+        if not entry then return end
+        local shift = type(IsShiftKeyDown) == "function" and select(2, pcall(IsShiftKeyDown))
+        if shift then
+            CompendiumUI:AimArrow(entry)
+        else
+            ns.Compendium:Pin(entry)
+        end
     end)
     row:SetScript("OnEnter", function(self)
         self.over = true
@@ -414,6 +445,19 @@ function CompendiumUI:FillRow(row, entry, level)
     row:Show()
 end
 
+--- Point the beast arrow at a beast, and say so.
+function CompendiumUI:AimArrow(entry)
+    local arrow = ns.BeastArrow
+    if not arrow then return false end
+    if arrow:Follow(entry) then
+        ns.Print(("beast arrow pointing at %s. Its red gem, /bpet arrow off or Settings hides it."):format(
+            entry.name or "it"))
+        return true
+    end
+    ns.Print(("where %s lives is not known yet, so the arrow cannot point at it."):format(entry.name or "it"))
+    return false
+end
+
 --- Everything known about a beast, on the game's tooltip.
 function CompendiumUI:ShowTooltip(row)
     local entry = rawget(row, "entry")
@@ -447,6 +491,9 @@ function CompendiumUI:ShowTooltip(row)
         GameTooltip:AddLine(C.PlaceText(entry), 1, 1, 1, true)
     else
         GameTooltip:AddLine("Where it lives is not known yet.", 0.9, 0.9, 0.9, true)
+    end
+    if entry.zone then
+        GameTooltip:AddLine("Shift-click to point the arrow at it.", Theme.Unpack("accent"))
     end
     if entry.also and #entry.also > 0 then
         GameTooltip:AddLine("Also in " .. table.concat(entry.also, ", "), 0.9, 0.9, 0.9, true)

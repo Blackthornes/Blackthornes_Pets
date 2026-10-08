@@ -261,6 +261,9 @@ local function CloseGem(trim, onClick)
     return close
 end
 
+-- The beast arrow wears the same gem beside its plate (UI/BeastArrow.lua).
+Titanforged.CloseGem = CloseGem
+
 --------------------------------------------------------------------------------
 -- Dressing a frame
 --------------------------------------------------------------------------------
