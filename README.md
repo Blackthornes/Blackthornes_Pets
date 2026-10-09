@@ -107,7 +107,12 @@ inside it. If they differ, the client ignores the folder and says nothing.
 /bpet arrow      an arrow to a beast from the compendium (on, off, clear, check, tomtom, reset)
 ```
 
-The settings window is also under the game's Options > AddOns.
+The settings window is also under the game's Options > AddOns. Its pages
+(Hunter pet, Compendium, General) are picked along the top. Hover a setting
+to see what it does, or tick **Show descriptions** to see it under every
+row; **Find a setting** searches every page. **Text size** on the General
+page makes all of the addon's text a point or two bigger after a `/reload`.
+Every command above has a button there too.
 
 `/pets` works too.
 
