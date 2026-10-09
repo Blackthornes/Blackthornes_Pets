@@ -257,7 +257,7 @@ function PetStatus:Update()
     local status = self:Read()
     self:CheckFeed(status)
     if ns.Food then
-        local stacks = ns.Food:Scan(status)
+        local stacks = ns.Food:Latest(status)
         ns.Food:CheckLow(status, stacks)
         if ns.FeedButton then ns.FeedButton:Update(status, stacks) end
         if ns.FeedKey then ns.FeedKey:Update(status, stacks) end
@@ -278,7 +278,10 @@ function PetStatus:OnEnable()
         "UNIT_PET", "UNIT_HAPPINESS", "PET_UI_UPDATE", "UNIT_PET_EXPERIENCE",
         "UNIT_LEVEL", "PLAYER_REGEN_DISABLED",
     }) do
-        ns.RegisterEvent(self, event, OnPetEvent)
+        -- The UNIT_ ones only for the player and the pet: UNIT_LEVEL fires
+        -- for every unit around, each one only to be dropped.
+        local register = event:find("^UNIT_") and ns.RegisterPetEvent or ns.RegisterEvent
+        register(self, event, OnPetEvent)
     end
 
     if C_Timer and C_Timer.NewTicker then

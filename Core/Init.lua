@@ -135,11 +135,13 @@ ns.eventFrame = eventFrame
 
 local handlers = {}
 local unknownEvents = {}
+-- Events asked for with only the player and the pet as units (RegisterPetEvent).
+local ownUnitsOnly = {}
 
 --- Register an event handler.
 -- On Forever, registering an event the client does not know raises a Lua error
 -- rather than failing quietly, so every registration goes through pcall.
-function ns.RegisterEvent(owner, event, fn)
+local function Register(owner, event, fn, ownUnitsWanted)
     if type(fn) ~= "function" then
         ns.Debug("RegisterEvent: no handler for", event)
         return false
@@ -159,7 +161,34 @@ function ns.RegisterEvent(owner, event, fn)
         handlers[event] = list
     end
 
+    -- Someone wants this event for every unit: lift the filter below.
+    if ownUnitsOnly[event] and not ownUnitsWanted then
+        ownUnitsOnly[event] = nil
+        pcall(eventFrame.RegisterEvent, eventFrame, event)
+    end
+
     list[#list + 1] = { owner = owner, fn = fn }
+    return true
+end
+
+function ns.RegisterEvent(owner, event, fn)
+    return Register(owner, event, fn, false)
+end
+
+--- Register a UNIT_ event handler that only cares about the player and the
+--- pet. The game sends these for every unit near you (party, raid,
+--- nameplates), and every class paid for each one only to throw it away.
+--- While every handler of the event is like this, the client is asked to
+--- send the player's and the pet's alone. Handlers still check the unit
+--- themselves, so a client without unit filtering, or a later handler that
+--- wants every unit, behaves exactly as before.
+function ns.RegisterPetEvent(owner, event, fn)
+    local fresh = handlers[event] == nil
+    if not Register(owner, event, fn, true) then return false end
+    if fresh and type(eventFrame.RegisterUnitEvent) == "function"
+        and pcall(eventFrame.RegisterUnitEvent, eventFrame, event, "player", "pet") then
+        ownUnitsOnly[event] = true
+    end
     return true
 end
 
@@ -175,6 +204,7 @@ function ns.UnregisterEvent(owner, event)
 
     if #list == 0 then
         handlers[event] = nil
+        ownUnitsOnly[event] = nil
         pcall(eventFrame.UnregisterEvent, eventFrame, event)
     end
     return true

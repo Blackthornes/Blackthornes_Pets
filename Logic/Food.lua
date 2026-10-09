@@ -116,16 +116,61 @@ function Food:Inspect(bag, slot, info, status, eats)
     }, nil, name, level
 end
 
+local RANK = { full = 1, half = 2, low = 3 }
+
+local function BestFirst(a, b)
+    if RANK[a.effect] ~= RANK[b.effect] then return RANK[a.effect] < RANK[b.effect] end
+    if (a.level or 0) ~= (b.level or 0) then return (a.level or 0) < (b.level or 0) end
+    if a.bag ~= b.bag then return a.bag < b.bag end
+    return a.slot < b.slot
+end
+
 --- Every stack in the bags the pet will eat, as { bag, slot, itemID, name,
 --- count, level, diet, effect }, best first: food that feeds fully before
 --- food that does less, and among those the lowest level first, so the
 --- better food is kept for later. `stacks.incomplete` is true when the
 --- client has not yet told the addon what is in the bags (just after login,
 --- when the bags read empty and items come back without names).
+-- How long a scan is kept at most, even with no bag event, as a safety net.
+local KEEP_SCAN = 60
+
+local function Now()
+    local ok, now = pcall(GetTime)
+    return ok and tonumber(now) or nil
+end
+
+--- The bags changed (or may have): the next Scan reads them again.
+function Food:BagsChanged()
+    self.bagsSeen = (self.bagsSeen or 0) + 1
+end
+
+local function ScanKey(status)
+    return ("%s|%s|%s"):format(tostring(status.name), tostring(status.level),
+        table.concat(status.foods, ","))
+end
+
+--- Scan's answer, kept from the last complete scan when nothing it reads can
+--- have changed. The pet status is checked every few seconds and the pets
+--- window reads it again, but the food in the bags only changes when the
+--- bags do, so those reads take the kept scan: same pet, level and diet, no
+--- bag event (or item name arriving) since, and under a minute old.
+function Food:Latest(status)
+    status = status or ns.PetStatus:Read()
+    if not (status.exists and status.foods) then return {} end
+    local kept, now = self.kept, Now()
+    if kept and kept.key == ScanKey(status) and kept.bags == (self.bagsSeen or 0)
+        and now and kept.at and now >= kept.at and now - kept.at < KEEP_SCAN then
+        return kept.stacks
+    end
+    return self:Scan(status)
+end
+
 function Food:Scan(status)
     status = status or ns.PetStatus:Read()
     local stacks = {}
+    self.kept = nil
     if not (status.exists and status.foods) then return stacks end
+    local key = ScanKey(status)
 
     local eats = {}
     for _, diet in ipairs(status.foods) do eats[diet] = true end
@@ -149,13 +194,14 @@ function Food:Scan(status)
     end
     if slots == 0 then stacks.incomplete = true end
 
-    local rank = { full = 1, half = 2, low = 3 }
-    table.sort(stacks, function(a, b)
-        if rank[a.effect] ~= rank[b.effect] then return rank[a.effect] < rank[b.effect] end
-        if (a.level or 0) ~= (b.level or 0) then return (a.level or 0) < (b.level or 0) end
-        if a.bag ~= b.bag then return a.bag < b.bag end
-        return a.slot < b.slot
-    end)
+    table.sort(stacks, BestFirst)
+
+    -- Only a complete read is kept; one still waiting on item names is read
+    -- again on the next ask, as before.
+    self.waitingForNames = stacks.incomplete or nil
+    if not stacks.incomplete then
+        self.kept = { key = key, bags = self.bagsSeen or 0, at = Now(), stacks = stacks }
+    end
     return stacks
 end
 
@@ -377,16 +423,23 @@ end
 function Food:OnEnable()
     self:Settle()
 
-    local function OnBags() Food:Update() end
-    ns.RegisterEvent(self, "BAG_UPDATE_DELAYED", OnBags)
+    ns.RegisterEvent(self, "BAG_UPDATE_DELAYED", function()
+        Food:BagsChanged()
+        Food:Update()
+    end)
     -- Leaving combat: the Feed button can only be pointed at new food then.
-    ns.RegisterEvent(self, "PLAYER_REGEN_ENABLED", OnBags)
+    ns.RegisterEvent(self, "PLAYER_REGEN_ENABLED", function() Food:Update() end)
     -- Logging in or a /reload: wait for the bags again.
     ns.RegisterEvent(self, "PLAYER_ENTERING_WORLD", function(_, _, isLogin, isReload)
+        Food:BagsChanged()
         if isLogin or isReload then Food:Settle() end
     end)
-    -- An item the bags held without a name has arrived.
+    -- An item the bags held without a name has arrived. Only listened to
+    -- while the last scan was missing names: other addons ask the client for
+    -- items all the time, and each answer used to read the bags again.
     ns.RegisterEvent(self, "GET_ITEM_INFO_RECEIVED", function()
+        if not Food.waitingForNames then return end
+        Food:BagsChanged()
         if Food.retryPending or not (C_Timer and C_Timer.After) then return end
         Food.retryPending = true
         C_Timer.After(0.5, function()
