@@ -102,9 +102,16 @@ function UI:Build()
     -- has to be told when the window goes.
     frame:HookScript("OnHide", function() UI:PlaceFeedButton(nil) end)
 
+    -- The installed version, small and faint in the bottom right corner,
+    -- for every class, so a player can see at a glance which one they run.
+    local version = Theme.CreateLabel(frame, "tiny", "dim", "RIGHT")
+    version:SetPoint("BOTTOMRIGHT", -PADDING, 14)
+    version:SetText(ns.VersionLabel())
+    self.versionLabel = version
+
     local footer = Theme.CreateLabel(frame, "small", "muted")
     footer:SetPoint("BOTTOMLEFT", PADDING, 14)
-    footer:SetPoint("BOTTOMRIGHT", -PADDING, 14)
+    footer:SetPoint("BOTTOMRIGHT", version, "BOTTOMLEFT", -12, 0)
     self.footer = footer
 
     frame:Hide()
@@ -320,7 +327,7 @@ function UI:Refresh()
     end
 
     if self:HasPetClass() then
-        self.footer:SetText(ns.VersionLabel())
+        self.footer:SetText("")
         self:ShowStatus(ns.PetStatus:Read())
     else
         self.footer:SetText("Pets is for hunters and warlocks.")
