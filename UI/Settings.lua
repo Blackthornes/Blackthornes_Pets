@@ -29,7 +29,7 @@ local COLUMN_WIDTH = 330
 local CONTROL_X = 150
 
 local WIDTH = COLUMN_WIDTH + PADDING * 2
-local HEIGHT = 792
+local HEIGHT = 848
 
 local ROW_HEIGHT = 50
 local ROW_GAP = -6
@@ -294,7 +294,15 @@ function SettingsUI:BuildColumn()
     end)
     controls.beastArrowCheck:HookScript("OnLeave", function() GameTooltip:Hide() end)
 
-    local advanced = CreateSection(frame, "ADVANCED", { anchor = arrowRow })
+    -- TomTom's arrow instead of the dial, when TomTom is installed.
+    local tomtomRow = CreateRow(frame, arrowRow, "Use TomTom",
+        "With TomTom installed, its arrow points the way instead of this one. Same as /bpet arrow tomtom.")
+    controls.useTomTom = Widgets.CreateCheckbox(tomtomRow, "When installed", function(checked)
+        if ns.TomTom then ns.TomTom:SetOn(checked) end
+    end, true)
+    controls.useTomTom:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local advanced = CreateSection(frame, "ADVANCED", { anchor = tomtomRow })
 
     local debugRow = CreateRow(frame, advanced, "Debug output",
         "Extra messages in chat, to help track down a problem.")
@@ -324,6 +332,7 @@ function SettingsUI:Refresh()
     controls.tamingTooltip:SetChecked(ns.db.tamingTooltip ~= false)
     controls.debug:SetChecked(ns.db.debug == true)
     controls.beastArrow:SetChecked(ns.db.beastArrow == true)
+    controls.useTomTom:SetChecked(ns.db.useTomTom ~= false)
 end
 
 function SettingsUI:OnBeastArrowChanged()

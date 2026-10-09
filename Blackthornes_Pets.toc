@@ -28,6 +28,7 @@ Logic\TameRecord.lua
 Logic\Waypoints.lua
 Logic\Compendium.lua
 Logic\BeastArrow.lua
+Logic\TomTom.lua
 
 UI\Theme.lua
 UI\Widgets.lua

@@ -259,6 +259,9 @@ local DEFAULTS = {
     -- dragged to is beastArrowX and beastArrowY. The beast it follows is
     -- kept per character (arrowBeast).
     beastArrow = false,
+    -- With TomTom installed, its arrow shows the beast arrow's place
+    -- (Logic/TomTom.lua).
+    useTomTom = true,
 }
 
 -- Per character, because pets are: a hunter's stable and a warlock's demons
