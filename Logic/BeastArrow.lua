@@ -454,6 +454,7 @@ function BeastArrow:Check()
         width and (" (%.0f by %.0f yards)"):format(width, height) or ""))
 
     ns.PrintRaw(("  in an instance: %s"):format(BeastArrow.Inside() and "yes, so the arrow hides" or "no"))
+    if ns.TomTom then ns.PrintRaw(ns.TomTom.CheckLine()) end
 
     local state = self:State(Number(Read(_G.GetTime)) or 0)
     if state.beast then
@@ -480,7 +481,7 @@ local function Status()
     end
 end
 
-ns.RegisterCommand("arrow", "an arrow to a beast from the Pet Compendium (on, off, clear, check, reset)", function(rest)
+ns.RegisterCommand("arrow", "an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, reset)", function(rest)
     local word = (rest or ""):lower():match("^%s*(%a*)") or ""
     if word == "" then
         BeastArrow:SetOn(not BeastArrow.IsOn())
@@ -493,10 +494,12 @@ ns.RegisterCommand("arrow", "an arrow to a beast from the Pet Compendium (on, of
         ns.Print("beast arrow is not following a beast now.")
     elseif word == "check" then
         BeastArrow:Check()
+    elseif word == "tomtom" then
+        ns.TomTom:Command((rest or ""):lower():match("^%s*%a+%s+(%a+)"))
     elseif word == "reset" then
         if ns.BeastArrowUI and ns.BeastArrowUI.ResetPosition then ns.BeastArrowUI:ResetPosition() end
         ns.Print("beast arrow put back where it started.")
     else
-        ns.Print("/bpet arrow on, off, clear, check or reset.")
+        ns.Print("/bpet arrow on, off, clear, check, tomtom or reset.")
     end
 end)

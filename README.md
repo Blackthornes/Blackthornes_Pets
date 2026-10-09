@@ -49,6 +49,10 @@ the middle of the zone and says so. The compendium's **Arrow** button,
 hides inside dungeons. It is Farmer's goal arrow and Equipment's quest
 arrow brought over, and only one of the three is on screen at a time: the
 one aimed last shows, and the others wait until it is put away.
+With TomTom installed, the beast arrow hands its place to TomTom as a
+waypoint and its own dial stays hidden, so only TomTom's arrow is on screen;
+places TomTom cannot point at show on the dial as before. Untick **Use
+TomTom** in Settings, or type `/bpet arrow tomtom off`, to keep the dial.
 
 There is also a minimap button and `/bpet probe`, which checks which pet calls
 the client supports.
@@ -100,7 +104,7 @@ inside it. If they differ, the client ignores the folder and says nothing.
 /bpet taming     list the pet skills this hunter knows
 /bpet tamed      list the beasts you have tamed and what each taught
 /bpet compendium open the Pet Compendium; add words to search it (/bpet compendium fox)
-/bpet arrow      an arrow to a beast from the compendium (on, off, clear, check, reset)
+/bpet arrow      an arrow to a beast from the compendium (on, off, clear, check, tomtom, reset)
 ```
 
 The settings window is also under the game's Options > AddOns.
