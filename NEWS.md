@@ -10,6 +10,16 @@ name, after their group; changes nobody asked for go in a group of their
 own with no thanks. This is the only report that names players. A version with no section here posts nothing in #general.
 This file does not ship in the addon.
 
+## 0.8.0
+
+Hey everyone! A new Pets update just went up.
+
+You can see which version you have in the corner of the pets window and on the minimap button. Thanks Ezmode for the idea!
+
+Settings got a makeover. It has pages, a search box and bigger text if you want it. Pets also runs lighter now.
+
+Restart the game fully after you update. Have fun!
+
 ## 0.7.0
 
 Hey everyone! A small Pets update just went up.
