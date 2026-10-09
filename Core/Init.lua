@@ -292,6 +292,12 @@ local DEFAULTS = {
     -- With TomTom installed, its arrow shows the beast arrow's place
     -- (Logic/TomTom.lua).
     useTomTom = true,
+
+    -- The settings window (UI/SettingsPages.lua): its words under every row
+    -- rather than in tooltips, and Tradeskills' Text size. The page it was
+    -- left on is settingsPage, which has no default.
+    settingsDescriptions = false,
+    textSize = "normal",
 }
 
 -- Per character, because pets are: a hunter's stable and a warlock's demons

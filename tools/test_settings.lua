@@ -66,6 +66,81 @@ suite.check("/bpet minimap ticks it again", minimapBox:GetChecked())
 controls.debug:GetScript("OnClick")(controls.debug)
 suite.check("the debug box sets debug", ns.db.debug == true)
 
+-- The pages along the top, as Tradeskills' Settings tab has them.
+local pages = SettingsUI.pages
+suite.check("it opens on the first page", pages.shown == "pet")
+suite.check("with the feeding rows showing", pages.pages.pet.content:IsShown()
+    and not pages.pages.general.content:IsShown())
+local generalPart
+for _, part in ipairs(pages.switch) do
+    if part.key == "general" then generalPart = part end
+end
+generalPart.button:GetScript("OnClick")(generalPart.button)
+suite.check("a click on the switch shows that page", pages.pages.general.content:IsShown()
+    and not pages.pages.pet.content:IsShown())
+suite.check("and the page is remembered", ns.db.settingsPage == "general")
+suite.check("the page picked is gold", generalPart.label._color[1] == ns.Theme.colors.accent[1])
+SettingsUI:Hide()
+SettingsUI:Show()
+suite.check("it opens again on the page left", pages.shown == "general")
+
+-- What a setting does is a tooltip until Show descriptions is ticked.
+local feedRow
+for _, row in ipairs(pages.pages.pet.rows) do
+    if row.labelText == "Feed warning" then feedRow = row end
+end
+suite.check("descriptions start hidden", ns.db.settingsDescriptions == false
+    and not feedRow.hint:IsShown())
+GameTooltip._lines = {}
+feedRow:GetScript("OnEnter")(feedRow)
+suite.check("a row lights under the mouse", feedRow.hover:IsShown())
+suite.check("and says what it does in a tooltip", GameTooltip._lines[1] and
+    GameTooltip._lines[1]:find("no longer happy") ~= nil)
+local before = SettingsUI.frame:GetHeight()
+pages.describe:GetScript("OnClick")(pages.describe)
+suite.check("Show descriptions is saved", ns.db.settingsDescriptions == true)
+suite.check("and puts the words under the rows", feedRow.hint:IsShown())
+suite.check("and the window grows to fit them", SettingsUI.frame:GetHeight() > before)
+pages.describe:GetScript("OnClick")(pages.describe)
+suite.check("unticked, the window goes back", SettingsUI.frame:GetHeight() == before)
+
+-- Find a setting.
+pages.find:SetText("tomtom")
+pages:Search("tomtom")
+suite.check("the search shows the page that has it", pages.shown == "compendium")
+local lit = 0
+for _, entry in ipairs(pages.searchables) do
+    if entry.glow:IsShown() then lit = lit + 1 end
+end
+suite.check("and lights only what matches", lit == 1)
+pages:Search("")
+lit = 0
+for _, entry in ipairs(pages.searchables) do
+    if entry.glow:IsShown() then lit = lit + 1 end
+end
+suite.check("an empty search lights nothing", lit == 0)
+
+-- Text size, saved as a word, waits for a reload.
+controls.textSize.plus:GetScript("OnClick")(controls.textSize.plus)
+suite.check("Text size saves Large", ns.db.textSize == "large")
+suite.check("and offers Reload", controls.textSize.reload:IsShown())
+suite.check("beside the stepper, inside its column", controls.textSize.reload._point[2] == controls.textSize
+    and controls.textSize.reload._point[1] == "LEFT")
+controls.textSize.minus:GetScript("OnClick")(controls.textSize.minus)
+suite.check("back to Normal needs no reload", ns.db.textSize == "normal"
+    and not controls.textSize.reload:IsShown())
+
+-- Every /bpet command has a button here.
+local ran = {}
+local realSlash = ns.HandleSlash
+ns.HandleSlash = function(text) ran[#ran + 1] = text end
+for _, key in ipairs({ "food", "taming", "tamed", "openWindow", "probe", "help", "beastArrowCheck" }) do
+    controls[key]:GetScript("OnClick")(controls[key])
+end
+ns.HandleSlash = realSlash
+suite.check("the command buttons run their commands",
+    table.concat(ran, ",") == "food,taming,tamed,window,probe,help,arrow check")
+
 -- Position.
 ns.db.settingsX = 400
 SettingsUI:ResetPositions()

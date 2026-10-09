@@ -119,6 +119,21 @@ belongs in all three.
 The CurseForge project ID is **1720056** (the owner created it 2026-09-30), on the
 TOC's `X-Curse-Project-ID` line. The first release is 0.1.0.
 
+## The settings pages (from Tradeskills)
+
+The owner asked (2026-10-09) for Tradeskills' Settings upgrade in Pets,
+Equipment and Farmer. `UI/SettingsPages.lua` is the same file in all three
+(a fix to it belongs in all three): category pages along the top
+(`settingsPage`, the one left on), two columns a page, what a setting does
+as the row's tooltip ("Show descriptions", `settingsDescriptions`, off by
+default, puts it back under the rows), "Find a setting", and Text size
+(`textSize` normal/large/larger adds 0/1/2 to `Theme.sizes`, now a lookup
+over `Theme.BASE_SIZES`; read once, so it waits for /reload). The window
+fits its fullest page, so no page scrolls. Add a setting with
+`pages:Row(page, column, label, description)` and
+`pages:Section(page, column, "HEADING")` in `UI/Settings.lua`; every
+`/bpet` command has a button there.
+
 ## The house frame (Titanforged)
 
 The owner picked this look for all four addons on 2026-10-04 from two mockups
