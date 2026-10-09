@@ -127,6 +127,8 @@ function MinimapButton:Build()
         ns.Motion:Blend(self, "hover", 1, 0.12, function(v) IconSize(18 + 2 * v) end)
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
         GameTooltip:AddLine("Blackthornes Pets")
+        -- Which version is installed, so a player can say when reporting.
+        GameTooltip:AddLine(ns.VersionLabel(), 0.5, 0.5, 0.5)
 
         if ns.UI and ns.UI.Toggle then
             GameTooltip:AddLine("Click to open", 0.7, 0.7, 0.7)

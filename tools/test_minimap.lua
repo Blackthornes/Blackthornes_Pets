@@ -41,8 +41,9 @@ SettingsUI:Hide()
 button:GetScript("OnEnter")(button)
 local lines = GameTooltip._lines
 suite.check("the tooltip names the addon", lines[1] == "Blackthornes Pets", lines[1])
-suite.check("and what a click does", lines[2] == "Click to open", lines[2])
-suite.check("and a right-click", lines[3] == "Right-click for settings", lines[3])
+suite.check("then its version", lines[2] == ns.VersionLabel(), lines[2])
+suite.check("and what a click does", lines[3] == "Click to open", lines[3])
+suite.check("and a right-click", lines[4] == "Right-click for settings", lines[4])
 
 
 -- Dragging round the ring. The stub cursor sits due east of the minimap's
