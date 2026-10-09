@@ -17,6 +17,8 @@ fully after updating (`/reload` is not enough).
   Beasts you tamed, the pets window, Client check and Commands.
 - **Less CPU:** the bags are read for food only when they change, and unit
   events come only for you and your pet.
+- **More Forever beasts in the Compendium:** eleven more seen on Forever,
+  with their real spots and levels.
 
 ## 0.7.0
 
