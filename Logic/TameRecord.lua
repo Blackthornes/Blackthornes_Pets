@@ -239,12 +239,12 @@ end
 function TameRecord:OnEnable()
     -- Tame Beast is channelled on some clients and cast on others.
     for _, event in ipairs({ "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_START" }) do
-        ns.RegisterEvent(self, event, self.OnCastStart)
+        ns.RegisterPetEvent(self, event, self.OnCastStart)
     end
     -- Not UNIT_SPELLCAST_FAILED: pressing Tame Beast again mid-tame fails
     -- that press, while the tame itself carries on.
-    ns.RegisterEvent(self, "UNIT_SPELLCAST_INTERRUPTED", self.OnCastFailed)
-    ns.RegisterEvent(self, "UNIT_PET", self.OnPet)
+    ns.RegisterPetEvent(self, "UNIT_SPELLCAST_INTERRUPTED", self.OnCastFailed)
+    ns.RegisterPetEvent(self, "UNIT_PET", self.OnPet)
 end
 
 --------------------------------------------------------------------------------
