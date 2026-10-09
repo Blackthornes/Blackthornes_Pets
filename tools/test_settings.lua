@@ -123,7 +123,9 @@ suite.check("an empty search lights nothing", lit == 0)
 -- Text size, saved as a word, waits for a reload.
 controls.textSize.plus:GetScript("OnClick")(controls.textSize.plus)
 suite.check("Text size saves Large", ns.db.textSize == "large")
-suite.check("and offers Reload now", controls.textSize.reload:IsShown())
+suite.check("and offers Reload", controls.textSize.reload:IsShown())
+suite.check("beside the stepper, inside its column", controls.textSize.reload._point[2] == controls.textSize
+    and controls.textSize.reload._point[1] == "LEFT")
 controls.textSize.minus:GetScript("OnClick")(controls.textSize.minus)
 suite.check("back to Normal needs no reload", ns.db.textSize == "normal"
     and not controls.textSize.reload:IsShown())
