@@ -16,6 +16,9 @@ local ns
 
 -- Art the pretend client lacks.
 local missing = {}
+-- What SetDesaturated answers: nil as on a client that says nothing,
+-- false where it cannot grey a texture.
+local greys = nil
 
 -- Tests share one Lua state, so the globals replaced here are put back.
 local saved = { CreateFrame = CreateFrame, UIParent = UIParent, CreateColor = CreateColor,
@@ -112,7 +115,7 @@ local function Region(parent)
         return 1
     end
     region.SetVertexColor = function(self, r, g, b, a) self.vertex = { r, g, b, a } end
-    region.SetDesaturated = function(self, on) self.desaturated = on end
+    region.SetDesaturated = function(self, on) self.desaturated = on; return greys end
     region.CreateFontString = function(self) return Region(self) end
     region.GetParent = function(self) return self.parent end
     region.GetMinMaxValues = function(self) return self.min or 0, self.max or 0 end
@@ -215,6 +218,14 @@ check("no corner gems", #btrim.corners, 0)
 check("the name on the title", btrim.plate.label.text, "Blackthornes Pets")
 check("wide enough for it", btrim.plate.width >= #"Blackthornes Pets" * 6 + 30, true)
 check("a portrait in a silver ring", btrim.portrait ~= nil, true)
+local ring = btrim.portrait.regions[1]
+check("greyed to silver", ring and ring.desaturated, true)
+check("with no tint where the client greys it", ring and ring.vertex, nil)
+greys = false
+local _, grey = Dress(ns)
+ring = grey.portrait.regions[1]
+check("a client that cannot grey it tints it silver", ring and ring.vertex and ring.vertex[1], 0.75)
+greys = nil
 check("the game's close button", btrim.closeButton.template, "UIPanelCloseButton")
 btrim.closeButton.scripts.OnClick(btrim.closeButton)
 check("which closes the window", closed.done, true)
