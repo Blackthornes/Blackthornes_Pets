@@ -163,8 +163,12 @@ suite.check("the family chooser picks a family", ns.db.compendium.family == UI.f
 
 UI.rows[1]:GetScript("OnEnter")(UI.rows[1])
 local text = table.concat(GameTooltip._lines, "\n")
+local first = UI.rows[1].entry
 suite.check("hovering a beast shows where and what it teaches",
-    text:find(UI.rows[1].entry.name, 1, true) and text:find("Click to pin", 1, true), text)
+    text:find(first.name, 1, true) and text:find(first.zone, 1, true), text)
+-- Only a beast with a spot offers a pin: Waypoints:Pin turns the rest down.
+suite.check("and offers a pin only where there is a spot",
+    text:find((first.x and first.y) and "Click to pin" or "No exact spot to pin", 1, true), text)
 
 ns.HandleSlash("compendium vuldren")
 suite.check("/bpet compendium with words searches", UI.search:GetText() == "vuldren")

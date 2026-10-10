@@ -134,7 +134,8 @@ local function LineText(line)
 end
 
 --- What the client says about the item's buff: true or false, or nil when
---- it has nothing to say yet (the tooltip not loaded).
+--- it has nothing to say yet (the tooltip not loaded). A client with neither
+--- call has nothing to wait for: false.
 local function ReadBuff(itemID)
     local answer
     local tooltip = C_TooltipInfo and C_TooltipInfo.GetItemByID
@@ -161,18 +162,34 @@ local function ReadBuff(itemID)
             end
         end
     end
+    if answer == nil and type(tooltip) ~= "function"
+        and not (type(itemSpell) == "function" and type(describe) == "function") then
+        return false
+    end
     return answer
 end
 
 --- True when the food gives a buff as well as feeding. Kept per item ID
---- once the client has answered, so a bag scan reads each food once.
+--- once the client has answered, so a bag scan reads each food once. The
+--- second value is true while the client has not answered yet: the food
+--- counts as plain food until it does, and after BUFF_TRIES reads with no
+--- answer it is taken as plain food for the session, so a client that never
+--- answers does not keep the bags being read again.
+local BUFF_TRIES = 5
+
 function Food:IsBuffFood(itemID)
     if type(itemID) ~= "number" then return false end
     self.buffKnown = self.buffKnown or {}
     local known = self.buffKnown[itemID]
     if known ~= nil then return known end
     known = ReadBuff(itemID)
-    if known == nil then return false end
+    if known == nil then
+        self.buffTries = self.buffTries or {}
+        local tries = (self.buffTries[itemID] or 0) + 1
+        self.buffTries[itemID] = tries
+        if tries < BUFF_TRIES then return false, true end
+        known = false
+    end
     self.buffKnown[itemID] = known
     return known
 end
@@ -192,10 +209,11 @@ function Food:Inspect(bag, slot, info, status, eats)
     local effect = self:Effect(level, status.level)
     if effect == "refused" then return nil, "too low level", name, level end
     local itemID = Plain(info.itemID)
-    local buff = self:IsBuffFood(itemID)
+    local buff, unsure = self:IsBuffFood(itemID)
+    if unsure then RequestItem(itemID) end
     if buff and NeverBuffFood() then return nil, "buff food, which you chose never to feed", name, level end
     return {
-        bag = bag, slot = slot, itemID = itemID, buff = buff or nil,
+        bag = bag, slot = slot, itemID = itemID, buff = buff or nil, buffUnsure = unsure or nil,
         name = name, level = level, diet = diet, effect = effect,
         count = tonumber(Plain(info.stackCount)) or 1,
     }, nil, name, level
@@ -262,7 +280,7 @@ function Food:Scan(status)
     local eats = {}
     for _, diet in ipairs(status.foods) do eats[diet] = true end
 
-    local slots = 0
+    local slots, unsure = 0, false
     for bag = FIRST_BAG, LAST_BAG do
         local count = NumSlots(bag)
         slots = slots + count
@@ -272,6 +290,7 @@ function Food:Scan(status)
                 local stack, why = self:Inspect(bag, slot, info, status, eats)
                 if stack then
                     stacks[#stacks + 1] = stack
+                    if stack.buffUnsure then unsure = true end
                 elseif why == "no name from the client" then
                     stacks.incomplete = true
                     RequestItem(Plain(info.itemID))
@@ -284,9 +303,11 @@ function Food:Scan(status)
     table.sort(stacks, BestFirst)
 
     -- Only a complete read is kept; one still waiting on item names is read
-    -- again on the next ask, as before.
-    self.waitingForNames = stacks.incomplete or nil
-    if not stacks.incomplete then
+    -- again on the next ask, as before. So is one with a food whose tooltip
+    -- has not loaded yet: until it does, buff food could sort first (or be
+    -- fed with "Never feed it" ticked) for the minute a kept scan lasts.
+    self.waitingForNames = (stacks.incomplete or unsure) or nil
+    if not (stacks.incomplete or unsure) then
         self.kept = { key = key, bags = self.bagsSeen or 0, at = Now(), stacks = stacks }
     end
     return stacks

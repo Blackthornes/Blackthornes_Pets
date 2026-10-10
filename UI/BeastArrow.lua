@@ -264,7 +264,7 @@ end
 function ArrowUI.Words(state)
     local mode = state.mode
     if mode == "blind" then
-        return "Can't see you here", "The game won't say where you are", "/beq arrow check", "muted"
+        return "Can't see you here", "The game won't say where you are", "/bpet arrow check", "muted"
     end
     return state.distance or "", state.place or "", state.note or "", state.noteColor or "muted"
 end
