@@ -493,7 +493,7 @@ ns.RegisterCommand("arrow", "an arrow to a beast from the Pet Compendium (on, of
         BeastArrow:Clear()
         ns.Print("beast arrow is not following a beast now.")
     elseif word == "check" then
-        BeastArrow:Check()
+        ns.KeepCheck("arrow check", BeastArrow.Check, BeastArrow)
     elseif word == "tomtom" then
         ns.TomTom:Command((rest or ""):lower():match("^%s*%a+%s+(%a+)"))
     elseif word == "reset" then
