@@ -165,6 +165,55 @@ local function CommandRow(pages, page, column, label, description, buttonText, c
     return row, button
 end
 
+-- The window styles, in the order the stepper steps through them.
+local STYLES = { "titanforged", "blizzard" }
+local STYLE_LABELS = { titanforged = "Titanforged", blizzard = "Blizzard" }
+
+--- Titanforged or Blizzard, with Reload beside it while the pick differs
+--- from what is drawn, as the Text size row has. Pets has no dropdown, so
+--- it is a stepper like Text size.
+function SettingsUI.WindowStyleControl(row, x)
+    local reload
+    local function Drawn()
+        local Look = ns.BlizzardLook
+        return Look and Look.Style() or "titanforged"
+    end
+
+    local stepper = Widgets.CreateStepper(row, {
+        min = 1, max = #STYLES, step = 1,
+        format = function(value) return STYLE_LABELS[STYLES[value]] end,
+        onChange = function(value)
+            ns.db.windowStyle = STYLES[value]
+            reload:SetShown(STYLES[value] ~= Drawn())
+        end,
+    })
+    stepper:SetWidth(100)
+    stepper:SetPoint("TOPLEFT", x, -2)
+
+    -- ReloadUI is allowed from a click, and saves everything first.
+    reload = Widgets.CreateButton(row, "Reload now", function()
+        if ReloadUI then ReloadUI() end
+    end, { width = 60, height = 20 })
+    reload:SetPoint("LEFT", stepper, "RIGHT", 6, 0)
+    reload:HookScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:AddLine("Reload the interface so the new window style shows (/reload)", 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    reload:HookScript("OnLeave", function() GameTooltip:Hide() end)
+    reload:Hide()
+    stepper.reload = reload
+
+    function stepper:Sync()
+        local Look = ns.BlizzardLook
+        local wanted = Look and Look.Wanted() or "titanforged"
+        self:SetValue(wanted == "blizzard" and 2 or 1, true)
+        reload:SetShown(wanted ~= Drawn())
+    end
+
+    return stepper
+end
+
 function SettingsUI:BuildPages()
     local controls = self.controls
     local pages = self.pages
@@ -313,6 +362,13 @@ function SettingsUI:BuildPages()
         "Large and Larger add a point or two to all of this addon's text. Takes effect after /reload.")
     controls.textSize = ns.SettingsPages.TextSizeControl(textRow, CONTROL_X, function() return ns.db end)
 
+    -- Asked 2026-10-10: the game's own look for players who would rather
+    -- the windows matched the rest of their screen. Read at login, so it
+    -- waits for /reload as Text size does. See UI/BlizzardLook.lua.
+    local styleRow = pages:Row("general", 1, "Window style",
+        "Titanforged is the house look, with a gold rim and glowing edges. Blizzard uses the game's own frames, red buttons and tick boxes. Takes effect after /reload.")
+    controls.windowStyle = SettingsUI.WindowStyleControl(styleRow, CONTROL_X)
+
     pages:Section("general", 2, "ADVANCED")
 
     local debugRow = pages:Row("general", 2, "Debug output",
@@ -356,6 +412,7 @@ function SettingsUI:Refresh()
     controls.beastArrow:SetChecked(ns.db.beastArrow == true)
     controls.useTomTom:SetChecked(ns.db.useTomTom ~= false)
     controls.textSize:Sync()
+    controls.windowStyle:Sync()
     self.pages:Refresh()
 end
 

@@ -248,7 +248,11 @@ function Widgets.CreateButton(parent, text, onClick, opts)
     -- Dark lettering only on a gold face: a primary button given its own
     -- dark face (opts.baseColor) keeps a gold label, or its text would be
     -- dark on dark and the button would read as an empty box.
-    local goldFace = opts.primary and not opts.baseColor
+    -- The Blizzard window style has no gold face: every button wears the
+    -- game's red with a gold label (UI/BlizzardLook.lua).
+    local Look = ns.BlizzardLook
+    local blizzard = Look and Look.On()
+    local goldFace = opts.primary and not opts.baseColor and not blizzard
 
     local baseKey = goldFace and "accent" or "row"
     local hotFill = goldFace and "accentHi" or opts.danger and "rowHover" or "rowActive"
@@ -260,12 +264,14 @@ function Widgets.CreateButton(parent, text, onClick, opts)
     local labelHot = opts.labelKey or defaultHot
 
     button.background = Theme.Fill(button, baseKey)
+    -- Kept on the button, so the Blizzard style leaves a face of its own be.
+    button.baseColor = opts.baseColor
     if opts.baseColor then
         button.background:SetColorTexture(unpack(opts.baseColor))
     end
     Theme.Border(button, edgeKey)
     button.sheen = Theme.TopSheen(button, 0.10)
-    if Theme.Bevel then Theme.Bevel(button) end
+    if Theme.Bevel then button.bevel = { Theme.Bevel(button) } end
 
     -- Every button glows round its edge under the mouse; the primary one
     -- glows a little even at rest. A button with a face of its own keeps to
@@ -333,6 +339,8 @@ function Widgets.CreateButton(parent, text, onClick, opts)
     -- the label was put (a caller may have moved it beside an icon), it
     -- goes back to exactly there.
     button:SetScript("OnMouseDown", function(self)
+        -- Held, for the Blizzard style's pressed art.
+        self.held = true
         local point, relativeTo, relativePoint, x, y = self.label:GetPoint(1)
         if not (point and type(x) == "number" and type(y) == "number") then return end
 
@@ -341,6 +349,7 @@ function Widgets.CreateButton(parent, text, onClick, opts)
     end)
 
     button:SetScript("OnMouseUp", function(self)
+        self.held = nil
         local rest = rawget(self, "restPoint")
         if not rest then return end
 
@@ -367,6 +376,8 @@ function Widgets.CreateButton(parent, text, onClick, opts)
         labelHot = key or defaultHot
         Light(Motion:Value(self, "hover"))
     end
+
+    if blizzard then Look.Button(button) end
 
     return button
 end
@@ -399,6 +410,7 @@ function Widgets.CreateCheckbox(parent, text, onToggle, initial)
     label:SetText(text)
 
     checkbox.label = label
+    checkbox.tick = tick
     -- Measured as the game draws it, so the label is never cut short.
     checkbox:SetWidth(math.max(Theme.TextWidth("small", text), label:GetStringWidth() or 60) + 24)
     checkbox.checked = initial and true or false
@@ -430,7 +442,8 @@ function Widgets.CreateCheckbox(parent, text, onToggle, initial)
     function checkbox:SetDisabled(disabled)
         self.disabled = disabled and true or false
         label:SetTextColor(Theme.Unpack(self.disabled and "dim" or "text"))
-        tick:SetAlpha(self.disabled and 0.4 or 1)
+        -- In the Blizzard style the house tick stays out of sight.
+        if not rawget(self, "blizzard") then tick:SetAlpha(self.disabled and 0.4 or 1) end
         PaintBox(false)
     end
 
@@ -460,6 +473,10 @@ function Widgets.CreateCheckbox(parent, text, onToggle, initial)
         label:SetTextColor(Theme.Unpack(self.disabled and "dim" or "text"))
         PaintBox(false)
     end)
+
+    if ns.BlizzardLook and ns.BlizzardLook.Checkbox(checkbox, box, tick) then
+        checkbox.blizzard = true
+    end
 
     return checkbox
 end

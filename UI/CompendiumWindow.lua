@@ -314,6 +314,8 @@ function CompendiumUI:BuildList()
     local thumb = well:CreateTexture(nil, "OVERLAY")
     thumb:SetWidth(SCROLL_WIDTH)
     thumb:SetColorTexture(Theme.Unpack("accent", 0.8))
+    -- The game's knob in the Blizzard window style (UI/BlizzardLook.lua).
+    if ns.BlizzardLook then ns.BlizzardLook.Thumb(thumb) end
     self.thumb = thumb
 
     local empty = Theme.CreateLabel(well, "normal", "muted", "CENTER")

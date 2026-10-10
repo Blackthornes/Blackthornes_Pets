@@ -157,6 +157,27 @@ secure setup and only wear the shared button look. Pets has no Window
 effects setting, so `Motion.Level()` is always "full" and the glint always
 runs; if one is added, the glint and portrait light already follow it.
 
+## The Blizzard window style
+
+The owner asked (2026-10-10) for a choice of the game's own look beside
+Titanforged, in all four addons. "Window style" in Settings (`windowStyle`,
+`titanforged` or `blizzard`, Titanforged by default; read once at login,
+so a change waits for /reload, as Text size does). `UI/BlizzardLook.lua`
+is the same file in all four (a fix to it belongs in all four): picked, it
+lays the game's colours over `Theme.colors` (grey metal, the game's gold,
+plain rows with a blue bar for the one picked) and puts out the halos;
+`Titanforged:Dress` hands the window to `BlizzardLook.Dress` (silver rim,
+a title tab where the plate sits, a silver-ringed portrait and the game's
+`UIPanelCloseButton`, with the same trim fields); and the widgets call
+`BlizzardLook.Button`, `.Checkbox` and `.Thumb` (the compendium's scroll
+thumb) to wear the game's own texture files. Pets has no hanging tabs or
+dropdown, so its Settings row is a stepper like Text size; the Feed
+buttons wear the game's red too, their secure setup untouched.
+It never touches a Blizzard frame. Each file is checked once
+(`BlizzardLook.HasArt`); a client without one keeps that widget in the
+house look, and `/bpet probe` lists what is missing. Not yet seen in game.
+New widgets should look right in both styles.
+
 ## Discord
 
 The addons share a Discord server, Blackthornes AddOns (public invite
