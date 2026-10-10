@@ -80,9 +80,10 @@ smallest), so check them before inventing a convention:
   their areas; read them before relying on an API.
 
 Nothing here calls the other addons, and nothing calls this one, apart
-from the shared arrow table below. If that changes, write down the global
-and the calls in both repos' `CLAUDE.md`, the way Farmer and Tradeskills do
-for prices and goals.
+from the shared arrow table below and Blackthornes Butler's one read-only
+call (see "What Butler calls here"). If that changes, write down the global and the calls
+in both repos' `CLAUDE.md`, the way Farmer and Tradeskills do for prices
+and goals.
 
 The beast arrow (the owner asked 2026-10-08): `Logic/BeastArrow.lua` and
 `UI/BeastArrow.lua` are Equipment's quest arrow (itself Farmer's goal
@@ -118,6 +119,40 @@ belongs in all three.
 
 The CurseForge project ID is **1720056** (the owner created it 2026-09-30), on the
 TOC's `X-Curse-Project-ID` line. The first release is 0.1.0.
+
+## What Butler calls here
+
+**Blackthornes_Butler** (`Blackthornes/Blackthornes_Butler`) tells the
+player what to do with each bag item, and asks here whether the pet wants
+it. It calls, inside a pcall and only when this addon is loaded:
+
+```lua
+_G.BlackthornesPets.Butler:Advise(itemID)  -- a table, or nil; never raises; reads only
+```
+
+`Logic/Butler.lua` answers for the character playing and the pet it has
+out, nil when there is no hunter pet that eats (no pet, a warlock, a client
+that names no diet), when the item is not in `Data/PetFood.lua`, or on any
+error. Otherwise:
+
+- `eats`: true when the pet eats the item (its diet, and not 30 or more
+  levels below the pet); false for pet food of another diet or too low.
+- `buff`: true for buff food (`Food:IsBuffFood`), which is fed last.
+- `hours`: about how long all the food the pet is fed from the bags lasts,
+  to a tenth of an hour, by the classic rule (35,000, 17,000 or 8,000
+  happiness a piece by `Food:Effect`, 670 lost every 7.5 seconds); 0 with
+  none, nil while the bags are not all read. The same for every item.
+- `count`: how many of the item are carried among the food the pet is fed;
+  0 for food it eats that is not carried; nil when not known (food it does
+  not eat, buff food with "Never feed buff food" ticked, or bags not all
+  read).
+
+Butler asks once per bag item, a hundred in one frame, so the pet and the
+food (`Food:Latest`, itself kept between bag events) are read once and kept
+until `Food:BagsChanged` or the clock moves on (`Butler:Reading`); no timer.
+Keep the global, `Butler` and `Advise(itemID)` with these fields stable; if
+one has to change, change Butler's `Logic/Sisters.lua` too. Tested in
+`tools/test_butler.lua`.
 
 ## The settings pages (from Tradeskills)
 
