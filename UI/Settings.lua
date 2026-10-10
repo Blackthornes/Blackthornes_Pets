@@ -503,11 +503,10 @@ function SettingsUI:RegisterGameOptions()
     blurb:SetText("Pets' settings have a window of their own.")
 
     local open = Widgets.CreateButton(panel, "Open Pets settings", function()
-        -- Close the game's panel first, or the two windows fight for the
-        -- keyboard.
-        if SettingsPanel and HideUIPanel then
-            pcall(HideUIPanel, SettingsPanel)
-        end
+        -- The game's panel is left as it is: hiding a stock frame runs the
+        -- game's own code as this addon and taints it (Equipment's Edit
+        -- Mode error, 2026-10-10). Pets' window is top level in the dialog
+        -- layer, so it comes up over the panel.
         SettingsUI:Show()
     end, { width = 190, height = 24 })
     open:SetPoint("TOPLEFT", blurb, "BOTTOMLEFT", 0, -14)
