@@ -198,6 +198,15 @@ function SettingsUI:BuildPages()
     end, true)
     controls.lowFoodWarning:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    local buffFoodRow = pages:Row("pet", 1, "Buff food",
+        "Food that gives a buff, like stat food, is always fed last. Tick this to never feed it to your pet at all.")
+
+    controls.neverFeedBuffFood = Widgets.CreateCheckbox(buffFoodRow, "Never feed it", function(checked)
+        ns.db.neverFeedBuffFood = checked
+        if ns.Food then ns.Food:Update() end
+    end, false)
+    controls.neverFeedBuffFood:SetPoint("TOPLEFT", CONTROL_X, -2)
+
     local quickFeedRow = pages:Row("pet", 1, "Feed button by quests",
         "A small Feed button above the quest list while your pet needs feeding.")
 
@@ -340,6 +349,7 @@ function SettingsUI:Refresh()
     controls.feedWarning:SetChecked(ns.db.feedWarning ~= false)
     controls.feedWarnOnlyUnhappy:SetChecked(ns.db.feedWarnOnlyUnhappy == true)
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
+    controls.neverFeedBuffFood:SetChecked(ns.db.neverFeedBuffFood == true)
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
     controls.tamingTooltip:SetChecked(ns.db.tamingTooltip ~= false)
     controls.debug:SetChecked(ns.db.debug == true)

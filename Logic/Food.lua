@@ -99,6 +99,88 @@ local function RequestItem(id)
     if type(fn) == "function" and id then pcall(fn, id) end
 end
 
+--------------------------------------------------------------------------------
+-- Buff food
+--
+-- Food that also gives a buff (stat food: "you will become well fed and
+-- gain...") is worth more to the hunter than to the pet, so it is fed last,
+-- only when nothing else the pet eats is in the bags, and never with "Never
+-- feed buff food" (neverFeedBuffFood) ticked. Which food that is comes from
+-- the client: the item's tooltip, or its use spell's description, read once
+-- per item a session.
+--------------------------------------------------------------------------------
+
+-- Words in a food's "Use:" text that mean it gives more than health back.
+local BUFF_WORDS = { "well fed", "increases your", "for the next" }
+
+local function GivesBuff(text)
+    if type(text) ~= "string" then return false end
+    text = text:lower()
+    for _, words in ipairs(BUFF_WORDS) do
+        if text:find(words, 1, true) then return true end
+    end
+    return false
+end
+
+local function LineText(line)
+    if type(line) ~= "table" then return nil end
+    local text = Plain(line.leftText)
+    if text == nil and type(line.args) == "table" then
+        for _, arg in ipairs(line.args) do
+            if type(arg) == "table" and arg.field == "leftText" then text = Plain(arg.stringVal) end
+        end
+    end
+    return type(text) == "string" and text or nil
+end
+
+--- What the client says about the item's buff: true or false, or nil when
+--- it has nothing to say yet (the tooltip not loaded).
+local function ReadBuff(itemID)
+    local answer
+    local tooltip = C_TooltipInfo and C_TooltipInfo.GetItemByID
+    if type(tooltip) == "function" then
+        local ok, data = pcall(tooltip, itemID)
+        if ok and type(data) == "table" and type(data.lines) == "table" and #data.lines > 1 then
+            answer = false
+            for _, line in ipairs(data.lines) do
+                if GivesBuff(LineText(line)) then return true end
+            end
+        end
+    end
+    local itemSpell = (C_Item and C_Item.GetItemSpell) or _G.GetItemSpell
+    local describe = C_Spell and C_Spell.GetSpellDescription
+    if type(itemSpell) == "function" and type(describe) == "function" then
+        local ok, _, spellID = pcall(itemSpell, itemID)
+        spellID = ok and Plain(spellID)
+        if type(spellID) == "number" then
+            local okText, text = pcall(describe, spellID)
+            text = okText and Plain(text)
+            if type(text) == "string" and text ~= "" then
+                if GivesBuff(text) then return true end
+                answer = false
+            end
+        end
+    end
+    return answer
+end
+
+--- True when the food gives a buff as well as feeding. Kept per item ID
+--- once the client has answered, so a bag scan reads each food once.
+function Food:IsBuffFood(itemID)
+    if type(itemID) ~= "number" then return false end
+    self.buffKnown = self.buffKnown or {}
+    local known = self.buffKnown[itemID]
+    if known ~= nil then return known end
+    known = ReadBuff(itemID)
+    if known == nil then return false end
+    self.buffKnown[itemID] = known
+    return known
+end
+
+local function NeverBuffFood()
+    return ns.db and ns.db.neverFeedBuffFood == true
+end
+
 --- One bag slot: the stack as Scan lists it if the pet will eat it, or nil
 --- and why not, which /bpet food prints.
 function Food:Inspect(bag, slot, info, status, eats)
@@ -109,8 +191,11 @@ function Food:Inspect(bag, slot, info, status, eats)
     if not eats[diet] then return nil, ("%s, which it does not eat"):format(diet), name, level end
     local effect = self:Effect(level, status.level)
     if effect == "refused" then return nil, "too low level", name, level end
+    local itemID = Plain(info.itemID)
+    local buff = self:IsBuffFood(itemID)
+    if buff and NeverBuffFood() then return nil, "buff food, which you chose never to feed", name, level end
     return {
-        bag = bag, slot = slot, itemID = Plain(info.itemID),
+        bag = bag, slot = slot, itemID = itemID, buff = buff or nil,
         name = name, level = level, diet = diet, effect = effect,
         count = tonumber(Plain(info.stackCount)) or 1,
     }, nil, name, level
@@ -119,6 +204,8 @@ end
 local RANK = { full = 1, half = 2, low = 3 }
 
 local function BestFirst(a, b)
+    -- Buff food goes last, whatever it would do for the pet.
+    if (a.buff or false) ~= (b.buff or false) then return not a.buff end
     if RANK[a.effect] ~= RANK[b.effect] then return RANK[a.effect] < RANK[b.effect] end
     if (a.level or 0) ~= (b.level or 0) then return (a.level or 0) < (b.level or 0) end
     if a.bag ~= b.bag then return a.bag < b.bag end
@@ -126,9 +213,9 @@ local function BestFirst(a, b)
 end
 
 --- Every stack in the bags the pet will eat, as { bag, slot, itemID, name,
---- count, level, diet, effect }, best first: food that feeds fully before
---- food that does less, and among those the lowest level first, so the
---- better food is kept for later. `stacks.incomplete` is true when the
+--- count, level, diet, effect, buff }, best first: food that feeds fully
+--- before food that does less, and among those the lowest level first, so
+--- the better food is kept for later. Buff food comes after all the rest. `stacks.incomplete` is true when the
 --- client has not yet told the addon what is in the bags (just after login,
 --- when the bags read empty and items come back without names).
 -- How long a scan is kept at most, even with no bag event, as a safety net.
@@ -145,8 +232,8 @@ function Food:BagsChanged()
 end
 
 local function ScanKey(status)
-    return ("%s|%s|%s"):format(tostring(status.name), tostring(status.level),
-        table.concat(status.foods, ","))
+    return ("%s|%s|%s|%s"):format(tostring(status.name), tostring(status.level),
+        table.concat(status.foods, ","), tostring(NeverBuffFood()))
 end
 
 --- Scan's answer, kept from the last complete scan when nothing it reads can
@@ -322,8 +409,9 @@ function Food:Report()
                     level and (" (level " .. level .. ")") or "")
                 if stack then
                     found = found + stack.count
-                    ns.PrintRaw(("  |c%s%s|r  %s x%d, %s"):format(ns.COLORS.good, label,
-                        stack.diet, stack.count, self:EffectLabel(stack.effect)))
+                    ns.PrintRaw(("  |c%s%s|r  %s x%d, %s%s"):format(ns.COLORS.good, label,
+                        stack.diet, stack.count, self:EffectLabel(stack.effect),
+                        stack.buff and ", buff food (fed last)" or ""))
                 elseif why == "not in the food list" then
                     if not seen[name] then
                         seen[name] = true

@@ -226,6 +226,87 @@ suite.check("food of another diet says why", report:find("Shiny Red Apple|r  Fru
 suite.check("everything else is on one line", report:find("not in the food list:|r Linen Cloth", 1, true), report)
 suite.check("and it adds up", report:find("pieces your pet will eat", 1, true), report)
 
+-- Buff food (a player asked): food whose use text gives a buff is fed last,
+-- and never with "Never feed buff food" ticked. The client's tooltip says
+-- which it is.
+ITEMS[3662] = { "Crocolisk Steak", 12 }
+local TOOLTIPS = {
+    [3662] = { "Crocolisk Steak", "Use: Restores 243 health over 21 sec. Must remain seated while eating. If you spend at least 10 seconds eating you will become well fed and gain 6 Stamina and Spirit for 15 min." },
+    [117] = { "Tough Jerky", "Use: Restores 61 health over 18 sec. Must remain seated while eating." },
+    [2287] = { "Haunch of Meat", "Use: Restores 243 health over 21 sec. Must remain seated while eating." },
+}
+local tooltipReads = 0
+_G.C_TooltipInfo = {
+    GetItemByID = function(id)
+        tooltipReads = tooltipReads + 1
+        local lines = TOOLTIPS[id]
+        if not lines then return nil end
+        local data = { lines = {} }
+        for i, text in ipairs(lines) do data.lines[i] = { leftText = text } end
+        return data
+    end,
+}
+_G.UnitExists = function() return true end
+_G.C_Item = {
+    GetItemInfo = function(id)
+        local item = ITEMS[id]
+        if item then return item[1], nil, 1, item[2] end
+    end,
+}
+Food.buffKnown = nil
+bags = {
+    [0] = { [1] = { itemID = 3662, stackCount = 5 }, [2] = { itemID = 2287, stackCount = 2 } },
+    [1] = { [1] = { itemID = 117, stackCount = 3 } },
+}
+stacks = Food:Scan()
+suite.check("buff food is still fed", #stacks == 3, #stacks)
+suite.check("but last, after plainer food of a higher level",
+    stacks[3].name == "Crocolisk Steak" and stacks[3].buff == true, stacks[3].name)
+suite.check("plain food comes first", stacks[1].name == "Tough Jerky" and not stacks[1].buff, stacks[1].name)
+local reads = tooltipReads
+Food:Scan()
+suite.check("each food's tooltip is read once a session", tooltipReads == reads, tooltipReads - reads)
+
+bags[0][2], bags[1] = nil, nil
+stacks = Food:Scan()
+suite.check("with nothing else, buff food is fed", #stacks == 1 and stacks[1].name == "Crocolisk Steak")
+
+ns.db.neverFeedBuffFood = true
+stacks = Food:Scan()
+suite.check("ticked, buff food is never fed", #stacks == 0, #stacks)
+suite.check("and does not count as food left", Food:Count(stacks) == 0)
+env.chat = {}
+ns.HandleSlash("food")
+suite.check("the food report says why",
+    env.ChatText():find("buff food, which you chose never to feed", 1, true), env.ChatText())
+ns.db.neverFeedBuffFood = false
+
+-- An item the tooltip has not loaded is not called buff food, and is asked
+-- about again on the next scan.
+Food.buffKnown = nil
+TOOLTIPS[3662] = { "Crocolisk Steak" }
+suite.check("no tooltip yet is not buff food", Food:IsBuffFood(3662) == false)
+suite.check("and is not kept", Food.buffKnown[3662] == nil)
+
+-- Without the tooltip call, the use spell's description says.
+_G.C_TooltipInfo = nil
+_G.C_Item.GetItemSpell = function(id) if id == 3662 then return "Food", 1131 end end
+_G.C_Spell = { GetSpellDescription = function(id)
+    return id == 1131 and "Restores 243 health over 21 sec. If you spend at least 10 seconds eating you will become well fed." or nil
+end }
+suite.check("the spell description is read too", Food:IsBuffFood(3662) == true)
+_G.C_Spell = nil
+
+-- Settings: the tick box.
+ns.SettingsUI:Show()
+local buffBox = ns.SettingsUI.controls.neverFeedBuffFood
+suite.check("the tick box is there and off by default", buffBox and buffBox:GetChecked() == false)
+buffBox:GetScript("OnClick")(buffBox)
+suite.check("and ticking it turns it on", ns.db.neverFeedBuffFood == true)
+buffBox:GetScript("OnClick")(buffBox)
+suite.check("and unticking turns it off again", ns.db.neverFeedBuffFood == false)
+ns.SettingsUI:Hide()
+
 _G.UnitExists = function() return false end
 env.chat = {}
 ns.HandleSlash("food")
