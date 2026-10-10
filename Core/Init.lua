@@ -279,6 +279,10 @@ local DEFAULTS = {
     -- The warning when the bags hold little food the pet will eat.
     lowFoodWarning = true,
 
+    -- Food that gives a buff (stat food) is always fed last; ticked, it is
+    -- never fed at all.
+    neverFeedBuffFood = false,
+
     -- The small Feed button above the quest tracker while the pet is hungry.
     quickFeed = true,
 
