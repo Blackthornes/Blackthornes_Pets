@@ -189,6 +189,15 @@ function Probe:Run()
     Line("has", #present > 0 and table.concat(present, ", ") or "none of them")
     Line("missing", #missing > 0 and table.concat(missing, ", ") or "nothing")
 
+    -- The Blizzard window style draws with the game's own art; this says
+    -- which pieces the client has (UI/BlizzardLook.lua).
+    if ns.BlizzardLook then
+        for _, text in ipairs(ns.BlizzardLook.ProbeLines()) do
+            local name, value = text:match("^(.-): (.*)$")
+            Line(name or "style", value or text)
+        end
+    end
+
     -- The long list first, so the readings people look for end up at the
     -- bottom of the chat window.
     local calls = PetCalls()
