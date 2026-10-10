@@ -12,6 +12,11 @@ is the only report that names players. A version with no section here posts
 nothing in #general.
 This file does not ship in the addon.
 
+## 0.9.1
+
+- Demons don't show an empty training points line anymore.
+- Dragging the beast arrow won't count as a click anymore.
+
 ## 0.9.0
 
 - Your pet now eats food that buffs you last, so you keep it for yourself. You can also tell it to never eat that food.

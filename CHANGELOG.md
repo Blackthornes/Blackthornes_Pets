@@ -4,6 +4,18 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.9.1
+
+For WoW: Forever (interface 16001). No files were added, so `/reload` is
+enough after updating.
+
+- **Fixes:** a warlock's demon no longer shows an empty "Training points"
+  row. Dropping the beast arrow's dial after a drag never counts as a click
+  or eats the next one. TomTom gets the beast's place again after the arrow
+  or Use TomTom is turned off and on. "Open Pets settings" in the game's
+  options leaves the game's panel alone. The Blizzard window style's
+  portrait ring stays silver on every client.
+
 ## 0.9.0
 
 For WoW: Forever (interface 16001). A file was added, so restart the game
