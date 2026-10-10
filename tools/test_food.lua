@@ -172,6 +172,7 @@ Food.bagsReady, Food.warnedLow = nil, nil
 
 -- The window: a Food row and the Feed button over it.
 bags[0] = { [3] = { itemID = 117, stackCount = 30 } }
+Food:BagsChanged()
 local UI = ns.UI
 UI:Show()
 suite.check("the window has a food row",
@@ -183,11 +184,13 @@ suite.check("on a layer above the window, which rises when clicked",
 suite.check("and names the food", UI.feedButton.label:GetText() == "Feed Tough Jerky", UI.feedButton.label:GetText())
 
 bags[0] = {}
+Food:BagsChanged()
 UI:Refresh()
 suite.check("with no food the button goes", not UI.feedButton:IsShown())
 
 -- In combat the button is left alone, since the game will not allow a change.
 bags[0] = { [3] = { itemID = 117, stackCount = 30 } }
+Food:BagsChanged()
 _G.InCombatLockdown = function() return true end
 UI:Refresh()
 suite.check("in combat nothing is changed", not UI.feedButton:IsShown())
@@ -196,6 +199,30 @@ UI:Refresh()
 suite.check("out of combat it comes back", UI.feedButton:IsShown())
 UI:PlaceFeedButton(nil, true)
 suite.check("combat starting takes it away", not UI.feedButton:IsShown())
+
+-- The button is a layer above every window, so it goes while Settings or
+-- the Compendium is open, or it would take their clicks.
+UI:Refresh()
+suite.check("the version moves up over the Feed button",
+    select(2, UI.versionLabel:GetPoint(1)) == UI.feedButton)
+-- The test frames do not run OnShow and OnHide themselves.
+local function Fire(window, script)
+    local frame = window.frame
+    local fn = frame:GetScript(script)
+    if fn then fn(frame) end
+end
+ns.SettingsUI:Show()
+Fire(ns.SettingsUI, "OnShow")
+suite.check("Settings open puts the Feed button away", not UI.feedButton:IsShown())
+ns.SettingsUI:Hide()
+Fire(ns.SettingsUI, "OnHide")
+suite.check("and closing it brings it back", UI.feedButton:IsShown())
+ns.CompendiumUI:Show()
+Fire(ns.CompendiumUI, "OnShow")
+suite.check("so does the Compendium", not UI.feedButton:IsShown())
+ns.CompendiumUI:Hide()
+Fire(ns.CompendiumUI, "OnHide")
+suite.check("and back again", UI.feedButton:IsShown())
 
 -- Settings.
 ns.SettingsUI:Show()
@@ -287,6 +314,30 @@ Food.buffKnown = nil
 TOOLTIPS[3662] = { "Crocolisk Steak" }
 suite.check("no tooltip yet is not buff food", Food:IsBuffFood(3662) == false)
 suite.check("and is not kept", Food.buffKnown[3662] == nil)
+
+-- A scan with such a food is not kept, so the tooltip is read again once it
+-- loads rather than a minute later.
+Food.buffKnown, Food.buffTries = nil, nil
+bags = { [0] = { [1] = { itemID = 3662, stackCount = 5 } } }
+Food:BagsChanged()
+stacks = Food:Scan()
+suite.check("a scan waiting on a tooltip is not kept", Food.kept == nil)
+suite.check("and listens for the item to load", Food.waitingForNames == true)
+TOOLTIPS[3662] = { "Crocolisk Steak", "Use: Restores 243 health over 21 sec. If you spend at least 10 seconds eating you will become well fed." }
+ns.db.neverFeedBuffFood = true
+stacks = Food:Latest()
+suite.check("once it loads, Never feed it holds", #stacks == 0, #stacks)
+ns.db.neverFeedBuffFood = false
+
+-- A tooltip that never loads is given up on after a few reads, so the bags
+-- are not read again for it forever.
+Food.buffKnown, Food.buffTries = nil, nil
+TOOLTIPS[3662] = { "Crocolisk Steak" }
+for _ = 1, 5 do Food:Scan() end
+suite.check("given up on after a few tries", Food.buffKnown[3662] == false)
+stacks = Food:Scan()
+suite.check("and the scan is kept again", Food.kept ~= nil and not Food.waitingForNames)
+Food.buffKnown, Food.buffTries = nil, nil
 
 -- Without the tooltip call, the use spell's description says.
 _G.C_TooltipInfo = nil

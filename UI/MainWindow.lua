@@ -208,7 +208,7 @@ function UI:PlaceFeedButton(stack, beforeCombat)
     if not button then return end
     if InCombat() and not beforeCombat then return end
 
-    if stack and self.frame and self.frame:IsShown() then
+    if stack and self.frame and self.frame:IsShown() and not UI.Covered() then
         button:SetAttribute("type", "macro")
         button:SetAttribute("macrotext", ns.Food:FeedMacro(stack))
         button:SetText("Feed " .. stack.name)
@@ -223,6 +223,45 @@ function UI:PlaceFeedButton(stack, beforeCombat)
         button:SetAttribute("macrotext", nil)
         self.feedStack = nil
     end
+    self:PlaceVersion()
+end
+
+--- The version sits just above the Feed button while it shows, which would
+--- otherwise cover it, and back in the corner when it goes.
+function UI:PlaceVersion()
+    local version, button = self.versionLabel, self.feedButton
+    if not version then return end
+    version:ClearAllPoints()
+    if button and button:IsShown() then
+        version:SetPoint("BOTTOMRIGHT", button, "TOPRIGHT", 0, 4)
+    else
+        version:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", -PADDING, 14)
+    end
+end
+
+--- Is the Settings window or the Pet Compendium open? The Feed button sits
+--- a layer above every window, so it is put away while either is up, or it
+--- would show through them and take their clicks.
+function UI.Covered()
+    for _, window in ipairs({ ns.SettingsUI, ns.CompendiumUI }) do
+        local frame = window and rawget(window, "frame")
+        if frame then
+            local ok, shown = pcall(frame.IsShown, frame)
+            if ok and shown then return true end
+        end
+    end
+    return false
+end
+
+--- Settings and the Compendium tell the pets window when they open or
+--- close, so the Feed button goes and comes back with them.
+function UI:WatchCover(frame)
+    if not (frame and frame.HookScript) then return end
+    local function Again()
+        if UI.frame and UI.frame:IsShown() then pcall(UI.Refresh, UI) end
+    end
+    frame:HookScript("OnShow", Again)
+    frame:HookScript("OnHide", Again)
 end
 
 --- One line on where the Feed button is, for /bpet food.
@@ -261,7 +300,9 @@ function UI:ShowStatus(status)
         values.foods = PetStatus:FoodText(status)
 
         if status.foods then
-            local stacks = ns.Food:Scan(status)
+            -- The kept scan, unless the bags changed: this runs on every
+            -- pet event and the status check while the window is open.
+            local stacks = ns.Food:Latest(status)
             values.food = ns.Food:Summary(stacks)
             self:PlaceFeedButton(stacks[1])
         else

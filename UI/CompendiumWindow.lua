@@ -27,6 +27,8 @@ local BAR_GAP = 8
 local ROW_HEIGHT = 34
 local VISIBLE = 11
 local SCROLL_WIDTH = 4
+-- The game's knob, in the Blizzard window style, needs room to read as one.
+local BLIZZARD_SCROLL_WIDTH = 10
 
 -- The list's columns: where each starts in a row, and how wide it is.
 local COLUMNS = {
@@ -116,6 +118,8 @@ function CompendiumUI:Build()
     end
 
     self.frame = frame
+    -- The pets window puts its Feed button away while this is open.
+    if ns.UI and ns.UI.WatchCover then ns.UI:WatchCover(frame) end
     self:BuildHeader()
     self:BuildBar()
     self:BuildHeadings()
@@ -302,21 +306,24 @@ function CompendiumUI:BuildList()
     if Theme.Recess then Theme.Recess(well) end
     self.well = well
 
-    self.rows = {}
-    for index = 1, VISIBLE do self.rows[index] = self:BuildRow(index) end
+    local thumb = well:CreateTexture(nil, "OVERLAY")
+    thumb:SetColorTexture(Theme.Unpack("accent", 0.8))
+    -- The game's knob in the Blizzard window style (UI/BlizzardLook.lua),
+    -- which needs a wider bar than the house's thin one or it is squashed
+    -- to a sliver.
+    self.scrollWidth = SCROLL_WIDTH
+    if ns.BlizzardLook and ns.BlizzardLook.Thumb(thumb) then self.scrollWidth = BLIZZARD_SCROLL_WIDTH end
+    thumb:SetWidth(self.scrollWidth)
+    self.thumb = thumb
 
     local track = well:CreateTexture(nil, "ARTWORK")
     track:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PADDING, self.listTop)
-    track:SetSize(SCROLL_WIDTH, VISIBLE * ROW_HEIGHT)
+    track:SetSize(self.scrollWidth, VISIBLE * ROW_HEIGHT)
     track:SetColorTexture(Theme.Unpack("rowAlt"))
     self.track = track
 
-    local thumb = well:CreateTexture(nil, "OVERLAY")
-    thumb:SetWidth(SCROLL_WIDTH)
-    thumb:SetColorTexture(Theme.Unpack("accent", 0.8))
-    -- The game's knob in the Blizzard window style (UI/BlizzardLook.lua).
-    if ns.BlizzardLook then ns.BlizzardLook.Thumb(thumb) end
-    self.thumb = thumb
+    self.rows = {}
+    for index = 1, VISIBLE do self.rows[index] = self:BuildRow(index) end
 
     local empty = Theme.CreateLabel(well, "normal", "muted", "CENTER")
     empty:SetPoint("TOP", frame, "TOP", 0, self.listTop - 60)
@@ -338,7 +345,7 @@ function CompendiumUI:BuildRow(index)
     local row = CreateFrame("Button", nil, self.frame)
     row:SetHeight(ROW_HEIGHT)
     row:SetPoint("TOPLEFT", PADDING, self.listTop - (index - 1) * ROW_HEIGHT)
-    row:SetPoint("TOPRIGHT", -(PADDING + SCROLL_WIDTH + 2), self.listTop - (index - 1) * ROW_HEIGHT)
+    row:SetPoint("TOPRIGHT", -(PADDING + (self.scrollWidth or SCROLL_WIDTH) + 2), self.listTop - (index - 1) * ROW_HEIGHT)
     row.background = Theme.Fill(row, index % 2 == 0 and "rowAlt" or "panel")
     row.rest = index % 2 == 0 and "rowAlt" or "panel"
 
@@ -536,8 +543,12 @@ function CompendiumUI:ShowTooltip(row)
     end
 
     GameTooltip:AddLine(" ")
-    GameTooltip:AddLine(entry.zone and "Click to pin it on your map." or "No place to pin yet.",
-        0.6, 0.6, 0.6)
+    -- Only a beast with a spot can be pinned (Waypoints:Pin); the arrow
+    -- can still point at its zone.
+    local pinText = (entry.zone and entry.x and entry.y) and "Click to pin it on your map."
+        or entry.zone and "No exact spot to pin; Shift-click to point the arrow at its zone."
+        or "No place to pin yet."
+    GameTooltip:AddLine(pinText, 0.6, 0.6, 0.6, true)
     GameTooltip:Show()
 end
 

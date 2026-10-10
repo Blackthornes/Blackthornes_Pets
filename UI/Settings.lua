@@ -49,7 +49,12 @@ function SettingsUI:ResetPositions()
     ns.db.settingsX = nil
     ns.db.settingsY = nil
     self:RestorePosition()
-    if ns.BeastArrowUI and ns.BeastArrowUI.frame then ns.BeastArrowUI:ResetPosition() end
+    if ns.BeastArrowUI and ns.BeastArrowUI.frame then
+        ns.BeastArrowUI:ResetPosition()
+    else
+        -- Not built this session: the saved spot goes, so it starts in place.
+        ns.db.beastArrowX, ns.db.beastArrowY = nil, nil
+    end
 end
 
 --------------------------------------------------------------------------------
@@ -100,6 +105,8 @@ function SettingsUI:Build()
     end
 
     self.frame = frame
+    -- The pets window puts its Feed button away while this is open.
+    if ns.UI and ns.UI.WatchCover then ns.UI:WatchCover(frame) end
     self.controls = {}
 
     self:BuildHeader()
