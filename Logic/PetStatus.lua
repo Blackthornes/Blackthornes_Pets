@@ -99,7 +99,13 @@ function PetStatus:Read()
     local xp, xpMax = Call("GetPetExperience")
     status.xp, status.xpMax = Number(xp), Number(xpMax)
 
-    -- Only hunters' pets have these. A demon may get nils or nothing.
+    -- Only hunters' pets have these. A demon is not asked: the probe found
+    -- Forever answers nothing for its happiness and loyalty, an empty food
+    -- list, and 0, 0 for its training points, which read as a row of
+    -- nothing in the pets window. A class the client will not name is
+    -- read as before.
+    if status.class and status.class ~= "HUNTER" then return status end
+
     local happiness, damage, loyaltyRate = Call("C_PetInfo.GetPetHappiness")
     happiness = Number(happiness)
     if happiness and HAPPINESS[happiness] then

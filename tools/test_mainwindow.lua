@@ -92,7 +92,9 @@ _G.UnitClass = function() return "Warlock", "WARLOCK" end
 _G.UnitName = function() return "Grel'zok" end
 _G.UnitCreatureFamily = function() return "Imp" end
 _G.GetPetExperience = function() return 0, 0 end
-_G.C_PetInfo = { GetPetHappiness = function() return nil end }
+-- Forever answers 0, 0 for a demon's training points (the probe, 2026-09-30).
+_G.C_PetInfo = { GetPetHappiness = function() return nil end,
+    GetPetTrainingPoints = function() return 0, 0 end }
 UI:Refresh()
 suite.check("a demon is named with its family",
     rows.pet.value:GetText() == "Grel'zok, Imp, level 8", rows.pet.value:GetText())

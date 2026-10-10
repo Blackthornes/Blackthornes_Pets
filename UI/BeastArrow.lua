@@ -149,18 +149,23 @@ function ArrowUI:Build()
     self.note = note
 
     frame:SetScript("OnDragStart", function(self)
-        self.dragging = true
+        ArrowUI.dragging = true
         self:StartMoving()
     end)
     frame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
         ArrowUI:SavePosition()
-        -- The button coming up after a drag is not a click.
-        self.dragged = true
+        -- The button coming up after a drag is not a click. Whichever of
+        -- the two the client runs first, the drag is marked while it is
+        -- still going (dragging) and, when OnDragStop comes before the
+        -- button comes up, for that one coming up (dragged); never past it,
+        -- or the next click would be swallowed.
+        if ArrowUI.dragging then ArrowUI.dragged = true end
+        ArrowUI.dragging = nil
     end)
-    frame:SetScript("OnMouseUp", function(self, button)
-        if self.dragged then
-            self.dragged, self.dragging = nil, nil
+    frame:SetScript("OnMouseUp", function(_, button)
+        if ArrowUI.dragged or ArrowUI.dragging then
+            ArrowUI.dragged, ArrowUI.dragging = nil, nil
             return
         end
         ArrowUI:OnClick(button)
