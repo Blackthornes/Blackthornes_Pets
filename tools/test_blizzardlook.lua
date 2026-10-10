@@ -16,9 +16,9 @@ local ns
 
 -- Art the pretend client lacks.
 local missing = {}
--- What SetDesaturated answers: nil as on a client that says nothing,
--- false where it cannot grey a texture.
-local greys = nil
+-- What SetDesaturated answers: true where the client greys the texture,
+-- false where it cannot.
+local greys = true
 
 -- Tests share one Lua state, so the globals replaced here are put back.
 local saved = { CreateFrame = CreateFrame, UIParent = UIParent, CreateColor = CreateColor,
@@ -225,7 +225,7 @@ greys = false
 local _, grey = Dress(ns)
 ring = grey.portrait.regions[1]
 check("a client that cannot grey it tints it silver", ring and ring.vertex and ring.vertex[1], 0.75)
-greys = nil
+greys = true
 check("the game's close button", btrim.closeButton.template, "UIPanelCloseButton")
 btrim.closeButton.scripts.OnClick(btrim.closeButton)
 check("which closes the window", closed.done, true)

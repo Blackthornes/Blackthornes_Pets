@@ -35,6 +35,12 @@ local MAX_WIDTH = 320
 -- Redrawn this often, seconds: smooth to the eye, cheap to run.
 local STEP = 0.03
 
+local function Clock()
+    if type(GetTime) ~= "function" then return 0 end
+    local ok, now = pcall(GetTime)
+    return ok and tonumber(now) or 0
+end
+
 -- Gold while it points the way, green once you are there, pale blue when it
 -- cannot point (far away, no position).
 local TINTS = {
@@ -155,17 +161,16 @@ function ArrowUI:Build()
     frame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
         ArrowUI:SavePosition()
-        -- The button coming up after a drag is not a click. Whichever of
-        -- the two the client runs first, the drag is marked while it is
-        -- still going (dragging) and, when OnDragStop comes before the
-        -- button comes up, for that one coming up (dragged); never past it,
-        -- or the next click would be swallowed.
-        if ArrowUI.dragging then ArrowUI.dragged = true end
+        -- The button coming up after a drag is not a click. The client may
+        -- send OnMouseUp before this, after it, or not at all, so the drop
+        -- is remembered by the moment it happened, never as a flag that
+        -- could swallow the next real click.
         ArrowUI.dragging = nil
+        ArrowUI.droppedAt = Clock()
     end)
     frame:SetScript("OnMouseUp", function(_, button)
-        if ArrowUI.dragged or ArrowUI.dragging then
-            ArrowUI.dragged, ArrowUI.dragging = nil, nil
+        if ArrowUI.dragging or (ArrowUI.droppedAt and ArrowUI.droppedAt == Clock()) then
+            ArrowUI.dragging, ArrowUI.droppedAt = nil, nil
             return
         end
         ArrowUI:OnClick(button)
@@ -211,12 +216,6 @@ end
 --------------------------------------------------------------------------------
 -- Drawing
 --------------------------------------------------------------------------------
-
-local function Clock()
-    if type(GetTime) ~= "function" then return 0 end
-    local ok, now = pcall(GetTime)
-    return ok and tonumber(now) or 0
-end
 
 --------------------------------------------------------------------------------
 -- One arrow at a time

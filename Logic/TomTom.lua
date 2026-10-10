@@ -117,8 +117,9 @@ end
 --- Take our waypoint off TomTom, if there is one.
 function TomTomLink:Clear()
     local uid = self.uid
-    -- A place TomTom dropped or turned down is tried again the next time
-    -- the dial is turned on, or Use TomTom ticked, not only when it moves.
+    -- A place TomTom turned down is offered again after a clearing: the
+    -- arrow turned off and on, or Use TomTom re-ticked, means try again,
+    -- not keep the dial until the place changes.
     self.uid, self.key, self.refused = nil, nil, nil
     if uid == nil then return end
     local tomtom = TomTomLink.Addon()
