@@ -46,6 +46,17 @@ status = PetStatus:Read()
 suite.check("a secret value is left out", status.healthMax == nil and status.name == "Boar")
 _G.UnitHealthMax = nil
 
+-- A warlock's demon: Forever answers 0, 0 for its training points, which
+-- would read as a row of nothing, so a demon is not asked the hunter-only
+-- questions at all.
+_G.UnitClass = function() return "Warlock", "WARLOCK" end
+_G.UnitName = function() return "Grel'zok" end
+_G.C_PetInfo.GetPetTrainingPoints = function() return 0, 0 end
+status = PetStatus:Read()
+suite.check("a demon has no training points", status.exists and status.trainingFree == nil
+    and status.happiness == nil and status.foods == nil, status.trainingFree)
+Hunter()
+
 _G.UnitExists = function() return false end
 suite.check("no pet out", PetStatus:Read().exists == false)
 _G.UnitExists = function() error("secret") end

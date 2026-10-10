@@ -358,4 +358,24 @@ ns.HandleSlash("arrow on")
 ArrowUI:Close()
 suite.check("the red gem turns it off", not Arrow.IsOn())
 
+-- Letting go after a drag is not a click, whichever order the client runs
+-- the two scripts in, and the click after it still counts.
+ns.HandleSlash("arrow on")
+local dial = ArrowUI.frame
+local opened = 0
+ns.CompendiumUI.Show = function() opened = opened + 1 end
+dial:GetScript("OnDragStart")(dial)
+dial:GetScript("OnDragStop")(dial)
+dial:GetScript("OnMouseUp")(dial, "LeftButton")
+suite.check("a drop after a drag (drag stop first) is not a click", opened == 0)
+dial:GetScript("OnMouseUp")(dial, "LeftButton")
+suite.check("and the next click still opens the compendium", opened == 1)
+dial:GetScript("OnDragStart")(dial)
+dial:GetScript("OnMouseUp")(dial, "LeftButton")
+dial:GetScript("OnDragStop")(dial)
+suite.check("a drop after a drag (mouse up first) is not a click either", opened == 1)
+dial:GetScript("OnMouseUp")(dial, "LeftButton")
+suite.check("and the click after that still counts", opened == 2)
+ns.HandleSlash("arrow off")
+
 suite.done()
