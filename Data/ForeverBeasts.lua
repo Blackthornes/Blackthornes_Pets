@@ -75,6 +75,7 @@ ForeverBeasts.SEEN = {
     ["Surf Crawler"] = { zone = "Durotar", x = 62.3, y = 74.5, min = 8, max = 8 },
     ["Swoop"] = { zone = "Mulgore", x = 42.6, y = 47, min = 7, max = 9 },
     ["Taloned Swoop"] = { zone = "Mulgore", x = 62.6, y = 67.1, min = 10, max = 10 },
+    ["Timber Wolf"] = { zone = "Elwynn Forest", x = 47.2, y = 39.2, min = 2, max = 2 },
     ["Vampiric Duskbat"] = { zone = "Tirisfal Glades", x = 46.4, y = 59.6, min = 8, max = 9 },
     ["Venomtail Scorpid"] = { zone = "Durotar", x = 45, y = 22, min = 9, max = 10 },
     ["Vicious Night Web Spider"] = { zone = "Tirisfal Glades", x = 86.7, y = 56.9, min = 9, max = 10 },
@@ -83,6 +84,7 @@ ForeverBeasts.SEEN = {
     ["Worg"] = { zone = "Silverpine Forest", x = 64.7, y = 7.9, min = 10, max = 11 },
     ["Young Night Web Spider"] = { zone = "Tirisfal Glades", x = 28.6, y = 59.1, min = 2, max = 3 },
     ["Young Scavenger"] = { zone = "Tirisfal Glades", x = 29.5, y = 59.9, min = 1, max = 1 },
+    ["Young Wolf"] = { zone = "Elwynn Forest", x = 48, y = 39.6, min = 1, max = 1 },
 }
 
 ForeverBeasts.TAMED = {
