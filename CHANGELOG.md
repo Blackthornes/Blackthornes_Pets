@@ -4,6 +4,27 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.9.0
+
+For WoW: Forever (interface 16001). A file was added, so restart the game
+fully after updating (`/reload` is not enough).
+
+- **Buff food is fed last:** the Feed buttons and the Feed pet key only use
+  food that makes you Well Fed when nothing else the pet eats is in your
+  bags. Settings > Hunter pet > Feeding has a new "Never feed it" tick box
+  (off by default) to leave it out altogether.
+- **Window style:** Settings > General has a new Window style switch.
+  Titanforged stays the default. Blizzard gives the windows the game's own
+  look, with no glows. A change takes effect after a reload.
+- **Pet Compendium:** two more beasts seen on Forever (Timber Wolf and Young
+  Wolf in Elwynn Forest).
+- **Fixes:** buff food is no longer fed before its tooltip has loaded; the
+  pets window's Feed button no longer shows through Settings or the
+  Compendium, or covers the version number; the beast arrow's dial comes back
+  when TomTom drops its waypoint; the compendium offers a pin only where it
+  knows a spot; Put it back resets the arrow too; the minimap button follows
+  the cursor on a resized minimap; and fixes to the Blizzard window style.
+
 ## 0.8.0
 
 For WoW: Forever (interface 16001). A file was added, so restart the game

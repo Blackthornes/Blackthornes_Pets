@@ -12,6 +12,14 @@ is the only report that names players. A version with no section here posts
 nothing in #general.
 This file does not ship in the addon.
 
+## 0.9.0
+
+- Your pet now eats food that buffs you last, so you keep it for yourself. You can also tell it to never eat that food.
+- You can pick a new window look that matches the game's own windows. The gold look is still the default.
+- The Feed button doesn't get in the way of other windows anymore, plus a few other fixes.
+
+Thanks Ezmode for the buff food idea!
+
 ## 0.8.0
 
 Hey everyone! A new Pets update just went up.
