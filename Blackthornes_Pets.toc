@@ -23,6 +23,7 @@ Data\ForeverBeasts.lua
 
 Logic\PetStatus.lua
 Logic\Food.lua
+Logic\Butler.lua
 Logic\Taming.lua
 Logic\TameRecord.lua
 Logic\Waypoints.lua
