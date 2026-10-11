@@ -253,8 +253,27 @@ suite.check("the bar sits above the rows", UI.grip:GetFrameLevel() > UI.frame:Ge
 GetCursorPosition = oldCursor
 UI:ScrollTo(0)
 
-UI.familyStepper.plus:GetScript("OnClick")()
-suite.check("the family chooser picks a family", ns.db.compendium.family == UI.families[1])
+-- The family dropdown.
+local picker = UI.familyDropdown
+suite.check("the family picker starts on every family", picker:GetValue() == false)
+suite.check("and lists every family after All families", #picker.options == #UI.families + 1
+    and picker.options[1].text == "All families", #picker.options)
+picker:GetScript("OnMouseDown")(picker)
+suite.check("a click opens its menu", picker.menu:IsShown())
+local shownEntries = 0
+for _, entry in ipairs(picker.entries) do if entry:IsShown() then shownEntries = shownEntries + 1 end end
+suite.check("a long list shows 12 at a time", shownEntries == math.min(12, #picker.options), shownEntries)
+picker.entries[2]:GetScript("OnClick")()
+suite.check("picking one filters by that family", ns.db.compendium.family == UI.families[1]
+    and UI.lines[1].family == UI.families[1], ns.db.compendium.family)
+suite.check("and closes the menu", not picker.menu:IsShown())
+suite.check("the box names the family", picker:GetValue() == UI.families[1])
+picker:GetScript("OnMouseDown")(picker)
+picker.menu:GetScript("OnMouseWheel")(picker.menu, -1)
+picker.entries[1]:GetScript("OnClick")()
+suite.check("All families clears it", ns.db.compendium.family == nil, ns.db.compendium.family)
+picker:GetScript("OnMouseDown")(picker)
+picker.entries[2]:GetScript("OnClick")()
 
 UI.rows[1]:GetScript("OnEnter")(UI.rows[1])
 local text = table.concat(GameTooltip._lines, "\n")

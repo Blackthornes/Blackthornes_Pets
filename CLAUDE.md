@@ -63,7 +63,10 @@ family, so turning it round barely moved anything with a box ticked).
 Every heading follows the house rule: a click sorts, a second turns it
 round, a third goes back to by beast (`CompendiumUI:SortBy`), whatever
 is ticked. The list's scroll bar takes the mouse (`CompendiumUI.grip`,
-wider than it looks), so holding it drags the list, never the window. Before a release, fold
+wider than it looks), so holding it drags the list, never the window. The
+family picker is a dropdown (`Widgets.CreateDropdown`, Tradeskills'
+trimmed to one choice; a player asked, the owner agreed 2026-10-11),
+sized to its longest family by `Widgets.DropdownWidth`. Before a release, fold
 in the owner's tames and the latest Farmer harvest by rerunning
 `forever_beasts.py`. The map pin is Equipment's `Logic/Waypoints.lua`.
 Beside it: settings, a minimap
@@ -263,8 +266,10 @@ plain rows with a blue bar for the one picked) and puts out the halos;
 a title tab where the plate sits, a silver-ringed portrait and the game's
 `UIPanelCloseButton`, with the same trim fields); and the widgets call
 `BlizzardLook.Button`, `.Checkbox` and `.Thumb` (the compendium's scroll
-thumb) to wear the game's own texture files. Pets has no hanging tabs or
-dropdown, so its Settings row is a stepper like Text size; the Feed
+thumb) to wear the game's own texture files. Pets has no hanging tabs, and
+its one dropdown (the compendium's family picker) is drawn in the
+theme's colours, which the Blizzard style recolours, so its Settings row
+is a stepper like Text size; the Feed
 buttons wear the game's red too, their secure setup untouched.
 It never touches a Blizzard frame. Each file is checked once
 (`BlizzardLook.HasArt`); a client without one keeps that widget in the

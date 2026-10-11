@@ -198,6 +198,16 @@ function CompendiumUI:OnBeastArrowChanged()
     end
 end
 
+--- The family dropdown's choices: every family first, then each family in
+--- name order. `false` stands for every family.
+function CompendiumUI:FamilyOptions()
+    local options = { { text = L["All families"], value = false } }
+    for _, name in ipairs(ns.Compendium:Families()) do
+        options[#options + 1] = { text = name, value = name }
+    end
+    return options
+end
+
 --- The option bar: the family chooser and the search on one line, the tick
 --- boxes under them.
 function CompendiumUI:BuildBar()
@@ -208,21 +218,18 @@ function CompendiumUI:BuildBar()
     familyLabel:SetPoint("TOPLEFT", PADDING, top - 4)
     familyLabel:SetText(L["Family"])
 
-    -- 0 is every family; 1 and up are the families in name order.
-    local family = Widgets.CreateStepper(frame, {
-        min = 0, max = 999, step = 1, value = 0,
-        format = function(value)
-            return CompendiumUI.families and CompendiumUI.families[value] or L["All families"]
-        end,
-        onChange = function(value)
-            CompendiumUI:Options().family = CompendiumUI.families[value]
-            CompendiumUI.offset = 0
-            CompendiumUI:Refresh()
-        end,
-    })
-    family:SetWidth(170)
+    -- A dropdown of every family (a player asked, the owner agreed
+    -- 2026-10-11; it was a stepper that went one family at a time), wide
+    -- enough for the longest name in either language.
+    local options = self:FamilyOptions()
+    local family = Widgets.CreateDropdown(frame, options, function(value)
+        CompendiumUI:Options().family = value or nil
+        CompendiumUI.offset = 0
+        CompendiumUI:Refresh()
+    end, { width = Widgets.DropdownWidth(options, 170) })
     family:SetPoint("LEFT", familyLabel, "RIGHT", 8, 0)
-    self.familyStepper = family
+    family:SetValue(false)
+    self.familyDropdown = family
 
     local search = Widgets.CreateSearchBox(frame, L["Search beasts, zones or skills"], function(text)
         CompendiumUI.searchText = text
@@ -729,23 +736,16 @@ end
 function CompendiumUI:SyncControls()
     local o = self:Options()
     self.families = ns.Compendium:Families()
-    local index = 0
-    for i, name in ipairs(self.families) do
-        if name == o.family then index = i end
+    local known = false
+    for _, name in ipairs(self.families) do
+        if name == o.family then known = true end
     end
-    if o.family and index == 0 then o.family = nil end
-    -- The stepper's range follows the families there are.
-    local stepper = self.familyStepper
-    stepper.minus:SetScript("OnClick", function()
-        if (stepper.value or 0) > 0 then stepper:SetValue(stepper.value - 1) end
-    end)
-    stepper.plus:SetScript("OnClick", function()
-        if (stepper.value or 0) < #self.families then stepper:SetValue(stepper.value + 1) end
-    end)
-    stepper.value = index
-    stepper.text:SetText(self.families[index] or L["All families"])
-    stepper.minus:SetLabelColor(index <= 0 and "dim" or nil)
-    stepper.plus:SetLabelColor(index >= #self.families and "dim" or nil)
+    if o.family and not known then o.family = nil end
+    -- The choices follow the families there are, rebuilt only when that
+    -- list changed (a tame can add one), not on every redraw.
+    local dropdown = self.familyDropdown
+    if #dropdown.options ~= #self.families + 1 then dropdown:SetOptions(self:FamilyOptions()) end
+    dropdown:SetValue(o.family or false)
 
     for key, box in pairs(self.ticks) do box:SetChecked(o[key] == true) end
     self:PaintHeadings()
