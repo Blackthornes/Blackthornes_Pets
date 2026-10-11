@@ -171,6 +171,10 @@ an ID will do:
 - A tame keeps `familyID` (`UnitCreatureFamily`'s second value, 5 for
   Boar in the first probe, the same numbers as Classic's families) beside
   the client's family name, and the compendium goes by the ID.
-- Not fixed: the map pin and the beast arrow find a zone's map by its
-  English name (`Waypoints:MapFor`, `GetRealZoneText`), so on a German
-  client they find no map. That file is Equipment's copy; fix both.
+- Zones: the client names maps in its language, the data in English.
+  `Logic/Waypoints.lua` (Equipment's copy, changed with it) keeps
+  Classic's map IDs for the data's zones (`Waypoints.ZONE_MAPS`), asked
+  only off an English client (`GetLocale`) and after the name: `MapFor`
+  falls back on the ID, and `Waypoints:DataZone` turns the client's zone
+  name into the data's for the beast arrow (`BeastArrow:Here`) and a
+  tame's home (`TameRecord:Where`).

@@ -143,6 +143,46 @@ ns.db.tamedBeasts[999002] = { name = "Alte Eule", level = 10, family = "Eule", s
 ns.Compendium:Invalidate()
 suite.check("an old record keeps its family name", ns.Compendium:Get(999002).family == "Eule")
 
+-- Zones: the client names its maps in German, the data in English.
+local Waypoints = ns.Waypoints
+local MAPS = {
+    [947] = { name = "Azeroth" },
+    [1415] = { name = "Östliche Königreiche", parentMapID = 947 },
+    [1429] = { name = "Wald von Elwynn", parentMapID = 1415 },
+    [1436] = { name = "Westfall", parentMapID = 1415 },
+}
+_G.C_Map = {
+    GetBestMapForUnit = function() return 1429 end,
+    GetMapInfo = function(id) return MAPS[id] end,
+    GetMapChildrenInfo = function(id)
+        local out = {}
+        for mapID, info in pairs(MAPS) do
+            if info.parentMapID == id then out[#out + 1] = { name = info.name, mapID = mapID } end
+        end
+        return out
+    end,
+    GetPlayerMapPosition = function()
+        return { GetXY = function() return 0.4, 0.6 end }
+    end,
+}
+_G.GetRealZoneText = function() return "Wald von Elwynn" end
+
+suite.check("an English client keeps the client's name",
+    Waypoints:DataZone("Wald von Elwynn") == "Wald von Elwynn")
+_G.GetLocale = function() return "deDE" end
+suite.check("a German zone name turns English", Waypoints:DataZone("Wald von Elwynn") == "Elwynn Forest")
+suite.check("by the map it names", Waypoints:DataZone("Wald von Elwynn", 1429) == "Elwynn Forest")
+suite.check("a name the data knows stays", Waypoints:DataZone("Westfall") == "Westfall")
+suite.check("the map pin finds the zone by its ID", Waypoints:MapFor("Elwynn Forest") == 1429)
+suite.check("and by name where the names agree", Waypoints:MapFor("Westfall") == 1436)
+local here = ns.BeastArrow:Here()
+suite.check("the arrow knows the zone it is in", here and here.zone == "Elwynn Forest", here and here.zone)
+local zone, x, y = ns.TameRecord:Where()
+suite.check("a tame is placed under the data's zone name", zone == "Elwynn Forest" and x == 40 and y == 60, zone)
+local target = ns.BeastArrow:Target({ name = "Wolf", zone = "Elwynn Forest" }, here)
+suite.check("a beast with no spot in this zone is about this zone", target.here == true)
+
+_G.C_Map, _G.GetRealZoneText, _G.GetLocale = nil, nil, nil
 _G.C_Container, _G.C_Item, _G.C_PetInfo, _G.C_TooltipInfo, _G.C_Spell = nil, nil, nil, nil, nil
 _G.UnitClass, _G.UnitExists, _G.UnitName, _G.UnitLevel = nil, nil, nil, nil
 _G.UnitGUID, _G.UnitCreatureFamily, _G.GetPetActionInfo, _G.GetTime = nil, nil, nil, nil

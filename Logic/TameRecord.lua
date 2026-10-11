@@ -109,7 +109,11 @@ function TameRecord:Where()
     local map = _G.C_Map
     if type(map) ~= "table" then return nil end
     local mapID = Call(map.GetBestMapForUnit, "player")
-    if type(mapID) ~= "number" then return Call(_G.GetZoneText), nil, nil end
+    if type(mapID) ~= "number" then
+        local zone = Call(_G.GetZoneText)
+        if type(zone) == "string" and zone ~= "" and ns.Waypoints then zone = ns.Waypoints:DataZone(zone) end
+        return zone, nil, nil
+    end
 
     local zone
     local info = Call(map.GetMapInfo, mapID)
@@ -130,6 +134,8 @@ function TameRecord:Where()
         y = math.floor(py * 1000 + 0.5) / 10
     end
     if type(zone) ~= "string" or zone == "" then zone = nil end
+    -- Kept by the data's English name, on a client in another language too.
+    if zone and ns.Waypoints then zone = ns.Waypoints:DataZone(zone, mapID) or zone end
     return zone, x, y
 end
 

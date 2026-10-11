@@ -229,7 +229,9 @@ function BeastArrow:Here()
 
     local here = { map = mapID, x = x, y = y }
     here.continent, here.north, here.west = BeastArrow.WorldPos(mapID, x, y)
+    -- By the data's English name, on a client in another language too.
     here.zone = Plain(Read(_G.GetRealZoneText))
+    if here.zone and ns.Waypoints then here.zone = ns.Waypoints:DataZone(here.zone) end
     return here
 end
 
