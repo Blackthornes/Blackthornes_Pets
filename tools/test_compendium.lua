@@ -263,6 +263,36 @@ ns.db.tamedBeasts = { [2850] = { name = "Broken Tooth", level = 37, skills = {} 
 suite.check("an old tame gets its speed when called out", ns.TameRecord:NoteSpeed() == 1.5
     and ns.db.tamedBeasts[2850].speed == 1.5)
 suite.check("only once", ns.TameRecord:NoteSpeed() == nil)
+
+-- A speed (or anything else) learned while the compendium is open shows at
+-- once: the list is built again and the window drawn again.
+ns.db.tamedBeasts = { [2850] = { name = "Broken Tooth", level = 37, skills = {} } }
+C:Invalidate()
+ns.db.compendium.family, ns.db.compendium.raresOnly = nil, false
+ns.db.compendium.tameNow, ns.db.compendium.newSkills = false, false
+ns.HandleSlash("compendium Broken Tooth")
+suite.check("the open window shows Classic's speed first",
+    UI.lines[1] and UI.lines[1].id == 2850 and not UI.lines[1].speedSeen)
+ns.TameRecord:NoteSpeed()
+suite.check("and the tamed speed as soon as it is noted",
+    UI.lines[1] and UI.lines[1].speed == 1.5 and UI.lines[1].speedSeen == true,
+    UI.lines[1] and UI.lines[1].speed)
+
+-- Taming a beast already recorded with more skills keeps the old record but
+-- still adds what it lacked, and the open window shows it.
+ns.db.tamedBeasts = { [2850] = { name = "Broken Tooth", level = 37,
+    skills = { { name = "Bite", rank = 1, spell = 1 }, { name = "Dash", rank = 1, spell = 2 } } } }
+C:Invalidate()
+UI:Refresh()
+_G.UnitExists = function(unit) return unit == "pet" end
+_G.GetPetActionInfo = function() end
+ns.TameRecord.pending = { npcID = 2850, name = "Broken Tooth", level = 37, at = GetTime and GetTime() or 0 }
+local kept = ns.TameRecord:Capture()
+suite.check("a longer old record is kept", kept and #kept.skills == 2)
+suite.check("but learns the speed it lacked", kept and kept.speed == 1.5)
+suite.check("which the open window shows", UI.lines[1] and UI.lines[1].speedSeen == true)
+_G.UnitExists, _G.GetPetActionInfo = nil, nil
+ns.CompendiumUI:Hide()
 ns.db.tamedBeasts = nil
 _G.UnitGUID, _G.UnitAttackSpeed, _G.InCombatLockdown = nil, nil, nil
 

@@ -38,6 +38,15 @@ local function Now()
     return (type(GetTime) == "function" and GetTime()) or 0
 end
 
+--- A record was added or learned something: the Pet Compendium builds its
+--- list again, and an open compendium window shows it now rather than on
+--- its next click.
+local function Changed()
+    if ns.Compendium then ns.Compendium:Invalidate() end
+    local window = ns.CompendiumUI
+    if window and window.Refresh then pcall(window.Refresh, window) end
+end
+
 local function SpellName(id)
     return Call(C_Spell and C_Spell.GetSpellName, id)
 end
@@ -195,11 +204,20 @@ function TameRecord:Capture()
     if old and type(old.skills) == "table" and #old.skills > #skills then
         -- Kept, but a record from before the Compendium learns where the
         -- beast lives and what it is.
+        local learned = false
         if not old.zone and pending.zone then
             old.zone, old.x, old.y = pending.zone, pending.x, pending.y
+            learned = true
         end
-        old.family = old.family or Call(_G.UnitCreatureFamily, "pet")
-        old.speed = old.speed or self:PetSpeed()
+        if not old.family then
+            old.family = Call(_G.UnitCreatureFamily, "pet")
+            learned = learned or old.family ~= nil
+        end
+        if not old.speed then
+            old.speed = self:PetSpeed()
+            learned = learned or old.speed ~= nil
+        end
+        if learned then Changed() end
         return old
     end
 
@@ -216,7 +234,7 @@ function TameRecord:Capture()
         speed = self:PetSpeed(),
     }
     store[pending.npcID] = record
-    if ns.Compendium then ns.Compendium:Invalidate() end
+    Changed()
     ns.Print(("recorded what %s teaches: %s"):format(record.name or "the beast",
         #skills > 0 and self:SkillText(skills) or "nothing"))
     return record
@@ -250,7 +268,7 @@ function TameRecord:NoteSpeed()
     local speed = self:PetSpeed()
     if not speed then return nil end
     record.speed = speed
-    if ns.Compendium then ns.Compendium:Invalidate() end
+    Changed()
     return speed
 end
 
