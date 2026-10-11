@@ -202,7 +202,8 @@ L["Only beasts whose taming teaches a skill this hunter has not got."] =
     "Nur Wildtiere, deren Zähmung eine Fertigkeit lehrt, die dieser Jäger noch nicht hat."
 L["Only beasts WoW: Forever has shown: seen, tamed or named by a Forever guide."] =
     "Nur Wildtiere, die WoW: Forever gezeigt hat: gesehen, gezähmt oder von einem Forever-Leitfaden genannt."
-L["Click again to turn the order round."] = "Noch ein Klick dreht die Reihenfolge um."
+L["Click again to turn the order round, and a third time to go back to sorting by beast."] =
+    "Noch ein Klick dreht die Reihenfolge um, ein dritter sortiert wieder nach Wildtier."
 L["Beast"] = "Wildtier"
 L["Sort by beast"] = "Nach Wildtier sortieren"
 L["Family"] = "Familie"
@@ -211,8 +212,8 @@ L["Level"] = "Stufe"
 L["Sort by level"] = "Nach Stufe sortieren"
 L["Speed"] = "Tempo"
 L["Sort by speed"] = "Nach Tempo sortieren"
-L["Seconds between its bites and claws: lower is faster. Sorts fastest first, family by family."] =
-    "Sekunden zwischen seinen Bissen und Klauenhieben: weniger ist schneller. Sortiert die schnellsten zuerst, Familie für Familie."
+L["Seconds between its bites and claws: lower is faster. Sorts fastest first."] =
+    "Sekunden zwischen seinen Bissen und Klauenhieben: weniger ist schneller. Sortiert die schnellsten zuerst."
 L["Where"] = "Wo"
 L["Sort by where"] = "Nach Ort sortieren"
 L["Teaches"] = "Lehrt"

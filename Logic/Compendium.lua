@@ -277,15 +277,11 @@ local SORTS = {
         if (a.zone or "") ~= (b.zone or "") then return (a.zone or "~") < (b.zone or "~") end
         return nil
     end,
-    -- Fastest first within each family, so the top of each family's run
-    -- is the quickest pet of that kind.
-    speed = function(a, b, descending)
-        if (a.family or "~") ~= (b.family or "~") then
-            local before = (a.family or "~") < (b.family or "~")
-            if descending then return not before end
-            return before
-        end
+    -- Fastest first across every family (a player wanted the quickest pets
+    -- at the top); beasts as fast as each other stay together by family.
+    speed = function(a, b)
         if a.speed ~= b.speed then return a.speed < b.speed end
+        if (a.family or "~") ~= (b.family or "~") then return (a.family or "~") < (b.family or "~") end
         return nil
     end,
     rank = function(a, b)
@@ -315,20 +311,16 @@ function Compendium:List(filter)
 
     local first = SORTS[filter.sort] or SORTS.name
     local descending = filter.descending
-    -- What a beast lacks for the sort, it goes last for, either way round
-    -- (for speed, last in its family).
+    -- What a beast lacks for the sort, it goes last for, either way round.
     local field = ({ level = "min", family = "family", zone = "zone", rank = "rank",
         speed = "speed" })[filter.sort]
     table.sort(out, function(a, b)
-        if field and (a[field] == nil) ~= (b[field] == nil)
-            and (filter.sort ~= "speed" or a.family == b.family) then
+        if field and (a[field] == nil) ~= (b[field] == nil) then
             return b[field] == nil
         end
         local x, y = a, b
         if descending then x, y = b, a end
-        -- Speed keeps the families in name order either way round; only the
-        -- order within each family turns.
-        local result = first(x, y, descending)
+        local result = first(x, y)
         if result ~= nil then return result end
         if (a.min or 999) ~= (b.min or 999) then return (a.min or 999) < (b.min or 999) end
         if a.name ~= b.name then return a.name < b.name end

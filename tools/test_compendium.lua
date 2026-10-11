@@ -125,7 +125,7 @@ suite.check("one teaching something new stays", #newSkills > 0)
 ns.charDB.beastTraining = nil
 
 
--- Attack speed: Classic's swing time, fastest first within each family, and
+-- Attack speed: Classic's swing time, fastest first, and
 -- a tamed pet's real speed winning.
 local tooth
 for _, entry in ipairs(C:All()) do
@@ -134,22 +134,32 @@ end
 suite.check("Broken Tooth carries Classic's 1.0 speed", tooth and tooth.speed == 1, tooth and tooth.speed)
 suite.check("written as players write it", C.SpeedText(tooth) == "1.0", C.SpeedText(tooth))
 suite.check("1.25 keeps both places", C.SpeedText({ speed = 1.25 }) == "1.25")
-local fast = C:List({ sort = "speed" })
-local ordered, lastFamily, lastSpeed, families = true, nil, nil, {}
-for _, entry in ipairs(fast) do
-    if entry.family ~= lastFamily then
-        if entry.family and families[entry.family] then ordered = false end
-        if entry.family then families[entry.family] = true end
-        lastFamily, lastSpeed = entry.family, nil
+-- Fastest first across every family, beasts of no known speed last, and
+-- turned round the slowest first, with or without a box ticked.
+local function Ordered(list, slowFirst)
+    local last, seenNil = nil, false
+    for _, entry in ipairs(list) do
+        if entry.speed == nil then
+            seenNil = true
+        elseif seenNil then
+            return false
+        elseif last and (slowFirst and entry.speed > last or not slowFirst and entry.speed < last) then
+            return false
+        end
+        last = entry.speed or last
     end
-    if entry.speed then
-        if lastSpeed and entry.speed < lastSpeed then ordered = false end
-        lastSpeed = entry.speed
-    elseif lastSpeed == nil then
-        lastSpeed = nil
-    end
+    return true
 end
-suite.check("speed sorts fastest first, family by family", ordered)
+local fast = C:List({ sort = "speed" })
+suite.check("speed sorts fastest first", Ordered(fast) and fast[1].speed == 1, fast[1].speed)
+local slow = C:List({ sort = "speed", descending = true })
+suite.check("and turned round, slowest first", Ordered(slow, true) and slow[1].speed > fast[1].speed)
+for _, box in ipairs({ "foreverOnly", "raresOnly" }) do
+    local up = C:List({ sort = "speed", [box] = true })
+    local down = C:List({ sort = "speed", [box] = true, descending = true })
+    suite.check("with " .. box .. " ticked it still turns round", #up > 1 and Ordered(up)
+        and Ordered(down, true) and up[1].speed ~= down[1].speed, #up)
+end
 local cats = C:List({ sort = "speed", family = "Cat" })
 suite.check("the fastest cat comes first", cats[1].name == "Broken Tooth", cats[1].name)
 local slowCats = C:List({ sort = "speed", family = "Cat", descending = true })
@@ -205,6 +215,43 @@ UI:SortBy("level")
 suite.check("a heading sorts", ns.db.compendium.sort == "level" and not ns.db.compendium.descending)
 UI:SortBy("level")
 suite.check("and again turns it round", ns.db.compendium.descending == true)
+UI:SortBy("level")
+suite.check("a third time goes back to sorting by beast",
+    ns.db.compendium.sort == "name" and not ns.db.compendium.descending)
+ns.db.compendium.foreverOnly, ns.db.compendium.raresOnly = true, false
+UI:SortBy("speed")
+local fastest = UI.lines[1]
+UI:SortBy("speed")
+suite.check("with Seen on Forever ticked, Speed turns round", ns.db.compendium.descending == true
+    and UI.lines[1] ~= fastest and (UI.lines[1].speed or 0) > (fastest.speed or 0))
+ns.db.compendium.foreverOnly, ns.db.compendium.raresOnly = false, before
+UI:Refresh()
+
+-- The scroll bar: holding it drags the list, not the window.
+UI.grip._top = 400
+suite.check("the bar catches the mouse", UI.grip:IsShown())
+local oldCursor = GetCursorPosition
+GetCursorPosition = function() return 0, 400 - 2 end
+UI:ScrollTo(0)
+UI.grip:GetScript("OnMouseDown")(UI.grip, "LeftButton")
+suite.check("catching the thumb holds it", UI.offset == 0 and UI.grip:GetScript("OnUpdate"))
+GetCursorPosition = function() return 0, 400 - 2 - 374 / 2 end
+UI.grip:GetScript("OnUpdate")(UI.grip)
+local most = #UI.lines - 11
+suite.check("dragging it scrolls the list", UI.offset > most * 0.3 and UI.offset < most * 0.7, UI.offset)
+GetCursorPosition = function() return 0, 0 end
+UI.grip:GetScript("OnUpdate")(UI.grip)
+suite.check("and no further than the end", UI.offset == most, UI.offset)
+UI.grip:GetScript("OnMouseUp")(UI.grip)
+suite.check("letting go stops it", UI.grip:GetScript("OnUpdate") == nil)
+GetCursorPosition = function() return 0, 400 - 370 end
+UI:ScrollTo(0)
+UI.grip:GetScript("OnMouseDown")(UI.grip, "LeftButton")
+suite.check("a click lower on the bar jumps there", UI.offset > most * 0.8, UI.offset)
+UI.grip:GetScript("OnMouseUp")(UI.grip)
+suite.check("the bar sits above the rows", UI.grip:GetFrameLevel() > UI.frame:GetFrameLevel())
+GetCursorPosition = oldCursor
+UI:ScrollTo(0)
 
 UI.familyStepper.plus:GetScript("OnClick")()
 suite.check("the family chooser picks a family", ns.db.compendium.family == UI.families[1])
