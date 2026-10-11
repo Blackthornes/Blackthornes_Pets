@@ -133,6 +133,20 @@ suite.check("without a GUID the beast's name is enough",
     Record:Capture() ~= nil and ns.db.tamedBeasts[4515] ~= nil)
 ns.db.tamedBeasts[4514], ns.db.tamedBeasts[4515] = nil, nil
 
+-- The beast arrow was following the beast just tamed: it is put away.
+ns.charDB.arrowBeast = 9999
+target.guid, target.name = "Creature-0-1-2-3-4516-00001", "Broken Tooth"
+pet.guid, pet.name = nil, "Broken Tooth"
+Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
+Record:Capture()
+suite.check("an arrow following another beast keeps it", ns.charDB.arrowBeast == 9999)
+ns.charDB.arrowBeast = 4516
+Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
+Record:Capture()
+suite.check("taming the beast it follows puts the arrow away", ns.charDB.arrowBeast == nil)
+suite.check("and says so", env.ChatText():find("tamed Broken Tooth, arrow put away.", 1, true), env.ChatText())
+ns.db.tamedBeasts[4516] = nil
+
 -- The tooltip answers from the record, and finds Classic's teach spell.
 local skills = Taming:SkillsFor(4512)
 suite.check("a recorded beast's skills come from the record",

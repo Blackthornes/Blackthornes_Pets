@@ -102,7 +102,10 @@ arrow) brought over as a copy, and `tools/make_arrow_art.py` draws the same
 points at the compendium's spot, so Forever's wins where there is one, and
 never makes up a coordinate. Off by default (`beastArrow`, account wide;
 spot `beastArrowX`/`beastArrowY`); the compendium's Arrow button, `/bpet
-arrow` and a Settings row turn it on. A fix to the dial belongs in all
+arrow` and a Settings row turn it on. Taming the beast it follows puts it
+away (`BeastArrow:Tamed`, from `TameRecord:Capture`, by NPC ID or name;
+the owner, 2026-10-11): `arrowBeast` is cleared and chat says "tamed X,
+arrow put away." A fix to the dial belongs in all
 three addons. Not yet seen in game; `/bpet arrow check` reports what it
 reads.
 

@@ -49,7 +49,8 @@ to it: a gold dial that turns as you turn, with the distance in yards and a
 green check once you are there. A beast with a zone and no spot points at
 the middle of the zone and says so. The compendium's **Arrow** button,
 `/bpet arrow` or Settings shows or hides it; its red gem closes it, and it
-hides inside dungeons. It is Farmer's goal arrow and Equipment's quest
+hides inside dungeons. Tame the beast it points at and it puts itself away.
+It is Farmer's goal arrow and Equipment's quest
 arrow brought over, and only one of the three is on screen at a time: the
 one aimed last shows, and the others wait until it is put away.
 With TomTom installed, the beast arrow hands its place to TomTom as a

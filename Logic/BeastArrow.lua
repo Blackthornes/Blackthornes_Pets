@@ -118,6 +118,24 @@ function BeastArrow:Clear()
     self:Changed()
 end
 
+--- A beast was just tamed (TameRecord:Capture): if the arrow was following
+--- it, its job is done, so it is put away (the owner, 2026-10-11: the
+--- addons should finish what they start). Matched by NPC ID, else by name.
+--- True when it was.
+function BeastArrow:Tamed(npcID, name)
+    local followed = ns.charDB and tonumber(ns.charDB.arrowBeast)
+    if not followed then return false end
+    local entry = self:Beast()
+    local same = tonumber(npcID) == followed
+    if not same and type(name) == "string" and entry and type(entry.name) == "string" then
+        same = entry.name:lower() == name:lower()
+    end
+    if not same then return false end
+    self:Clear()
+    ns.Print(("tamed %s, arrow put away."):format(name or (entry and entry.name) or "your beast"))
+    return true
+end
+
 --------------------------------------------------------------------------------
 -- Where the player is
 --------------------------------------------------------------------------------
