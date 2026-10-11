@@ -7,6 +7,7 @@
 -- the item's level, and so how much good it does, comes from the client.
 
 local _, ns = ...
+local L = ns.L
 
 local Food = ns.NewModule("Food")
 
@@ -22,9 +23,9 @@ Food.LOW_FOOD = LOW_FOOD
 -- The classic rule: within 10 levels it does its full good, then half, then
 -- little, and from 30 levels below the pet will not eat it at all.
 local EFFECTS = {
-    { below = 10, key = "full", label = "full" },
-    { below = 20, key = "half", label = "half" },
-    { below = 30, key = "low", label = "little" },
+    { below = 10, key = "full", label = L["full"] },
+    { below = 20, key = "half", label = L["half"] },
+    { below = 30, key = "low", label = L["little"] },
 }
 
 --- How well food of `itemLevel` feeds a pet of `petLevel`: "full", "half",
@@ -42,7 +43,7 @@ function Food:EffectLabel(key)
     for _, effect in ipairs(EFFECTS) do
         if effect.key == key then return effect.label end
     end
-    return "refused"
+    return L["refused"]
 end
 
 --------------------------------------------------------------------------------
@@ -214,12 +215,14 @@ function Food:Inspect(bag, slot, info, status, eats)
     local itemID = Plain(info.itemID)
     local diet = ns.PetFood.DietOf(itemID, name)
     if not diet then return nil, "not in the food list", name, level end
-    if not eats[diet] then return nil, ("%s, which it does not eat"):format(diet), name, level end
+    if not eats[diet] then
+        return nil, L.Format("%s, which it does not eat", ns.PetFood.Label(diet)), name, level
+    end
     local effect = self:Effect(level, status.level)
-    if effect == "refused" then return nil, "too low level", name, level end
+    if effect == "refused" then return nil, L["too low level"], name, level end
     local buff, unsure = self:IsBuffFood(itemID)
     if unsure then RequestItem(itemID) end
-    if buff and NeverBuffFood() then return nil, "buff food, which you chose never to feed", name, level end
+    if buff and NeverBuffFood() then return nil, L["buff food, which you chose never to feed"], name, level end
     return {
         bag = bag, slot = slot, itemID = itemID, buff = buff or nil, buffUnsure = unsure or nil,
         name = name, level = level, diet = diet, effect = effect,
@@ -331,13 +334,13 @@ end
 --- "Tough Jerky (full), 34 in bags" or "None in your bags", for the window.
 function Food:Summary(stacks)
     if #stacks == 0 then
-        return ("|c%sNone in your bags|r"):format(ns.COLORS.bad)
+        return ("|c%s%s|r"):format(ns.COLORS.bad, L["None in your bags"])
     end
     local best = stacks[1]
     local total = self:Count(stacks)
-    local text = ("%s (%s), %d in bags"):format(best.name, self:EffectLabel(best.effect), total)
+    local text = L.Format("%s (%s), %d in bags", best.name, self:EffectLabel(best.effect), total)
     if total < LOW_FOOD then
-        text = text .. (", |c%srunning low|r"):format(ns.COLORS.warn)
+        text = text .. (", |c%s%s|r"):format(ns.COLORS.warn, L["running low"])
     end
     return text
 end
@@ -369,9 +372,9 @@ function Food:CheckLow(status, stacks)
     self.warnedLow = true
     local message
     if total == 0 then
-        message = ("You have no food %s will eat."):format(status.name or "your pet")
+        message = L.Format("You have no food %s will eat.", status.name or L["your pet"])
     else
-        message = ("Only %d food left that %s will eat."):format(total, status.name or "your pet")
+        message = L.Format("Only %d food left that %s will eat.", total, status.name or L["your pet"])
     end
     ns.Warn(message)
     ns.PetStatus:Alert(message)
@@ -411,16 +414,16 @@ end
 function Food:Report()
     local status = ns.PetStatus:Read()
     if not status.exists then
-        ns.Print("food: no pet out.")
+        ns.Print(L["food: no pet out."])
         return
     end
     if not status.foods then
-        ns.Print("food: the client did not say what your pet eats.")
+        ns.Print(L["food: the client did not say what your pet eats."])
         return
     end
 
     local eats = ns.PetFood.Eats(status.foods)
-    ns.Print(("food: %s (level %s) eats %s"):format(status.name or "your pet",
+    ns.Print(L.Format("food: %s (level %s) eats %s", status.name or L["your pet"],
         tostring(status.level or "?"), table.concat(status.foods, ", ")))
 
     local slots, items, found = 0, 0, 0
@@ -433,19 +436,20 @@ function Food:Report()
             if info then
                 items = items + 1
                 local stack, why, name, level = self:Inspect(bag, slot, info, status, eats)
-                local label = ("%s%s"):format(name or ("item " .. tostring(Plain(info.itemID) or "?")),
-                    level and (" (level " .. level .. ")") or "")
+                local label = ("%s%s"):format(name or L.Format("item %s", tostring(Plain(info.itemID) or "?")),
+                    level and L.Format(" (level %s)", level) or "")
                 if stack then
                     found = found + stack.count
                     ns.PrintRaw(("  |c%s%s|r  %s x%d, %s%s"):format(ns.COLORS.good, label,
-                        stack.diet, stack.count, self:EffectLabel(stack.effect),
-                        stack.buff and ", buff food (fed last)" or ""))
+                        ns.PetFood.Label(stack.diet), stack.count, self:EffectLabel(stack.effect),
+                        stack.buff and L[", buff food (fed last)"] or ""))
                 elseif why == "not in the food list" then
                     if not seen[name] then
                         seen[name] = true
                         unlisted[#unlisted + 1] = name
                     end
                 else
+                    if why == "no name from the client" then why = L["no name from the client"] end
                     ns.PrintRaw(("  |c%s%s|r  %s"):format(ns.COLORS.muted, label, why))
                 end
             end
@@ -456,24 +460,24 @@ function Food:Report()
     -- Data/PetFood.lua, this is where it shows up.
     if #unlisted > 0 then
         table.sort(unlisted)
-        ns.PrintRaw(("  |c%snot in the food list:|r %s"):format(ns.COLORS.muted, table.concat(unlisted, ", ")))
+        ns.PrintRaw(("  |c%s%s|r %s"):format(ns.COLORS.muted, L["not in the food list:"], table.concat(unlisted, ", ")))
     end
 
     if slots == 0 then
-        ns.Print("food: could not read your bags on this client.")
+        ns.Print(L["food: could not read your bags on this client."])
     else
-        ns.Print(("food: %d items in %d slots, %d pieces your pet will eat."):format(
+        ns.Print(L.Format("food: %d items in %d slots, %d pieces your pet will eat.",
             items, slots, found))
     end
     if ns.UI and ns.UI.FeedButtonState then
-        ns.Print("food: " .. ns.UI:FeedButtonState() .. ".")
+        ns.Print(L.Format("food: %s.", ns.UI:FeedButtonState()))
     end
     if ns.FeedKey then
-        ns.Print("food: " .. ns.FeedKey:State())
+        ns.Print(L.Format("food: %s", ns.FeedKey:State()))
     end
 end
 
-ns.RegisterCommand("food", "list the food in your bags and whether your pet will eat it (reads only)", function()
+ns.RegisterCommand("food", L["list the food in your bags and whether your pet will eat it (reads only)"], function()
     Food:Report()
 end)
 

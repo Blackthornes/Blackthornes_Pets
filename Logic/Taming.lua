@@ -15,6 +15,7 @@
 -- from the spell check is only as good as that check, so the tooltip says so.
 
 local _, ns = ...
+local L = ns.L
 
 local Taming = ns.NewModule("Taming")
 
@@ -41,7 +42,7 @@ end
 
 --- "Bite (Rank 3)", the way the game writes it.
 function Taming.Label(skill)
-    return ("%s (Rank %d)"):format(skill.name, skill.rank)
+    return L.Format("%s (Rank %d)", skill.name, skill.rank)
 end
 
 local function Key(name, rank)
@@ -229,15 +230,15 @@ function Taming:KnownList()
     return out
 end
 
-ns.RegisterCommand("taming", "list the pet skills this hunter knows", function()
+ns.RegisterCommand("taming", L["list the pet skills this hunter knows"], function()
     local known = Taming:KnownList()
     if #known == 0 then
-        ns.Print("no pet skills known yet. Open Beast Training once so the list can be read.")
+        ns.Print(L["no pet skills known yet. Open Beast Training once so the list can be read."])
     else
-        ns.Print(("pet skills known (%d): %s"):format(#known, table.concat(known, ", ")))
+        ns.Print(L.Format("pet skills known (%d): %s", #known, table.concat(known, ", ")))
     end
     if not Taming:HasRecord() then
-        ns.PrintRaw(("  |c%sBeast Training has not been opened on this character yet.|r")
-            :format(ns.COLORS.muted))
+        ns.PrintRaw(("  |c%s%s|r"):format(ns.COLORS.muted,
+            L["Beast Training has not been opened on this character yet."]))
     end
 end)

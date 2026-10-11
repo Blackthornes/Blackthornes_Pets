@@ -17,6 +17,7 @@
 -- Logic/TomTom.lua does the same for the goal arrow.
 
 local _, ns = ...
+local L = ns.L
 
 local TomTomLink = ns.NewModule("TomTom")
 
@@ -141,10 +142,10 @@ end
 function TomTomLink:Command(word)
     if word == "on" or word == "off" then self:SetOn(word == "on") else self:SetOn(not TomTomLink.IsOn()) end
     if not TomTomLink.IsOn() then
-        ns.Print("TomTom not used: the beast arrow shows its own dial.")
+        ns.Print(L["TomTom not used: the beast arrow shows its own dial."])
     elseif TomTomLink.Installed() then
-        ns.Print("TomTom used: its arrow shows the beast arrow's place.")
+        ns.Print(L["TomTom used: its arrow shows the beast arrow's place."])
     else
-        ns.Print("TomTom will be used once it is installed.")
+        ns.Print(L["TomTom will be used once it is installed."])
     end
 end

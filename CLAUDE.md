@@ -187,6 +187,41 @@ fits its fullest page, so no page scrolls. Add a setting with
 `pages:Section(page, column, "HEADING")` in `UI/Settings.lua`; every
 `/bpet` command has a button there.
 
+## German translation
+
+The owner said yes (2026-10-11) to a German translation, piloted here
+before the other four. Players are told the language as "Deutsch", or
+"Deutsch (German)" where English readers need it; the code names stay
+`deDE` and `Locale/deDE.lua`.
+
+- **English is the key and the fallback.** `Locale/Locale.lua` (first in
+  the TOC) makes `ns.L`, whose missing keys answer the key itself, so
+  `L["Feed"]` is "Feed" until a translation fills it in. `L.Format(key,
+  ...)` is `string.format` on the translation, and puts values named by
+  place (`%2$s ... %1$d`) in order where German word order needs them,
+  since the tests' Lua 5.1 cannot.
+- **Adding a string:** write it as `L["English text"]` or
+  `L.Format("English %s", value)`, a literal where it is written (a key
+  built at run time cannot be checked), add its line to `Locale/deDE.lua`
+  (informal "du" and the game's own German words: Begleiter, Wildtier,
+  Zähmen, Tierausbildung, Futter, Stufe, Meter), and run
+  `python tools/check_locale.py`, which lists keys with no German line and
+  German lines no longer used. It only warns (the tests workflow runs it
+  as a warning); keep it at 0 missing. `tools/test_locale.lua` loads the
+  addon as a German client.
+- **Left in English on purpose:** slash command words, saved and internal
+  keys, anything compared against data, data names (beasts, families,
+  zones; skill and item names come from the client), `Probe/` output, the
+  arrow check and debug lines (they are for us), `/bpet tamed`'s paste
+  lines, and spell names a macro casts.
+- German runs about 30% longer: buttons grow to fit, settings rows wrap,
+  and a new fixed width must wrap or grow, never end in "...".
+- `Locale/Locale.lua` and `tools/check_locale.py` are meant to be the same
+  in all five addons; once the others have them, a fix to either belongs
+  in all five. `Core/SisterNote.lua`, `UI/SettingsPages.lua` and
+  `UI/Titanforged.lua` read `ns.L` with an English stand-in, so they still
+  work unchanged in an addon without `Locale/`.
+
 ## The house frame (Titanforged)
 
 The owner picked this look for all four addons on 2026-10-04 from two mockups

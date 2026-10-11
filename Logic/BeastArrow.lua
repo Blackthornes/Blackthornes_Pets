@@ -21,6 +21,7 @@
 -- and inside a pcall; inside a dungeon the arrow hides.
 
 local _, ns = ...
+local L = ns.L
 
 local BeastArrow = ns.NewModule("BeastArrow")
 
@@ -132,7 +133,7 @@ function BeastArrow:Tamed(npcID, name)
     end
     if not same then return false end
     self:Clear()
-    ns.Print(("tamed %s, arrow put away."):format(name or (entry and entry.name) or "your beast"))
+    ns.Print(L.Format("tamed %s, arrow put away.", name or (entry and entry.name) or L["your beast"]))
     return true
 end
 
@@ -316,10 +317,10 @@ end
 function BeastArrow.Yards(yards)
     local whole = math.floor(yards + 0.5)
     if whole >= 1000 then
-        return ("%d,%03d yd"):format(math.floor(whole / 1000), whole % 1000)
+        return L.Format("%d,%03d yd", math.floor(whole / 1000), whole % 1000)
     end
     if whole >= 100 then whole = math.floor(whole / 10 + 0.5) * 10 end
-    return ("%d yd"):format(whole)
+    return L.Format("%d yd", whole)
 end
 
 
@@ -361,13 +362,15 @@ end
 --- The note under the place: where the spot comes from, or why there is
 --- none.
 function BeastArrow.Note(target, entry)
-    if entry and entry.instance then return "Inside " .. (entry.instance == "raid" and "a raid" or "a dungeon"), "muted" end
-    if target.far then return "Far from here: head for " .. (target.zone or "it"), "muted" end
-    if target.here then return "No exact spot known in this zone", "accent" end
-    if target.area then return "The middle of the zone: no exact spot known", "accent" end
+    if entry and entry.instance then
+        return entry.instance == "raid" and L["Inside a raid"] or L["Inside a dungeon"], "muted"
+    end
+    if target.far then return L.Format("Far from here: head for %s", target.zone or L["it"]), "muted" end
+    if target.here then return L["No exact spot known in this zone"], "accent" end
+    if target.area then return L["The middle of the zone: no exact spot known"], "accent" end
     local why = ns.Compendium and ns.Compendium.ForeverText and ns.Compendium.ForeverText(entry)
     if why then return why, "good" end
-    return "Where it lived in Classic", "muted"
+    return L["Where it lived in Classic"], "muted"
 end
 
 --- Everything the dial needs for this moment:
@@ -407,19 +410,19 @@ function BeastArrow:State(clock)
 
     if target.far then
         state.mode = "far"
-        state.distance = target.zone or "Far away"
+        state.distance = target.zone or L["Far away"]
         return state
     end
     if target.here then
         state.mode = "here"
-        state.distance = "In " .. (target.zone or "this zone")
+        state.distance = L.Format("In %s", target.zone or L["this zone"])
         return state
     end
 
     local north, west = BeastArrow.Offset(here, target.map, target.mx, target.my, target)
     if not north then
         state.mode = "far"
-        state.distance = target.zone or "Far away"
+        state.distance = target.zone or L["Far away"]
         return state
     end
 
@@ -431,7 +434,7 @@ function BeastArrow:State(clock)
 
     if not target.area and yards <= ARRIVED then
         state.mode = "arrived"
-        state.distance = "You're there"
+        state.distance = L["You're there"]
         return state
     end
 
@@ -492,16 +495,16 @@ local function Status()
     if BeastArrow.IsOn() then
         local entry = BeastArrow:Beast()
         if entry then
-            ns.Print(("beast arrow on, pointing at %s."):format(entry.name or "?"))
+            ns.Print(L.Format("beast arrow on, pointing at %s.", entry.name or "?"))
         else
-            ns.Print("beast arrow on. Shift-click a beast in the Pet Compendium for it to point at.")
+            ns.Print(L["beast arrow on. Shift-click a beast in the Pet Compendium for it to point at."])
         end
     else
-        ns.Print("beast arrow off. /bpet arrow on shows it.")
+        ns.Print(L["beast arrow off. /bpet arrow on shows it."])
     end
 end
 
-ns.RegisterCommand("arrow", "an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, reset)", function(rest)
+ns.RegisterCommand("arrow", L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, reset)"], function(rest)
     local word = (rest or ""):lower():match("^%s*(%a*)") or ""
     if word == "" then
         BeastArrow:SetOn(not BeastArrow.IsOn())
@@ -511,15 +514,15 @@ ns.RegisterCommand("arrow", "an arrow to a beast from the Pet Compendium (on, of
         Status()
     elseif word == "clear" then
         BeastArrow:Clear()
-        ns.Print("beast arrow is not following a beast now.")
+        ns.Print(L["beast arrow is not following a beast now."])
     elseif word == "check" then
         ns.KeepCheck("arrow check", BeastArrow.Check, BeastArrow)
     elseif word == "tomtom" then
         ns.TomTom:Command((rest or ""):lower():match("^%s*%a+%s+(%a+)"))
     elseif word == "reset" then
         if ns.BeastArrowUI and ns.BeastArrowUI.ResetPosition then ns.BeastArrowUI:ResetPosition() end
-        ns.Print("beast arrow put back where it started.")
+        ns.Print(L["beast arrow put back where it started."])
     else
-        ns.Print("/bpet arrow on, off, clear, check, tomtom or reset.")
+        ns.Print(L["/bpet arrow on, off, clear, check, tomtom or reset."])
     end
 end)

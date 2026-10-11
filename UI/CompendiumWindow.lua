@@ -12,6 +12,7 @@
 -- choices are kept, account wide, in BlackthornesPetsDB.compendium.
 
 local _, ns = ...
+local L = ns.L
 
 local CompendiumUI = ns.NewModule("CompendiumUI")
 
@@ -32,13 +33,13 @@ local BLIZZARD_SCROLL_WIDTH = 10
 
 -- The list's columns: where each starts in a row, and how wide it is.
 local COLUMNS = {
-    { key = "name", label = "Beast", x = 10, width = 186 },
-    { key = "family", label = "Family", x = 200, width = 88 },
-    { key = "level", label = "Level", x = 292, width = 48 },
-    { key = "speed", label = "Speed", x = 344, width = 46,
-      tip = "Seconds between its bites and claws: lower is faster. Sorts fastest first, family by family." },
-    { key = "zone", label = "Where", x = 394, width = 180 },
-    { key = "skills", label = "Teaches", x = 578, width = 188 },
+    { key = "name", label = L["Beast"], sortTip = L["Sort by beast"], x = 10, width = 186 },
+    { key = "family", label = L["Family"], sortTip = L["Sort by family"], x = 200, width = 88 },
+    { key = "level", label = L["Level"], sortTip = L["Sort by level"], x = 292, width = 48 },
+    { key = "speed", label = L["Speed"], sortTip = L["Sort by speed"], x = 344, width = 46,
+      tip = L["Seconds between its bites and claws: lower is faster. Sorts fastest first, family by family."] },
+    { key = "zone", label = L["Where"], sortTip = L["Sort by where"], x = 394, width = 180 },
+    { key = "skills", label = L["Teaches"], x = 578, width = 188 },
 }
 
 -- A pet's usual swing time; quicker is green, slower amber.
@@ -97,7 +98,7 @@ function CompendiumUI:Build()
 
     if ns.Titanforged then
         local trim = ns.Titanforged:Dress(frame, {
-            title = "Pet Compendium",
+            title = L["Pet Compendium"],
             portrait = true,
             close = function() CompendiumUI:Hide() end,
         })
@@ -139,8 +140,8 @@ function CompendiumUI:Build()
     hint:SetPoint("BOTTOMLEFT", PADDING, 12)
     hint:SetWidth(WIDTH - PADDING * 2)
     hint:SetWordWrap(true)
-    hint:SetText(("Click a beast to pin it on your map, Shift-click to point the arrow at it. %s marks what WoW: Forever has shown; "
-        .. "the rest is Classic 1.12."):format(Colored("good", "Forever")))
+    hint:SetText(L.Format("Click a beast to pin it on your map, Shift-click to point the arrow at it. %s marks what WoW: Forever has shown; the rest is Classic 1.12.",
+        Colored("good", "Forever")))
     self.hint = hint
 
     frame:Hide()
@@ -165,20 +166,20 @@ function CompendiumUI:BuildHeader()
     subtitle:SetPoint("LEFT", header, "LEFT", 48, -4)
     self.subtitle = subtitle
 
-    local settings = Widgets.CreateButton(header, "Settings", function()
+    local settings = Widgets.CreateButton(header, L["Settings"], function()
         if ns.SettingsUI then ns.SettingsUI:Toggle() end
     end, { width = 70, height = 20 })
     settings:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
 
     -- The beast arrow: lit green while it is up.
-    local arrow = Widgets.CreateButton(header, "Arrow", function()
+    local arrow = Widgets.CreateButton(header, L["Arrow"], function()
         if ns.BeastArrow then ns.HandleSlash(ns.BeastArrow.IsOn() and "arrow off" or "arrow on") end
     end, { width = 60, height = 20 })
     arrow:SetPoint("RIGHT", settings, "LEFT", -8, 0)
     arrow:HookScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
-        GameTooltip:AddLine("Beast arrow", Theme.Unpack("accent"))
-        GameTooltip:AddLine("A dial that turns as you turn, pointing the way to a beast. Shift-click a beast to aim it. Click again to hide it.",
+        GameTooltip:AddLine(L["Beast arrow"], Theme.Unpack("accent"))
+        GameTooltip:AddLine(L["A dial that turns as you turn, pointing the way to a beast. Shift-click a beast to aim it. Click again to hide it."],
             1, 1, 1, true)
         GameTooltip:Show()
     end)
@@ -202,13 +203,13 @@ function CompendiumUI:BuildBar()
 
     local familyLabel = Theme.CreateLabel(frame, "small", "muted")
     familyLabel:SetPoint("TOPLEFT", PADDING, top - 4)
-    familyLabel:SetText("Family")
+    familyLabel:SetText(L["Family"])
 
     -- 0 is every family; 1 and up are the families in name order.
     local family = Widgets.CreateStepper(frame, {
         min = 0, max = 999, step = 1, value = 0,
         format = function(value)
-            return CompendiumUI.families and CompendiumUI.families[value] or "All families"
+            return CompendiumUI.families and CompendiumUI.families[value] or L["All families"]
         end,
         onChange = function(value)
             CompendiumUI:Options().family = CompendiumUI.families[value]
@@ -220,7 +221,7 @@ function CompendiumUI:BuildBar()
     family:SetPoint("LEFT", familyLabel, "RIGHT", 8, 0)
     self.familyStepper = family
 
-    local search = Widgets.CreateSearchBox(frame, "Search beasts, zones or skills", function(text)
+    local search = Widgets.CreateSearchBox(frame, L["Search beasts, zones or skills"], function(text)
         CompendiumUI.searchText = text
         CompendiumUI.offset = 0
         CompendiumUI:Refresh()
@@ -230,13 +231,13 @@ function CompendiumUI:BuildBar()
     self.search = search
 
     local ticks = {
-        { key = "tameNow", text = "Tameable now",
-          tip = "Only beasts at or below your level, so you can tame them today." },
-        { key = "raresOnly", text = "Rares only", tip = "Only rare and rare elite beasts." },
-        { key = "newSkills", text = "Teaches me something new",
-          tip = "Only beasts whose taming teaches a skill this hunter has not got." },
-        { key = "foreverOnly", text = "Seen on Forever",
-          tip = "Only beasts WoW: Forever has shown: seen, tamed or named by a Forever guide." },
+        { key = "tameNow", text = L["Tameable now"],
+          tip = L["Only beasts at or below your level, so you can tame them today."] },
+        { key = "raresOnly", text = L["Rares only"], tip = L["Only rare and rare elite beasts."] },
+        { key = "newSkills", text = L["Teaches me something new"],
+          tip = L["Only beasts whose taming teaches a skill this hunter has not got."] },
+        { key = "foreverOnly", text = L["Seen on Forever"],
+          tip = L["Only beasts WoW: Forever has shown: seen, tamed or named by a Forever guide."] },
     }
     self.ticks = {}
     local previous
@@ -287,9 +288,9 @@ function CompendiumUI:BuildHeadings()
             heading:SetScript("OnEnter", function(self)
                 self.label:SetTextColor(Theme.Unpack("accentHi"))
                 GameTooltip:SetOwner(self, "ANCHOR_TOP")
-                GameTooltip:AddLine(("Sort by %s"):format(column.label:lower()), 1, 1, 1)
+                GameTooltip:AddLine(column.sortTip, 1, 1, 1)
                 if column.tip then GameTooltip:AddLine(column.tip, 0.9, 0.9, 0.9, true) end
-                GameTooltip:AddLine("Click again to turn the order round.", 0.9, 0.9, 0.9, true)
+                GameTooltip:AddLine(L["Click again to turn the order round."], 0.9, 0.9, 0.9, true)
                 GameTooltip:Show()
             end)
             heading:SetScript("OnLeave", function()
@@ -409,7 +410,7 @@ local Compendium = function() return ns.Compendium end
 function CompendiumUI.SkillText(skills)
     local parts = {}
     for i, skill in ipairs(skills) do
-        local text = ns.Taming.Label(skill):gsub(" %(Rank (%d+)%)", " %1")
+        local text = ("%s %d"):format(skill.name, skill.rank)
         local known = ns.Taming:Knows(skill)
         if known == true then
             text = Colored("good", text)
@@ -434,12 +435,12 @@ function CompendiumUI:NameText(entry)
 end
 
 function CompendiumUI:ZoneText(entry)
-    if not entry.zone then return Colored("dim", "Not known yet") end
+    if not entry.zone then return Colored("dim", L["Not known yet"]) end
     local where = entry.zone
     if entry.x and entry.y then
         where = where .. "\n" .. Colored("dim", ("%.1f, %.1f"):format(entry.x, entry.y))
     elseif entry.instance then
-        where = where .. "\n" .. Colored("dim", entry.instance == "raid" and "Raid" or "Dungeon")
+        where = where .. "\n" .. Colored("dim", entry.instance == "raid" and L["Raid"] or L["Dungeon"])
     end
     return where
 end
@@ -454,7 +455,7 @@ function CompendiumUI:SpeedCell(entry)
     elseif entry.speed > USUAL_SPEED then
         text = Colored("warn", text)
     end
-    if entry.speedSeen then text = text .. "\n" .. Colored("good", "tamed") end
+    if entry.speedSeen then text = text .. "\n" .. Colored("good", L["tamed"]) end
     return text
 end
 
@@ -465,14 +466,14 @@ function CompendiumUI:FillRow(row, entry, level)
         return
     end
     row.name:SetText(self:NameText(entry))
-    row.family:SetText(entry.family or Colored("dim", "Not known yet"))
+    row.family:SetText(entry.family or Colored("dim", L["Not known yet"]))
     local levelText = Compendium().LevelText(entry)
     if Compendium():CanTame(entry, level) == false then levelText = Colored("loss", levelText) end
     row.level:SetText(levelText)
     row.speed:SetText(self:SpeedCell(entry))
     row.zone:SetText(self:ZoneText(entry))
     local skills = Compendium():Skills(entry)
-    row.skills:SetText(#skills > 0 and self.SkillText(skills) or Colored("dim", "Nothing"))
+    row.skills:SetText(#skills > 0 and self.SkillText(skills) or Colored("dim", L["Nothing"]))
     row:Show()
 end
 
@@ -481,11 +482,11 @@ function CompendiumUI:AimArrow(entry)
     local arrow = ns.BeastArrow
     if not arrow then return false end
     if arrow:Follow(entry) then
-        ns.Print(("beast arrow pointing at %s. Its red gem, /bpet arrow off or Settings hides it."):format(
-            entry.name or "it"))
+        ns.Print(L.Format("beast arrow pointing at %s. Its red gem, /bpet arrow off or Settings hides it.",
+            entry.name or L["it"]))
         return true
     end
-    ns.Print(("where %s lives is not known yet, so the arrow cannot point at it."):format(entry.name or "it"))
+    ns.Print(L.Format("where %s lives is not known yet, so the arrow cannot point at it.", entry.name or L["it"]))
     return false
 end
 
@@ -500,30 +501,37 @@ function CompendiumUI:ShowTooltip(row)
 
     local kind = {}
     if C.RankText(entry) then kind[#kind + 1] = C.RankText(entry) end
-    kind[#kind + 1] = entry.family or "Family not known yet"
+    kind[#kind + 1] = entry.family or L["Family not known yet"]
     GameTooltip:AddLine(table.concat(kind, " "), 1, 1, 1)
-    if entry.diet then GameTooltip:AddLine("Eats " .. entry.diet, 0.9, 0.9, 0.9, true) end
+    if entry.diet then
+        -- The data's diet words ("Meat, Fish") as players read them.
+        local words = {}
+        for word in entry.diet:gmatch("[^,]+") do
+            words[#words + 1] = ns.PetFood.Label((word:gsub("^%s+", ""):gsub("%s+$", "")))
+        end
+        GameTooltip:AddLine(L.Format("Eats %s", table.concat(words, ", ")), 0.9, 0.9, 0.9, true)
+    end
 
     local levelText = C.LevelText(entry)
     if levelText ~= "" then
         local can = C:CanTame(entry)
         if can == true then
-            GameTooltip:AddLine(("Level %s. You can tame it now."):format(levelText), Theme.Unpack("good"))
+            GameTooltip:AddLine(L.Format("Level %s. You can tame it now.", levelText), Theme.Unpack("good"))
         elseif can == false then
-            GameTooltip:AddLine(("Level %s. You can tame it from level %d."):format(levelText, entry.min),
+            GameTooltip:AddLine(L.Format("Level %s. You can tame it from level %d.", levelText, entry.min),
                 Theme.Unpack("loss"))
         else
-            GameTooltip:AddLine("Level " .. levelText, 1, 1, 1)
+            GameTooltip:AddLine(L.Format("Level %s", levelText), 1, 1, 1)
         end
     end
 
     local speed = C.SpeedText(entry)
     if speed then
-        local where = entry.speedSeen and "read off a tamed pet on Forever" or "Classic data"
+        local where = entry.speedSeen and L["read off a tamed pet on Forever"] or L["Classic data"]
         local key = entry.speed < USUAL_SPEED and "good" or entry.speed > USUAL_SPEED and "warn" or "text"
-        GameTooltip:AddLine(("Attack speed %s (%s)"):format(speed, where), Theme.Unpack(key))
+        GameTooltip:AddLine(L.Format("Attack speed %s (%s)", speed, where), Theme.Unpack(key))
         if entry.speedSeen and entry.classicSpeed and entry.classicSpeed ~= entry.speed then
-            GameTooltip:AddLine(("Classic said %s."):format(C.SpeedText({ speed = entry.classicSpeed })),
+            GameTooltip:AddLine(L.Format("Classic said %s.", C.SpeedText({ speed = entry.classicSpeed })),
                 0.7, 0.7, 0.7, true)
         end
     end
@@ -532,31 +540,31 @@ function CompendiumUI:ShowTooltip(row)
     if entry.zone then
         GameTooltip:AddLine(C.PlaceText(entry), 1, 1, 1, true)
     else
-        GameTooltip:AddLine("Where it lives is not known yet.", 0.9, 0.9, 0.9, true)
+        GameTooltip:AddLine(L["Where it lives is not known yet."], 0.9, 0.9, 0.9, true)
     end
     if entry.zone then
-        GameTooltip:AddLine("Shift-click to point the arrow at it.", Theme.Unpack("accent"))
+        GameTooltip:AddLine(L["Shift-click to point the arrow at it."], Theme.Unpack("accent"))
     end
     if entry.also and #entry.also > 0 then
-        GameTooltip:AddLine("Also in " .. table.concat(entry.also, ", "), 0.9, 0.9, 0.9, true)
+        GameTooltip:AddLine(L.Format("Also in %s", table.concat(entry.also, ", ")), 0.9, 0.9, 0.9, true)
     end
     if entry.spawns and entry.spawns > 1 and entry.x then
-        GameTooltip:AddLine(("%d spawn points; the spot shown is near the middle."):format(entry.spawns),
+        GameTooltip:AddLine(L.Format("%d spawn points; the spot shown is near the middle.", entry.spawns),
             0.7, 0.7, 0.7, true)
     end
     local respawn = C.RespawnText(entry)
-    if respawn then GameTooltip:AddLine("Comes back after " .. respawn, 0.9, 0.9, 0.9, true) end
+    if respawn then GameTooltip:AddLine(L.Format("Comes back after %s", respawn), 0.9, 0.9, 0.9, true) end
 
     local skills = C:Skills(entry)
     GameTooltip:AddLine(" ")
     if #skills == 0 then
-        GameTooltip:AddLine("Taming it teaches nothing new.", 0.9, 0.9, 0.9, true)
+        GameTooltip:AddLine(L["Taming it teaches nothing new."], 0.9, 0.9, 0.9, true)
     else
-        GameTooltip:AddLine("Taming it teaches", Theme.Unpack("accent"))
+        GameTooltip:AddLine(L["Taming it teaches"], Theme.Unpack("accent"))
         for _, skill in ipairs(skills) do
             local known = ns.Taming:Knows(skill)
             local key = known == true and "good" or known == false and "loss" or "text"
-            local tail = known == true and "  (known)" or known == false and "  (not known)" or ""
+            local tail = known == true and ("  " .. L["(known)"]) or known == false and ("  " .. L["(not known)"]) or ""
             GameTooltip:AddLine("  " .. ns.Taming.Label(skill) .. tail, Theme.Unpack(key))
         end
     end
@@ -567,20 +575,20 @@ function CompendiumUI:ShowTooltip(row)
         GameTooltip:AddLine(forever, Theme.Unpack("good"))
         local classic = entry.classic
         if classic and classic.zone and classic.zone ~= entry.zone then
-            GameTooltip:AddLine(("Classic had it in %s."):format(classic.zone), 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine(L.Format("Classic had it in %s.", classic.zone), 0.7, 0.7, 0.7, true)
         end
         if entry.source then
             local site = entry.source:match("^https?://([^/]+)") or entry.source
-            GameTooltip:AddLine("Source: " .. site:gsub("^www%.", ""), 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine(L.Format("Source: %s", (site:gsub("^www%.", ""))), 0.7, 0.7, 0.7, true)
         end
     end
 
     GameTooltip:AddLine(" ")
     -- Only a beast with a spot can be pinned (Waypoints:Pin); the arrow
     -- can still point at its zone.
-    local pinText = (entry.zone and entry.x and entry.y) and "Click to pin it on your map."
-        or entry.zone and "No exact spot to pin; Shift-click to point the arrow at its zone."
-        or "No place to pin yet."
+    local pinText = (entry.zone and entry.x and entry.y) and L["Click to pin it on your map."]
+        or entry.zone and L["No exact spot to pin; Shift-click to point the arrow at its zone."]
+        or L["No place to pin yet."]
     GameTooltip:AddLine(pinText, 0.6, 0.6, 0.6, true)
     GameTooltip:Show()
 end
@@ -658,7 +666,7 @@ function CompendiumUI:SyncControls()
         if (stepper.value or 0) < #self.families then stepper:SetValue(stepper.value + 1) end
     end)
     stepper.value = index
-    stepper.text:SetText(self.families[index] or "All families")
+    stepper.text:SetText(self.families[index] or L["All families"])
     stepper.minus:SetLabelColor(index <= 0 and "dim" or nil)
     stepper.plus:SetLabelColor(index >= #self.families and "dim" or nil)
 
@@ -676,16 +684,16 @@ function CompendiumUI:Refresh()
     self:Draw()
 
     local level = ns.Compendium:PlayerLevel()
-    self.subtitle:SetText(level and ("Beasts a hunter can tame. You are level %d."):format(level)
-        or "Beasts a hunter can tame.")
+    self.subtitle:SetText(level and L.Format("Beasts a hunter can tame. You are level %d.", level)
+        or L["Beasts a hunter can tame."])
 
     local shown, total = #self.lines, #ns.Compendium:All()
     self.empty:SetShown(shown == 0)
-    self.empty:SetText("No beast matches. Untick a box or clear the search.")
+    self.empty:SetText(L["No beast matches. Untick a box or clear the search."])
     if shown == total then
-        self.footer:SetText(("%d beasts"):format(total))
+        self.footer:SetText(L.Format("%d beasts", total))
     else
-        self.footer:SetText(("%d of %d beasts"):format(shown, total))
+        self.footer:SetText(L.Format("%d of %d beasts", shown, total))
     end
 end
 
@@ -730,7 +738,7 @@ function CompendiumUI:Toggle()
     end
 end
 
-ns.RegisterCommand("compendium", "open the Pet Compendium: every beast you can tame", function(rest)
+ns.RegisterCommand("compendium", L["open the Pet Compendium: every beast you can tame"], function(rest)
     if type(rest) == "string" and rest:match("%S") then
         CompendiumUI.searchText = rest:match("^%s*(.-)%s*$")
         CompendiumUI:Show()

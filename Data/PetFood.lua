@@ -15,6 +15,7 @@
 -- as before.
 
 local _, ns = ...
+local L = ns.L
 
 local DIETS = {
     Meat = {
@@ -156,6 +157,17 @@ local DIET_WORDS = {
     Obst = "Fruit", Pilz = "Fungus", Pilze = "Fungus",
 }
 
+-- Each diet's name as players read it, in their language.
+local LABELS = {
+    Meat = L["Meat"], Fish = L["Fish"], Bread = L["Bread"], Cheese = L["Cheese"],
+    Fruit = L["Fruit"], Fungus = L["Fungus"],
+}
+
+--- A diet key ("Meat") as players read it.
+local function Label(diet)
+    return LABELS[diet] or diet
+end
+
 -- item ID -> diet, and English name -> diet for a food with no ID.
 local byID, byName = {}, {}
 for diet, foods in pairs(DIETS) do
@@ -203,4 +215,5 @@ ns.PetFood = {
     Diet = Diet,
     DietOf = DietOf,
     Eats = Eats,
+    Label = Label,
 }

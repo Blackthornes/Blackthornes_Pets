@@ -13,6 +13,7 @@
 -- Classic table's, because what the game showed beats what 1.12 said.
 
 local _, ns = ...
+local L = ns.L
 
 local TameRecord = ns.NewModule("TameRecord")
 
@@ -264,8 +265,8 @@ function TameRecord:Capture()
     }
     store[pending.npcID] = record
     Changed()
-    ns.Print(("recorded what %s teaches: %s"):format(record.name or "the beast",
-        #skills > 0 and self:SkillText(skills) or "nothing"))
+    ns.Print(L.Format("recorded what %s teaches: %s", record.name or L["the beast"],
+        #skills > 0 and self:SkillText(skills) or L["nothing"]))
     return record
 end
 
@@ -355,12 +356,12 @@ function TameRecord:Lines()
     return lines
 end
 
-ns.RegisterCommand("tamed", "list the beasts you have tamed and what each taught", function()
+ns.RegisterCommand("tamed", L["list the beasts you have tamed and what each taught"], function()
     local lines = TameRecord:Lines()
     if #lines == 0 then
-        ns.Print("no tamed beasts recorded yet. Tame one and it is written down.")
+        ns.Print(L["no tamed beasts recorded yet. Tame one and it is written down."])
         return
     end
-    ns.Print(("tamed beasts recorded (%d):"):format(#lines))
+    ns.Print(L.Format("tamed beasts recorded (%d):", #lines))
     for _, line in ipairs(lines) do ns.PrintRaw("  " .. line) end
 end)

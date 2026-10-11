@@ -8,6 +8,7 @@
 -- combat anyway.
 
 local _, ns = ...
+local L = ns.L
 
 local FeedButton = ns.NewModule("FeedButton")
 
@@ -27,7 +28,7 @@ end
 function FeedButton:Build()
     if self.button then return self.button end
 
-    local button = ns.Widgets.CreateButton(UIParent, "Feed", nil, {
+    local button = ns.Widgets.CreateButton(UIParent, L["Feed"], nil, {
         name = "BlackthornesPetsQuickFeed",
         template = "SecureActionButtonTemplate",
         primary = true,
@@ -40,9 +41,9 @@ function FeedButton:Build()
         local stack = FeedButton.stack
         if not (stack and GameTooltip) then return end
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-        GameTooltip:AddLine(("Feed %s"):format(stack.name))
-        GameTooltip:AddLine(("%s is %s."):format(FeedButton.petName or "Your pet",
-            FeedButton.mood or "hungry"), 0.7, 0.7, 0.7)
+        GameTooltip:AddLine(L.Format("Feed %s", stack.name))
+        GameTooltip:AddLine(L.Format("%s is %s.", FeedButton.petName or L["Your pet"],
+            FeedButton.mood or L["hungry"]), 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)
     button:HookScript("OnLeave", function()

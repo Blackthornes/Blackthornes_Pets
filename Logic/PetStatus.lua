@@ -8,6 +8,7 @@
 -- health and focus are secret values, so nothing here reads them.
 
 local _, ns = ...
+local L = ns.L
 
 local PetStatus = ns.NewModule("PetStatus")
 
@@ -17,9 +18,9 @@ local CHECK_EVERY = 15
 
 -- C_PetInfo.GetPetHappiness's first value.
 local HAPPINESS = {
-    [1] = { name = "Unhappy", color = "bad" },
-    [2] = { name = "Content", color = "warn" },
-    [3] = { name = "Happy", color = "good" },
+    [1] = { name = L["Unhappy"], color = "bad" },
+    [2] = { name = L["Content"], color = "warn" },
+    [3] = { name = L["Happy"], color = "good" },
 }
 
 PetStatus.HAPPINESS = HAPPINESS
@@ -150,7 +151,7 @@ function PetStatus:HappinessText(status)
     if not info then return nil end
     local text = info.name
     if status.damagePercent then
-        text = ("%s (%d%% damage)"):format(text, status.damagePercent)
+        text = L.Format("%s (%d%% damage)", text, status.damagePercent)
     end
     return Colored(info.color, text)
 end
@@ -160,9 +161,9 @@ function PetStatus:LoyaltyText(status)
     if not (status and status.loyalty) then return nil end
     local rate = status.loyaltyRate
     if rate and rate < 0 then
-        return status.loyalty .. ", " .. Colored("bad", "falling")
+        return status.loyalty .. ", " .. Colored("bad", L["falling"])
     elseif rate and rate > 0 then
-        return status.loyalty .. ", " .. Colored("good", "rising")
+        return status.loyalty .. ", " .. Colored("good", L["rising"])
     end
     return status.loyalty
 end
@@ -180,7 +181,7 @@ function PetStatus:TrainingText(status)
     if not (status and status.trainingFree) then return nil end
     local free = status.trainingFree
     local freeText = Colored(free < 0 and "bad" or "text", tostring(free))
-    return ("%s free (%d total, %d spent)"):format(freeText,
+    return L.Format("%s free (%d total, %d spent)", freeText,
         status.trainingTotal, status.trainingSpent)
 end
 
@@ -248,8 +249,8 @@ function PetStatus:CheckFeed(status)
     if self.warnedAt and self.warnedAt <= level then return false end
 
     self.warnedAt = level
-    local name = status.name or "Your pet"
-    local message = ("%s is %s. Feed it."):format(name, HAPPINESS[level].name:lower())
+    local name = status.name or L["Your pet"]
+    local message = L.Format("%s is %s. Feed it.", name, HAPPINESS[level].name:lower())
     ns.Warn(message)
     PetStatus:Alert(message)
     return true
