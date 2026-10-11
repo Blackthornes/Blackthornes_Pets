@@ -29,7 +29,10 @@ care" key binding (`Bindings.xml`, `UI/FeedKey.lua`: a hidden secure button
 the key clicks, its macro kept up to date out of combat; since 2026-10-11 it
 also calls the pet with none out, revives a dead one, `[@pet,dead]` and
 `petDead` when its body is gone, and summons a warlock's last demon, kept per
-character in `lastDemon`, never rename it), and the
+character in `lastDemon`, never rename it; in combat with the pet alive it
+casts Mend Pet, `[@pet,exists,nodead,combat]`; and a second key, "Revive pet",
+is its own secure button `BlackthornesPetsReviveKey` that only casts Revive
+Pet, 2026-10-11), and the
 taming skills on a beast's tooltip (`Logic/Taming.lua`,
 `UI/TamingTooltip.lua`), from `Data/BeastSkills.lua`, which is generated from
 the vmangos world database's copy of Classic 1.12's CreatureSpellData, never
