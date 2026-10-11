@@ -66,6 +66,13 @@ suite.check("/bpet minimap ticks it again", minimapBox:GetChecked())
 controls.debug:GetScript("OnClick")(controls.debug)
 suite.check("the debug box sets debug", ns.db.debug == true)
 
+-- The sister note (Core/SisterNote.lua).
+suite.check("the sister addons box starts ticked", controls.sisters:GetChecked())
+controls.sisters:GetScript("OnClick")(controls.sisters)
+suite.check("unticking it turns the note off", ns.db.sisterNote == false)
+ns.HandleSlash("sisters")
+suite.check("/bpet sisters turns it back on", ns.db.sisterNote == true and controls.sisters:GetChecked())
+
 -- The pages along the top, as Tradeskills' Settings tab has them.
 local pages = SettingsUI.pages
 suite.check("it opens on the first page", pages.shown == "pet")
