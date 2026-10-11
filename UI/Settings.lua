@@ -386,6 +386,16 @@ function SettingsUI:BuildPages()
     end, false)
     controls.debug:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    -- Core/SisterNote.lua: one chat line, once, naming the Blackthornes
+    -- addons the player does not have. Off here is off in all of them.
+    local sistersRow = pages:Row("general", 2, "Sister addons",
+        "Once, a few seconds after login, says in chat which Blackthornes addons you don't have "
+        .. "and what each adds. Turning it off here turns it off in all of them. Same as /bpet sisters.")
+    controls.sisters = Widgets.CreateCheckbox(sistersRow, "Mention them", function(checked)
+        ns.SisterNote:SetOn(checked)
+    end, true)
+    controls.sisters:SetPoint("TOPLEFT", CONTROL_X, -2)
+
     local _, probeButton = CommandRow(pages, "general", 2, "Client check",
         "Lists in chat which pet calls this client has, to help track down a problem. It only reads. Same as /bpet probe.",
         "Check", "probe")
@@ -416,6 +426,7 @@ function SettingsUI:Refresh()
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
     controls.tamingTooltip:SetChecked(ns.db.tamingTooltip ~= false)
     controls.debug:SetChecked(ns.db.debug == true)
+    controls.sisters:SetChecked(ns.SisterNote:IsOn())
     controls.beastArrow:SetChecked(ns.db.beastArrow == true)
     controls.useTomTom:SetChecked(ns.db.useTomTom ~= false)
     controls.textSize:Sync()
