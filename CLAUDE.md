@@ -20,7 +20,10 @@ Everything around pets for **hunters and warlocks**: the hunter's pet and
 stable, the warlock's demons. The first feature is the pet status panel in
 the pets window and the hunter's feed warning (`Logic/PetStatus.lua`), built
 on the `C_PetInfo` calls the probe found, and the food helper
-(`Logic/Food.lua`, `Data/PetFood.lua`): food in the bags by diet, a secure
+(`Logic/Food.lua`, `Data/PetFood.lua`, foods by item ID with their
+English name, IDs filled in by `tools/petfood_ids.py` from pfQuest, the
+client's diet words mapped in `DIET_WORDS` so a German client works too):
+food in the bags by diet, a secure
 Feed button kept outside the window so the window still closes in combat,
 a low food warning, and a small Feed button above the quest tracker while the
 pet is hungry (`UI/FeedButton.lua`, placed by screen position rather than

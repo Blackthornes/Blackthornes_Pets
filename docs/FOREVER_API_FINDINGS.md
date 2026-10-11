@@ -150,3 +150,27 @@ pet (`true`) from a demon (`false`).
 
 Still to probe: a hunter at the stable master with the stable open, and the
 taming lines above (on a hunter).
+
+## German and other language clients (2026-10-11, not yet seen in game)
+
+The client hands out its own language's words: `GetPetFoodTypes` diets,
+item names, spell names (Beast Training's list, the pet bar) and
+`UnitCreatureFamily`'s name. So nothing is matched by English text where
+an ID will do:
+
+- Food is matched by item ID (`Data/PetFood.lua`), the English name only
+  for a food with none.
+- Diet words go through `PetFood.DIET_WORDS`. The German ones (Fleisch,
+  Fisch, Brot, Käse, Obst, Pilz/Pilze) are classic's, **unverified** on
+  Forever; `/bpet food` on a German client prints the words it gets.
+- Buff food is still told from its "Use:" text; German words ("satt",
+  "Erhöht Eure", "für die nächsten") sit beside the English, unverified.
+  No language-neutral flag for it was found.
+- Skill names read from the client are turned into the data's English
+  names through the skills' spell IDs (`Taming:EnglishName`).
+- A tame keeps `familyID` (`UnitCreatureFamily`'s second value, 5 for
+  Boar in the first probe, the same numbers as Classic's families) beside
+  the client's family name, and the compendium goes by the ID.
+- Not fixed: the map pin and the beast arrow find a zone's map by its
+  English name (`Waypoints:MapFor`, `GetRealZoneText`), so on a German
+  client they find no map. That file is Equipment's copy; fix both.
