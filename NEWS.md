@@ -12,8 +12,9 @@ is the only report that names players. A version with no section here posts
 nothing in #general.
 This file does not ship in the addon.
 
-## 0.13.1
+## 0.14.0
 
+- Pick a family in the Compendium from a dropdown list.
 - You can grab the Compendium's scroll bar now without moving the whole window.
 - Sort by Speed to see the fastest pets first. Click again for the slowest.
 

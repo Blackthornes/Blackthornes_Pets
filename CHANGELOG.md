@@ -4,16 +4,21 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
-## 0.13.1
+## 0.14.0
 
 For WoW: Forever (interface 16001). No files were added, so `/reload` is
 enough after updating.
 
+- **Pick a family from a list:** the Pet Compendium's family picker is now
+  a dropdown. One click opens it with All families and every family in
+  name order, the mouse wheel scrolls it, and the family picked is marked
+  in gold.
 - **Fixes:** in the Pet Compendium, holding the scroll bar now drags the
   list instead of the window, and clicking the bar jumps there. Every
   column title sorts by its own value, and a second click turns it round,
-  with any box ticked. Speed lists the fastest first across every family. A third click on any column title
-  goes back to sorting by beast.
+  with any box ticked. Speed lists the fastest first across every
+  family. A third click on any column title goes back to sorting by
+  beast.
 
 ## 0.13.0
 
