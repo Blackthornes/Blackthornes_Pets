@@ -199,6 +199,7 @@ function TameRecord:Capture()
             old.zone, old.x, old.y = pending.zone, pending.x, pending.y
         end
         old.family = old.family or Call(_G.UnitCreatureFamily, "pet")
+        old.speed = old.speed or self:PetSpeed()
         return old
     end
 
@@ -210,6 +211,9 @@ function TameRecord:Capture()
         -- Where it was tamed and what it is, for the Pet Compendium.
         family = Call(_G.UnitCreatureFamily, "pet"),
         zone = pending.zone, x = pending.x, y = pending.y,
+        -- Seconds between its melee swings, read off the real pet: the
+        -- compendium's Speed column trusts it over Classic's number.
+        speed = self:PetSpeed(),
     }
     store[pending.npcID] = record
     if ns.Compendium then ns.Compendium:Invalidate() end
@@ -226,13 +230,38 @@ function TameRecord:SkillText(skills)
     return table.concat(parts, ", ")
 end
 
+--- The pet's melee speed, seconds between swings to two places, or nil
+--- when the client will not say. Read out of combat only, where a haste
+--- effect is least likely to be on it.
+function TameRecord:PetSpeed()
+    local locked = Call(_G.InCombatLockdown)
+    if locked == true then return nil end
+    local speed = Call(_G.UnitAttackSpeed, "pet")
+    if type(speed) ~= "number" or speed <= 0 or speed > 10 then return nil end
+    return math.floor(speed * 100 + 0.5) / 100
+end
+
+--- A pet tamed before speeds were kept: when it is called out, its speed
+--- is added to its record. Once per pet; nothing is ever taken away.
+function TameRecord:NoteSpeed()
+    local npcID = PetNpcID()
+    local record = npcID and self:Get(npcID)
+    if type(record) ~= "table" or record.speed then return nil end
+    local speed = self:PetSpeed()
+    if not speed then return nil end
+    record.speed = speed
+    if ns.Compendium then ns.Compendium:Invalidate() end
+    return speed
+end
+
 function TameRecord:OnPet(_, unit)
     if unit and unit ~= "player" then return end
-    if not self.pending then return end
+    local after = self.pending and function() TameRecord:Capture() end
+        or function() TameRecord:NoteSpeed() end
     if C_Timer and C_Timer.After then
-        C_Timer.After(SETTLE, function() TameRecord:Capture() end)
+        C_Timer.After(SETTLE, after)
     else
-        self:Capture()
+        after()
     end
 end
 
@@ -271,6 +300,7 @@ function TameRecord:Lines()
             where = record.x and (" in %s %.1f, %.1f"):format(record.zone, record.x, record.y)
                 or (" in %s"):format(record.zone)
         end
+        if type(record.speed) == "number" then where = where .. (", %.2f speed"):format(record.speed) end
         lines[#lines + 1] = ("%d %s (%s)%s%s: %s"):format(id, record.name or "?",
             tostring(record.level or "?"), record.family and (", " .. record.family) or "", where,
             #spells > 0 and table.concat(spells, ", ") or "nothing")

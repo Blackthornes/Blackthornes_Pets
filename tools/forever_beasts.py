@@ -14,9 +14,9 @@ said:
          (`--harvest`), which holds mob names, zones and coordinates only.
          A name is kept only when Data/Compendium.lua has a beast of that
          name, so nothing that is not tameable creeps in.
-  TAMED  Beasts tamed on Forever, by creature id: name, level, family, where
-         and the skills the new pet came with. Read from Pets' own account
-         save, Blackthornes_Pets.lua in the game's
+  TAMED  Beasts tamed on Forever, by creature id: name, level, family, where,
+         its attack speed and the skills the new pet came with. Read from
+         Pets' own account save, Blackthornes_Pets.lua in the game's
          WTF/Account/<account>/SavedVariables folder; only its `tamedBeasts`
          table is read, so nothing about the player or their characters is
          copied. Tames already in the file are kept; a reading with more
@@ -259,7 +259,7 @@ def tamed_from(lua, path):
             if s.name:
                 skills.append((s.name, int(s.rank or 1)))
         rec = {"name": r.name, "level": r.level, "family": r.family,
-               "zone": r.zone, "x": r.x, "y": r.y, "skills": skills}
+               "zone": r.zone, "x": r.x, "y": r.y, "speed": r.speed, "skills": skills}
         out[int(npc_id)] = {k: v for k, v in rec.items() if v is not None}
     return out
 
@@ -275,7 +275,7 @@ def shipped_tamed(lua):
         r = store[npc_id]
         skills = [(r.skills[i].name, int(r.skills[i].rank)) for i in (r.skills or {})]
         rec = {"name": r.name, "level": r.level, "family": r.family,
-               "zone": r.zone, "x": r.x, "y": r.y, "skills": skills}
+               "zone": r.zone, "x": r.x, "y": r.y, "speed": r.speed, "skills": skills}
         out[int(npc_id)] = {k: v for k, v in rec.items() if v is not None}
     return out
 
@@ -342,6 +342,8 @@ def render(seen, tamed):
             parts.append(f"zone = {lua_string(r['zone'])}")
         if r.get("x") is not None and r.get("y") is not None:
             parts.append(f"x = {num(r['x'])}, y = {num(r['y'])}")
+        if r.get("speed"):
+            parts.append(f"speed = {float(r['speed']):g}")
         parts.append("skills = " + skills_lua(r.get("skills", [])))
         w(f"    [{npc_id}] = {{ " + ", ".join(parts) + " },")
     w("}")
@@ -396,7 +398,7 @@ def main(argv):
         for npc_id, rec in tamed_from(lua, path).items():
             old = tamed.get(npc_id)
             if old and len(old.get("skills", [])) > len(rec.get("skills", [])):
-                for key in ("zone", "x", "y", "family"):
+                for key in ("zone", "x", "y", "family", "speed"):
                     if key in rec and key not in old:
                         old[key] = rec[key]
                 continue

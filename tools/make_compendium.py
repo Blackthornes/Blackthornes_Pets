@@ -10,7 +10,8 @@ Run from the repository root with two Classic 1.12 databases on disk:
                                    Data/BeastSkills.lua was made from. Its
                                    creature_template says which beasts are
                                    tameable (type_flags bit 1), their family,
-                                   levels and rank (rare, elite), and its
+                                   levels, rank (rare, elite) and attack
+                                   speed (base_attack_time), and its
                                    creature table where each one spawns and
                                    how long it takes to come back
   github.com/shagu/pfQuest         db/: where every creature stands, in zone
@@ -227,6 +228,10 @@ def main():
             "min": t["level_min"], "max": t["level_max"],
             "rank": RANKS.get(t["rank"]),
         }
+        # Seconds between melee swings. A Classic pet keeps the speed of the
+        # beast it was tamed from, so this is the tamed pet's speed too.
+        if t["base_attack_time"] and t["base_attack_time"] > 0:
+            beast["speed"] = round(t["base_attack_time"] / 1000, 2)
 
         by_zone = collections.defaultdict(list)
         for zone, x, y in spots:
@@ -273,7 +278,9 @@ def main():
     w("-- \"rareelite\", \"elite\" or none), the zone it mostly lives in and a spot")
     w("-- there near the middle of its spawns (x, y), how many spawn points it has,")
     w("-- other zones it is also found in, `instance` for a dungeon or raid beast")
-    w("-- (no coordinates), and for a rare the respawn time in seconds, low and high.")
+    w("-- (no coordinates), for a rare the respawn time in seconds, low and high,")
+    w("-- and `speed`, the seconds between its melee swings (base_attack_time), which")
+    w("-- a Classic pet keeps from the beast it was tamed from.")
     w("")
     w("local _, ns = ...")
     w("")
@@ -302,6 +309,8 @@ def main():
             parts.append("also = { " + ", ".join(lua_string(z) for z in b["also"]) + " }")
         if b.get("respawn"):
             parts.append(f"respawn = {{ {b['respawn'][0]}, {b['respawn'][1]} }}")
+        if b.get("speed"):
+            parts.append(f"speed = {b['speed']:g}")
         w(f"    [{b['id']}] = {{ " + ", ".join(parts) + " },")
     w("}")
     w("")
