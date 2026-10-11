@@ -4,6 +4,17 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.12.0
+
+For WoW: Forever (interface 16001). The key bindings changed, so restart
+the game fully after updating (`/reload` is not enough).
+
+- **Mend Pet in a fight:** in combat, with the pet alive, the Pet care key
+  casts Mend Pet. Out of combat it calls, revives or feeds the pet as
+  before.
+- **A Dismiss pet key:** for hunters, a new key under Options, Keybindings, AddOns puts
+  the pet away.
+
 ## 0.11.0
 
 For WoW: Forever (interface 16001). No files were added, so `/reload` is
