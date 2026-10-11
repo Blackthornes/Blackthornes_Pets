@@ -124,6 +124,47 @@ suite.check("a beast teaching only what you know is left out", not fangListed)
 suite.check("one teaching something new stays", #newSkills > 0)
 ns.charDB.beastTraining = nil
 
+
+-- Attack speed: Classic's swing time, fastest first within each family, and
+-- a tamed pet's real speed winning.
+local tooth
+for _, entry in ipairs(C:All()) do
+    if entry.name == "Broken Tooth" then tooth = entry end
+end
+suite.check("Broken Tooth carries Classic's 1.0 speed", tooth and tooth.speed == 1, tooth and tooth.speed)
+suite.check("written as players write it", C.SpeedText(tooth) == "1.0", C.SpeedText(tooth))
+suite.check("1.25 keeps both places", C.SpeedText({ speed = 1.25 }) == "1.25")
+local fast = C:List({ sort = "speed" })
+local ordered, lastFamily, lastSpeed, families = true, nil, nil, {}
+for _, entry in ipairs(fast) do
+    if entry.family ~= lastFamily then
+        if entry.family and families[entry.family] then ordered = false end
+        if entry.family then families[entry.family] = true end
+        lastFamily, lastSpeed = entry.family, nil
+    end
+    if entry.speed then
+        if lastSpeed and entry.speed < lastSpeed then ordered = false end
+        lastSpeed = entry.speed
+    elseif lastSpeed == nil then
+        lastSpeed = nil
+    end
+end
+suite.check("speed sorts fastest first, family by family", ordered)
+local cats = C:List({ sort = "speed", family = "Cat" })
+suite.check("the fastest cat comes first", cats[1].name == "Broken Tooth", cats[1].name)
+local slowCats = C:List({ sort = "speed", family = "Cat", descending = true })
+local slowest = 0
+for _, entry in ipairs(slowCats) do slowest = math.max(slowest, entry.speed or 0) end
+suite.check("and turned round, the slowest", slowCats[1].speed == slowest, slowCats[1].speed)
+suite.check("with a cat of no known speed still last", slowCats[#slowCats].speed == nil)
+ns.db.tamedBeasts = { [2850] = { name = "Broken Tooth", level = 37, speed = 1.5, skills = {} } }
+C:Invalidate()
+tooth = C:Get(2850)
+suite.check("a tamed pet's real speed wins", tooth.speed == 1.5 and tooth.speedSeen)
+suite.check("with Classic's kept for the tooltip", tooth.classicSpeed == 1)
+ns.db.tamedBeasts = nil
+C:Invalidate()
+
 -- Sorting.
 local byLevel = C:List({ sort = "level" })
 suite.check("sorted by level", (byLevel[1].min or 0) <= (byLevel[#byLevel].min or 999))
@@ -153,6 +194,13 @@ UI.ticks.raresOnly:GetScript("OnClick")(UI.ticks.raresOnly)
 suite.check("ticking a box is saved", ns.db.compendium.raresOnly == true)
 suite.check("and filters the list", UI.footer:GetText():find(" of ", 1, true), UI.footer:GetText())
 
+local before = ns.db.compendium.raresOnly
+ns.db.compendium.raresOnly = false
+UI:SortBy("speed")
+suite.check("the Speed heading sorts by speed", ns.db.compendium.sort == "speed")
+suite.check("and the first row shows its speed", UI.rows[1].speed:GetText():find("%d%.%d"),
+    UI.rows[1].speed:GetText())
+ns.db.compendium.raresOnly = before
 UI:SortBy("level")
 suite.check("a heading sorts", ns.db.compendium.sort == "level" and not ns.db.compendium.descending)
 UI:SortBy("level")
@@ -198,5 +246,24 @@ map.GetPlayerMapPosition = function() error("secret value") end
 zone, x = ns.TameRecord:Where()
 suite.check("an unreadable spot still keeps the zone", zone == "Durotar" and x == nil)
 _G.C_Map = nil
+
+-- The tame record keeps the real pet's speed, out of combat only, and adds
+-- it to a pet tamed before speeds were kept.
+_G.UnitAttackSpeed = function(unit) if unit == "pet" then return 1.2999, 0 end end
+_G.InCombatLockdown = function() return false end
+suite.check("the pet's speed is read to two places", ns.TameRecord:PetSpeed() == 1.3)
+_G.InCombatLockdown = function() return true end
+suite.check("but not in combat", ns.TameRecord:PetSpeed() == nil)
+_G.InCombatLockdown = function() return false end
+_G.UnitAttackSpeed = function() error("secret value") end
+suite.check("a secret speed is no answer", ns.TameRecord:PetSpeed() == nil)
+_G.UnitAttackSpeed = function(unit) if unit == "pet" then return 1.5 end end
+_G.UnitGUID = function(unit) if unit == "pet" then return "Pet-0-1-2-3-2850-0000001" end end
+ns.db.tamedBeasts = { [2850] = { name = "Broken Tooth", level = 37, skills = {} } }
+suite.check("an old tame gets its speed when called out", ns.TameRecord:NoteSpeed() == 1.5
+    and ns.db.tamedBeasts[2850].speed == 1.5)
+suite.check("only once", ns.TameRecord:NoteSpeed() == nil)
+ns.db.tamedBeasts = nil
+_G.UnitGUID, _G.UnitAttackSpeed, _G.InCombatLockdown = nil, nil, nil
 
 suite.done()

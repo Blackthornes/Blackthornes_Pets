@@ -36,7 +36,8 @@ on. `/bpet tamed` lists everything recorded so far.
 
 The Pet Compendium (`/bpet compendium`, or the button in the pets window and
 in Settings) lists every beast a hunter can tame: its family and diet, level,
-zone and spot, rank and respawn, and what taming it teaches, with filters for
+zone and spot, rank and respawn, attack speed (fastest first in each family
+when sorted by it), and what taming it teaches, with filters for
 what you can tame now, rares, skills you lack and what WoW: Forever has shown.
 Classic's list comes from `tools/make_compendium.py`; Forever's findings from
 `tools/forever_beasts.py` (see the top of each for how to rerun them).

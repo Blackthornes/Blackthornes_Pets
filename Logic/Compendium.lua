@@ -66,6 +66,11 @@ local function Overlay(entry, spot, why)
         entry.min = math.min(entry.min or spot.level, spot.level)
         entry.max = math.max(entry.max or spot.level, spot.level)
     end
+    -- A speed read off a real tamed pet beats Classic's number.
+    if type(spot.speed) == "number" and spot.speed > 0 then
+        if entry.classicSpeed == nil and not entry.speedSeen then entry.classicSpeed = entry.speed end
+        entry.speed, entry.speedSeen = spot.speed, true
+    end
     entry.forever = entry.forever or why
 end
 
@@ -76,6 +81,8 @@ local function TamedEntry(id, record, why)
         id = id, name = record.name or ("Beast " .. id), family = family, diet = diet,
         min = record.level, max = record.level,
         zone = record.zone, x = record.x, y = record.y,
+        speed = type(record.speed) == "number" and record.speed or nil,
+        speedSeen = type(record.speed) == "number" or nil,
         forever = why,
     }
 end
@@ -95,6 +102,7 @@ function Compendium:All()
             min = beast.min, max = beast.max, rank = beast.rank,
             zone = beast.zone, x = beast.x, y = beast.y, instance = beast.instance,
             also = beast.also, spawns = beast.spawns, respawn = beast.respawn,
+            speed = beast.speed,
         }
         entries[#entries + 1] = entry
         byID[id] = entry
@@ -259,13 +267,24 @@ local SORTS = {
         if (a.zone or "") ~= (b.zone or "") then return (a.zone or "~") < (b.zone or "~") end
         return nil
     end,
+    -- Fastest first within each family, so the top of each family's run
+    -- is the quickest pet of that kind.
+    speed = function(a, b, descending)
+        if (a.family or "~") ~= (b.family or "~") then
+            local before = (a.family or "~") < (b.family or "~")
+            if descending then return not before end
+            return before
+        end
+        if a.speed ~= b.speed then return a.speed < b.speed end
+        return nil
+    end,
     rank = function(a, b)
         local ra, rb = RANK_ORDER[a.rank] or 9, RANK_ORDER[b.rank] or 9
         if ra ~= rb then return ra < rb end
         return nil
     end,
 }
-Compendium.SORT_KEYS = { "name", "family", "level", "zone", "rank" }
+Compendium.SORT_KEYS = { "name", "family", "level", "zone", "rank", "speed" }
 
 --- The beasts that pass `filter`, sorted.
 -- filter: family (a name or nil), text, tameNow, raresOnly, newSkills,
@@ -286,13 +305,20 @@ function Compendium:List(filter)
 
     local first = SORTS[filter.sort] or SORTS.name
     local descending = filter.descending
-    -- What a beast lacks for the sort, it goes last for, either way round.
-    local field = ({ level = "min", family = "family", zone = "zone", rank = "rank" })[filter.sort]
+    -- What a beast lacks for the sort, it goes last for, either way round
+    -- (for speed, last in its family).
+    local field = ({ level = "min", family = "family", zone = "zone", rank = "rank",
+        speed = "speed" })[filter.sort]
     table.sort(out, function(a, b)
-        if field and (a[field] == nil) ~= (b[field] == nil) then return b[field] == nil end
+        if field and (a[field] == nil) ~= (b[field] == nil)
+            and (filter.sort ~= "speed" or a.family == b.family) then
+            return b[field] == nil
+        end
         local x, y = a, b
         if descending then x, y = b, a end
-        local result = first(x, y)
+        -- Speed keeps the families in name order either way round; only the
+        -- order within each family turns.
+        local result = first(x, y, descending)
         if result ~= nil then return result end
         if (a.min or 999) ~= (b.min or 999) then return (a.min or 999) < (b.min or 999) end
         if a.name ~= b.name then return a.name < b.name end
@@ -328,6 +354,13 @@ function Compendium.RespawnText(entry)
     if low == high and unitLow == unitHigh then return ("%d %s"):format(low, unitLow) end
     if unitLow == unitHigh then return ("%d-%d %s"):format(low, high, unitHigh) end
     return ("%d %s to %d %s"):format(low, unitLow, high, unitHigh)
+end
+
+--- "1.2", "1.25", "2.0": seconds between swings, as players write them.
+function Compendium.SpeedText(entry)
+    if type(entry.speed) ~= "number" then return nil end
+    local text = ("%.2f"):format(entry.speed):gsub("0$", "")
+    return text
 end
 
 --- "Duskwood 32.6, 25.8", "Wailing Caverns (dungeon)" or just the zone.

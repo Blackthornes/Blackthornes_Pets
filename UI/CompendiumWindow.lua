@@ -32,12 +32,17 @@ local BLIZZARD_SCROLL_WIDTH = 10
 
 -- The list's columns: where each starts in a row, and how wide it is.
 local COLUMNS = {
-    { key = "name", label = "Beast", x = 10, width = 196 },
-    { key = "family", label = "Family", x = 212, width = 92 },
-    { key = "level", label = "Level", x = 308, width = 52 },
-    { key = "zone", label = "Where", x = 364, width = 200 },
-    { key = "skills", label = "Teaches", x = 570, width = 196 },
+    { key = "name", label = "Beast", x = 10, width = 186 },
+    { key = "family", label = "Family", x = 200, width = 88 },
+    { key = "level", label = "Level", x = 292, width = 48 },
+    { key = "speed", label = "Speed", x = 344, width = 46,
+      tip = "Seconds between its bites and claws: lower is faster. Sorts fastest first, family by family." },
+    { key = "zone", label = "Where", x = 394, width = 180 },
+    { key = "skills", label = "Teaches", x = 578, width = 188 },
 }
+
+-- A pet's usual swing time; quicker is green, slower amber.
+local USUAL_SPEED = 2.0
 
 -- The colour a beast's name takes for its rank.
 local RANK_COLOR = { rare = "rare", rareelite = "rare", elite = "warn" }
@@ -283,6 +288,7 @@ function CompendiumUI:BuildHeadings()
                 self.label:SetTextColor(Theme.Unpack("accentHi"))
                 GameTooltip:SetOwner(self, "ANCHOR_TOP")
                 GameTooltip:AddLine(("Sort by %s"):format(column.label:lower()), 1, 1, 1)
+                if column.tip then GameTooltip:AddLine(column.tip, 0.9, 0.9, 0.9, true) end
                 GameTooltip:AddLine("Click again to turn the order round.", 0.9, 0.9, 0.9, true)
                 GameTooltip:Show()
             end)
@@ -361,8 +367,9 @@ function CompendiumUI:BuildRow(index)
     row.name = Cell(row, COLUMNS[1], "small", "text")
     row.family = Cell(row, COLUMNS[2], "small", "text")
     row.level = Cell(row, COLUMNS[3], "small", "text")
-    row.zone = Cell(row, COLUMNS[4], "small", "text")
-    row.skills = Cell(row, COLUMNS[5], "tiny", "text")
+    row.speed = Cell(row, COLUMNS[4], "small", "text")
+    row.zone = Cell(row, COLUMNS[5], "small", "text")
+    row.skills = Cell(row, COLUMNS[6], "tiny", "text")
 
     row:RegisterForClicks("LeftButtonUp")
     row:SetScript("OnClick", function(self)
@@ -437,6 +444,20 @@ function CompendiumUI:ZoneText(entry)
     return where
 end
 
+--- "1.2" in green when quicker than usual, amber when slower, with "tamed"
+--- under it when the number was read off a real pet.
+function CompendiumUI:SpeedCell(entry)
+    local text = Compendium().SpeedText(entry)
+    if not text then return Colored("dim", "-") end
+    if entry.speed < USUAL_SPEED then
+        text = Colored("good", text)
+    elseif entry.speed > USUAL_SPEED then
+        text = Colored("warn", text)
+    end
+    if entry.speedSeen then text = text .. "\n" .. Colored("good", "tamed") end
+    return text
+end
+
 function CompendiumUI:FillRow(row, entry, level)
     row.entry = entry
     if not entry then
@@ -448,6 +469,7 @@ function CompendiumUI:FillRow(row, entry, level)
     local levelText = Compendium().LevelText(entry)
     if Compendium():CanTame(entry, level) == false then levelText = Colored("loss", levelText) end
     row.level:SetText(levelText)
+    row.speed:SetText(self:SpeedCell(entry))
     row.zone:SetText(self:ZoneText(entry))
     local skills = Compendium():Skills(entry)
     row.skills:SetText(#skills > 0 and self.SkillText(skills) or Colored("dim", "Nothing"))
@@ -492,6 +514,17 @@ function CompendiumUI:ShowTooltip(row)
                 Theme.Unpack("loss"))
         else
             GameTooltip:AddLine("Level " .. levelText, 1, 1, 1)
+        end
+    end
+
+    local speed = C.SpeedText(entry)
+    if speed then
+        local where = entry.speedSeen and "read off a tamed pet on Forever" or "Classic data"
+        local key = entry.speed < USUAL_SPEED and "good" or entry.speed > USUAL_SPEED and "warn" or "text"
+        GameTooltip:AddLine(("Attack speed %s (%s)"):format(speed, where), Theme.Unpack(key))
+        if entry.speedSeen and entry.classicSpeed and entry.classicSpeed ~= entry.speed then
+            GameTooltip:AddLine(("Classic said %s."):format(C.SpeedText({ speed = entry.classicSpeed })),
+                0.7, 0.7, 0.7, true)
         end
     end
 
