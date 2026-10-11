@@ -232,6 +232,10 @@ function Probe:Run()
     -- calls answer only while the Beast Training window is open.
     Line("knows Bite 1", Read("IsPlayerSpell", 17254) .. "; " .. Read("IsSpellKnown", 17254))
     Line("knows Charge 1", Read("IsPlayerSpell", 7370) .. "; " .. Read("IsSpellKnown", 7370))
+    -- The Pet care key's macro leans on these conditions (2026-10-11).
+    Line("macro conditions", Read("SecureCmdOptionParse", "[nopet] no pet; [@pet,dead] dead; [combat] fighting; ready"))
+    Line("knows Call/Revive Pet", Read("IsPlayerSpell", 883) .. "; " .. Read("IsPlayerSpell", 982))
+    Line("pet dead", Read("UnitIsDead", "pet"))
     Line("craft window", Read("GetCraftDisplaySkillLine") .. "; " .. Read("GetNumCrafts")
         .. "; first " .. Read("GetCraftInfo", 1))
 end
