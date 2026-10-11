@@ -12,6 +12,13 @@ is the only report that names players. A version with no section here posts
 nothing in #general.
 This file does not ship in the addon.
 
+## 0.13.1
+
+- You can grab the Compendium's scroll bar now without moving the whole window.
+- Sort by Speed to see the fastest pets first. Click again for the slowest.
+
+Thanks Ezmode for the report!
+
 ## 0.13.0
 
 - Pets speaks German now on German game clients.
