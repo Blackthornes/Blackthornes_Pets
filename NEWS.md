@@ -12,6 +12,11 @@ is the only report that names players. A version with no section here posts
 nothing in #general.
 This file does not ship in the addon.
 
+## 0.13.0
+
+- Pets speaks German now on German game clients.
+- Feeding, taming and the map work on German clients too.
+
 ## 0.12.0
 
 - The Pet care key now heals your pet in a fight.

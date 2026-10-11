@@ -4,6 +4,23 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.13.0
+
+For WoW: Forever (interface 16001). Files were added, so restart the game
+fully after updating (`/reload` is not enough).
+
+- **Pets in German:** on a German client, the pets window, the
+  compendium, settings, tooltips, warnings, chat lines and key binding
+  names show in German. Anything not translated yet shows in English.
+- **Sister addons:** a few seconds after login, one chat line names the
+  Blackthornes addons you don't have yet and what each one adds. It shows
+  once per account, comes back only for an addon it has never named, and
+  never names one you have installed but turned off. "Sister addons" in
+  Settings turns it off in all of them at once.
+- **Fixes:** on German and other non-English clients, the food helper,
+  Feed button, low-food warning, buff food, Beast Training, tames,
+  families and zones now work. English clients are unchanged.
+
 ## 0.12.0
 
 For WoW: Forever (interface 16001). The key bindings changed, so restart
