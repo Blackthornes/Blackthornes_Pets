@@ -12,6 +12,11 @@ is the only report that names players. A version with no section here posts
 nothing in #general.
 This file does not ship in the addon.
 
+## 0.11.0
+
+- The feed key is now one Pet care key: it calls, revives or feeds your pet, and warlocks get their last demon.
+- Tame the beast the arrow was leading you to and the arrow goes away by itself.
+
 ## 0.10.1
 
 - The Pet Compendium shows a new tame and its speed right away.
