@@ -12,6 +12,13 @@ is the only report that names players. A version with no section here posts
 nothing in #general.
 This file does not ship in the addon.
 
+## 0.12.0
+
+- The Pet care key now heals your pet in a fight.
+- New key to dismiss your pet.
+
+Thanks Ezmode for the ideas!
+
 ## 0.11.0
 
 - The feed key is now one Pet care key: it calls, revives or feeds your pet, and warlocks get their last demon.
