@@ -4,6 +4,21 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.10.0
+
+For WoW: Forever (interface 16001). Files were added, so restart the game
+fully after updating (`/reload` is not enough).
+
+- **Speed in the Pet Compendium:** a new Speed column shows the seconds
+  between a beast's swings, green when faster than 2.0 and amber when
+  slower. Clicking the heading puts the fastest of each family first, and
+  clicking again puts the slowest first. A pet you tame has its real speed
+  read off it, marked "tamed".
+- **More Forever beasts:** six more beasts seen on Forever join the
+  Compendium, and four have better spots.
+- **Fixes:** in the Blizzard window style, the Window style box fits its
+  words and the Reload buttons sit under their setting.
+
 ## 0.9.1
 
 For WoW: Forever (interface 16001). No files were added, so `/reload` is
