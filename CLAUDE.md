@@ -57,8 +57,13 @@ column (a player asked, the owner agreed 2026-10-11) is Classic's
 `base_attack_time` in seconds, since a Classic pet keeps the speed of the
 beast it was tamed from; `TameRecord:PetSpeed` reads `UnitAttackSpeed("pet")`
 out of combat at the tame (and once for an older tame when it is called
-out, `NoteSpeed`), and that real speed wins. Sorting by Speed keeps
-families in name order and puts the fastest of each first. Before a release, fold
+out, `NoteSpeed`), and that real speed wins. Sorting by Speed puts the
+fastest first across every family (2026-10-11; it used to go family by
+family, so turning it round barely moved anything with a box ticked).
+Every heading follows the house rule: a click sorts, a second turns it
+round, a third goes back to by beast (`CompendiumUI:SortBy`), whatever
+is ticked. The list's scroll bar takes the mouse (`CompendiumUI.grip`,
+wider than it looks), so holding it drags the list, never the window. Before a release, fold
 in the owner's tames and the latest Farmer harvest by rerunning
 `forever_beasts.py`. The map pin is Equipment's `Logic/Waypoints.lua`.
 Beside it: settings, a minimap

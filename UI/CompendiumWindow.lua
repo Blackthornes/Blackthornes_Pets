@@ -30,6 +30,9 @@ local VISIBLE = 11
 local SCROLL_WIDTH = 4
 -- The game's knob, in the Blizzard window style, needs room to read as one.
 local BLIZZARD_SCROLL_WIDTH = 10
+-- How wide the bar is to the mouse: wider than it looks, so it is easy to
+-- catch, and it takes the click so the window is not dragged instead.
+local GRIP_WIDTH = 16
 
 -- The list's columns: where each starts in a row, and how wide it is.
 local COLUMNS = {
@@ -37,7 +40,7 @@ local COLUMNS = {
     { key = "family", label = L["Family"], sortTip = L["Sort by family"], x = 200, width = 88 },
     { key = "level", label = L["Level"], sortTip = L["Sort by level"], x = 292, width = 48 },
     { key = "speed", label = L["Speed"], sortTip = L["Sort by speed"], x = 344, width = 46,
-      tip = L["Seconds between its bites and claws: lower is faster. Sorts fastest first, family by family."] },
+      tip = L["Seconds between its bites and claws: lower is faster. Sorts fastest first."] },
     { key = "zone", label = L["Where"], sortTip = L["Sort by where"], x = 394, width = 180 },
     { key = "skills", label = L["Teaches"], x = 578, width = 188 },
 }
@@ -267,7 +270,7 @@ function CompendiumUI:BuildBar()
 end
 
 --- The headings, which sort the list: a click sorts by that column, a
---- second click turns it round.
+--- second click turns it round, a third goes back to sorting by beast.
 function CompendiumUI:BuildHeadings()
     local frame = self.frame
     self.headings = {}
@@ -290,7 +293,7 @@ function CompendiumUI:BuildHeadings()
                 GameTooltip:SetOwner(self, "ANCHOR_TOP")
                 GameTooltip:AddLine(column.sortTip, 1, 1, 1)
                 if column.tip then GameTooltip:AddLine(column.tip, 0.9, 0.9, 0.9, true) end
-                GameTooltip:AddLine(L["Click again to turn the order round."], 0.9, 0.9, 0.9, true)
+                GameTooltip:AddLine(L["Click again to turn the order round, and a third time to go back to sorting by beast."], 0.9, 0.9, 0.9, true)
                 GameTooltip:Show()
             end)
             heading:SetScript("OnLeave", function()
@@ -328,6 +331,20 @@ function CompendiumUI:BuildList()
     track:SetSize(self.scrollWidth, VISIBLE * ROW_HEIGHT)
     track:SetColorTexture(Theme.Unpack("rowAlt"))
     self.track = track
+
+    -- What the mouse catches: the bar and a little either side, above the
+    -- rows. Holding it drags the thumb; a click on the bar jumps there.
+    local grip = CreateFrame("Frame", nil, frame)
+    grip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -(PADDING - (GRIP_WIDTH - self.scrollWidth) / 2), self.listTop)
+    grip:SetSize(GRIP_WIDTH, VISIBLE * ROW_HEIGHT)
+    grip:SetFrameLevel(frame:GetFrameLevel() + 10)
+    grip:EnableMouse(true)
+    grip:SetScript("OnMouseDown", function(_, button)
+        if button == nil or button == "LeftButton" then CompendiumUI:StartScrollDrag() end
+    end)
+    grip:SetScript("OnMouseUp", function() CompendiumUI:StopScrollDrag() end)
+    grip:SetScript("OnHide", function() CompendiumUI:StopScrollDrag() end)
+    self.grip = grip
 
     self.rows = {}
     for index = 1, VISIBLE do self.rows[index] = self:BuildRow(index) end
@@ -597,12 +614,17 @@ end
 -- Drawing
 --------------------------------------------------------------------------------
 
+--- A click on a heading: the first sorts by it, the second turns it round,
+--- the third goes back to the usual order (by beast, A to Z). Filters play
+--- no part, so it works the same with any box ticked.
 function CompendiumUI:SortBy(key)
     local o = self:Options()
-    if (o.sort or "name") == key then
-        o.descending = not o.descending
-    else
+    if (o.sort or "name") ~= key then
         o.sort, o.descending = key, false
+    elseif not o.descending then
+        o.descending = true
+    else
+        o.sort, o.descending = "name", false
     end
     self.offset = 0
     self:Refresh()
@@ -616,9 +638,60 @@ function CompendiumUI:PaintHeadings()
 end
 
 function CompendiumUI:ScrollBy(steps)
+    self:ScrollTo((self.offset or 0) + steps)
+end
+
+--- Show the list from `offset` on; only redraws the rows when it moved.
+function CompendiumUI:ScrollTo(offset)
     local most = math.max(0, #(self.lines or {}) - VISIBLE)
-    self.offset = math.max(0, math.min(most, (self.offset or 0) + steps))
+    offset = math.max(0, math.min(most, math.floor(offset + 0.5)))
+    if offset == self.offset then return end
+    self.offset = offset
     self:Draw()
+end
+
+--- How far down the bar the cursor is, in the bar's own pixels, or nil.
+function CompendiumUI:CursorOnBar()
+    local grip = self.grip
+    local top = grip and grip:GetTop()
+    if not top then return nil end
+    local _, y = GetCursorPosition()
+    local scale = grip:GetEffectiveScale() or 1
+    if not (y and scale > 0) then return nil end
+    return top - y / scale
+end
+
+--- Put the thumb's top `pos` pixels down the bar, and the list with it.
+function CompendiumUI:ScrollToThumb(pos)
+    local total = #(self.lines or {})
+    local room = VISIBLE * ROW_HEIGHT - (self.thumbSize or 0)
+    if total <= VISIBLE or room <= 0 then return end
+    self:ScrollTo(math.max(0, math.min(room, pos)) / room * (total - VISIBLE))
+end
+
+--- The mouse went down on the bar: hold the thumb where it was caught, or,
+--- off the thumb, jump so the thumb's middle is under the cursor. Until the
+--- button comes up, the list follows the cursor (OnUpdate runs only then).
+function CompendiumUI:StartScrollDrag()
+    if #(self.lines or {}) <= VISIBLE then return end
+    local pos = self:CursorOnBar()
+    if not pos then return end
+    local top, size = self.thumbTop or 0, self.thumbSize or 0
+    if pos >= top and pos <= top + size then
+        self.grabAt = pos - top
+    else
+        self.grabAt = size / 2
+        self:ScrollToThumb(pos - self.grabAt)
+    end
+    self.grip:SetScript("OnUpdate", function()
+        local now = CompendiumUI:CursorOnBar()
+        if now then CompendiumUI:ScrollToThumb(now - (CompendiumUI.grabAt or 0)) end
+    end)
+end
+
+function CompendiumUI:StopScrollDrag()
+    self.grabAt = nil
+    if self.grip then self.grip:SetScript("OnUpdate", nil) end
 end
 
 function CompendiumUI:Draw()
@@ -637,13 +710,17 @@ function CompendiumUI:Draw()
         local height = VISIBLE * ROW_HEIGHT
         local size = math.max(16, height * VISIBLE / total)
         local top = (height - size) * offset / (total - VISIBLE)
+        self.thumbTop, self.thumbSize = top, size
         self.thumb:SetHeight(size)
         self.thumb:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -PADDING, self.listTop - top)
         self.thumb:Show()
         self.track:Show()
+        self.grip:Show()
     else
+        self.thumbTop, self.thumbSize = nil, nil
         self.thumb:Hide()
         self.track:Hide()
+        self.grip:Hide()
     end
 end
 
