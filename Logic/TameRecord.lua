@@ -196,6 +196,10 @@ function TameRecord:Capture()
 
     self.pending = nil
     if not self:IsTamedPet(pending) then return nil end
+    -- Tamed: the beast arrow following it is done.
+    if ns.BeastArrow and ns.BeastArrow.Tamed then
+        pcall(ns.BeastArrow.Tamed, ns.BeastArrow, pending.npcID, pending.name)
+    end
     local skills = self:PetSkills()
     local store = Store()
     if not store then return nil end
