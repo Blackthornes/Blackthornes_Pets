@@ -4,6 +4,18 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.11.0
+
+For WoW: Forever (interface 16001). No files were added, so `/reload` is
+enough after updating.
+
+- **One Pet care key:** the Feed pet key is now Pet care and does what the
+  pet needs: calls it when none is out, revives it when it's dead, and
+  feeds it otherwise (never in combat). For a warlock it summons the last
+  demon you used. A key you already bound stays bound.
+- **The beast arrow puts itself away:** taming the beast the arrow is
+  leading you to puts the arrow away and says so in chat.
+
 ## 0.10.1
 
 For WoW: Forever (interface 16001). No files were added, so `/reload` is
