@@ -15,10 +15,12 @@ damage that costs), loyalty, experience, training points and what it eats. The
 window also shows the food in your bags the pet will eat, best first, with a
 Feed button that feeds it the lowest-level food that still does full good.
 While the pet needs feeding, a small Feed button also sits just above the
-quest tracker, so it can be fed without opening the window. A "Feed pet"
-key feeds it the same food whenever you press it, hungry or not; set the key
-under Options, Keybindings, AddOns, Blackthornes Pets. With no pet or no food
-it says why in chat. A
+quest tracker, so it can be fed without opening the window. One "Pet care"
+key does whatever the pet needs: it calls the pet when none is out, revives
+it when it is dead, and otherwise feeds it the same food, hungry or not. For a
+warlock it summons the last demon you used. Set the key under Options,
+Keybindings, AddOns, Blackthornes Pets. With nothing to do it says why in
+chat. A
 hunter gets a warning in chat and in raid-warning text when the pet stops
 being happy, and another when food it eats runs low; both can be changed in
 the settings window. Which diet each food is comes from `Data/PetFood.lua`,
@@ -124,13 +126,13 @@ Every command above has a button there too.
 | `Core/` | Namespace, module registry, event dispatch, slash commands, saved variables |
 | `Data/` | Tables the addon reads: pet food diets and what taming each beast teaches |
 | `Logic/` | The pet rules, kept apart from the game so they can be tested (none yet) |
-| `UI/` | Theme, widgets, the house window frame, the minimap button, the pets window, the settings window and the Feed pet key |
+| `UI/` | Theme, widgets, the house window frame, the minimap button, the pets window, the settings window and the Pet care key |
 | `Media/` | The window frame's art (`Frame/*.tga`), drawn by `tools/make_frame_art.py` |
 | `Probe/` | `/bpet probe`, which checks what the running game actually supports instead of guessing |
 | `tools/` | Checks, tests, the frame art script and the link script. Not shipped to the client |
 | `docs/` | What the Forever client actually does, found with `/bpet probe`. Not shipped |
 
-`Bindings.xml` names the Feed pet key binding; the client loads it by itself,
+`Bindings.xml` names the Pet care key binding; the client loads it by itself,
 so it is not in the TOC.
 
 `Blackthornes_Pets.toc` lists every Lua file in load order. A file that is

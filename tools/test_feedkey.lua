@@ -1,6 +1,7 @@
--- The "Feed pet" key: a hidden secure button kept on the best food out of
--- combat, hungry or not, left alone in combat, cleared with no food, and
--- saying why in chat when it has nothing to feed.
+-- The "Pet care" key: a hidden secure button kept on the best food out of
+-- combat, hungry or not, left alone in combat, and saying why in chat when it
+-- has nothing to do. It calls the pet when none is out, revives a dead one,
+-- and summons a warlock's last demon.
 
 local env = dofile(lfs_cwd .. "/tools/testenv.lua")
 local suite = env.NewSuite("feedkey")
@@ -27,7 +28,7 @@ suite.check("it acts once, as the key comes up",
 
 -- The binding's names, and Bindings.xml naming the same button.
 suite.check("the header is named", _G.BINDING_HEADER_BLACKTHORNESPETS == "Blackthornes Pets")
-suite.check("the key is named", _G["BINDING_NAME_CLICK BlackthornesPetsFeedKey:LeftButton"] == "Feed pet")
+suite.check("the key is named", _G["BINDING_NAME_CLICK BlackthornesPetsFeedKey:LeftButton"] == "Pet care (call, revive or feed)")
 local handle = assert(io.open(lfs_cwd .. "/Bindings.xml", "r"))
 local xml = handle:read("*a")
 handle:close()
@@ -65,10 +66,13 @@ end
 
 Refresh()
 suite.check("a happy pet still gets its food armed", button:GetAttribute("type") == "macro")
+local text = button:GetAttribute("macrotext") or ""
 suite.check("the best food, as the Feed buttons pick",
-    button:GetAttribute("macrotext") == ns.Food:FeedMacro(ns.Food:Scan()[1])
-        and (button:GetAttribute("macrotext") or ""):find("/use 0 5", 1, true),
-    button:GetAttribute("macrotext"))
+    text:find(ns.Food:FeedMacro(ns.Food:Scan()[1]), 1, true) and text:find("/use 0 5", 1, true), text)
+suite.check("first it calls or revives the pet when it needs it",
+    text:find("/cast [@pet,dead] Revive Pet; [nopet] Call Pet\n", 1, true) == 1, text)
+suite.check("and feeding stops with no pet, a dead one or in combat",
+    text:find("/stopmacro [nopet][@pet,dead][combat]\n/cast", 1, true) ~= nil, text)
 suite.check("a press with food says nothing", Pressed() == "")
 suite.check("/bpet food names the food", FeedKey:State():find("feeds Tough Jerky", 1, true), FeedKey:State())
 
@@ -81,8 +85,9 @@ suite.check("in combat nothing is changed",
 _G.InCombatLockdown = nil
 
 Refresh()
-suite.check("out of combat with no food it is cleared",
-    button:GetAttribute("macrotext") == nil and button:GetAttribute("type") == nil)
+suite.check("out of combat with no food it only calls or revives",
+    button:GetAttribute("macrotext") == "/cast [@pet,dead] Revive Pet; [nopet] Call Pet",
+    button:GetAttribute("macrotext"))
 suite.check("and a press says why", Pressed():find("no food in your bags that Scorpid will eat", 1, true),
     env.ChatText())
 
@@ -92,14 +97,57 @@ suite.check("food back, armed again", (button:GetAttribute("macrotext") or ""):f
 
 _G.UnitExists = function() return false end
 ns.PetStatus:Update()
-suite.check("no pet, cleared", button:GetAttribute("macrotext") == nil)
-suite.check("and a press says so", Pressed():find("no pet out", 1, true), env.ChatText())
-_G.UnitExists = function() return true end
+suite.check("no pet: the key calls it", button:GetAttribute("macrotext") == "/cast [@pet,dead] Revive Pet; [nopet] Call Pet")
+suite.check("and a press says nothing", Pressed() == "", env.ChatText())
+suite.check("/bpet food says so", FeedKey:State():find("calls your pet", 1, true), FeedKey:State())
 
+-- It dies, and its body goes: Call Pet would only say it is dead.
+_G.UnitExists = function() return true end
+_G.UnitIsDead = function() return true end
+_G.InCombatLockdown = function() return true end
+ns.PetStatus:Update()
+_G.InCombatLockdown = nil
+_G.UnitExists = function() return false end
+ns.PetStatus:Update()
+suite.check("a pet that died is revived, not called",
+    button:GetAttribute("macrotext") == "/cast [nopet][@pet,dead] Revive Pet", button:GetAttribute("macrotext"))
+_G.UnitExists, _G.UnitIsDead = function() return true end, nil
+ns.PetStatus:Update()
+suite.check("alive again: back to calling and feeding",
+    (button:GetAttribute("macrotext") or ""):find("[nopet] Call Pet", 1, true) ~= nil)
+
+-- A hunter too young for Call Pet: nothing but food.
+_G.IsPlayerSpell = function(id) return id ~= ns.FeedKey.CALL_PET and id ~= ns.FeedKey.REVIVE_PET end
+ns.PetStatus:Update()
+suite.check("no Call Pet known: just the food", (button:GetAttribute("macrotext") or ""):find("/stopmacro", 1, true) == 1,
+    button:GetAttribute("macrotext"))
+_G.IsPlayerSpell = nil
+
+-- In combat with food armed, a press says it can't feed now.
+_G.InCombatLockdown = function() return true end
+suite.check("in combat a press says it can't feed", Pressed():find("can't be fed in combat", 1, true), env.ChatText())
+_G.InCombatLockdown = nil
+
+-- A warlock: the last demon summoned, else the first known.
 _G.UnitClass = function() return "Warlock", "WARLOCK" end
-Refresh()
-suite.check("not a hunter, nothing armed", button:GetAttribute("macrotext") == nil)
-suite.check("and a press says it is for hunters", Pressed():find("for hunters", 1, true), env.ChatText())
+_G.UnitExists = function() return false end
+ns.PetStatus:Update()
+suite.check("a warlock with no demon out summons the Imp",
+    button:GetAttribute("macrotext") == "/cast [nopet] Summon Imp", button:GetAttribute("macrotext"))
+FeedKey:OnCast(697)
+suite.check("a Voidwalker summoned is remembered", ns.charDB.lastDemon == 697)
+suite.check("and the key summons it", button:GetAttribute("macrotext") == "/cast [nopet] Summon Voidwalker",
+    button:GetAttribute("macrotext"))
+suite.check("other spells are not demons", FeedKey:OnCast(133) == false and ns.charDB.lastDemon == 697)
+suite.check("a press with no demon out says nothing", Pressed() == "", env.ChatText())
+_G.UnitExists = function() return true end
+ns.PetStatus:Update()
+suite.check("with the demon out, a press says so", Pressed():find("already out", 1, true), env.ChatText())
+
+_G.UnitClass = function() return "Mage", "MAGE" end
+ns.PetStatus:Update()
+suite.check("not a hunter or warlock, nothing armed", button:GetAttribute("macrotext") == nil)
+suite.check("and a press says what it is for", Pressed():find("hunter's pet", 1, true), env.ChatText())
 
 _G.C_Container, _G.C_Item, _G.C_PetInfo = nil, nil, nil
 _G.UnitExists, _G.UnitName, _G.UnitLevel, _G.UnitClass = nil, nil, nil, nil
