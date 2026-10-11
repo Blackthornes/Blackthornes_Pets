@@ -16,8 +16,8 @@
 -- would otherwise be eaten). In combat, with the pet alive, the same key
 -- casts Mend Pet instead (a player asked, the owner agreed 2026-10-11).
 --
--- A second key, "Revive pet", casts Revive Pet and nothing else, for a
--- player who wants it on its own button. It is a second secure button built
+-- A second key, "Dismiss pet", casts Dismiss Pet and nothing else, for a
+-- player who wants it on its own button (the main key already revives). It is a second secure button built
 -- the same way.
 
 local _, ns = ...
@@ -26,18 +26,19 @@ local FeedKey = ns.NewModule("FeedKey")
 
 FeedKey.BUTTON = "BlackthornesPetsFeedKey"
 FeedKey.BINDING = "CLICK " .. FeedKey.BUTTON .. ":LeftButton"
-FeedKey.REVIVE_BUTTON = "BlackthornesPetsReviveKey"
-FeedKey.REVIVE_BINDING = "CLICK " .. FeedKey.REVIVE_BUTTON .. ":LeftButton"
+FeedKey.DISMISS_BUTTON = "BlackthornesPetsDismissKey"
+FeedKey.DISMISS_BINDING = "CLICK " .. FeedKey.DISMISS_BUTTON .. ":LeftButton"
 
 -- Names for Bindings.xml, shown under Options, Keybindings, AddOns. The
 -- button keeps its old name, so a key already bound stays bound.
 _G.BINDING_HEADER_BLACKTHORNESPETS = "Blackthornes Pets"
 _G["BINDING_NAME_" .. FeedKey.BINDING] = "Pet care (call, revive, feed or mend)"
-_G["BINDING_NAME_" .. FeedKey.REVIVE_BINDING] = "Revive pet"
+_G["BINDING_NAME_" .. FeedKey.DISMISS_BINDING] = "Dismiss pet"
 
 FeedKey.CALL_PET = 883
 FeedKey.REVIVE_PET = 982
 FeedKey.MEND_PET = 136
+FeedKey.DISMISS_PET = 2641
 -- Summon Imp, Voidwalker, Succubus and Felhunter, the first known one used
 -- until the warlock summons one (kept per character in lastDemon).
 FeedKey.DEMONS = { 688, 697, 712, 691 }
@@ -110,15 +111,15 @@ function FeedKey:Build()
     -- touches nothing protected.
     button:HookScript("OnClick", function() FeedKey:OnPressed() end)
     self.button = button
-    self.reviveButton = NewKeyButton(self.REVIVE_BUTTON)
+    self.dismissButton = NewKeyButton(self.DISMISS_BUTTON)
     return button
 end
 
---- The revive key's macro: Revive Pet for a hunter who knows it, else nil.
-function FeedKey:ReviveMacro(status)
+--- The dismiss key's macro: Dismiss Pet for a hunter who knows it, else nil.
+function FeedKey:DismissMacro(status)
     if not (status and status.class == "HUNTER") then return nil end
-    if not self.Knows(self.REVIVE_PET) then return nil end
-    return "/cast " .. self.SpellName(self.REVIVE_PET, "Revive Pet")
+    if not self.Knows(self.DISMISS_PET) then return nil end
+    return "/cast " .. self.SpellName(self.DISMISS_PET, "Dismiss Pet")
 end
 
 --- Why the key has nothing to feed, or nil when it has food to feed.
@@ -215,15 +216,15 @@ function FeedKey:Update(status, stacks)
     self.isWarlock = status and status.class == "WARLOCK" or false
     self.why = why
 
-    local revive = self.reviveButton
-    local reviveMacro = self:ReviveMacro(status)
-    if revive then
-        if reviveMacro then
-            revive:SetAttribute("type", "macro")
-            revive:SetAttribute("macrotext", reviveMacro)
+    local dismiss = self.dismissButton
+    local dismissMacro = self:DismissMacro(status)
+    if dismiss then
+        if dismissMacro then
+            dismiss:SetAttribute("type", "macro")
+            dismiss:SetAttribute("macrotext", dismissMacro)
         else
-            revive:SetAttribute("type", nil)
-            revive:SetAttribute("macrotext", nil)
+            dismiss:SetAttribute("type", nil)
+            dismiss:SetAttribute("macrotext", nil)
         end
     end
 end

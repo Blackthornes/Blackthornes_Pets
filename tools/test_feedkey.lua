@@ -77,15 +77,15 @@ suite.check("and feeding stops with no pet, a dead one or in combat",
 suite.check("a living pet in a fight is mended, before the feeding stops",
     text:find(MEND .. "\n/stopmacro", 1, true) ~= nil, text)
 suite.check("/bpet food says it mends", FeedKey:State():find("mends it in combat", 1, true), FeedKey:State())
-suite.check("the revive key only revives",
-    FeedKey.reviveButton:GetAttribute("type") == "macro"
-        and FeedKey.reviveButton:GetAttribute("macrotext") == "/cast Revive Pet",
-    tostring(FeedKey.reviveButton:GetAttribute("macrotext")))
+suite.check("the dismiss key only dismisses",
+    FeedKey.dismissButton:GetAttribute("type") == "macro"
+        and FeedKey.dismissButton:GetAttribute("macrotext") == "/cast Dismiss Pet",
+    tostring(FeedKey.dismissButton:GetAttribute("macrotext")))
 suite.check("it is never shown and acts as the key comes up",
-    not FeedKey.reviveButton:IsShown() and FeedKey.reviveButton:GetAttribute("useOnKeyDown") == false)
+    not FeedKey.dismissButton:IsShown() and FeedKey.dismissButton:GetAttribute("useOnKeyDown") == false)
 suite.check("it has its own binding name",
-    _G["BINDING_NAME_CLICK BlackthornesPetsReviveKey:LeftButton"] == "Revive pet"
-        and xml:find('name="CLICK BlackthornesPetsReviveKey:LeftButton"', 1, true) ~= nil)
+    _G["BINDING_NAME_CLICK BlackthornesPetsDismissKey:LeftButton"] == "Dismiss pet"
+        and xml:find('name="CLICK BlackthornesPetsDismissKey:LeftButton"', 1, true) ~= nil)
 suite.check("a press with food says nothing", Pressed() == "")
 suite.check("/bpet food names the food", FeedKey:State():find("feeds Tough Jerky", 1, true), FeedKey:State())
 
