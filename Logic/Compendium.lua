@@ -74,9 +74,18 @@ local function Overlay(entry, spot, why)
     entry.forever = entry.forever or why
 end
 
+--- A tamed beast's family: by its ID when Classic has that family, since
+--- the name is in the language of the client that tamed it.
+local function RecordFamily(record)
+    local id = record.familyID
+    local data = ns.CompendiumData
+    if type(id) == "number" and data and data.FAMILIES[id] then return Family(id) end
+    return Family(record.family)
+end
+
 --- A beast tamed on Forever, as an entry of its own: one Classic never had.
 local function TamedEntry(id, record, why)
-    local family, diet = Family(record.family)
+    local family, diet = RecordFamily(record)
     return {
         id = id, name = record.name or ("Beast " .. id), family = family, diet = diet,
         min = record.level, max = record.level,
@@ -149,8 +158,8 @@ function Compendium:All()
                 local entry = byID[id]
                 if entry then
                     Overlay(entry, record, why)
-                    if record.family and not entry.family then
-                        entry.family, entry.diet = Family(record.family)
+                    if (record.family or record.familyID) and not entry.family then
+                        entry.family, entry.diet = RecordFamily(record)
                     end
                 else
                     entry = TamedEntry(id, record, why)

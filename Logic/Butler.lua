@@ -58,8 +58,7 @@ function Butler:Reading()
     local status = ns.PetStatus:Read()
     if status.exists and status.foods and (status.class == nil or status.class == "HUNTER") then
         local stacks = ns.Food:Latest(status)
-        local eats, carried = {}, {}
-        for _, diet in ipairs(status.foods) do eats[diet] = true end
+        local eats, carried = ns.PetFood.Eats(status.foods), {}
         for _, stack in ipairs(stacks) do
             if stack.itemID then
                 carried[stack.itemID] = (carried[stack.itemID] or 0) + stack.count
@@ -89,7 +88,8 @@ end
 
 local function Answer(reading, itemID)
     local name, level = NameAndLevel(itemID)
-    local diet = name and ns.PetFood.byName[name]
+    -- By ID first, so food is known on a client in any language.
+    local diet = ns.PetFood.DietOf(itemID, name)
     if not diet then return false end
     local eats = reading.eats[diet] == true
         and ns.Food:Effect(level, reading.status.level) ~= "refused"

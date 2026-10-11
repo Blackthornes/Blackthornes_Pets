@@ -51,6 +51,15 @@ local function SpellName(id)
     return Call(C_Spell and C_Spell.GetSpellName, id)
 end
 
+--- The pet's family: its name as the client gives it and its ID (the
+--- retail shape, "Boar, 5"), either nil when the client does not say.
+local function Family()
+    local name, id = Call(_G.UnitCreatureFamily, "pet")
+    if type(name) ~= "string" or name == "" then name = nil end
+    if type(id) ~= "number" then id = nil end
+    return name, id
+end
+
 --- Is this spell Tame Beast? A spell id the client made secret is not: it
 --- raises when compared, and every spell the player casts comes through here.
 function TameRecord:IsTameBeast(spellID)
@@ -100,7 +109,11 @@ function TameRecord:Where()
     local map = _G.C_Map
     if type(map) ~= "table" then return nil end
     local mapID = Call(map.GetBestMapForUnit, "player")
-    if type(mapID) ~= "number" then return Call(_G.GetZoneText), nil, nil end
+    if type(mapID) ~= "number" then
+        local zone = Call(_G.GetZoneText)
+        if type(zone) == "string" and zone ~= "" and ns.Waypoints then zone = ns.Waypoints:DataZone(zone) end
+        return zone, nil, nil
+    end
 
     local zone
     local info = Call(map.GetMapInfo, mapID)
@@ -121,6 +134,8 @@ function TameRecord:Where()
         y = math.floor(py * 1000 + 0.5) / 10
     end
     if type(zone) ~= "string" or zone == "" then zone = nil end
+    -- Kept by the data's English name, on a client in another language too.
+    if zone and ns.Waypoints then zone = ns.Waypoints:DataZone(zone, mapID) or zone end
     return zone, x, y
 end
 
@@ -169,9 +184,12 @@ function TameRecord:PetSkills()
         if name and not isToken and type(spellID) == "number" then
             local subtext = Call(C_Spell and C_Spell.GetSpellSubtext, spellID)
             local rank = type(subtext) == "string" and tonumber(subtext:match("(%d+)"))
+            -- Kept under the data's English name, so a tame on a client in
+            -- another language lines up with Data/BeastSkills.lua.
+            local known = ns.BeastSkills and ns.BeastSkills.SKILLS[spellID]
             skills[#skills + 1] = {
                 spell = spellID,
-                name = SpellName(spellID) or name,
+                name = known and known.name or ns.Taming:EnglishName(SpellName(spellID) or name),
                 rank = rank or 1,
             }
         end
@@ -214,8 +232,12 @@ function TameRecord:Capture()
             learned = true
         end
         if not old.family then
-            old.family = Call(_G.UnitCreatureFamily, "pet")
+            old.family, old.familyID = Family()
             learned = learned or old.family ~= nil
+        elseif not old.familyID then
+            local _, familyID = Family()
+            old.familyID = familyID
+            learned = learned or familyID ~= nil
         end
         if not old.speed then
             old.speed = self:PetSpeed()
@@ -225,13 +247,16 @@ function TameRecord:Capture()
         return old
     end
 
+    local family, familyID = Family()
     local record = {
         name = pending.name,
         level = pending.level,
         skills = skills,
         seen = type(time) == "function" and time() or 0,
         -- Where it was tamed and what it is, for the Pet Compendium.
-        family = Call(_G.UnitCreatureFamily, "pet"),
+        -- The family's name is the client's own words; its ID is the same
+        -- in every language, and is what the Pet Compendium goes by.
+        family = family, familyID = familyID,
         zone = pending.zone, x = pending.x, y = pending.y,
         -- Seconds between its melee swings, read off the real pet: the
         -- compendium's Speed column trusts it over Classic's number.

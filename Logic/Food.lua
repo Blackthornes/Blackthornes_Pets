@@ -3,8 +3,8 @@
 -- warning when that food runs low.
 --
 -- What the pet eats comes from C_PetInfo.GetPetFoodTypes (read by
--- PetStatus); what diet an item is comes from Data/PetFood.lua; the item's
--- level, and so how much good it does, comes from the client.
+-- PetStatus); what diet an item is comes from Data/PetFood.lua, by item ID;
+-- the item's level, and so how much good it does, comes from the client.
 
 local _, ns = ...
 
@@ -111,13 +111,21 @@ end
 --------------------------------------------------------------------------------
 
 -- Words in a food's "Use:" text that mean it gives more than health back.
-local BUFF_WORDS = { "well fed", "increases your", "for the next" }
+-- The client hands out no flag for it, so this reads its text: English,
+-- and the German client's words (classic's, not yet seen on Forever). A
+-- client in another language reads every food as plain food, as before.
+-- Patterns, matched on the lower-cased text.
+local BUFF_WORDS = {
+    "well fed", "increases your", "for the next",
+    -- German: "... werdet Ihr satt", "Erhöht Eure ...", "für die nächsten"
+    "%f[%a]satt%f[%A]", "erhöht eure", "erhöht euer", "für die nächsten",
+}
 
 local function GivesBuff(text)
     if type(text) ~= "string" then return false end
     text = text:lower()
     for _, words in ipairs(BUFF_WORDS) do
-        if text:find(words, 1, true) then return true end
+        if text:find(words) then return true end
     end
     return false
 end
@@ -203,12 +211,12 @@ end
 function Food:Inspect(bag, slot, info, status, eats)
     local name, level = NameAndLevel(info)
     if not name then return nil, "no name from the client", name, level end
-    local diet = ns.PetFood.byName[name]
+    local itemID = Plain(info.itemID)
+    local diet = ns.PetFood.DietOf(itemID, name)
     if not diet then return nil, "not in the food list", name, level end
     if not eats[diet] then return nil, ("%s, which it does not eat"):format(diet), name, level end
     local effect = self:Effect(level, status.level)
     if effect == "refused" then return nil, "too low level", name, level end
-    local itemID = Plain(info.itemID)
     local buff, unsure = self:IsBuffFood(itemID)
     if unsure then RequestItem(itemID) end
     if buff and NeverBuffFood() then return nil, "buff food, which you chose never to feed", name, level end
@@ -277,8 +285,8 @@ function Food:Scan(status)
     if not (status.exists and status.foods) then return stacks end
     local key = ScanKey(status)
 
-    local eats = {}
-    for _, diet in ipairs(status.foods) do eats[diet] = true end
+    -- The client's diet words, in its own language, as Data/PetFood.lua's.
+    local eats = ns.PetFood.Eats(status.foods)
 
     local slots, unsure = 0, false
     for bag = FIRST_BAG, LAST_BAG do
@@ -411,8 +419,7 @@ function Food:Report()
         return
     end
 
-    local eats = {}
-    for _, diet in ipairs(status.foods) do eats[diet] = true end
+    local eats = ns.PetFood.Eats(status.foods)
     ns.Print(("food: %s (level %s) eats %s"):format(status.name or "your pet",
         tostring(status.level or "?"), table.concat(status.foods, ", ")))
 

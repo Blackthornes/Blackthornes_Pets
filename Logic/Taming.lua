@@ -65,8 +65,41 @@ function Taming:NpcID(guid)
     return ok and id or nil
 end
 
+--- The client's name for each skill, in its own language, to the English
+--- name the data uses: read off the spells' IDs (the pet's spell and the
+--- one the hunter learns), once, when first asked. A client that names no
+--- spell yet is asked again, a few times at most.
+local NAME_TRIES = 3
+
+function Taming:SkillNames()
+    if self.skillNames then return self.skillNames end
+    local names, any = {}, false
+    local canAsk = Resolve("C_Spell.GetSpellName") ~= nil
+    for spell, skill in pairs(ns.BeastSkills.SKILLS) do
+        names[skill.name] = skill.name
+        for _, id in ipairs(canAsk and { spell, skill.teach } or {}) do
+            local name = Call("C_Spell.GetSpellName", id)
+            if type(name) == "string" and name ~= "" then
+                any = true
+                names[name] = names[name] or skill.name
+            end
+        end
+    end
+    self.skillNameTries = (self.skillNameTries or 0) + 1
+    if any or not canAsk or self.skillNameTries >= NAME_TRIES then self.skillNames = names end
+    return names
+end
+
+--- The data's English name for a skill named by the client ("Beißen" on a
+--- German one), or the name itself when nothing matches.
+function Taming:EnglishName(name)
+    if type(name) ~= "string" then return name end
+    return self:SkillNames()[name] or name
+end
+
 --- The Classic skill of this name and rank, for the spell a hunter learns.
 local function ClassicSkill(name, rank)
+    name = Taming:EnglishName(name)
     for _, skill in pairs(ns.BeastSkills.SKILLS) do
         if skill.name == name and skill.rank == rank then return skill end
     end
@@ -147,15 +180,17 @@ function Taming:ReadBeastTraining()
     local count = Call("GetNumCrafts")
     if type(count) ~= "number" or count < 1 then return nil end
 
-    local names = {}
-    for _, skill in pairs(ns.BeastSkills.SKILLS) do names[skill.name] = true end
+    -- The window names skills in the client's language: kept by the
+    -- data's English name.
+    local names = self:SkillNames()
 
     local found = {}
     for i = 1, count do
         local name, subText, kind = Call("GetCraftInfo", i)
-        if type(name) == "string" and names[name] and kind ~= "header" then
+        local english = type(name) == "string" and names[name]
+        if english and kind ~= "header" then
             local rank = type(subText) == "string" and tonumber(subText:match("(%d+)"))
-            if rank then found[#found + 1] = Key(name, rank) end
+            if rank then found[#found + 1] = Key(english, rank) end
         end
     end
     -- An enchanting window, or a pet with nothing learned: not ours to read.
