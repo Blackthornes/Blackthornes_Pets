@@ -3,4 +3,5 @@
      it is not listed in the TOC. -->
 <Bindings>
     <Binding name="CLICK BlackthornesPetsFeedKey:LeftButton" header="BLACKTHORNESPETS" category="ADDONS"/>
+    <Binding name="CLICK BlackthornesPetsReviveKey:LeftButton" category="ADDONS"/>
 </Bindings>

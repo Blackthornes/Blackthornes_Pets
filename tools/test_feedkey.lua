@@ -28,7 +28,7 @@ suite.check("it acts once, as the key comes up",
 
 -- The binding's names, and Bindings.xml naming the same button.
 suite.check("the header is named", _G.BINDING_HEADER_BLACKTHORNESPETS == "Blackthornes Pets")
-suite.check("the key is named", _G["BINDING_NAME_CLICK BlackthornesPetsFeedKey:LeftButton"] == "Pet care (call, revive or feed)")
+suite.check("the key is named", _G["BINDING_NAME_CLICK BlackthornesPetsFeedKey:LeftButton"] == "Pet care (call, revive, feed or mend)")
 local handle = assert(io.open(lfs_cwd .. "/Bindings.xml", "r"))
 local xml = handle:read("*a")
 handle:close()
@@ -57,6 +57,7 @@ _G.C_Container = {
 }
 _G.C_Item = { GetItemInfo = function(id) return names[id], nil, 1, levels[id] end }
 
+local MEND = "\n/cast [@pet,exists,nodead,combat] Mend Pet"
 local function Refresh() ns.Food:Update() end
 local function Pressed()
     env.chat = {}
@@ -73,6 +74,18 @@ suite.check("first it calls or revives the pet when it needs it",
     text:find("/cast [@pet,dead] Revive Pet; [nopet] Call Pet\n", 1, true) == 1, text)
 suite.check("and feeding stops with no pet, a dead one or in combat",
     text:find("/stopmacro [nopet][@pet,dead][combat]\n/cast", 1, true) ~= nil, text)
+suite.check("a living pet in a fight is mended, before the feeding stops",
+    text:find(MEND .. "\n/stopmacro", 1, true) ~= nil, text)
+suite.check("/bpet food says it mends", FeedKey:State():find("mends it in combat", 1, true), FeedKey:State())
+suite.check("the revive key only revives",
+    FeedKey.reviveButton:GetAttribute("type") == "macro"
+        and FeedKey.reviveButton:GetAttribute("macrotext") == "/cast Revive Pet",
+    tostring(FeedKey.reviveButton:GetAttribute("macrotext")))
+suite.check("it is never shown and acts as the key comes up",
+    not FeedKey.reviveButton:IsShown() and FeedKey.reviveButton:GetAttribute("useOnKeyDown") == false)
+suite.check("it has its own binding name",
+    _G["BINDING_NAME_CLICK BlackthornesPetsReviveKey:LeftButton"] == "Revive pet"
+        and xml:find('name="CLICK BlackthornesPetsReviveKey:LeftButton"', 1, true) ~= nil)
 suite.check("a press with food says nothing", Pressed() == "")
 suite.check("/bpet food names the food", FeedKey:State():find("feeds Tough Jerky", 1, true), FeedKey:State())
 
@@ -86,7 +99,7 @@ _G.InCombatLockdown = nil
 
 Refresh()
 suite.check("out of combat with no food it only calls or revives",
-    button:GetAttribute("macrotext") == "/cast [@pet,dead] Revive Pet; [nopet] Call Pet",
+    button:GetAttribute("macrotext") == "/cast [@pet,dead] Revive Pet; [nopet] Call Pet" .. MEND,
     button:GetAttribute("macrotext"))
 suite.check("and a press says why", Pressed():find("no food in your bags that Scorpid will eat", 1, true),
     env.ChatText())
@@ -97,7 +110,7 @@ suite.check("food back, armed again", (button:GetAttribute("macrotext") or ""):f
 
 _G.UnitExists = function() return false end
 ns.PetStatus:Update()
-suite.check("no pet: the key calls it", button:GetAttribute("macrotext") == "/cast [@pet,dead] Revive Pet; [nopet] Call Pet")
+suite.check("no pet: the key calls it", button:GetAttribute("macrotext") == "/cast [@pet,dead] Revive Pet; [nopet] Call Pet" .. MEND)
 suite.check("and a press says nothing", Pressed() == "", env.ChatText())
 suite.check("/bpet food says so", FeedKey:State():find("calls your pet", 1, true), FeedKey:State())
 
@@ -110,14 +123,14 @@ _G.InCombatLockdown = nil
 _G.UnitExists = function() return false end
 ns.PetStatus:Update()
 suite.check("a pet that died is revived, not called",
-    button:GetAttribute("macrotext") == "/cast [nopet][@pet,dead] Revive Pet", button:GetAttribute("macrotext"))
+    button:GetAttribute("macrotext") == "/cast [nopet][@pet,dead] Revive Pet" .. MEND, button:GetAttribute("macrotext"))
 _G.UnitExists, _G.UnitIsDead = function() return true end, nil
 ns.PetStatus:Update()
 suite.check("alive again: back to calling and feeding",
     (button:GetAttribute("macrotext") or ""):find("[nopet] Call Pet", 1, true) ~= nil)
 
 -- A hunter too young for Call Pet: nothing but food.
-_G.IsPlayerSpell = function(id) return id ~= ns.FeedKey.CALL_PET and id ~= ns.FeedKey.REVIVE_PET end
+_G.IsPlayerSpell = function(id) return id ~= ns.FeedKey.CALL_PET and id ~= ns.FeedKey.REVIVE_PET and id ~= ns.FeedKey.MEND_PET end
 ns.PetStatus:Update()
 suite.check("no Call Pet known: just the food", (button:GetAttribute("macrotext") or ""):find("/stopmacro", 1, true) == 1,
     button:GetAttribute("macrotext"))

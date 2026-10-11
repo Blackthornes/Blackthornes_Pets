@@ -13,7 +13,12 @@
 -- game's macro conditions ([nopet], [@pet,dead], [combat]) for what changes
 -- in a fight: a pet that dies mid-fight is revived by the same macro.
 -- Feeding stops in combat (Feed Pet cannot be cast there, and the food
--- would otherwise be eaten).
+-- would otherwise be eaten). In combat, with the pet alive, the same key
+-- casts Mend Pet instead (a player asked, the owner agreed 2026-10-11).
+--
+-- A second key, "Revive pet", casts Revive Pet and nothing else, for a
+-- player who wants it on its own button. It is a second secure button built
+-- the same way.
 
 local _, ns = ...
 
@@ -21,14 +26,18 @@ local FeedKey = ns.NewModule("FeedKey")
 
 FeedKey.BUTTON = "BlackthornesPetsFeedKey"
 FeedKey.BINDING = "CLICK " .. FeedKey.BUTTON .. ":LeftButton"
+FeedKey.REVIVE_BUTTON = "BlackthornesPetsReviveKey"
+FeedKey.REVIVE_BINDING = "CLICK " .. FeedKey.REVIVE_BUTTON .. ":LeftButton"
 
 -- Names for Bindings.xml, shown under Options, Keybindings, AddOns. The
 -- button keeps its old name, so a key already bound stays bound.
 _G.BINDING_HEADER_BLACKTHORNESPETS = "Blackthornes Pets"
-_G["BINDING_NAME_" .. FeedKey.BINDING] = "Pet care (call, revive or feed)"
+_G["BINDING_NAME_" .. FeedKey.BINDING] = "Pet care (call, revive, feed or mend)"
+_G["BINDING_NAME_" .. FeedKey.REVIVE_BINDING] = "Revive pet"
 
 FeedKey.CALL_PET = 883
 FeedKey.REVIVE_PET = 982
+FeedKey.MEND_PET = 136
 -- Summon Imp, Voidwalker, Succubus and Felhunter, the first known one used
 -- until the warlock summons one (kept per character in lastDemon).
 FeedKey.DEMONS = { 688, 697, 712, 691 }
@@ -79,10 +88,9 @@ local function PetIsDead()
     return ok and dead == true
 end
 
-function FeedKey:Build()
-    if self.button then return self.button end
-
-    local button = CreateFrame("Button", self.BUTTON, UIParent, "SecureActionButtonTemplate")
+--- A hidden secure button a key binding can click.
+local function NewKeyButton(name)
+    local button = CreateFrame("Button", name, UIParent, "SecureActionButtonTemplate")
     button:Hide()
     -- A key binding clicks the button twice, once as the key goes down and
     -- once as it comes up. Registered for the release only, with
@@ -92,11 +100,25 @@ function FeedKey:Build()
     -- button set to act on key down never cast on Forever).
     button:RegisterForClicks("AnyUp")
     button:SetAttribute("useOnKeyDown", false)
+    return button
+end
+
+function FeedKey:Build()
+    if self.button then return self.button end
+    local button = NewKeyButton(self.BUTTON)
     -- Runs after the secure click, and only says why nothing happened, so it
     -- touches nothing protected.
     button:HookScript("OnClick", function() FeedKey:OnPressed() end)
     self.button = button
+    self.reviveButton = NewKeyButton(self.REVIVE_BUTTON)
     return button
+end
+
+--- The revive key's macro: Revive Pet for a hunter who knows it, else nil.
+function FeedKey:ReviveMacro(status)
+    if not (status and status.class == "HUNTER") then return nil end
+    if not self.Knows(self.REVIVE_PET) then return nil end
+    return "/cast " .. self.SpellName(self.REVIVE_PET, "Revive Pet")
 end
 
 --- Why the key has nothing to feed, or nil when it has food to feed.
@@ -128,9 +150,10 @@ local DEMON_NAMES = { [688] = "Summon Imp", [697] = "Summon Voidwalker",
     [712] = "Summon Succubus", [691] = "Summon Felhunter" }
 
 --- The key's macro for this pet and these bags, and what it is set to do
---- with no pet out ("call", "revive", "summon" or nil).
+--- with no pet out ("call", "revive", "summon" or nil); third, whether it
+--- mends the pet in combat.
 function FeedKey:Macro(status, stacks)
-    local lines, absent = {}, nil
+    local lines, absent, mend = {}, nil, nil
     if status and status.class == "HUNTER" then
         local call = self.Knows(self.CALL_PET) and self.SpellName(self.CALL_PET, "Call Pet")
         local revive = self.Knows(self.REVIVE_PET) and self.SpellName(self.REVIVE_PET, "Revive Pet")
@@ -147,6 +170,12 @@ function FeedKey:Macro(status, stacks)
         elseif revive then
             lines[#lines + 1] = ("/cast [@pet,dead] %s"):format(revive)
         end
+        mend = self.Knows(self.MEND_PET) and self.SpellName(self.MEND_PET, "Mend Pet") or nil
+        if mend then
+            -- Only a living pet in a fight: the call/revive line above has
+            -- the other cases, and feeding stops at [combat] below.
+            lines[#lines + 1] = ("/cast [@pet,exists,nodead,combat] %s"):format(mend)
+        end
         local stack = not self:Why(status, stacks) and stacks[1]
         if stack then
             lines[#lines + 1] = "/stopmacro [nopet][@pet,dead][combat]"
@@ -160,7 +189,7 @@ function FeedKey:Macro(status, stacks)
         end
     end
     if #lines == 0 then return nil, nil end
-    return table.concat(lines, "\n"), absent
+    return table.concat(lines, "\n"), absent, mend ~= nil
 end
 
 --- Point the button at what the pet needs, or at nothing with the reason
@@ -171,7 +200,7 @@ function FeedKey:Update(status, stacks)
     if InCombat() then return end
     local button = self:Build()
 
-    local macro, absent = self:Macro(status, stacks)
+    local macro, absent, mends = self:Macro(status, stacks)
     local why = self:Why(status, stacks)
     if macro then
         button:SetAttribute("type", "macro")
@@ -182,8 +211,21 @@ function FeedKey:Update(status, stacks)
     end
     self.stack = not why and stacks and stacks[1] or nil
     self.absent = absent
+    self.mends = mends
     self.isWarlock = status and status.class == "WARLOCK" or false
     self.why = why
+
+    local revive = self.reviveButton
+    local reviveMacro = self:ReviveMacro(status)
+    if revive then
+        if reviveMacro then
+            revive:SetAttribute("type", "macro")
+            revive:SetAttribute("macrotext", reviveMacro)
+        else
+            revive:SetAttribute("type", nil)
+            revive:SetAttribute("macrotext", nil)
+        end
+    end
 end
 
 --- After a key press: nothing to say when the key did something; the game
@@ -192,6 +234,8 @@ function FeedKey:OnPressed()
     local status = ns.PetStatus and ns.PetStatus:Read() or {}
     if not status.exists or PetIsDead() then
         if self.absent then return end
+    elseif InCombat() and self.mends then
+        return
     elseif self.stack then
         if InCombat() then ns.Print("your pet can't be fed in combat.") end
         return
@@ -218,6 +262,7 @@ function FeedKey:State()
     local absent = self.absent == "call" and "calls your pet when none is out"
         or self.absent == "revive" and "revives your pet"
         or self.absent == "summon" and "summons your demon when none is out" or nil
+    if self.mends then absent = (absent and (absent .. ", and ") or "") .. "mends it in combat" end
     if self.stack then
         return ("%s feeds %s%s."):format(bound, self.stack.name, absent and (", and " .. absent) or "")
     end
