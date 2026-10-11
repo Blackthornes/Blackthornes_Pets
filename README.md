@@ -18,7 +18,7 @@ While the pet needs feeding, a small Feed button also sits just above the
 quest tracker, so it can be fed without opening the window. One "Pet care"
 key does whatever the pet needs: it calls the pet when none is out, revives
 it when it is dead, and otherwise feeds it the same food, hungry or not. In a fight, with the pet
-alive, the same key casts Mend Pet. A second key, "Revive pet", casts Revive
+alive, the same key casts Mend Pet. A second key, "Dismiss pet", casts Dismiss
 Pet and nothing else. For a
 warlock it summons the last demon you used. Set the key under Options,
 Keybindings, AddOns, Blackthornes Pets. With nothing to do it says why in
