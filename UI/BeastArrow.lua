@@ -15,6 +15,7 @@
 -- inside dungeons and while no beast is picked.
 
 local ADDON, ns = ...
+local L = ns.L
 
 local ArrowUI = ns.NewModule("BeastArrowUI")
 
@@ -198,18 +199,18 @@ end
 --- The close gem: the arrow off until turned on again.
 function ArrowUI:Close()
     ns.BeastArrow:SetOn(false)
-    ns.Print("beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back.")
+    ns.Print(L["beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back."])
 end
 
 function ArrowUI:ShowTooltip(owner)
     if not GameTooltip then return end
     GameTooltip:SetOwner(owner, "ANCHOR_BOTTOM")
-    GameTooltip:AddLine("Beast arrow", Theme.Unpack("accent"))
+    GameTooltip:AddLine(L["Beast arrow"], Theme.Unpack("accent"))
     local state = self.state
     local beast = state and state.beast
     if beast then GameTooltip:AddLine(ns.Compendium.PlaceText(beast), 1, 1, 1, true) end
-    GameTooltip:AddLine("Click to open the Pet Compendium; Shift-click a beast there to follow it.", 0.9, 0.9, 0.9, true)
-    GameTooltip:AddLine("Drag to move it. The red gem closes it.", 0.9, 0.9, 0.9)
+    GameTooltip:AddLine(L["Click to open the Pet Compendium; Shift-click a beast there to follow it."], 0.9, 0.9, 0.9, true)
+    GameTooltip:AddLine(L["Drag to move it. The red gem closes it."], 0.9, 0.9, 0.9, true)
     GameTooltip:Show()
 end
 
@@ -268,7 +269,7 @@ end
 function ArrowUI.Words(state)
     local mode = state.mode
     if mode == "blind" then
-        return "Can't see you here", "The game won't say where you are", "/bpet arrow check", "muted"
+        return L["Can't see you here"], L["The game won't say where you are"], "/bpet arrow check", "muted"
     end
     return state.distance or "", state.place or "", state.note or "", state.noteColor or "muted"
 end

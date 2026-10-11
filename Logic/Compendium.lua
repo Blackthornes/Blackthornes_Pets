@@ -14,6 +14,7 @@
 -- A field nothing knows stays empty; nothing here guesses.
 
 local _, ns = ...
+local L = ns.L
 
 local Compendium = ns.NewModule("Compendium")
 
@@ -87,7 +88,7 @@ end
 local function TamedEntry(id, record, why)
     local family, diet = RecordFamily(record)
     return {
-        id = id, name = record.name or ("Beast " .. id), family = family, diet = diet,
+        id = id, name = record.name or L.Format("Beast %d", id), family = family, diet = diet,
         min = record.level, max = record.level,
         zone = record.zone, x = record.x, y = record.y,
         speed = type(record.speed) == "number" and record.speed or nil,
@@ -346,13 +347,13 @@ function Compendium.LevelText(entry)
     return tostring(entry.min)
 end
 
-local RANK_WORDS = { rare = "Rare", rareelite = "Rare elite", elite = "Elite" }
+local RANK_WORDS = { rare = L["Rare"], rareelite = L["Rare elite"], elite = L["Elite"] }
 function Compendium.RankText(entry) return RANK_WORDS[entry.rank] end
 
 --- "2 hours", "45 minutes", "2-4 hours".
 local function Span(seconds)
-    if seconds >= 5400 then return math.floor(seconds / 3600 + 0.5), "hours" end
-    return math.max(1, math.floor(seconds / 60 + 0.5)), "minutes"
+    if seconds >= 5400 then return math.floor(seconds / 3600 + 0.5), L["hours"] end
+    return math.max(1, math.floor(seconds / 60 + 0.5)), L["minutes"]
 end
 
 function Compendium.RespawnText(entry)
@@ -362,7 +363,7 @@ function Compendium.RespawnText(entry)
     local high, unitHigh = Span(respawn[2] or respawn[1])
     if low == high and unitLow == unitHigh then return ("%d %s"):format(low, unitLow) end
     if unitLow == unitHigh then return ("%d-%d %s"):format(low, high, unitHigh) end
-    return ("%d %s to %d %s"):format(low, unitLow, high, unitHigh)
+    return L.Format("%d %s to %d %s", low, unitLow, high, unitHigh)
 end
 
 --- "1.2", "1.25", "2.0": seconds between swings, as players write them.
@@ -372,19 +373,23 @@ function Compendium.SpeedText(entry)
     return text
 end
 
+-- "dungeon" and "raid", the data's words, as players read them.
+local INSTANCE_WORDS = { dungeon = L["dungeon"], raid = L["raid"] }
+function Compendium.InstanceText(kind) return INSTANCE_WORDS[kind] or kind end
+
 --- "Duskwood 32.6, 25.8", "Wailing Caverns (dungeon)" or just the zone.
 function Compendium.PlaceText(entry)
     if not entry.zone then return "" end
     if entry.x and entry.y then return ("%s %.1f, %.1f"):format(entry.zone, entry.x, entry.y) end
-    if entry.instance then return ("%s (%s)"):format(entry.zone, entry.instance) end
+    if entry.instance then return ("%s (%s)"):format(entry.zone, Compendium.InstanceText(entry.instance)) end
     return entry.zone
 end
 
 local WHY = {
-    seen = "Seen on Forever",
-    tamed = "Tamed on Forever",
-    found = "Found on Forever",
-    mine = "You tamed it on Forever",
+    seen = L["Seen on Forever"],
+    tamed = L["Tamed on Forever"],
+    found = L["Found on Forever"],
+    mine = L["You tamed it on Forever"],
 }
 function Compendium.ForeverText(entry) return entry.forever and WHY[entry.forever] end
 

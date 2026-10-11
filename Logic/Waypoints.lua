@@ -15,6 +15,7 @@
 -- them simply cannot pin, and the compendium says so.
 
 local _, ns = ...
+local L = ns.L
 
 local Waypoints = ns.NewModule("Waypoints")
 
@@ -256,23 +257,23 @@ function Waypoints:Pin(place)
 end
 
 local WHY = {
-    nospot = "no exact spot is known for that one",
-    noclient = "this client cannot put a pin on the map",
-    nomap = "the map for that zone could not be found",
+    nospot = L["no exact spot is known for that one"],
+    noclient = L["this client cannot put a pin on the map"],
+    nomap = L["the map for that zone could not be found"],
 }
 
 --- Pin a place and say so in chat. `what` names it ("Mother Fang").
 function Waypoints:Show(place, what)
     local ok, why = self:Pin(place)
     if ok then
-        ns.Print(("pinned %s on your map: %s (%s, %s)"):format(what or place.name or "it",
+        ns.Print(L.Format("pinned %s on your map: %s (%s, %s)", what or place.name or L["it"],
             place.zone, place.x, place.y))
         -- Open the map on it, where the game lets an addon.
         local mapID = self:MapFor(place.zone)
         if type(_G.OpenWorldMap) == "function" then pcall(_G.OpenWorldMap, mapID) end
     else
         local where = place and place.zone and (" (" .. place.zone .. ")") or ""
-        ns.Print(("can't pin %s%s: %s"):format(what or "that", where, WHY[why] or why))
+        ns.Print(L.Format("can't pin %s%s: %s", what or L["that"], where, WHY[why] or why))
     end
     return ok
 end

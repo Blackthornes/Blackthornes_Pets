@@ -21,6 +21,7 @@
 -- the same way.
 
 local _, ns = ...
+local L = ns.L
 
 local FeedKey = ns.NewModule("FeedKey")
 
@@ -32,8 +33,8 @@ FeedKey.DISMISS_BINDING = "CLICK " .. FeedKey.DISMISS_BUTTON .. ":LeftButton"
 -- Names for Bindings.xml, shown under Options, Keybindings, AddOns. The
 -- button keeps its old name, so a key already bound stays bound.
 _G.BINDING_HEADER_BLACKTHORNESPETS = "Blackthornes Pets"
-_G["BINDING_NAME_" .. FeedKey.BINDING] = "Pet care (call, revive, feed or mend)"
-_G["BINDING_NAME_" .. FeedKey.DISMISS_BINDING] = "Dismiss pet"
+_G["BINDING_NAME_" .. FeedKey.BINDING] = L["Pet care (call, revive, feed or mend)"]
+_G["BINDING_NAME_" .. FeedKey.DISMISS_BINDING] = L["Dismiss pet"]
 
 FeedKey.CALL_PET = 883
 FeedKey.REVIVE_PET = 982
@@ -125,13 +126,13 @@ end
 --- Why the key has nothing to feed, or nil when it has food to feed.
 function FeedKey:Why(status, stacks)
     if not status or status.class ~= "HUNTER" then
-        return "the Pet care key feeds a hunter's pet."
+        return L["the Pet care key feeds a hunter's pet."]
     end
-    if not status.exists then return "you have no pet out." end
-    if not status.foods then return "the game did not say what your pet eats." end
+    if not status.exists then return L["you have no pet out."] end
+    if not status.foods then return L["the game did not say what your pet eats."] end
     if not (stacks and stacks[1]) then
-        if stacks and stacks.incomplete then return "your bags are still loading. Try again in a moment." end
-        return ("you have no food in your bags that %s will eat."):format(status.name or "your pet")
+        if stacks and stacks.incomplete then return L["your bags are still loading. Try again in a moment."] end
+        return L.Format("you have no food in your bags that %s will eat.", status.name or L["your pet"])
     end
     return nil
 end
@@ -238,13 +239,13 @@ function FeedKey:OnPressed()
     elseif InCombat() and self.mends then
         return
     elseif self.stack then
-        if InCombat() then ns.Print("your pet can't be fed in combat.") end
+        if InCombat() then ns.Print(L["your pet can't be fed in combat."]) end
         return
     elseif self.isWarlock then
-        ns.Print("your demon is already out.")
+        ns.Print(L["your demon is already out."])
         return
     end
-    ns.Print(self.why or "nothing to feed your pet yet.")
+    ns.Print(self.why or L["nothing to feed your pet yet."])
 end
 
 --- The key the player bound, or nil.
@@ -258,17 +259,18 @@ end
 --- One line on the key, for /bpet food.
 function FeedKey:State()
     local key = self:Key()
-    local bound = key and ("Pet care key (%s)"):format(key)
-        or "Pet care key (not set; Options, Keybindings, AddOns)"
-    local absent = self.absent == "call" and "calls your pet when none is out"
-        or self.absent == "revive" and "revives your pet"
-        or self.absent == "summon" and "summons your demon when none is out" or nil
-    if self.mends then absent = (absent and (absent .. ", and ") or "") .. "mends it in combat" end
+    local bound = key and L.Format("Pet care key (%s)", key)
+        or L["Pet care key (not set; Options, Keybindings, AddOns)"]
+    local absent = self.absent == "call" and L["calls your pet when none is out"]
+        or self.absent == "revive" and L["revives your pet"]
+        or self.absent == "summon" and L["summons your demon when none is out"] or nil
+    local andWord = L[", and "]
+    if self.mends then absent = (absent and (absent .. andWord) or "") .. L["mends it in combat"] end
     if self.stack then
-        return ("%s feeds %s%s."):format(bound, self.stack.name, absent and (", and " .. absent) or "")
+        return L.Format("%s feeds %s%s.", bound, self.stack.name, absent and (andWord .. absent) or "")
     end
     if absent then return ("%s %s."):format(bound, absent) end
-    return ("%s has nothing to feed: %s"):format(bound, self.why or "not checked yet.")
+    return L.Format("%s has nothing to feed: %s", bound, self.why or L["not checked yet."])
 end
 
 --- A warlock summoned a demon: the key summons that one from now on.

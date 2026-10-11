@@ -7,6 +7,7 @@
 -- as one set, and like Equipment's gear window, which is the same shape.
 
 local _, ns = ...
+local L = ns.L
 
 local UI = ns.NewModule("UI")
 
@@ -29,13 +30,13 @@ local VALUE_X = 150
 -- In the order they are shown. A row whose value the client does not give
 -- (a demon has no happiness) is hidden, and the rows below close up.
 local ROWS = {
-    { key = "pet", label = "Pet" },
-    { key = "happiness", label = "Happiness" },
-    { key = "loyalty", label = "Loyalty" },
-    { key = "experience", label = "Experience" },
-    { key = "training", label = "Training points" },
-    { key = "foods", label = "Eats" },
-    { key = "food", label = "Food" },
+    { key = "pet", label = L["Pet"] },
+    { key = "happiness", label = L["Happiness"] },
+    { key = "loyalty", label = L["Loyalty"] },
+    { key = "experience", label = L["Experience"] },
+    { key = "training", label = L["Training points"] },
+    { key = "foods", label = L["Eats"] },
+    { key = "food", label = L["Food"] },
 }
 
 --------------------------------------------------------------------------------
@@ -92,7 +93,7 @@ function UI:Build()
 
     local empty = Theme.CreateLabel(frame, "normal", "muted")
     empty:SetPoint("CENTER", 0, 0)
-    empty:SetText("No pet out.")
+    empty:SetText(L["No pet out."])
     self.emptyLabel = empty
 
     self:BuildStatus()
@@ -143,13 +144,13 @@ function UI:BuildHeader()
     self.subtitle = subtitle
 
     -- Below the close gem on the corner.
-    local settings = Widgets.CreateButton(header, "Settings", function()
+    local settings = Widgets.CreateButton(header, L["Settings"], function()
         if ns.SettingsUI then ns.SettingsUI:Toggle() end
     end, { width = 70, height = 20 })
     settings:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
 
     -- Every beast a hunter can tame (UI/CompendiumWindow.lua).
-    local compendium = Widgets.CreateButton(header, "Pet Compendium", function()
+    local compendium = Widgets.CreateButton(header, L["Pet Compendium"], function()
         if ns.CompendiumUI then ns.CompendiumUI:Toggle() end
     end, { width = 110, height = 20 })
     compendium:SetPoint("RIGHT", settings, "LEFT", -8, 0)
@@ -176,7 +177,7 @@ end
 --- anchored over the window only while out of combat, and let go of as
 --- combat starts, which PLAYER_REGEN_DISABLED fires just before.
 function UI:BuildFeedButton()
-    local button = Widgets.CreateButton(UIParent, "Feed", nil, {
+    local button = Widgets.CreateButton(UIParent, L["Feed"], nil, {
         name = "BlackthornesPetsFeedButton",
         template = "SecureActionButtonTemplate",
         primary = true,
@@ -211,7 +212,7 @@ function UI:PlaceFeedButton(stack, beforeCombat)
     if stack and self.frame and self.frame:IsShown() and not UI.Covered() then
         button:SetAttribute("type", "macro")
         button:SetAttribute("macrotext", ns.Food:FeedMacro(stack))
-        button:SetText("Feed " .. stack.name)
+        button:SetText(L.Format("Feed %s", stack.name))
         button:ClearAllPoints()
         button:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", -PADDING, 10)
         button:SetFrameLevel(self.frame:GetFrameLevel() + 10)
@@ -286,10 +287,10 @@ function UI:ShowStatus(status)
     local values = {}
 
     if status.exists then
-        local pet = status.name or "Your pet"
+        local pet = status.name or L["Your pet"]
         local details = {}
         if status.family and status.family ~= status.name then details[#details + 1] = status.family end
-        if status.level then details[#details + 1] = "level " .. status.level end
+        if status.level then details[#details + 1] = L.Format("level %s", status.level) end
         if #details > 0 then pet = pet .. ", " .. table.concat(details, ", ") end
 
         values.pet = pet
@@ -360,9 +361,9 @@ function UI:Refresh()
 
     local class = self:PlayerClass()
     if class == "HUNTER" then
-        self.subtitle:SetText("Hunter")
+        self.subtitle:SetText(L["Hunter"])
     elseif class == "WARLOCK" then
-        self.subtitle:SetText("Warlock")
+        self.subtitle:SetText(L["Warlock"])
     else
         self.subtitle:SetText("")
     end
@@ -371,7 +372,7 @@ function UI:Refresh()
         self.footer:SetText("")
         self:ShowStatus(ns.PetStatus:Read())
     else
-        self.footer:SetText("Pets is for hunters and warlocks.")
+        self.footer:SetText(L["Pets is for hunters and warlocks."])
         self:ShowStatus({ exists = false })
         self.emptyLabel:Hide()
     end
@@ -419,6 +420,6 @@ function UI:Toggle()
     end
 end
 
-ns.RegisterCommand("window", "open the pets window (so does /bpet on its own)", function()
+ns.RegisterCommand("window", L["open the pets window (so does /bpet on its own)"], function()
     UI:Toggle()
 end)

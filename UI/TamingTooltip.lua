@@ -9,6 +9,7 @@
 -- never replaced.
 
 local _, ns = ...
+local L = ns.L
 
 local TamingTooltip = ns.NewModule("TamingTooltip")
 
@@ -61,15 +62,15 @@ function TamingTooltip:Lines(npcID)
     local skills = Taming:SkillsFor(npcID)
     if #skills == 0 then return nil end
 
-    local lines = { { left = ICON .. " " .. Colored("accent", "Taming teaches") } }
+    local lines = { { left = ICON .. " " .. Colored("accent", L["Taming teaches"]) } }
     local unsure = false
     for _, skill in ipairs(skills) do
         local known = Taming:Knows(skill)
         local line = { left = "   " .. Taming.Label(skill) }
         if known == true then
-            line.color, line.right = "good", "Known"
+            line.color, line.right = "good", L["Known"]
         elseif known == false then
-            line.color, line.right = "bad", "Not known"
+            line.color, line.right = "bad", L["Not known"]
         else
             line.color, unsure = "text", true
         end
@@ -78,7 +79,7 @@ function TamingTooltip:Lines(npcID)
         lines[#lines + 1] = line
     end
     if unsure then
-        lines[#lines + 1] = { left = Colored("muted", "   Open Beast Training once to see which you know") }
+        lines[#lines + 1] = { left = Colored("muted", "   " .. L["Open Beast Training once to see which you know"]) }
     end
     return lines
 end
