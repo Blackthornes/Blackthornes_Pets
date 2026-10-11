@@ -12,6 +12,10 @@ is the only report that names players. A version with no section here posts
 nothing in #general.
 This file does not ship in the addon.
 
+## 0.10.1
+
+- The Pet Compendium shows a new tame and its speed right away.
+
 ## 0.10.0
 
 - The Pet Compendium now shows how fast each beast attacks, so you can find the fastest pet in a family.
