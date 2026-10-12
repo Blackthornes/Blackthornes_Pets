@@ -152,6 +152,13 @@ suite.check("a Voidwalker summoned is remembered", ns.charDB.lastDemon == 697)
 suite.check("and the key summons it", button:GetAttribute("macrotext") == "/cast [nopet] Summon Voidwalker",
     button:GetAttribute("macrotext"))
 suite.check("other spells are not demons", FeedKey:OnCast(133) == false and ns.charDB.lastDemon == 697)
+-- A spell id the client made secret raises when compared: it is no demon,
+-- and the cast handler must not raise on it.
+local secretSpell = newproxy(true)
+getmetatable(secretSpell).__tostring = function(self) return self end
+getmetatable(secretSpell).__eq = function() error("secret value") end
+suite.check("a secret spell id is no demon and does not raise",
+    select(2, pcall(FeedKey.OnCast, FeedKey, secretSpell)) == false and ns.charDB.lastDemon == 697)
 suite.check("a press with no demon out says nothing", Pressed() == "", env.ChatText())
 _G.UnitExists = function() return true end
 ns.PetStatus:Update()
