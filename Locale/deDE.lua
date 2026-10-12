@@ -21,7 +21,6 @@ if not (ok and locale == "deDE") then return end
 -- Core
 L["Saved for Claude, /reload to write it."] = "Für Claude gespeichert, /reload schreibt es."
 L["module %s:%s failed"] = "Modul %s:%s fehlgeschlagen"
-L["dev build"] = "Entwicklerversion"
 L["show this list"] = "zeigt diese Liste"
 L["unknown command: %s"] = "unbekannter Befehl: %s"
 L["/bpet %s failed: %s"] = "/bpet %s fehlgeschlagen: %s"
