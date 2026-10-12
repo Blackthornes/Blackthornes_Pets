@@ -377,8 +377,14 @@ function CompendiumUI:BuildRow(index)
     row:SetHeight(ROW_HEIGHT)
     row:SetPoint("TOPLEFT", PADDING, self.listTop - (index - 1) * ROW_HEIGHT)
     row:SetPoint("TOPRIGHT", -(PADDING + (self.scrollWidth or SCROLL_WIDTH) + 2), self.listTop - (index - 1) * ROW_HEIGHT)
-    row.background = Theme.Fill(row, index % 2 == 0 and "rowAlt" or "panel")
-    row.rest = index % 2 == 0 and "rowAlt" or "panel"
+    -- Dark glass, a shade apart row by row, with a fine line under each.
+    row.rest = index % 2 == 0 and "glassAlt" or "glass"
+    row.background = Theme.Fill(row, row.rest)
+    row.rule = row:CreateTexture(nil, "BACKGROUND", nil, 1)
+    row.rule:SetPoint("BOTTOMLEFT")
+    row.rule:SetPoint("BOTTOMRIGHT")
+    row.rule:SetHeight(1)
+    row.rule:SetColorTexture(Theme.Unpack("border", 0.6))
 
     -- A gold bar down the left edge under the mouse, as the house lists do.
     local stripe = row:CreateTexture(nil, "OVERLAY")
@@ -409,7 +415,7 @@ function CompendiumUI:BuildRow(index)
     end)
     row:SetScript("OnEnter", function(self)
         self.over = true
-        self.background:SetColorTexture(Theme.Unpack("rowHover"))
+        self.background:SetColorTexture(Theme.Unpack("glassHover"))
         self.stripe:Show()
         if rawget(self, "entry") then CompendiumUI:ShowTooltip(self) end
     end)
