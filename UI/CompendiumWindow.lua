@@ -616,10 +616,6 @@ function CompendiumUI:ShowTooltip(row)
         if classic and classic.zone and classic.zone ~= entry.zone then
             GameTooltip:AddLine(L.Format("Classic had it in %s.", classic.zone), 0.7, 0.7, 0.7, true)
         end
-        if entry.source then
-            local site = entry.source:match("^https?://([^/]+)") or entry.source
-            GameTooltip:AddLine(L.Format("Source: %s", (site:gsub("^www%.", ""))), 0.7, 0.7, 0.7, true)
-        end
     end
 
     GameTooltip:AddLine(" ")

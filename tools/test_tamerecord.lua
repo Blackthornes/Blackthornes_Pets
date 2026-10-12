@@ -63,6 +63,18 @@ suite.check("with the beast's name and level", rec.name == "Rabid Crag Boar" and
 suite.check("saved for the whole account", ns.db.tamedBeasts[4512] == rec)
 suite.check("and said in chat", env.ChatText():find("recorded what Rabid Crag Boar teaches: Charge (Rank 2), Swipe (Rank 1)", 1, true), env.ChatText())
 
+-- A client that gives no rank text: a skill Classic knows keeps Classic's rank.
+target.guid = "Creature-0-1-2-3-4517-00001"
+Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
+local fullBar = bar
+bar = { { "Bite", nil, false, false, true, false, 17255 } }
+local noRank = Record:Capture()
+suite.check("a known skill with no rank text keeps Classic's rank",
+    noRank and noRank.skills[1].rank == 2, noRank and noRank.skills[1].rank)
+bar = fullBar
+ns.db.tamedBeasts[4517] = nil
+target.guid = "Creature-0-1-2-3-4512-00001"
+
 -- A later tame whose bar has not filled in does not wipe the list.
 Record:OnCastStart("UNIT_SPELLCAST_START", "player", "cast", 1515)
 local saved = bar

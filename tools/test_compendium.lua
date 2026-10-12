@@ -26,8 +26,7 @@ suite.check("every beast has a name, family, levels and a zone", bad == nil, bad
 
 local ids, dupe = {}, nil
 for _, found in ipairs(ns.ForeverBeasts.FOUND) do
-    suite.check("every Forever find names its source", type(found.source) == "string"
-        and found.source:find("^https://"), found.name)
+    suite.check("no Forever find names a website", found.source == nil, found.name)
     if found.id then
         if ids[found.id] then dupe = found.id end
         ids[found.id] = true

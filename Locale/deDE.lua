@@ -245,7 +245,6 @@ L["Taming it teaches"] = "Es zu zähmen lehrt"
 L["(known)"] = "(bekannt)"
 L["(not known)"] = "(nicht bekannt)"
 L["Classic had it in %s."] = "In Classic war es in %s."
-L["Source: %s"] = "Quelle: %s"
 L["Click to pin it on your map."] = "Klicken markiert es auf deiner Karte."
 L["No exact spot to pin; Shift-click to point the arrow at its zone."] =
     "Keine genaue Stelle zum Markieren; Umschalt-Klick richtet den Pfeil auf seine Zone."
