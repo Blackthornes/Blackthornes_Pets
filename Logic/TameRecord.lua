@@ -191,7 +191,7 @@ function TameRecord:PetSkills()
             skills[#skills + 1] = {
                 spell = spellID,
                 name = known and known.name or ns.Taming:EnglishName(SpellName(spellID) or name),
-                rank = rank or 1,
+                rank = rank or (known and known.rank) or 1,
             }
         end
     end
