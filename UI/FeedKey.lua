@@ -274,7 +274,12 @@ function FeedKey:State()
 end
 
 --- A warlock summoned a demon: the key summons that one from now on.
+--- Every spell the player casts comes through here, and a spell ID the
+--- client made secret raises when compared (Logic/TameRecord.lua), so it
+--- is read plain first; a secret one is no demon.
 function FeedKey:OnCast(spellID)
+    spellID = ns.PetStatus.Plain(spellID)
+    if type(spellID) ~= "number" then return false end
     for _, demon in ipairs(self.DEMONS) do
         if spellID == demon then
             if ns.charDB then ns.charDB.lastDemon = demon end
@@ -290,10 +295,10 @@ function FeedKey:OnEnable()
     -- The pet dying is noted at once, so the key revives rather than calls
     -- once its body is gone; the fight ending re-arms the key.
     ns.RegisterPetEvent(self, "UNIT_HEALTH", function(_, _, unit)
-        if unit == "pet" and PetIsDead() then FeedKey.petDead = true end
+        if ns.PetStatus.Plain(unit) == "pet" and PetIsDead() then FeedKey.petDead = true end
     end)
     ns.RegisterPetEvent(self, "UNIT_SPELLCAST_SUCCEEDED", function(_, _, unit, _, spellID)
-        if unit == "player" then FeedKey:OnCast(spellID) end
+        if ns.PetStatus.Plain(unit) == "player" then FeedKey:OnCast(spellID) end
     end)
     ns.RegisterEvent(self, "PLAYER_REGEN_ENABLED", function()
         if ns.PetStatus then ns.PetStatus:Update() end
