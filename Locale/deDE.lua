@@ -431,3 +431,20 @@ L["Open Beast Training once to see which you know"] = "Öffne einmal die Tieraus
 
 -- The house frame
 L["Close"] = "Schließen"
+
+-- UI/WhatsNew.lua (the same lines in every addon) and its Settings rows.
+L["What's New"] = "Neuigkeiten"
+L["BLACKTHORNES ADDONS"] = "BLACKTHORNES-ADDONS"
+L["Here's what changed since you last played."] = "Das hat sich seit deinem letzten Spiel geändert."
+L["The newest changes in each of your Blackthornes addons."] = "Die neuesten Änderungen in jedem deiner Blackthornes-Addons."
+L["Show after updates"] = "Nach Updates zeigen"
+L["Motion"] = "Bewegung"
+L["Got it"] = "Alles klar"
+L["there is no news to show yet."] = "es gibt noch keine Neuigkeiten."
+L["open the What's New window for every Blackthornes addon"] = "öffnet das Neuigkeiten-Fenster für alle Blackthornes-Addons"
+L["Opens the What's New window: what changed in each of your Blackthornes addons. Same as /bpet whatsnew."] = "Öffnet das Neuigkeiten-Fenster: was sich in jedem deiner Blackthornes-Addons geändert hat. Wie /bpet whatsnew."
+L["After an update"] = "Nach einem Update"
+L["Brings up the What's New window the first time you play after a Blackthornes addon updates. Turning it off here turns it off in all of them."] = "Zeigt das Neuigkeiten-Fenster, wenn du nach einem Update eines Blackthornes-Addons zum ersten Mal spielst. Hier ausgeschaltet ist es in allen aus."
+L["Show What's New"] = "Neuigkeiten zeigen"
+L["What's New motion"] = "Bewegung der Neuigkeiten"
+L["The What's New window rises in, and its news slides up and glows. Turning it off here turns it off in all of them."] = "Das Neuigkeiten-Fenster gleitet herein, und seine Neuigkeiten schieben sich hoch und leuchten. Hier ausgeschaltet ist es in allen aus."
