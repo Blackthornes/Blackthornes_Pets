@@ -395,6 +395,13 @@ function CompendiumUI:BuildRow(index)
     stripe:Hide()
     row.stripe = stripe
 
+    -- And a soft gold wash from the left, as the house rows light. Shown
+    -- and hidden outright: a gradient faded with SetAlpha stayed lit.
+    row.wash = row:CreateTexture(nil, "BORDER", nil, 1)
+    row.wash:SetAllPoints(row)
+    Theme.SetGradientAlpha(row.wash, "HORIZONTAL", "accent", 0.10, 0)
+    row.wash:Hide()
+
     row.name = Cell(row, COLUMNS[1], "small", "text")
     row.family = Cell(row, COLUMNS[2], "small", "text")
     row.level = Cell(row, COLUMNS[3], "small", "text")
@@ -417,12 +424,14 @@ function CompendiumUI:BuildRow(index)
         self.over = true
         self.background:SetColorTexture(Theme.Unpack("glassHover"))
         self.stripe:Show()
+        self.wash:Show()
         if rawget(self, "entry") then CompendiumUI:ShowTooltip(self) end
     end)
     row:SetScript("OnLeave", function(self)
         self.over = false
         self.background:SetColorTexture(Theme.Unpack(self.rest))
         self.stripe:Hide()
+        self.wash:Hide()
         GameTooltip:Hide()
     end)
     row:Hide()
