@@ -5,6 +5,11 @@
 local _, ns = ...
 
 ns.WHATS_NEW = {
+    { version = "0.15.0", lines = {
+        "A new What's New window shows what changed after each update.",
+        "Foxes now show what they eat in the Compendium.",
+        "The Compendium got the new dark look.",
+    } },
     { version = "0.14.0", lines = {
         "Pick a family in the Compendium from a dropdown list.",
         "You can grab the Compendium's scroll bar now without moving the whole window.",
@@ -13,9 +18,5 @@ ns.WHATS_NEW = {
     { version = "0.13.0", lines = {
         "Pets speaks German now on German game clients.",
         "Feeding, taming and the map work on German clients too.",
-    } },
-    { version = "0.12.0", lines = {
-        "The Pet care key now heals your pet in a fight.",
-        "New key to dismiss your pet.",
     } },
 }
