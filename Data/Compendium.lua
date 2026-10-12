@@ -42,6 +42,8 @@ Compendium.FAMILIES = {
     [25] = { "Hyena", "Meat, Fruit" },
     [26] = { "Owl", "Meat" },
     [27] = { "Wind Serpent", "Fish, Cheese, Bread" },
+    [312] = { "Core Hound", "Meat" },
+    [319] = { "Fox", "Meat" },
 }
 
 Compendium.BEASTS = {
