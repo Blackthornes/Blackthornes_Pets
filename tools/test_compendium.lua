@@ -35,6 +35,11 @@ for _, found in ipairs(ns.ForeverBeasts.FOUND) do
 end
 suite.check("no Forever find is listed twice", dupe == nil, dupe)
 
+-- Families the Forever client has and 1.12 did not.
+suite.check("Fox and Core Hound are known families that eat meat",
+    data.FAMILIES[319] and data.FAMILIES[319][1] == "Fox" and data.FAMILIES[319][2] == "Meat"
+    and data.FAMILIES[312] and data.FAMILIES[312][1] == "Core Hound" and data.FAMILIES[312][2] == "Meat")
+
 -- Classic, as it was.
 local fang = C:Get(471)
 suite.check("Mother Fang is a rare spider in Elwynn", fang and fang.rank == "rare"
@@ -61,7 +66,7 @@ suite.check("a new Forever fox is in the list", alpha and alpha.family == "Fox"
     and alpha.forever == "found" and alpha.zone == "Zephras Isle")
 local skills = C:Skills(alpha)
 suite.check("teaching Trickster's Dance", skills[1] and skills[1].name == "Trickster's Dance")
-suite.check("a fox has no Classic diet to show", alpha.diet == nil)
+suite.check("a fox shows the diet the Forever client gives its family", alpha.diet == "Meat")
 suite.check("Forever's second Galestrider is a beast of its own",
     C:Get(251661).zone == "Zephras Isle" and C:Get(262523).zone == "Mulgore")
 suite.check("a bird of prey is filed with Classic's owls", C:Get(276101).family == "Owl")

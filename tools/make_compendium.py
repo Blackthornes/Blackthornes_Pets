@@ -59,6 +59,15 @@ FAMILIES = {
     27: ("Wind Serpent", "Fish, Cheese, Bread"),
 }
 
+# Families the Forever client has that 1.12 did not (read from the client's
+# own game tables: the family's food mask, 1 = meat). No Classic beast
+# belongs to them, so they only widen the family list and its diet; the
+# beasts come from Data/ForeverBeasts.lua.
+FOREVER_FAMILIES = {
+    312: ("Core Hound", "Meat"),
+    319: ("Fox", "Meat"),
+}
+
 # Dungeon and raid maps, which pfQuest gives no coordinates for.
 INSTANCES = {
     33: "Shadowfang Keep", 34: "The Stockade", 36: "The Deadmines",
@@ -289,7 +298,7 @@ def main():
     w("")
     w("-- Family id = { name, what it eats }")
     w("Compendium.FAMILIES = {")
-    for fid, (name, diet) in sorted(FAMILIES.items()):
+    for fid, (name, diet) in sorted({**FAMILIES, **FOREVER_FAMILIES}.items()):
         w(f"    [{fid}] = {{ {lua_string(name)}, {lua_string(diet)} }},")
     w("}")
     w("")
