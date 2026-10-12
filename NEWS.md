@@ -15,6 +15,11 @@ the thanks line: `python tools/make_whatsnew.py` writes them into
 Core/WhatsNewText.lua for the in-game What's New window. Run it after
 writing a section; the release check refuses a tag while it is behind.
 
+## 0.15.1
+
+- Tamed pets keep the right skill ranks.
+- No more Lua error from the Pet care key in dungeons.
+
 ## 0.15.0
 
 - A new What's New window shows what changed after each update.

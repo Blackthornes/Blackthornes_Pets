@@ -4,6 +4,21 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.15.1
+
+For WoW: Forever (interface 16001). No files were added, so `/reload` is
+enough after updating.
+
+- **Tamed skill ranks:** when the game gives no rank for a new pet's
+  skill, the tame keeps the rank the shipped skill data knows for it
+  (Bite 2 stays Bite 2) instead of saving every skill as Rank 1.
+- **Pet Compendium:** a Forever find's tooltip no longer has a line saying
+  where it was found.
+- **Pet care key:** casting inside a dungeon or raid no longer raises a
+  Lua error.
+- **What's New:** closing the window while holding its scroll bar lets go
+  of it.
+
 ## 0.15.0
 
 For WoW: Forever (interface 16001). Files were added, so restart the game
