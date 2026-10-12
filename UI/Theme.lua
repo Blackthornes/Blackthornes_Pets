@@ -19,6 +19,14 @@ Theme.colors = {
     rowAlt    = { 0.106, 0.118, 0.141 },
     rowHover  = { 0.180, 0.200, 0.239 },
     rowActive = { 0.220, 0.190, 0.110 },   -- a gold-tinted row, as in Tradeskills
+    -- Dark glass (2026-10-12, the house list rows; Tradeskills', Farmer's,
+    -- Equipment's and Butler's palettes have the same): rows sit in the
+    -- dark, a faint band apart, with a fine line under each. Hover lifts a
+    -- little and keeps the gold to the row's edge.
+    glass       = { 0.067, 0.075, 0.094 },   -- #111318
+    glassAlt    = { 0.039, 0.047, 0.063 },   -- #0A0C10
+    glassHover  = { 0.094, 0.106, 0.129 },   -- #181B21
+    glassActive = { 0.141, 0.122, 0.078 },   -- #241F14, gold in the dark
 
     border    = { 0.204, 0.224, 0.263 },
     borderLit = { 0.302, 0.333, 0.388 },
