@@ -205,6 +205,15 @@ suite.check("it wears the house frame", UI.frame.titan and UI.frame.titan.plate.
 suite.check("the first row is filled", UI.rows[1]:IsShown() and UI.rows[1].name:GetText() ~= "")
 suite.check("the footer counts the beasts", UI.footer:GetText():find("beasts", 1, true))
 
+-- A row under the mouse lights the house way: lighter glass, a gold edge
+-- and a gold wash, only on that row, the wash hidden again on leaving.
+local hovered, beside = UI.rows[1], UI.rows[2]
+hovered:GetScript("OnEnter")(hovered)
+suite.check("a row under the mouse shows its gold edge and wash",
+    hovered.stripe:IsShown() and hovered.wash:IsShown() and not beside.wash:IsShown())
+hovered:GetScript("OnLeave")(hovered)
+suite.check("leaving, the edge and wash are hidden", not hovered.stripe:IsShown() and not hovered.wash:IsShown())
+
 UI.ticks.raresOnly:GetScript("OnClick")(UI.ticks.raresOnly)
 suite.check("ticking a box is saved", ns.db.compendium.raresOnly == true)
 suite.check("and filters the list", UI.footer:GetText():find(" of ", 1, true), UI.footer:GetText())
