@@ -133,7 +133,6 @@ function Compendium:All()
         if found.id then entry = byID[found.id] else entry = byName[found.name] end
         if entry then
             Overlay(entry, found, "found")
-            entry.source = found.source
             entry.rank = entry.rank or found.rank
             entry.respawn = entry.respawn or found.respawn
         else
@@ -142,7 +141,7 @@ function Compendium:All()
                 id = found.id, name = found.name, family = family, diet = diet,
                 min = found.min, max = found.max, rank = found.rank,
                 zone = found.zone, x = found.x, y = found.y, respawn = found.respawn,
-                source = found.source, forever = "found",
+                forever = "found",
             }
             entries[#entries + 1] = entry
             if found.id then byID[found.id] = entry end
