@@ -4,6 +4,24 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.15.0
+
+For WoW: Forever (interface 16001). Files were added, so restart the game
+fully after updating (`/reload` is not enough).
+
+- **What's New window:** the first time the game loads after an update,
+  one window shows what changed in every Blackthornes addon that was
+  updated, with dark glass cards and a little motion. "Motion" in Settings
+  turns the movement off, "Show after updates" turns the window off (off
+  in one addon is off in all of them), and the `whatsnew` command or a
+  Settings button opens it any time.
+- **Fox and Core Hound:** both are known families that eat meat, so a fox
+  in the Pet Compendium now shows its diet.
+- **Dark glass rows:** the Pet Compendium's list uses the house dark glass
+  rows, with the gold wash under the mouse.
+- **Real version number:** played from a copy of the code, Pets shows its
+  version instead of "dev build".
+
 ## 0.14.0
 
 For WoW: Forever (interface 16001). No files were added, so `/reload` is

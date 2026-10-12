@@ -15,6 +15,12 @@ the thanks line: `python tools/make_whatsnew.py` writes them into
 Core/WhatsNewText.lua for the in-game What's New window. Run it after
 writing a section; the release check refuses a tag while it is behind.
 
+## 0.15.0
+
+- A new What's New window shows what changed after each update.
+- Foxes now show what they eat in the Compendium.
+- The Compendium got the new dark look.
+
 ## 0.14.0
 
 - Pick a family in the Compendium from a dropdown list.
