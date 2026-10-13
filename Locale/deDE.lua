@@ -27,8 +27,7 @@ L["/bpet %s failed: %s"] = "/bpet %s fehlgeschlagen: %s"
 
 -- The sister note
 L["and"] = "und"
-L["has sister addons that share what they know: %s. %s on CurseForge."] =
-    "hat Schwester-Addons, die ihr Wissen teilen: %s. %s auf CurseForge."
+L["works with other Blackthornes addons you don't have yet: %s. %s on CurseForge."] = "arbeitet mit weiteren Blackthornes-Addons zusammen, die dir noch fehlen: %s. %s auf CurseForge."
 L["It's"] = "Du findest es"
 L["They're"] = "Du findest sie"
 L["This note shows once."] = "Dieser Hinweis erscheint nur einmal."
@@ -192,8 +191,8 @@ L["A dial that turns as you turn, pointing the way to a beast. Shift-click a bea
 L["All families"] = "Alle Familien"
 L["Search beasts, zones or skills"] = "Wildtier, Zone oder Fertigkeit suchen"
 L["Tameable now"] = "Jetzt zähmbar"
-L["Only beasts at or below your level, so you can tame them today."] =
-    "Nur Wildtiere bis zu deiner Stufe, die du also heute zähmen kannst."
+L["Only beasts at or below your level, which you can tame now."] =
+    "Nur Wildtiere bis zu deiner Stufe, die du jetzt zähmen kannst."
 L["Rares only"] = "Nur Seltene"
 L["Only rare and rare elite beasts."] = "Nur seltene Wildtiere und seltene Elite."
 L["Teaches me something new"] = "Lehrt mich etwas Neues"
@@ -331,7 +330,7 @@ L["Low food warning"] = "Warnung bei wenig Futter"
 L["A warning in chat when you have fewer than %d food your pet will eat."] =
     "Eine Warnung im Chat, wenn du weniger als %d Futter hast, das dein Begleiter frisst."
 L["Buff food"] = "Buff-Essen"
-L["Food that gives a buff, like stat food, is always fed last. Tick this to never feed it to your pet at all."] =
+L["Food that gives a buff, like stat food, is always fed last. Tick this to never feed it."] =
     "Essen mit einem Buff, etwa Werte-Essen, wird immer zuletzt verfüttert. Setz den Haken, damit dein Begleiter es nie bekommt."
 L["Never feed it"] = "Nie verfüttern"
 L["Feed button by quests"] = "Füttern-Knopf bei den Quests"
