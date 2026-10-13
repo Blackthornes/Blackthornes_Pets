@@ -359,6 +359,7 @@ function ArrowUI:Draw(force)
         self:Turn(state.turn)
     end
 
+    if not frame:IsShown() then self:AvoidXPBar() end
     frame:Show()
 end
 
@@ -435,6 +436,26 @@ function ArrowUI:SavePosition()
     ns.db.beastArrowX, ns.db.beastArrowY = x, y
 end
 
+--- With Farmer's XP bar showing, an arrow that overlaps it sits just below
+--- it. The saved spot is never changed, so it goes back when the bar is gone.
+function ArrowUI:AvoidXPBar()
+    local frame = self.frame
+    if not frame then return end
+    pcall(function()
+        local farmer = _G.BlackthornesFarmer
+        local bar = farmer and farmer.XPBarUI and farmer.XPBarUI.frame
+        if not (bar and bar:IsShown()) then return end
+        local barLeft, barBottom, barWidth, barHeight = bar:GetRect()
+        local left, bottom, width, height = frame:GetRect()
+        if not (barLeft and left) then return end
+        if left < barLeft + barWidth and left + width > barLeft
+            and bottom < barBottom + barHeight and bottom + height > barBottom then
+            frame:ClearAllPoints()
+            frame:SetPoint("TOP", bar, "BOTTOM", 0, -6)
+        end
+    end)
+end
+
 function ArrowUI:RestorePosition()
     local frame = self.frame
     if not frame then return end
@@ -445,6 +466,7 @@ function ArrowUI:RestorePosition()
         -- Top middle, under where the game puts its own messages.
         frame:SetPoint("TOP", UIParent, "TOP", 0, -140)
     end
+    self:AvoidXPBar()
 end
 
 function ArrowUI:ResetPosition()
