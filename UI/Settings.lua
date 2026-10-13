@@ -256,7 +256,7 @@ function SettingsUI:BuildPages()
     controls.lowFoodWarning:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local buffFoodRow = pages:Row("pet", 1, L["Buff food"],
-        L["Food that gives a buff, like stat food, is always fed last. Tick this to never feed it to your pet at all."])
+        L["Food that gives a buff, like stat food, is always fed last. Tick this to never feed it."])
 
     controls.neverFeedBuffFood = Widgets.CreateCheckbox(buffFoodRow, L["Never feed it"], function(checked)
         ns.db.neverFeedBuffFood = checked

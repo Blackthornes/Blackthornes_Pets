@@ -242,7 +242,7 @@ function CompendiumUI:BuildBar()
 
     local ticks = {
         { key = "tameNow", text = L["Tameable now"],
-          tip = L["Only beasts at or below your level, so you can tame them today."] },
+          tip = L["Only beasts at or below your level, which you can tame now."] },
         { key = "raresOnly", text = L["Rares only"], tip = L["Only rare and rare elite beasts."] },
         { key = "newSkills", text = L["Teaches me something new"],
           tip = L["Only beasts whose taming teaches a skill this hunter has not got."] },
