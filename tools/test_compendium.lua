@@ -59,6 +59,14 @@ suite.check("and its Forever spot wins", scorpid.x == seen.x and scorpid.y == se
     and scorpid.min == seen.min)
 suite.check("with Classic's kept beside it", scorpid.classic and scorpid.classic.zone == "Durotar")
 
+-- Seen inside a dungeon: the spot is on the instance's own map, which the
+-- pin and the arrow cannot use, so Classic's place outside it stays.
+local coiler = C:Get(3630)
+suite.check("a beast seen inside The Wailing Caverns is still marked", coiler and coiler.forever == "seen")
+suite.check("and keeps its spot in The Barrens", coiler.zone == "The Barrens"
+    and coiler.x == 46.1 and coiler.y == 34.6, coiler.zone)
+suite.check("so it can still be pinned", C.PlaceText(coiler) == "The Barrens 46.1, 34.6", C.PlaceText(coiler))
+
 -- New on Forever.
 local alpha = C:Get(250874)
 suite.check("a new Forever fox is in the list", alpha and alpha.family == "Fox"
