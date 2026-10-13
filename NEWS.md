@@ -15,34 +15,51 @@ the thanks line: `python tools/make_whatsnew.py` writes them into
 Core/WhatsNewText.lua for the in-game What's New window. Run it after
 writing a section; the release check refuses a tag while it is behind.
 
+The window shows new features only. Write a section's features first, then
+a "Fixes and changes:" line with the fixes and other changes under it: those
+go to Discord but stay out of the window, and a section of only fixes puts
+nothing in it. Say what each feature does in a few plain words, the way you'd
+tell a friend: no hype, no questions to the reader, no exclamation marks
+outside the thanks line, no dashes as punctuation, no "now you can". The
+tool prints a note for a shipped line that reads like an advert.
+
 ## 0.15.1
+
+Fixes and changes:
 
 - Tamed pets keep the right skill ranks.
 - No more Lua error from the Pet care key in dungeons.
 
 ## 0.15.0
 
-- A new What's New window shows what changed after each update.
-- Foxes now show what they eat in the Compendium.
-- The Compendium got the new dark look.
+Fixes and changes:
+
+- Foxes show what they eat in the Compendium.
+- The Compendium uses the dark list look.
 
 ## 0.14.0
 
-- Pick a family in the Compendium from a dropdown list.
-- You can grab the Compendium's scroll bar now without moving the whole window.
+- The Compendium's family picker is a dropdown list.
+
+Fixes and changes:
+
+- The Compendium's scroll bar can be dragged without moving the window.
 - Sort by Speed to see the fastest pets first. Click again for the slowest.
 
 Thanks Ezmode for the report!
 
 ## 0.13.0
 
-- Pets speaks German now on German game clients.
-- Feeding, taming and the map work on German clients too.
+- Pets is in Deutsch on a German client.
+
+Fixes and changes:
+
+- Feeding, taming and the map work on German clients.
 
 ## 0.12.0
 
-- The Pet care key now heals your pet in a fight.
-- New key to dismiss your pet.
+- The Pet care key casts Mend Pet in a fight.
+- A key to dismiss your pet.
 
 Thanks Ezmode for the ideas!
 
