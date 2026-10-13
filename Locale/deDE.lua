@@ -27,8 +27,7 @@ L["/bpet %s failed: %s"] = "/bpet %s fehlgeschlagen: %s"
 
 -- The sister note
 L["and"] = "und"
-L["has sister addons that share what they know: %s. %s on CurseForge."] =
-    "hat Schwester-Addons, die ihr Wissen teilen: %s. %s auf CurseForge."
+L["works with other Blackthornes addons you don't have yet: %s. %s on CurseForge."] = "arbeitet mit weiteren Blackthornes-Addons zusammen, die dir noch fehlen: %s. %s auf CurseForge."
 L["It's"] = "Du findest es"
 L["They're"] = "Du findest sie"
 L["This note shows once."] = "Dieser Hinweis erscheint nur einmal."
