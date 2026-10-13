@@ -134,11 +134,6 @@ function CompendiumUI:Build()
     self:BuildHeadings()
     self:BuildList()
 
-    local footer = Theme.CreateLabel(frame, "small", "text")
-    footer:SetPoint("BOTTOMLEFT", PADDING, 28)
-    footer:SetWidth(WIDTH - PADDING * 2)
-    self.footer = footer
-
     local hint = Theme.CreateLabel(frame, "tiny", "dim")
     hint:SetPoint("BOTTOMLEFT", PADDING, 12)
     hint:SetWidth(WIDTH - PADDING * 2)
@@ -146,6 +141,13 @@ function CompendiumUI:Build()
     hint:SetText(L.Format("Click a beast to pin it on your map, Shift-click to point the arrow at it. %s marks what WoW: Forever has shown; the rest is Classic 1.12.",
         Colored("good", "Forever")))
     self.hint = hint
+
+    -- Sits on the hint's top, so a hint that wraps to a second line (the
+    -- German one, or a larger text size) pushes it up rather than under it.
+    local footer = Theme.CreateLabel(frame, "small", "text")
+    footer:SetPoint("BOTTOMLEFT", hint, "TOPLEFT", 0, 4)
+    footer:SetWidth(WIDTH - PADDING * 2)
+    self.footer = footer
 
     frame:Hide()
     return frame

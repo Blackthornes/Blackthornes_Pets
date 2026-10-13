@@ -49,9 +49,32 @@ local function Family(family)
     return nil
 end
 
+--- A zone name to compare by: lower case, without a leading "The", since
+--- Forever's map says "The Wailing Caverns" where Classic's data says
+--- "Wailing Caverns".
+local function ZoneKey(zone)
+    if type(zone) ~= "string" then return nil end
+    return (zone:lower():gsub("^the ", ""))
+end
+
+-- The dungeons and raids Classic places beasts in, by ZoneKey, filled as
+-- the list is built. A spot inside one is on that instance's own map,
+-- which the map pin and the arrow cannot use.
+local instanceZones = {}
+
 --- Lay a Forever spot over an entry, keeping what Classic said beside it.
+--- A spot inside a dungeon or raid keeps Classic's place: beasts seen in
+--- The Wailing Caverns also live in the cave outside it, in The Barrens,
+--- where they can be pinned. Its levels and speed still count.
 local function Overlay(entry, spot, why)
     if type(spot) ~= "table" then return end
+    if spot.zone and instanceZones[ZoneKey(spot.zone)] then
+        local levels = {}
+        for key, value in pairs(spot) do
+            if key ~= "zone" and key ~= "x" and key ~= "y" then levels[key] = value end
+        end
+        spot = levels
+    end
     if spot.zone and spot.zone ~= entry.zone or spot.x then
         entry.classic = entry.classic or {
             zone = entry.zone, x = entry.x, y = entry.y, min = entry.min, max = entry.max,
@@ -104,6 +127,10 @@ function Compendium:All()
     local data = ns.CompendiumData
     local forever = ns.ForeverBeasts or {}
     local entries, byID, byName = {}, {}, {}
+
+    for _, beast in pairs(data and data.BEASTS or {}) do
+        if beast.instance and beast.zone then instanceZones[ZoneKey(beast.zone)] = true end
+    end
 
     for id, beast in pairs(data and data.BEASTS or {}) do
         local family, diet = Family(beast.family)
