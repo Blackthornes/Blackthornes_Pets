@@ -4,6 +4,27 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.16.0
+
+For WoW: Forever (interface 16001). Files were added, so restart the game
+fully after updating (`/reload` is not enough).
+
+- **Goal dial lies back like a compass:** the beast arrow's dial is drawn
+  tilted, as if lying on the ground, with a gold blade that turns toward
+  the beast. It is a little smaller too.
+- **Arrow below the XP bar:** with Farmer's XP bar showing, a beast arrow
+  that would cover it sits just below it, plate and close button included.
+  Your saved spot is kept, so the arrow goes back when the bar is gone.
+- **About page:** Settings has an About page with the version, the
+  Discord invite, how to report a bug and the other Blackthornes addons.
+  A short note on how the addons are made shows once at the top of
+  What's New.
+- **Beasts seen in a dungeon:** a beast whose Forever sighting was inside
+  a dungeon or raid keeps its outdoor spot in the Pet Compendium, so the
+  map pin and the arrow still work. Its levels and speed still count.
+- **What's New:** it shows new features only; fixes and other changes
+  stay out of the window. An addon can also offer a one-time card there.
+
 ## 0.15.1
 
 For WoW: Forever (interface 16001). No files were added, so `/reload` is

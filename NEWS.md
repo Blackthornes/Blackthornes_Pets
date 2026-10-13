@@ -23,6 +23,18 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 0.16.0
+
+- This is the largest AddOn update so far across the whole suite of Blackthornes addons.
+- The pet arrow lies back like a compass on the ground. It's a bit smaller, too.
+- If the arrow would cover Farmer's XP bar, it sits just under it instead.
+- Settings has an About page with the Discord invite and how to report a bug.
+- Beasts spotted in dungeons still get a spot on the map you can follow.
+
+Fixes and changes:
+
+- What's New only shows new features now.
+
 ## 0.15.1
 
 Fixes and changes:
