@@ -8,12 +8,10 @@ the top; a release is refused if its version has no section here.
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
 
-- **Feed buttons and Pet care key:** four foods a pet will not eat are no
-  longer offered, and everyday foods that were missing are added. The feed
-  macro stops when Feed Pet cannot be cast, so the hunter does not sit down
-  and eat the food.
-- **Pet Compendium:** it redraws a second after a level-up. Settings > Pet
-  Compendium has a "Stop following" row with a Clear button.
+- **Bug fixes:** several fixes for the Feed buttons, the Pet care key, the
+  feed macro and the Pet Compendium.
+- **Pet Compendium:** Settings > Pet Compendium has a "Stop following" row
+  with a Clear button.
 
 ## 0.16.0
 

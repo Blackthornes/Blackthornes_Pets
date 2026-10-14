@@ -5,17 +5,14 @@
 local _, ns = ...
 
 ns.WHATS_NEW = {
-    { version = "0.16.0", lines = {
-        "This is the largest AddOn update so far across the whole suite of Blackthornes addons.",
-        "The pet arrow lies back like a compass on the ground. It's a bit smaller, too.",
-        "If the arrow would cover Farmer's XP bar, it sits just under it instead.",
-        "Settings has an About page with the Discord invite and how to report a bug.",
-        "Beasts spotted in dungeons still get a spot on the map you can follow.",
-    } },
     { version = "0.14.0", lines = {
         "The Compendium's family picker is a dropdown list.",
     } },
     { version = "0.13.0", lines = {
         "Pets is in Deutsch on a German client.",
+    } },
+    { version = "0.12.0", lines = {
+        "The Pet care key casts Mend Pet in a fight.",
+        "A key to dismiss your pet.",
     } },
 }

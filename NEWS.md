@@ -16,32 +16,9 @@ Core/WhatsNewText.lua for the in-game What's New window. Run it after
 writing a section; the release check refuses a tag while it is behind.
 
 The window shows new features only. Write a section's features first, then
-a "Fixes and changes:" line with the fixes and other changes under it: those
-go to Discord but stay out of the window, and a section of only fixes puts
-nothing in it. Say what each feature does in a few plain words, the way you'd
-tell a friend: no hype, no questions to the reader, no exclamation marks
-outside the thanks line, no dashes as punctuation, no "now you can". The
-tool prints a note for a shipped line that reads like an advert.
+a "Fixes and changes:
 
-## 0.16.1
-
-Fixes and changes:
-
-- Feed buttons no longer pick food a pet won't eat, and the usual foods are there.
-- Feeding stops cleanly when Feed Pet can't be cast.
-- The Compendium updates after you level up.
-
-## 0.16.0
-
-- This is the largest AddOn update so far across the whole suite of Blackthornes addons.
-- The pet arrow lies back like a compass on the ground. It's a bit smaller, too.
-- If the arrow would cover Farmer's XP bar, it sits just under it instead.
-- Settings has an About page with the Discord invite and how to report a bug.
-- Beasts spotted in dungeons still get a spot on the map you can follow.
-
-Fixes and changes:
-
-- What's New only shows new features now.
+- Several bug fixes for feeding and the Compendium.
 
 ## 0.15.1
 
