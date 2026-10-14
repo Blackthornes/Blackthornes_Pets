@@ -71,10 +71,10 @@ suite.check("no food at all says so", Food:Summary({}):find("None in your bags",
 -- The Feed button's macro.
 _G.C_Spell = { GetSpellName = function(id) return id == 6991 and "Feed Pet" or nil end }
 suite.check("the macro casts Feed Pet then uses the food",
-    Food:FeedMacro(stacks[1]) == "/cast Feed Pet\n/use 0 3", Food:FeedMacro(stacks[1]))
+    Food:FeedMacro(stacks[1]) == "/stopmacro [nopet][@pet,dead][combat]\n/cast Feed Pet\n/use 0 3", Food:FeedMacro(stacks[1]))
 _G.C_Spell = nil
 suite.check("without the spell name it falls back on English",
-    Food:FeedMacro(stacks[1]) == "/cast Feed Pet\n/use 0 3")
+    Food:FeedMacro(stacks[1]) == "/stopmacro [nopet][@pet,dead][combat]\n/cast Feed Pet\n/use 0 3")
 
 -- A pet level 40 turns its nose up at level 5 food and does little with 15.
 _G.UnitLevel = function() return 40 end

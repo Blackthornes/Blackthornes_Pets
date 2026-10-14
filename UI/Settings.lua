@@ -342,6 +342,13 @@ function SettingsUI:BuildPages()
     end, { width = 64, height = 20 })
     controls.beastArrowCheck:SetPoint("TOPLEFT", CONTROL_X, 0)
 
+    local clearRow = pages:Row("compendium", 2, L["Stop following"],
+        L["The arrow lets go of the beast it points at. Same as /bpet arrow clear."])
+    controls.beastArrowClear = Widgets.CreateButton(clearRow, L["Clear"], function()
+        ns.HandleSlash("arrow clear")
+    end, { width = 64, height = 20 })
+    controls.beastArrowClear:SetPoint("TOPLEFT", CONTROL_X, 0)
+
     -- TomTom's arrow instead of the dial, when TomTom is installed.
     local tomtomRow = pages:Row("compendium", 2, L["Use TomTom"],
         L["With TomTom installed, its arrow points the way instead of this one. Same as /bpet arrow tomtom."])
