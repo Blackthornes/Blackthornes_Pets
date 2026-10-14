@@ -401,9 +401,12 @@ end
 
 --- The macro the Feed button runs for a stack: cast Feed Pet, then use the
 --- food, which is how the classic client takes the food Feed Pet asks for.
+--- It stops first when Feed Pet cannot be cast (no pet, a dead one, a
+--- fight): the /use alone would have the hunter sit down and eat the food.
 function Food:FeedMacro(stack)
     if not stack then return nil end
-    return ("/cast %s\n/use %d %d"):format(self:FeedSpellName(), stack.bag, stack.slot)
+    return ("/stopmacro [nopet][@pet,dead][combat]\n/cast %s\n/use %d %d"):format(
+        self:FeedSpellName(), stack.bag, stack.slot)
 end
 
 --------------------------------------------------------------------------------

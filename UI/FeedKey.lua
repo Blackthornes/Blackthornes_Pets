@@ -180,7 +180,7 @@ function FeedKey:Macro(status, stacks)
         end
         local stack = not self:Why(status, stacks) and stacks[1]
         if stack then
-            lines[#lines + 1] = "/stopmacro [nopet][@pet,dead][combat]"
+            -- The feed macro stops first with no pet, a dead one or a fight.
             lines[#lines + 1] = ns.Food:FeedMacro(stack)
         end
     elseif status and status.class == "WARLOCK" then

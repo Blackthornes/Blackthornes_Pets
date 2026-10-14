@@ -364,6 +364,9 @@ L["Check the arrow"] = "Pfeil prüfen"
 L["Lists in chat what the arrow can read where you stand: your spot, your facing, the map. Same as /bpet arrow check."] =
     "Listet im Chat, was der Pfeil dort lesen kann, wo du stehst: deine Position, deine Blickrichtung, die Karte. Wie /bpet arrow check."
 L["Check"] = "Prüfen"
+L["Stop following"] = "Nicht mehr folgen"
+L["Clear"] = "Lösen"
+L["The arrow lets go of the beast it points at. Same as /bpet arrow clear."] = "Der Pfeil lässt das Wildtier los, auf das er zeigt. Wie /bpet arrow clear."
 L["Use TomTom"] = "TomTom nutzen"
 L["With TomTom installed, its arrow points the way instead of this one. Same as /bpet arrow tomtom."] =
     "Ist TomTom installiert, zeigt dessen Pfeil den Weg statt dieses. Wie /bpet arrow tomtom."

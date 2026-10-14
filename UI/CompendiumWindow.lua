@@ -820,6 +820,19 @@ function CompendiumUI:Hide()
     if self.frame then self.frame:Hide() end
 end
 
+--- A level-up changes which beasts can be tamed now and which levels show
+--- red, so an open compendium draws again a moment later, once the client
+--- gives the new level. A closed one does nothing.
+function CompendiumUI:OnEnable()
+    ns.RegisterEvent(self, "PLAYER_LEVEL_UP", function()
+        if C_Timer and C_Timer.After then
+            C_Timer.After(1, function() pcall(CompendiumUI.Refresh, CompendiumUI) end)
+        else
+            pcall(CompendiumUI.Refresh, CompendiumUI)
+        end
+    end)
+end
+
 function CompendiumUI:Toggle()
     if self.frame and self.frame:IsShown() then
         self:Hide()
