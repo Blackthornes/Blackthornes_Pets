@@ -12,7 +12,6 @@ For WoW: Forever (interface 16001). `/reload` is enough after updating.
   longer offered, and everyday foods that were missing are added. The feed
   macro stops when Feed Pet cannot be cast, so the hunter does not sit down
   and eat the food.
-- **Beast arrow:** it returns to its spot when Farmer's XP bar hides.
 - **Pet Compendium:** it redraws a second after a level-up. Settings > Pet
   Compendium has a "Stop following" row with a Clear button.
 
