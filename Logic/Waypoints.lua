@@ -257,9 +257,9 @@ function Waypoints:Pin(place)
 end
 
 local WHY = {
-    nospot = L["no exact spot is known for that one"],
-    noclient = L["this client cannot put a pin on the map"],
-    nomap = L["the map for that zone could not be found"],
+    nospot = L["there's no exact spot for that one"],
+    noclient = L["this client can't put a pin on the map"],
+    nomap = L["couldn't find the map for that zone"],
 }
 
 --- Pin a place and say so in chat. `what` names it ("Mother Fang").

@@ -216,13 +216,13 @@ function Food:Inspect(bag, slot, info, status, eats)
     local diet = ns.PetFood.DietOf(itemID, name)
     if not diet then return nil, "not in the food list", name, level end
     if not eats[diet] then
-        return nil, L.Format("%s, which it does not eat", ns.PetFood.Label(diet)), name, level
+        return nil, L.Format("%s, which it doesn't eat", ns.PetFood.Label(diet)), name, level
     end
     local effect = self:Effect(level, status.level)
     if effect == "refused" then return nil, L["too low level"], name, level end
     local buff, unsure = self:IsBuffFood(itemID)
     if unsure then RequestItem(itemID) end
-    if buff and NeverBuffFood() then return nil, L["buff food, which you chose never to feed"], name, level end
+    if buff and NeverBuffFood() then return nil, L["buff food, which you've chosen not to feed"], name, level end
     return {
         bag = bag, slot = slot, itemID = itemID, buff = buff or nil, buffUnsure = unsure or nil,
         name = name, level = level, diet = diet, effect = effect,
@@ -480,7 +480,7 @@ function Food:Report()
     end
 end
 
-ns.RegisterCommand("food", L["list the food in your bags and whether your pet will eat it (reads only)"], function()
+ns.RegisterCommand("food", L["list the food in your bags and whether your pet will eat it"], function()
     Food:Report()
 end)
 

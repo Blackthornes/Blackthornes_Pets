@@ -55,28 +55,29 @@ L["Fruit"] = "Obst"
 L["Fungus"] = "Pilze"
 
 -- The beast arrow
-L["tamed %s, arrow put away."] = "%s gezähmt, Pfeil weggepackt."
+L["you tamed %s, so the arrow is put away."] = "Du hast %s gezähmt, also ist der Pfeil weggepackt."
 L["your beast"] = "dein Wildtier"
 L["%d,%03d yd"] = "%d.%03d m"
 L["%d yd"] = "%d m"
 L["Inside a raid"] = "In einem Schlachtzug"
 L["Inside a dungeon"] = "In einem Dungeon"
-L["Far from here: head for %s"] = "Weit weg: geh nach %s"
+L["Far from here. Head for %s"] = "Weit weg. Geh nach %s"
 L["it"] = "es"
-L["No exact spot known in this zone"] = "Keine genaue Stelle in dieser Zone bekannt"
-L["The middle of the zone: no exact spot known"] = "Die Mitte der Zone: keine genaue Stelle bekannt"
+L["No exact spot for it in this zone yet"] = "Noch keine genaue Stelle in dieser Zone"
+L["The middle of the zone, since there's no exact spot yet"] =
+    "Die Mitte der Zone, weil es noch keine genaue Stelle gibt"
 L["Where it lived in Classic"] = "Wo es in Classic lebte"
 L["Far away"] = "Weit weg"
 L["In %s"] = "In %s"
 L["this zone"] = "dieser Zone"
 L["You're there"] = "Du bist da"
 L["beast arrow on, pointing at %s."] = "Wildtierpfeil an, er zeigt auf %s."
-L["beast arrow on. Shift-click a beast in the Pet Compendium for it to point at."] =
-    "Wildtierpfeil an. Klicke mit Umschalt auf ein Wildtier im Begleiterkompendium, damit er darauf zeigt."
+L["beast arrow on. Shift-click a beast in the Pet Compendium to aim it."] =
+    "Wildtierpfeil an. Shift-Klick auf ein Wildtier im Begleiterkompendium richtet ihn darauf aus."
 L["beast arrow off. /bpet arrow on shows it."] = "Wildtierpfeil aus. /bpet arrow on zeigt ihn wieder."
 L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, reset)"] =
     "ein Pfeil zu einem Wildtier aus dem Begleiterkompendium (on, off, clear, check, tomtom, reset)"
-L["beast arrow is not following a beast now."] = "Der Wildtierpfeil folgt jetzt keinem Wildtier."
+L["the beast arrow isn't following a beast right now."] = "Der Wildtierpfeil folgt gerade keinem Wildtier."
 L["beast arrow put back where it started."] = "Wildtierpfeil an seinen Anfangsplatz zurückgesetzt."
 L["/bpet arrow on, off, clear, check, tomtom or reset."] = "/bpet arrow on, off, clear, check, tomtom oder reset."
 
@@ -96,9 +97,9 @@ L["You tamed it on Forever"] = "Du hast es auf Forever gezähmt"
 L["Beast %d"] = "Wildtier %d"
 
 -- Food
-L["%s, which it does not eat"] = "%s, das es nicht frisst"
+L["%s, which it doesn't eat"] = "%s, das es nicht frisst"
 L["too low level"] = "zu niedrige Stufe"
-L["buff food, which you chose never to feed"] = "Buff-Essen, das du nie verfüttern wolltest"
+L["buff food, which you've chosen not to feed"] = "Buff-Essen, das du nicht verfüttern willst"
 L["full"] = "voll"
 L["half"] = "halb"
 L["little"] = "wenig"
@@ -124,8 +125,8 @@ L["food: %d items in %d slots, %d pieces your pet will eat."] =
     "Futter: %d Gegenstände in %d Plätzen, %d Stück davon frisst dein Begleiter."
 L["food: %s."] = "Futter: %s."
 L["food: %s"] = "Futter: %s"
-L["list the food in your bags and whether your pet will eat it (reads only)"] =
-    "listet das Futter in deinen Taschen und ob dein Begleiter es frisst (liest nur)"
+L["list the food in your bags and whether your pet will eat it"] =
+    "zeigt das Futter in deinen Taschen und ob dein Begleiter es frisst"
 
 -- The pet's status
 L["%s (%d%% damage)"] = "%s (%d%% Schaden)"
@@ -139,33 +140,32 @@ L["Your pet"] = "Dein Begleiter"
 L["%s is %s. Feed it."] = "%s ist %s. Zeit zum Füttern."
 
 -- Tames and pet skills
-L["recorded what %s teaches: %s"] = "notiert, was %s lehrt: %s"
+L["noted what %s teaches: %s"] = "notiert, was %s lehrt: %s"
 L["the beast"] = "das Wildtier"
 L["nothing"] = "nichts"
 L["list the beasts you have tamed and what each taught"] =
     "listet die Wildtiere, die du gezähmt hast, und was jedes gelehrt hat"
-L["no tamed beasts recorded yet. Tame one and it is written down."] =
-    "noch keine gezähmten Wildtiere notiert. Zähme eins, dann wird es aufgeschrieben."
-L["tamed beasts recorded (%d):"] = "notierte gezähmte Wildtiere (%d):"
+L["no tamed beasts yet. Tame one and it shows up here."] =
+    "noch keine gezähmten Wildtiere. Zähme eins, dann taucht es hier auf."
+L["beasts you've tamed (%d):"] = "Wildtiere, die du gezähmt hast (%d):"
 L["list the pet skills this hunter knows"] = "listet die Begleiterfertigkeiten, die dieser Jäger kennt"
-L["no pet skills known yet. Open Beast Training once so the list can be read."] =
-    "noch keine Begleiterfertigkeiten bekannt. Öffne einmal die Tierausbildung, damit die Liste gelesen werden kann."
+L["no pet skills known yet. Open Beast Training once so Pets can read the list."] =
+    "noch keine Begleiterfähigkeiten bekannt. Öffne einmal die Tierausbildung, damit Pets die Liste lesen kann."
 L["pet skills known (%d): %s"] = "bekannte Begleiterfertigkeiten (%d): %s"
-L["Beast Training has not been opened on this character yet."] =
-    "Die Tierausbildung wurde mit diesem Charakter noch nicht geöffnet."
+L["You haven't opened Beast Training on this character yet."] =
+    "Du hast die Tierausbildung mit diesem Charakter noch nicht geöffnet."
 L["%s (Rank %d)"] = "%s (Rang %d)"
 
 -- TomTom
-L["TomTom not used: the beast arrow shows its own dial."] =
-    "TomTom wird nicht genutzt: Der Wildtierpfeil zeigt seine eigene Scheibe."
-L["TomTom used: its arrow shows the beast arrow's place."] =
-    "TomTom wird genutzt: Sein Pfeil zeigt den Ort des Wildtierpfeils."
-L["TomTom will be used once it is installed."] = "TomTom wird genutzt, sobald es installiert ist."
+L["TomTom is off. The beast arrow shows its own dial."] = "TomTom ist aus. Der Wildtierpfeil zeigt seine eigene Scheibe."
+L["TomTom is on. Its arrow points where the beast arrow would."] =
+    "TomTom ist an. Sein Pfeil zeigt dorthin, wohin der Wildtierpfeil zeigen würde."
+L["TomTom takes over once it's installed."] = "TomTom übernimmt, sobald es installiert ist."
 
 -- Map pins
-L["no exact spot is known for that one"] = "für dieses ist keine genaue Stelle bekannt"
-L["this client cannot put a pin on the map"] = "dieses Spiel kann keine Markierung auf die Karte setzen"
-L["the map for that zone could not be found"] = "die Karte dieser Zone wurde nicht gefunden"
+L["there's no exact spot for that one"] = "für dieses gibt es keine genaue Stelle"
+L["this client can't put a pin on the map"] = "dieses Spiel kann keine Markierung auf die Karte setzen"
+L["couldn't find the map for that zone"] = "die Karte dieser Zone war nicht zu finden"
 L["pinned %s on your map: %s (%s, %s)"] = "%s auf deiner Karte markiert: %s (%s, %s)"
 L["can't pin %s%s: %s"] = "%s%s kann nicht markiert werden: %s"
 L["that"] = "das"
@@ -174,16 +174,16 @@ L["that"] = "das"
 L["beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back."] =
     "Wildtierpfeil aus. Die Schaltfläche Pfeil im Begleiterkompendium, /bpet arrow oder die Einstellungen holen ihn zurück."
 L["Beast arrow"] = "Wildtierpfeil"
-L["Click to open the Pet Compendium; Shift-click a beast there to follow it."] =
-    "Klicken öffnet das Begleiterkompendium; Umschalt-Klick auf ein Wildtier dort, um ihm zu folgen."
+L["Click to open the Pet Compendium. Shift-click a beast there to follow it."] =
+    "Klick öffnet das Begleiterkompendium. Shift-Klick auf ein Wildtier dort, um ihm zu folgen."
 L["Drag to move it. The red gem closes it."] = "Ziehen verschiebt ihn. Der rote Edelstein schließt ihn."
 L["Can't see you here"] = "Hier nicht zu sehen"
 L["The game won't say where you are"] = "Das Spiel sagt nicht, wo du bist"
 
 -- The compendium window
 L["Pet Compendium"] = "Begleiterkompendium"
-L["Click a beast to pin it on your map, Shift-click to point the arrow at it. %s marks what WoW: Forever has shown; the rest is Classic 1.12."] =
-    "Klicke auf ein Wildtier, um es auf der Karte zu markieren, Umschalt-Klick richtet den Pfeil darauf. %s kennzeichnet, was WoW: Forever gezeigt hat; der Rest ist Classic 1.12."
+L["Click a beast to pin it on your map, or Shift-click to point the arrow at it. %s marks what WoW: Forever has shown. The rest comes from Classic 1.12."] =
+    "Klick auf ein Wildtier markiert es auf deiner Karte, Shift-Klick richtet den Pfeil darauf aus. %s zeigt, was WoW: Forever gezeigt hat. Der Rest stammt aus Classic 1.12."
 L["Settings"] = "Einstellungen"
 L["Arrow"] = "Pfeil"
 L["A dial that turns as you turn, pointing the way to a beast. Shift-click a beast to aim it. Click again to hide it."] =
@@ -191,17 +191,17 @@ L["A dial that turns as you turn, pointing the way to a beast. Shift-click a bea
 L["All families"] = "Alle Familien"
 L["Search beasts, zones or skills"] = "Wildtier, Zone oder Fertigkeit suchen"
 L["Tameable now"] = "Jetzt zähmbar"
-L["Only beasts at or below your level, which you can tame now."] =
-    "Nur Wildtiere bis zu deiner Stufe, die du jetzt zähmen kannst."
+L["Only beasts at or below your level, so you can tame them now."] =
+    "Nur Wildtiere bis zu deiner Stufe, die du also jetzt zähmen kannst."
 L["Rares only"] = "Nur Seltene"
 L["Only rare and rare elite beasts."] = "Nur seltene Wildtiere und seltene Elite."
 L["Teaches me something new"] = "Lehrt mich etwas Neues"
-L["Only beasts whose taming teaches a skill this hunter has not got."] =
-    "Nur Wildtiere, deren Zähmung eine Fertigkeit lehrt, die dieser Jäger noch nicht hat."
-L["Only beasts WoW: Forever has shown: seen, tamed or named by a Forever guide."] =
-    "Nur Wildtiere, die WoW: Forever gezeigt hat: gesehen, gezähmt oder von einem Forever-Leitfaden genannt."
-L["Click again to turn the order round, and a third time to go back to sorting by beast."] =
-    "Noch ein Klick dreht die Reihenfolge um, ein dritter sortiert wieder nach Wildtier."
+L["Only beasts that teach a skill this hunter doesn't have yet."] =
+    "Nur Wildtiere, die eine Fähigkeit lehren, die dieser Jäger noch nicht hat."
+L["Only beasts WoW: Forever has shown, whether seen, tamed or named in a Forever guide."] =
+    "Nur Wildtiere, die WoW: Forever gezeigt hat, ob gesehen, gezähmt oder in einem Forever-Guide genannt."
+L["Click again to flip the order, and once more to sort by beast again."] =
+    "Klick noch mal, um die Reihenfolge umzudrehen, und ein weiteres Mal, um wieder nach Wildtier zu sortieren."
 L["Beast"] = "Wildtier"
 L["Sort by beast"] = "Nach Wildtier sortieren"
 L["Family"] = "Familie"
@@ -210,8 +210,8 @@ L["Level"] = "Stufe"
 L["Sort by level"] = "Nach Stufe sortieren"
 L["Speed"] = "Tempo"
 L["Sort by speed"] = "Nach Tempo sortieren"
-L["Seconds between its bites and claws: lower is faster. Sorts fastest first."] =
-    "Sekunden zwischen seinen Bissen und Klauenhieben: weniger ist schneller. Sortiert die schnellsten zuerst."
+L["Seconds between its bites and claws, so lower is faster. Sorts fastest first."] =
+    "Sekunden zwischen Bissen und Krallenhieben, weniger ist also schneller. Sortiert die schnellsten zuerst."
 L["Where"] = "Wo"
 L["Sort by where"] = "Nach Ort sortieren"
 L["Teaches"] = "Lehrt"
@@ -220,24 +220,24 @@ L["Raid"] = "Schlachtzug"
 L["Dungeon"] = "Dungeon"
 L["tamed"] = "gezähmt"
 L["Nothing"] = "Nichts"
-L["beast arrow pointing at %s. Its red gem, /bpet arrow off or Settings hides it."] =
-    "Wildtierpfeil zeigt auf %s. Sein roter Edelstein, /bpet arrow off oder die Einstellungen blenden ihn aus."
-L["where %s lives is not known yet, so the arrow cannot point at it."] =
+L["beast arrow pointing at %s. Hide it with its red gem, /bpet arrow off or Settings."] =
+    "Wildtierpfeil zeigt auf %s. Ausblenden kannst du ihn mit seinem roten Edelstein, /bpet arrow off oder in den Einstellungen."
+L["where %s lives isn't known yet, so the arrow can't point at it."] =
     "wo %s lebt, ist noch nicht bekannt, also kann der Pfeil nicht darauf zeigen."
 L["Family not known yet"] = "Familie noch nicht bekannt"
 L["Eats %s"] = "Frisst %s"
 L["Level %s. You can tame it now."] = "Stufe %s. Du kannst es jetzt zähmen."
 L["Level %s. You can tame it from level %d."] = "Stufe %s. Du kannst es ab Stufe %d zähmen."
 L["Level %s"] = "Stufe %s"
-L["read off a tamed pet on Forever"] = "an einem gezähmten Begleiter auf Forever abgelesen"
+L["from a pet tamed on Forever"] = "von einem auf Forever gezähmten Begleiter"
 L["Classic data"] = "Classic-Daten"
 L["Attack speed %s (%s)"] = "Angriffstempo %s (%s)"
 L["Classic said %s."] = "Laut Classic %s."
 L["Where it lives is not known yet."] = "Wo es lebt, ist noch nicht bekannt."
 L["Shift-click to point the arrow at it."] = "Umschalt-Klick richtet den Pfeil darauf."
 L["Also in %s"] = "Auch in %s"
-L["%d spawn points; the spot shown is near the middle."] =
-    "%d Fundorte; die gezeigte Stelle liegt nahe der Mitte."
+L["%d spawn points. The spot shown is near the middle of them."] =
+    "%d Fundorte. Die gezeigte Stelle liegt etwa in ihrer Mitte."
 L["Comes back after %s"] = "Taucht nach %s wieder auf"
 L["Taming it teaches nothing new."] = "Es zu zähmen lehrt nichts Neues."
 L["Taming it teaches"] = "Es zu zähmen lehrt"
@@ -245,8 +245,8 @@ L["(known)"] = "(bekannt)"
 L["(not known)"] = "(nicht bekannt)"
 L["Classic had it in %s."] = "In Classic war es in %s."
 L["Click to pin it on your map."] = "Klicken markiert es auf deiner Karte."
-L["No exact spot to pin; Shift-click to point the arrow at its zone."] =
-    "Keine genaue Stelle zum Markieren; Umschalt-Klick richtet den Pfeil auf seine Zone."
+L["No exact spot to pin. Shift-click to point the arrow at its zone."] =
+    "Keine genaue Stelle zum Markieren. Shift-Klick richtet den Pfeil auf seine Zone aus."
 L["No place to pin yet."] = "Noch kein Ort zum Markieren."
 L["Beasts a hunter can tame. You are level %d."] = "Wildtiere, die ein Jäger zähmen kann. Du bist Stufe %d."
 L["Beasts a hunter can tame."] = "Wildtiere, die ein Jäger zähmen kann."
@@ -274,8 +274,8 @@ L["your pet can't be fed in combat."] = "dein Begleiter kann im Kampf nicht gef�
 L["your demon is already out."] = "dein Dämon ist schon draußen."
 L["nothing to feed your pet yet."] = "noch nichts, womit du deinen Begleiter füttern kannst."
 L["Pet care key (%s)"] = "Begleiterpflege-Taste (%s)"
-L["Pet care key (not set; Options, Keybindings, AddOns)"] =
-    "Begleiterpflege-Taste (nicht belegt; Optionen, Tastaturbelegung, AddOns)"
+L["Pet care key (not set yet, find it under Options, Keybindings, AddOns)"] =
+    "Begleiterpflege-Taste (noch nicht belegt, du findest sie unter Optionen, Tastaturbelegung, AddOns)"
 L["calls your pet when none is out"] = "ruft deinen Begleiter, wenn keiner draußen ist"
 L["revives your pet"] = "belebt deinen Begleiter wieder"
 L["summons your demon when none is out"] = "beschwört deinen Dämon, wenn keiner draußen ist"
@@ -338,8 +338,8 @@ L["A small Feed button above the quest list while your pet needs feeding."] =
     "Ein kleiner Füttern-Knopf über der Questliste, solange dein Begleiter Futter braucht."
 L["Show it"] = "Anzeigen"
 L["Food in your bags"] = "Futter in deinen Taschen"
-L["Lists in chat the food in your bags and whether your pet will eat it. Same as /bpet food."] =
-    "Listet im Chat das Futter in deinen Taschen und ob dein Begleiter es frisst. Wie /bpet food."
+L["Lists the food in your bags in chat and says whether your pet will eat it. Same as /bpet food."] =
+    "Zeigt im Chat das Futter in deinen Taschen und ob dein Begleiter es frisst. Wie /bpet food."
 L["List it"] = "Auflisten"
 L["TAMING"] = "ZÄHMEN"
 L["Taming skills"] = "Fertigkeiten beim Zähmen"
@@ -347,12 +347,12 @@ L["On a beast's tooltip, the pet skills taming it teaches: green if you know the
     "Im Tooltip eines Wildtiers die Begleiterfertigkeiten, die das Zähmen lehrt: grün, wenn du sie kennst, sonst rot."
 L["Show them"] = "Anzeigen"
 L["Your pet skills"] = "Deine Begleiterfertigkeiten"
-L["Lists in chat the pet skills this hunter knows. Same as /bpet taming."] =
-    "Listet im Chat die Begleiterfertigkeiten, die dieser Jäger kennt. Wie /bpet taming."
+L["Lists the pet skills this hunter knows in chat. Same as /bpet taming."] =
+    "Zeigt im Chat die Begleiterfähigkeiten, die dieser Jäger kennt. Wie /bpet taming."
 L["List them"] = "Auflisten"
 L["Beasts you tamed"] = "Deine gezähmten Wildtiere"
-L["Lists in chat the beasts you have tamed and what each one taught. Same as /bpet tamed."] =
-    "Listet im Chat die Wildtiere, die du gezähmt hast, und was jedes gelehrt hat. Wie /bpet tamed."
+L["Lists the beasts you've tamed in chat, and what each one taught. Same as /bpet tamed."] =
+    "Zeigt im Chat die Wildtiere, die du gezähmt hast, und was jedes gelehrt hat. Wie /bpet tamed."
 L["PET COMPENDIUM"] = "BEGLEITERKOMPENDIUM"
 L["Every beast you can tame: what it teaches, its level, where it lives and how rare it is. Also /bpet compendium."] =
     "Jedes Wildtier, das du zähmen kannst: was es lehrt, seine Stufe, wo es lebt und wie selten es ist. Auch /bpet compendium."
@@ -361,20 +361,21 @@ L["BEAST ARROW"] = "WILDTIERPFEIL"
 L["A dial that points the way to a beast. Shift-click one in the compendium to aim it. Also /bpet arrow."] =
     "Eine Scheibe, die den Weg zu einem Wildtier zeigt. Umschalt-Klick auf eins im Kompendium richtet sie aus. Auch /bpet arrow."
 L["Check the arrow"] = "Pfeil prüfen"
-L["Lists in chat what the arrow can read where you stand: your spot, your facing, the map. Same as /bpet arrow check."] =
-    "Listet im Chat, was der Pfeil dort lesen kann, wo du stehst: deine Position, deine Blickrichtung, die Karte. Wie /bpet arrow check."
+L["Says in chat what the arrow can read where you're standing, like your spot, which way you face and the map. Same as /bpet arrow check."] =
+    "Zeigt im Chat, was der Pfeil dort lesen kann, wo du stehst, etwa deine Position, deine Blickrichtung und die Karte. Wie /bpet arrow check."
 L["Check"] = "Prüfen"
 L["Stop following"] = "Nicht mehr folgen"
 L["Clear"] = "Lösen"
-L["The arrow lets go of the beast it points at. Same as /bpet arrow clear."] = "Der Pfeil lässt das Wildtier los, auf das er zeigt. Wie /bpet arrow clear."
+L["The arrow stops following its beast. Same as /bpet arrow clear."] =
+    "Der Pfeil hört auf, seinem Wildtier zu folgen. Wie /bpet arrow clear."
 L["Use TomTom"] = "TomTom nutzen"
 L["With TomTom installed, its arrow points the way instead of this one. Same as /bpet arrow tomtom."] =
     "Ist TomTom installiert, zeigt dessen Pfeil den Weg statt dieses. Wie /bpet arrow tomtom."
 L["When installed"] = "Wenn installiert"
 L["WINDOWS"] = "FENSTER"
 L["Pets window"] = "Begleiterfenster"
-L["The pet that is out, how it is doing and its food. Same as /bpet window, or /bpet on its own."] =
-    "Der Begleiter, der draußen ist, wie es ihm geht und sein Futter. Wie /bpet window oder /bpet allein."
+L["Your pet that's out, how it's doing and its food. Same as /bpet window, or /bpet on its own."] =
+    "Dein Begleiter, der gerade draußen ist, wie es ihm geht und sein Futter. Wie /bpet window oder /bpet allein."
 L["Minimap button"] = "Minikartenknopf"
 L["Click it for the pets window, right-click for this page. Drag it to move it. Also /bpet minimap."] =
     "Klick öffnet das Begleiterfenster, Rechtsklick diese Seite. Ziehen verschiebt ihn. Auch /bpet minimap."
@@ -401,8 +402,8 @@ L["Once, a few seconds after login, says in chat which Blackthornes addons you d
 L["Mention them"] = "Erwähnen"
 L["Client check"] = "Spiel prüfen"
 L["COMPENDIUM"] = "KOMPENDIUM"
-L["Lists in chat which pet calls this client has, to help track down a problem. It only reads. Same as /bpet probe."] =
-    "Listet im Chat, welche Begleiterfunktionen dieses Spiel hat, um einem Problem auf die Spur zu kommen. Liest nur. Wie /bpet probe."
+L["Lists in chat which pet calls this client has, to help track down a problem. It doesn't change anything. Same as /bpet probe."] =
+    "Zeigt im Chat, welche Begleiter-Aufrufe dieses Spiel kennt, um einem Problem auf die Spur zu kommen. Es ändert nichts. Wie /bpet probe."
 L["Commands"] = "Befehle"
 L["Lists every /bpet command in chat. Same as /bpet help."] = "Listet jeden /bpet-Befehl im Chat. Wie /bpet help."
 L["The Pet Compendium, the beast arrow and TomTom"] = "Das Begleiterkompendium, der Wildtierpfeil und TomTom"
