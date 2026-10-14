@@ -61,7 +61,7 @@ suite.check("without the pet bar's commands",
     rec.skills[1].name == "Charge" and rec.skills[1].rank == 2 and rec.skills[2].name == "Swipe")
 suite.check("with the beast's name and level", rec.name == "Rabid Crag Boar" and rec.level == 12)
 suite.check("saved for the whole account", ns.db.tamedBeasts[4512] == rec)
-suite.check("and said in chat", env.ChatText():find("recorded what Rabid Crag Boar teaches: Charge (Rank 2), Swipe (Rank 1)", 1, true), env.ChatText())
+suite.check("and said in chat", env.ChatText():find("noted what Rabid Crag Boar teaches: Charge (Rank 2), Swipe (Rank 1)", 1, true), env.ChatText())
 
 -- A client that gives no rank text: a skill Classic knows keeps Classic's rank.
 target.guid = "Creature-0-1-2-3-4517-00001"
@@ -156,7 +156,7 @@ ns.charDB.arrowBeast = 4516
 Record:OnCastStart("UNIT_SPELLCAST_CHANNEL_START", "player", "cast", 1515)
 Record:Capture()
 suite.check("taming the beast it follows puts the arrow away", ns.charDB.arrowBeast == nil)
-suite.check("and says so", env.ChatText():find("tamed Broken Tooth, arrow put away.", 1, true), env.ChatText())
+suite.check("and says so", env.ChatText():find("tamed Broken Tooth, so the arrow is put away.", 1, true), env.ChatText())
 ns.db.tamedBeasts[4516] = nil
 
 -- The tooltip answers from the record, and finds Classic's teach spell.
@@ -177,7 +177,7 @@ suite.check("/bpet tamed lists what was recorded",
 ns.db.tamedBeasts = nil
 env.chat = {}
 ns.HandleSlash("tamed")
-suite.check("and says so when there is nothing", env.ChatText():find("no tamed beasts recorded yet", 1, true))
+suite.check("and says so when there is nothing", env.ChatText():find("no tamed beasts yet", 1, true))
 
 _G.GetTime, _G.C_Spell, _G.UnitGUID, _G.UnitName, _G.UnitLevel = nil, nil, nil, nil, nil
 _G.UnitExists, _G.GetPetActionInfo = nil, nil

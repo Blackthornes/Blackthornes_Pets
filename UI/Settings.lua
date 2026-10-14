@@ -287,7 +287,7 @@ function SettingsUI:BuildPages()
     controls.quickFeed:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local _, foodButton = CommandRow(pages, "pet", 1, L["Food in your bags"],
-        L["Lists in chat the food in your bags and whether your pet will eat it. Same as /bpet food."],
+        L["Lists the food in your bags in chat and says whether your pet will eat it. Same as /bpet food."],
         L["List it"], "food")
     controls.food = foodButton
 
@@ -302,12 +302,12 @@ function SettingsUI:BuildPages()
     controls.tamingTooltip:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local _, skillsButton = CommandRow(pages, "pet", 2, L["Your pet skills"],
-        L["Lists in chat the pet skills this hunter knows. Same as /bpet taming."],
+        L["Lists the pet skills this hunter knows in chat. Same as /bpet taming."],
         L["List them"], "taming")
     controls.taming = skillsButton
 
     local _, tamedButton = CommandRow(pages, "pet", 2, L["Beasts you tamed"],
-        L["Lists in chat the beasts you have tamed and what each one taught. Same as /bpet tamed."],
+        L["Lists the beasts you've tamed in chat, and what each one taught. Same as /bpet tamed."],
         L["List them"], "tamed")
     controls.tamed = tamedButton
 
@@ -336,14 +336,14 @@ function SettingsUI:BuildPages()
     controls.beastArrow:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local checkRow = pages:Row("compendium", 2, L["Check the arrow"],
-        L["Lists in chat what the arrow can read where you stand: your spot, your facing, the map. Same as /bpet arrow check."])
+        L["Says in chat what the arrow can read where you're standing, like your spot, which way you face and the map. Same as /bpet arrow check."])
     controls.beastArrowCheck = Widgets.CreateButton(checkRow, L["Check"], function()
         ns.HandleSlash("arrow check")
     end, { width = 64, height = 20 })
     controls.beastArrowCheck:SetPoint("TOPLEFT", CONTROL_X, 0)
 
     local clearRow = pages:Row("compendium", 2, L["Stop following"],
-        L["The arrow lets go of the beast it points at. Same as /bpet arrow clear."])
+        L["The arrow stops following its beast. Same as /bpet arrow clear."])
     controls.beastArrowClear = Widgets.CreateButton(clearRow, L["Clear"], function()
         ns.HandleSlash("arrow clear")
     end, { width = 64, height = 20 })
@@ -361,7 +361,7 @@ function SettingsUI:BuildPages()
     pages:Section("general", 1, L["WINDOWS"])
 
     local windowRow = pages:Row("general", 1, L["Pets window"],
-        L["The pet that is out, how it is doing and its food. Same as /bpet window, or /bpet on its own."])
+        L["Your pet that's out, how it's doing and its food. Same as /bpet window, or /bpet on its own."])
     controls.openWindow = Widgets.CreateButton(windowRow, L["Open it"], function()
         ns.HandleSlash("window")
     end, { width = 100, height = 20, primary = true })
@@ -438,7 +438,7 @@ function SettingsUI:BuildPages()
     controls.whatsNewMotion:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local _, probeButton = CommandRow(pages, "general", 2, L["Client check"],
-        L["Lists in chat which pet calls this client has, to help track down a problem. It only reads. Same as /bpet probe."],
+        L["Lists in chat which pet calls this client has, to help track down a problem. It doesn't change anything. Same as /bpet probe."],
         L["Check"], "probe")
     controls.probe = probeButton
 

@@ -170,7 +170,7 @@ env.chat = {}
 ns.HandleSlash("taming")
 text = env.ChatText()
 suite.check("/bpet taming lists what is known", text:find("pet skills known (1): Charge (Rank 1)", 1, true), text)
-suite.check("and says Beast Training has not been read", text:find("has not been opened", 1, true), text)
+suite.check("and says Beast Training has not been read", text:find("haven't opened Beast Training", 1, true), text)
 _G.IsPlayerSpell, _G.UnitClass = nil, nil
 
 suite.done()

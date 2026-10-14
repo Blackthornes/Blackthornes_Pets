@@ -260,7 +260,7 @@ end
 function FeedKey:State()
     local key = self:Key()
     local bound = key and L.Format("Pet care key (%s)", key)
-        or L["Pet care key (not set; Options, Keybindings, AddOns)"]
+        or L["Pet care key (not set yet, find it under Options, Keybindings, AddOns)"]
     local absent = self.absent == "call" and L["calls your pet when none is out"]
         or self.absent == "revive" and L["revives your pet"]
         or self.absent == "summon" and L["summons your demon when none is out"] or nil

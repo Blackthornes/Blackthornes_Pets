@@ -265,7 +265,7 @@ function TameRecord:Capture()
     }
     store[pending.npcID] = record
     Changed()
-    ns.Print(L.Format("recorded what %s teaches: %s", record.name or L["the beast"],
+    ns.Print(L.Format("noted what %s teaches: %s", record.name or L["the beast"],
         #skills > 0 and self:SkillText(skills) or L["nothing"]))
     return record
 end
@@ -359,9 +359,9 @@ end
 ns.RegisterCommand("tamed", L["list the beasts you have tamed and what each taught"], function()
     local lines = TameRecord:Lines()
     if #lines == 0 then
-        ns.Print(L["no tamed beasts recorded yet. Tame one and it is written down."])
+        ns.Print(L["no tamed beasts yet. Tame one and it shows up here."])
         return
     end
-    ns.Print(L.Format("tamed beasts recorded (%d):", #lines))
+    ns.Print(L.Format("beasts you've tamed (%d):", #lines))
     for _, line in ipairs(lines) do ns.PrintRaw("  " .. line) end
 end)

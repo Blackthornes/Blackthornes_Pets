@@ -133,7 +133,7 @@ function BeastArrow:Tamed(npcID, name)
     end
     if not same then return false end
     self:Clear()
-    ns.Print(L.Format("tamed %s, arrow put away.", name or (entry and entry.name) or L["your beast"]))
+    ns.Print(L.Format("you tamed %s, so the arrow is put away.", name or (entry and entry.name) or L["your beast"]))
     return true
 end
 
@@ -365,9 +365,9 @@ function BeastArrow.Note(target, entry)
     if entry and entry.instance then
         return entry.instance == "raid" and L["Inside a raid"] or L["Inside a dungeon"], "muted"
     end
-    if target.far then return L.Format("Far from here: head for %s", target.zone or L["it"]), "muted" end
-    if target.here then return L["No exact spot known in this zone"], "accent" end
-    if target.area then return L["The middle of the zone: no exact spot known"], "accent" end
+    if target.far then return L.Format("Far from here. Head for %s", target.zone or L["it"]), "muted" end
+    if target.here then return L["No exact spot for it in this zone yet"], "accent" end
+    if target.area then return L["The middle of the zone, since there's no exact spot yet"], "accent" end
     local why = ns.Compendium and ns.Compendium.ForeverText and ns.Compendium.ForeverText(entry)
     if why then return why, "good" end
     return L["Where it lived in Classic"], "muted"
@@ -497,7 +497,7 @@ local function Status()
         if entry then
             ns.Print(L.Format("beast arrow on, pointing at %s.", entry.name or "?"))
         else
-            ns.Print(L["beast arrow on. Shift-click a beast in the Pet Compendium for it to point at."])
+            ns.Print(L["beast arrow on. Shift-click a beast in the Pet Compendium to aim it."])
         end
     else
         ns.Print(L["beast arrow off. /bpet arrow on shows it."])
@@ -514,7 +514,7 @@ ns.RegisterCommand("arrow", L["an arrow to a beast from the Pet Compendium (on, 
         Status()
     elseif word == "clear" then
         BeastArrow:Clear()
-        ns.Print(L["beast arrow is not following a beast now."])
+        ns.Print(L["the beast arrow isn't following a beast right now."])
     elseif word == "check" then
         ns.KeepCheck("arrow check", BeastArrow.Check, BeastArrow)
     elseif word == "tomtom" then

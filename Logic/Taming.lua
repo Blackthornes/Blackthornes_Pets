@@ -233,12 +233,12 @@ end
 ns.RegisterCommand("taming", L["list the pet skills this hunter knows"], function()
     local known = Taming:KnownList()
     if #known == 0 then
-        ns.Print(L["no pet skills known yet. Open Beast Training once so the list can be read."])
+        ns.Print(L["no pet skills known yet. Open Beast Training once so Pets can read the list."])
     else
         ns.Print(L.Format("pet skills known (%d): %s", #known, table.concat(known, ", ")))
     end
     if not Taming:HasRecord() then
         ns.PrintRaw(("  |c%s%s|r"):format(ns.COLORS.muted,
-            L["Beast Training has not been opened on this character yet."]))
+            L["You haven't opened Beast Training on this character yet."]))
     end
 end)
