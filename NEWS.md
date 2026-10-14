@@ -23,6 +23,12 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 0.16.1
+
+Fixes and changes:
+
+- Several bug fixes for feeding and the Compendium.
+
 ## 0.16.0
 
 - This is the largest AddOn update so far across the whole suite of Blackthornes addons.

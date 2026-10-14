@@ -4,6 +4,15 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.16.1
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Bug fixes:** several fixes for the Feed buttons, the Pet care key, the
+  feed macro and the Pet Compendium.
+- **Pet Compendium:** Settings > Pet Compendium has a "Stop following" row
+  with a Clear button.
+
 ## 0.16.0
 
 For WoW: Forever (interface 16001). Files were added, so restart the game
