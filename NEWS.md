@@ -23,6 +23,15 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 0.16.1
+
+Fixes and changes:
+
+- Feed buttons no longer pick food a pet won't eat, and the usual foods are there.
+- Feeding stops cleanly when Feed Pet can't be cast.
+- The Compendium updates after you level up.
+- The beast arrow goes back to its spot when the XP bar hides.
+
 ## 0.16.0
 
 - This is the largest AddOn update so far across the whole suite of Blackthornes addons.
