@@ -202,7 +202,10 @@ over `Theme.BASE_SIZES`; read once, so it waits for /reload). The window
 fits its fullest page, so no page scrolls. Add a setting with
 `pages:Row(page, column, label, description)` and
 `pages:Section(page, column, "HEADING")` in `UI/Settings.lua`; every
-`/bpet` command has a button there.
+`/bpet` command has a button there, except the ones that only list things
+in chat (food, taming, tamed, help), which are typed only (the owner,
+2026-10-15). The minimap button always shows: no row and no `/bpet
+minimap` (2026-10-15); a saved `minimapHidden` is kept but not read.
 
 ## German translation
 

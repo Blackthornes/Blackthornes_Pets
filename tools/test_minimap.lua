@@ -72,17 +72,13 @@ MB:Reposition()
 suite.check("a larger minimap pushes it further out", OrbitDistance() > defaultDistance)
 Minimap._width = 140
 
--- Hiding it.
-ns.HandleSlash("minimap")
-suite.check("/bpet minimap hides it", not button:IsShown())
-suite.check("and the choice is saved", ns.db.minimapHidden == true)
-ns.HandleSlash("minimap")
-suite.check("/bpet minimap brings it back", button:IsShown())
-
--- Hidden has to survive a reload: the button is rebuilt at every login.
+-- It always shows: there is no command to hide it, and an old save's
+-- hidden flag is no longer read (the owner, 2026-10-15).
+suite.check("there is no minimap command", ns.commands.minimap == nil)
 ns.db.minimapHidden = true
 MB.button = nil
 MB:Build()
-suite.check("a hidden button stays hidden after a reload", not MB.button:IsShown())
+suite.check("an old hidden flag still shows the button", MB.button:IsShown())
+suite.check("and the flag stays in the save", ns.db.minimapHidden == true)
 
 suite.done()

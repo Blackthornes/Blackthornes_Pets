@@ -30,7 +30,7 @@ _G.UnitClass = function() return "Hunter", "HUNTER" end
 ns.UI:Show()
 suite.check("the pets window in English", ns.UI.subtitle:GetText() == "Hunter", ns.UI.subtitle:GetText())
 suite.check("with no pet, in English", ns.UI.emptyLabel:GetText() == "No pet out.")
-suite.check("the settings rows in English", SettingsLabels(ns)["Feed warning"] == true)
+suite.check("the settings rows in English", SettingsLabels(ns)["Feed Warning:"] == true)
 
 -- A German client.
 ns = env.Load("deDE")
@@ -41,8 +41,8 @@ suite.check("the pets window speaks Deutsch", ns.UI.subtitle:GetText() == "Jäge
 suite.check("with no pet out", ns.UI.emptyLabel:GetText() == "Kein Begleiter draußen.",
     ns.UI.emptyLabel:GetText())
 local labels = SettingsLabels(ns)
-suite.check("the settings rows speak Deutsch", labels["Futterwarnung"] == true)
-suite.check("and none is left in English", labels["Feed warning"] == nil)
+suite.check("the settings rows speak Deutsch", labels["Futterwarnung:"] == true)
+suite.check("and none is left in English", labels["Feed Warning:"] == nil)
 suite.check("the diet words", ns.PetFood.Label("Cheese") == "Käse")
 suite.check("the key binding's name", _G["BINDING_NAME_" .. ns.FeedKey.BINDING]
     == "Begleiterpflege (rufen, wiederbeleben, füttern oder heilen)")

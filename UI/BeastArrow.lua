@@ -235,8 +235,8 @@ function ArrowUI:ShowTooltip(owner)
     local state = self.state
     local beast = state and state.beast
     if beast then GameTooltip:AddLine(ns.Compendium.PlaceText(beast), 1, 1, 1, true) end
-    GameTooltip:AddLine(L["Click to open the Pet Compendium. Shift-click a beast there to follow it."], 0.9, 0.9, 0.9, true)
-    GameTooltip:AddLine(L["Drag to move it. The red gem closes it."], 0.9, 0.9, 0.9, true)
+    GameTooltip:AddLine(L["Click to open the Pet Compendium."], 0.9, 0.9, 0.9, true)
+    GameTooltip:AddLine(L["Drag to move it."], 0.9, 0.9, 0.9, true)
     GameTooltip:Show()
 end
 

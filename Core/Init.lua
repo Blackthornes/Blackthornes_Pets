@@ -326,7 +326,7 @@ local DEFAULTS = {
     -- start stacked.
     minimapAngle = math.rad(260),
     minimapGap = 16, -- kept for old saves; the button now sits on the ring
-    minimapHidden = false,
+    minimapHidden = false, -- kept for old saves; the button always shows now
 
     -- The warning when a hunter's pet needs feeding: on, and by default as
     -- soon as the pet is no longer happy, since only a happy pet does its

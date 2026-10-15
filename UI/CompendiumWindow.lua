@@ -40,7 +40,7 @@ local COLUMNS = {
     { key = "family", label = L["Family"], sortTip = L["Sort by family"], x = 200, width = 88 },
     { key = "level", label = L["Level"], sortTip = L["Sort by level"], x = 292, width = 48 },
     { key = "speed", label = L["Speed"], sortTip = L["Sort by speed"], x = 344, width = 46,
-      tip = L["How many seconds between its attacks. Lower is faster. Sorts the fastest first."] },
+      tip = L["Seconds between its attacks. Lower is faster."] },
     { key = "zone", label = L["Where"], sortTip = L["Sort by where"], x = 394, width = 180 },
     { key = "skills", label = L["Teaches"], x = 578, width = 188 },
 }
@@ -184,7 +184,7 @@ function CompendiumUI:BuildHeader()
     arrow:HookScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
         GameTooltip:AddLine(L["Beast arrow"], Theme.Unpack("accent"))
-        GameTooltip:AddLine(L["A dial that turns as you turn, pointing the way to a beast. Shift-click a beast to aim it. Click again to hide it."],
+        GameTooltip:AddLine(L["Points the way to a beast. Shift-click one in the compendium to aim it."],
             1, 1, 1, true)
         GameTooltip:Show()
     end)
@@ -244,12 +244,12 @@ function CompendiumUI:BuildBar()
 
     local ticks = {
         { key = "tameNow", text = L["Tameable now"],
-          tip = L["Only beasts at or below your level, so you can tame them now."] },
-        { key = "raresOnly", text = L["Rares only"], tip = L["Only rare and rare elite beasts."] },
+          tip = L["Only beasts at or below your level."] },
+        { key = "raresOnly", text = L["Rares only"] },
         { key = "newSkills", text = L["Teaches me something new"],
-          tip = L["Only beasts that teach a skill this hunter doesn't have yet."] },
+          tip = L["Only beasts that teach a skill you don't have yet."] },
         { key = "foreverOnly", text = L["Seen on Forever"],
-          tip = L["Only beasts that have been seen, tamed or named in a guide on WoW: Forever."] },
+          tip = L["Only beasts known to live on WoW: Forever."] },
     }
     self.ticks = {}
     local previous
@@ -264,13 +264,16 @@ function CompendiumUI:BuildBar()
         else
             box:SetPoint("TOPLEFT", PADDING, top - 32)
         end
-        box:HookScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_TOP")
-            GameTooltip:AddLine(spec.text, 1, 1, 1)
-            GameTooltip:AddLine(spec.tip, 0.9, 0.9, 0.9, true)
-            GameTooltip:Show()
-        end)
-        box:HookScript("OnLeave", function() GameTooltip:Hide() end)
+        -- A box whose label says it all has no hover.
+        if spec.tip then
+            box:HookScript("OnEnter", function(self)
+                GameTooltip:SetOwner(self, "ANCHOR_TOP")
+                GameTooltip:AddLine(spec.text, 1, 1, 1)
+                GameTooltip:AddLine(spec.tip, 0.9, 0.9, 0.9, true)
+                GameTooltip:Show()
+            end)
+            box:HookScript("OnLeave", function() GameTooltip:Hide() end)
+        end
         self.ticks[spec.key] = box
         previous = box
     end
@@ -302,7 +305,7 @@ function CompendiumUI:BuildHeadings()
                 GameTooltip:SetOwner(self, "ANCHOR_TOP")
                 GameTooltip:AddLine(column.sortTip, 1, 1, 1)
                 if column.tip then GameTooltip:AddLine(column.tip, 0.9, 0.9, 0.9, true) end
-                GameTooltip:AddLine(L["Click again to flip the order, and once more to sort by beast again."], 0.9, 0.9, 0.9, true)
+                GameTooltip:AddLine(L["Click again to flip it, and once more to go back."], 0.9, 0.9, 0.9, true)
                 GameTooltip:Show()
             end)
             heading:SetScript("OnLeave", function()
@@ -590,7 +593,7 @@ function CompendiumUI:ShowTooltip(row)
         GameTooltip:AddLine(L.Format("Also in %s", table.concat(entry.also, ", ")), 0.9, 0.9, 0.9, true)
     end
     if entry.spawns and entry.spawns > 1 and entry.x then
-        GameTooltip:AddLine(L.Format("%d spawn points. The spot shown is near the middle of them.", entry.spawns),
+        GameTooltip:AddLine(L.Format("Found in %d spots. This one is near the middle.", entry.spawns),
             0.7, 0.7, 0.7, true)
     end
     local respawn = C.RespawnText(entry)

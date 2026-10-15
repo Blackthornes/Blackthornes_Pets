@@ -106,7 +106,6 @@ inside it. If they differ, the client ignores the folder and says nothing.
 /bpet help       list every command
 /bpet probe      check what this client supports for pets; it only reads
 /bpet settings   open the settings window (so does right-clicking the minimap button)
-/bpet minimap    show or hide the minimap button
 /bpet taming     list the pet skills this hunter knows
 /bpet tamed      list the beasts you have tamed and what each taught
 /bpet compendium open the Pet Compendium; add words to search it (/bpet compendium fox)
