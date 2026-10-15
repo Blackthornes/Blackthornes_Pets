@@ -387,8 +387,8 @@ L["Text size"] = "Textgröße"
 L["Large and Larger add a point or two to all of this addon's text. Takes effect after /reload."] =
     "Groß und Größer machen den ganzen Text dieses Addons ein bis zwei Punkte größer. Wirkt nach /reload."
 L["Window style"] = "Fensterstil"
-L["Titanforged is the house look, with a gold rim and glowing edges. Blizzard uses the game's own frames, red buttons and tick boxes. Takes effect after /reload."] =
-    "Titanforged ist der Hausstil, mit goldenem Rand und leuchtenden Kanten. Blizzard nutzt die eigenen Fenster, roten Knöpfe und Kästchen des Spiels. Wirkt nach /reload."
+L["Titanforged has a gold rim and glowing edges. Blizzard looks like the game's own windows. Type /reload to see the change."] =
+    "Titanforged hat einen goldenen Rand und leuchtende Kanten. Blizzard sieht aus wie die Fenster des Spiels. Tipp /reload, um die Änderung zu sehen."
 L["HUNTER PET"] = "JÄGERBEGLEITER"
 L["ADVANCED"] = "ERWEITERT"
 L["Debug output"] = "Debug-Ausgabe"
@@ -397,8 +397,8 @@ L["Extra messages in chat, to help track down a problem."] =
 L["Feeding warnings, the Feed button and taming skills on tooltips"] =
     "Futterwarnungen, der Füttern-Knopf und Zähmfertigkeiten in Tooltips"
 L["Sister addons"] = "Schwester-Addons"
-L["Once, a few seconds after login, says in chat which Blackthornes addons you don't have and what each adds. Turning it off here turns it off in all of them. Same as /bpet sisters."] =
-    "Sagt einmal, ein paar Sekunden nach dem Einloggen, im Chat, welche Blackthornes-Addons dir fehlen und was jedes bietet. Hier aus heißt in allen aus. Wie /bpet sisters."
+L["A few seconds after you log in, chat lists the Blackthornes addons you don't have yet and what each one does. It only happens once. Turning it off here turns it off in all of them. Same as /bpet sisters."] =
+    "Ein paar Sekunden nach dem Einloggen nennt der Chat die Blackthornes-Addons, die dir noch fehlen, und was jedes macht. Das passiert nur einmal. Hier aus heißt in allen aus. Wie /bpet sisters."
 L["Mention them"] = "Erwähnen"
 L["Client check"] = "Spiel prüfen"
 L["COMPENDIUM"] = "KOMPENDIUM"
