@@ -174,9 +174,8 @@ L["that"] = "das"
 L["beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back."] =
     "Wildtierpfeil aus. Die Schaltfläche Pfeil im Begleiterkompendium, /bpet arrow oder die Einstellungen holen ihn zurück."
 L["Beast arrow"] = "Wildtierpfeil"
-L["Click to open the Pet Compendium. Shift-click a beast there to follow it."] =
-    "Klick öffnet das Begleiterkompendium. Shift-Klick auf ein Wildtier dort, um ihm zu folgen."
-L["Drag to move it. The red gem closes it."] = "Ziehen verschiebt ihn. Der rote Edelstein schließt ihn."
+L["Click to open the Pet Compendium."] = "Klick öffnet das Begleiterkompendium."
+L["Drag to move it."] = "Ziehen verschiebt ihn."
 L["Can't see you here"] = "Hier nicht zu sehen"
 L["The game won't say where you are"] = "Das Spiel sagt nicht, wo du bist"
 
@@ -186,22 +185,15 @@ L["Click a beast to pin it on your map, or Shift-click to point the arrow at it.
     "Klick auf ein Wildtier markiert es auf deiner Karte, Shift-Klick richtet den Pfeil darauf aus. %s zeigt, was WoW: Forever gezeigt hat. Der Rest stammt aus Classic 1.12."
 L["Settings"] = "Einstellungen"
 L["Arrow"] = "Pfeil"
-L["A dial that turns as you turn, pointing the way to a beast. Shift-click a beast to aim it. Click again to hide it."] =
-    "Eine Scheibe, die sich mit dir dreht und den Weg zu einem Wildtier zeigt. Umschalt-Klick auf ein Wildtier richtet sie aus. Noch ein Klick blendet sie aus."
 L["All families"] = "Alle Familien"
 L["Search beasts, zones or skills"] = "Wildtier, Zone oder Fertigkeit suchen"
 L["Tameable now"] = "Jetzt zähmbar"
-L["Only beasts at or below your level, so you can tame them now."] =
-    "Nur Wildtiere bis zu deiner Stufe, die du also jetzt zähmen kannst."
+L["Only beasts at or below your level."] = "Nur Wildtiere bis zu deiner Stufe."
 L["Rares only"] = "Nur Seltene"
-L["Only rare and rare elite beasts."] = "Nur seltene Wildtiere und seltene Elite."
 L["Teaches me something new"] = "Lehrt mich etwas Neues"
-L["Only beasts that teach a skill this hunter doesn't have yet."] =
-    "Nur Wildtiere, die eine Fähigkeit lehren, die dieser Jäger noch nicht hat."
-L["Only beasts that have been seen, tamed or named in a guide on WoW: Forever."] =
-    "Nur Wildtiere, die auf WoW: Forever gesehen, gezähmt oder in einem Guide genannt wurden."
-L["Click again to flip the order, and once more to sort by beast again."] =
-    "Klick noch mal, um die Reihenfolge umzudrehen, und ein weiteres Mal, um wieder nach Wildtier zu sortieren."
+L["Only beasts that teach a skill you don't have yet."] = "Nur Wildtiere, die dir eine Fähigkeit lehren, die du noch nicht hast."
+L["Only beasts known to live on WoW: Forever."] = "Nur Wildtiere, die es auf WoW: Forever sicher gibt."
+L["Click again to flip it, and once more to go back."] = "Klick noch mal zum Umdrehen und ein weiteres Mal zum Zurücksetzen."
 L["Beast"] = "Wildtier"
 L["Sort by beast"] = "Nach Wildtier sortieren"
 L["Family"] = "Familie"
@@ -210,8 +202,7 @@ L["Level"] = "Stufe"
 L["Sort by level"] = "Nach Stufe sortieren"
 L["Speed"] = "Tempo"
 L["Sort by speed"] = "Nach Tempo sortieren"
-L["How many seconds between its attacks. Lower is faster. Sorts the fastest first."] =
-    "Wie viele Sekunden zwischen seinen Angriffen liegen. Weniger ist schneller. Sortiert die schnellsten zuerst."
+L["Seconds between its attacks. Lower is faster."] = "Sekunden zwischen seinen Angriffen. Weniger ist schneller."
 L["Where"] = "Wo"
 L["Sort by where"] = "Nach Ort sortieren"
 L["Teaches"] = "Lehrt"
@@ -236,8 +227,7 @@ L["Classic said %s."] = "Laut Classic %s."
 L["Where it lives is not known yet."] = "Wo es lebt, ist noch nicht bekannt."
 L["Shift-click to point the arrow at it."] = "Umschalt-Klick richtet den Pfeil darauf."
 L["Also in %s"] = "Auch in %s"
-L["%d spawn points. The spot shown is near the middle of them."] =
-    "%d Fundorte. Die gezeigte Stelle liegt etwa in ihrer Mitte."
+L["Found in %d spots. This one is near the middle."] = "An %d Stellen zu finden. Diese liegt etwa in der Mitte."
 L["Comes back after %s"] = "Taucht nach %s wieder auf"
 L["Taming it teaches nothing new."] = "Es zu zähmen lehrt nichts Neues."
 L["Taming it teaches"] = "Es zu zähmen lehrt"

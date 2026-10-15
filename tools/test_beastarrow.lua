@@ -338,7 +338,7 @@ UI.arrowButton:GetScript("OnClick")(UI.arrowButton)
 suite.check("which turns it on", Arrow.IsOn())
 UI.arrowButton:GetScript("OnEnter")(UI.arrowButton)
 tip = table.concat(GameTooltip._lines, "\n")
-suite.check("and says what it does", tip:find("pointing the way to a beast", 1, true) ~= nil, tip)
+suite.check("and says what it does", tip:find("Points the way to a beast", 1, true) ~= nil, tip)
 
 ns.SettingsUI:Show()
 suite.check("Settings has the switch", ns.SettingsUI.controls.beastArrow:GetChecked() == true)
