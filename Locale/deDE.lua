@@ -307,10 +307,6 @@ L["Click to open"] = "Klicken zum Öffnen"
 L["Right-click for settings"] = "Rechtsklick für die Einstellungen"
 L["Click for settings"] = "Klicken für die Einstellungen"
 L["Drag to move it round the minimap"] = "Ziehen verschiebt ihn um die Minikarte"
-L["show or hide the minimap button"] = "zeigt den Minikartenknopf oder blendet ihn aus"
-L["minimap button shown."] = "Minikartenknopf eingeblendet."
-L["minimap button hidden. /bpet minimap brings it back."] =
-    "Minikartenknopf ausgeblendet. /bpet minimap holt ihn zurück."
 
 -- Settings
 L["Changes save as you make them."] = "Änderungen werden sofort gespeichert."
@@ -318,98 +314,19 @@ L["Reload"] = "Neu laden"
 L["Reload the interface so the new window style shows (/reload)"] =
     "Lädt die Oberfläche neu, damit der neue Fensterstil erscheint (/reload)"
 L["FEEDING"] = "FÜTTERN"
-L["Feed warning"] = "Futterwarnung"
-L["A warning in chat and on screen when your pet is no longer happy."] =
-    "Eine Warnung im Chat und auf dem Bildschirm, wenn dein Begleiter nicht mehr glücklich ist."
-L["Warn me"] = "Warnen"
-L["Only when unhappy"] = "Nur wenn unglücklich"
-L["No warning while your pet is content. You only hear about it once your pet is unhappy."] =
-    "Keine Warnung, solange dein Begleiter zufrieden ist. Du hörst erst davon, wenn er unglücklich ist."
-L["Enabled"] = "Aktiviert"
-L["Low food warning"] = "Warnung bei wenig Futter"
-L["A warning in chat when you have fewer than %d food your pet will eat."] =
-    "Eine Warnung im Chat, wenn du weniger als %d Futter hast, das dein Begleiter frisst."
-L["Buff food"] = "Buff-Essen"
-L["Food that gives a buff, like stat food, is always fed last. Tick this to never feed it."] =
-    "Essen mit einem Buff, etwa Werte-Essen, wird immer zuletzt verfüttert. Setz den Haken, damit dein Begleiter es nie bekommt."
-L["Never feed it"] = "Nie verfüttern"
-L["Feed button by quests"] = "Füttern-Knopf bei den Quests"
-L["A small Feed button above the quest list while your pet needs feeding."] =
-    "Ein kleiner Füttern-Knopf über der Questliste, solange dein Begleiter Futter braucht."
-L["Show it"] = "Anzeigen"
-L["Food in your bags"] = "Futter in deinen Taschen"
-L["Lists the food in your bags in chat and says whether your pet will eat it. Same as /bpet food."] =
-    "Zeigt im Chat das Futter in deinen Taschen und ob dein Begleiter es frisst. Wie /bpet food."
-L["List it"] = "Auflisten"
 L["TAMING"] = "ZÄHMEN"
-L["Taming skills"] = "Fertigkeiten beim Zähmen"
-L["A beast's tooltip shows the pet skills you get by taming it. Green means you know it, red means you don't."] =
-    "Der Tooltip eines Wildtiers zeigt die Begleiterfertigkeiten, die du durchs Zähmen bekommst. Grün heißt, du kennst sie, rot heißt, du kennst sie nicht."
-L["Show them"] = "Anzeigen"
-L["Your pet skills"] = "Deine Begleiterfertigkeiten"
-L["Lists the pet skills this hunter knows in chat. Same as /bpet taming."] =
-    "Zeigt im Chat die Begleiterfähigkeiten, die dieser Jäger kennt. Wie /bpet taming."
-L["List them"] = "Auflisten"
-L["Beasts you tamed"] = "Deine gezähmten Wildtiere"
-L["Lists the beasts you've tamed in chat, and what each one taught. Same as /bpet tamed."] =
-    "Zeigt im Chat die Wildtiere, die du gezähmt hast, und was jedes gelehrt hat. Wie /bpet tamed."
 L["PET COMPENDIUM"] = "BEGLEITERKOMPENDIUM"
-L["Every beast you can tame: what it teaches, its level, where it lives and how rare it is. Also /bpet compendium."] =
-    "Jedes Wildtier, das du zähmen kannst: was es lehrt, seine Stufe, wo es lebt und wie selten es ist. Auch /bpet compendium."
-L["Open it"] = "Öffnen"
 L["BEAST ARROW"] = "WILDTIERPFEIL"
-L["A dial that points the way to a beast. Shift-click one in the compendium to aim it. Also /bpet arrow."] =
-    "Eine Scheibe, die den Weg zu einem Wildtier zeigt. Umschalt-Klick auf eins im Kompendium richtet sie aus. Auch /bpet arrow."
-L["Check the arrow"] = "Pfeil prüfen"
-L["Tells you in chat what the arrow can see where you stand, like your spot, which way you face and the map. Same as /bpet arrow check."] =
-    "Sagt dir im Chat, was der Pfeil dort sieht, wo du stehst, etwa deine Position, deine Blickrichtung und die Karte. Wie /bpet arrow check."
 L["Check"] = "Prüfen"
-L["Stop following"] = "Nicht mehr folgen"
 L["Clear"] = "Lösen"
-L["The arrow stops following its beast. Same as /bpet arrow clear."] =
-    "Der Pfeil hört auf, seinem Wildtier zu folgen. Wie /bpet arrow clear."
-L["Use TomTom"] = "TomTom nutzen"
-L["With TomTom installed, its arrow points the way instead of this one. Same as /bpet arrow tomtom."] =
-    "Ist TomTom installiert, zeigt dessen Pfeil den Weg statt dieses. Wie /bpet arrow tomtom."
-L["When installed"] = "Wenn installiert"
 L["WINDOWS"] = "FENSTER"
-L["Pets window"] = "Begleiterfenster"
-L["Your pet that's out, how it's doing and its food. Same as /bpet window, or /bpet on its own."] =
-    "Dein Begleiter, der gerade draußen ist, wie es ihm geht und sein Futter. Wie /bpet window oder /bpet allein."
-L["Minimap button"] = "Minikartenknopf"
-L["Click it for the pets window, right-click for this page. Drag it to move it. Also /bpet minimap."] =
-    "Klick öffnet das Begleiterfenster, Rechtsklick diese Seite. Ziehen verschiebt ihn. Auch /bpet minimap."
-L["Window position"] = "Fensterposition"
-L["Moves this window and the beast arrow back where they started, if one ends up off screen."] =
-    "Setzt dieses Fenster und den Wildtierpfeil an ihren Anfangsplatz zurück, falls eins außerhalb des Bildschirms landet."
-L["Put it back"] = "Zurücksetzen"
-L["Text size"] = "Textgröße"
-L["Large and Larger add a point or two to all of this addon's text. Takes effect after /reload."] =
-    "Groß und Größer machen den ganzen Text dieses Addons ein bis zwei Punkte größer. Wirkt nach /reload."
-L["Window style"] = "Fensterstil"
-L["Titanforged has a gold rim and glowing edges. Blizzard looks like the game's own windows. Type /reload to see the change."] =
-    "Titanforged hat einen goldenen Rand und leuchtende Kanten. Blizzard sieht aus wie die Fenster des Spiels. Tipp /reload, um die Änderung zu sehen."
 L["HUNTER PET"] = "JÄGERBEGLEITER"
 L["ADVANCED"] = "ERWEITERT"
-L["Debug output"] = "Debug-Ausgabe"
-L["Extra messages in chat, to help track down a problem."] =
-    "Zusätzliche Meldungen im Chat, um einem Problem auf die Spur zu kommen."
 L["Feeding warnings, the Feed button and taming skills on tooltips"] =
     "Futterwarnungen, der Füttern-Knopf und Zähmfertigkeiten in Tooltips"
-L["Sister addons"] = "Schwester-Addons"
-L["A few seconds after you log in, chat lists the Blackthornes addons you don't have yet and what each one does. It only happens once. Turning it off here turns it off in all of them. Same as /bpet sisters."] =
-    "Ein paar Sekunden nach dem Einloggen nennt der Chat die Blackthornes-Addons, die dir noch fehlen, und was jedes macht. Das passiert nur einmal. Hier aus heißt in allen aus. Wie /bpet sisters."
-L["Mention them"] = "Erwähnen"
-L["Client check"] = "Spiel prüfen"
 L["COMPENDIUM"] = "KOMPENDIUM"
-L["Lists in chat what the game tells Pets about your pet, to help track down a problem. It doesn't change anything. Same as /bpet probe."] =
-    "Zeigt im Chat, was das Spiel Pets über deinen Begleiter verrät, um einem Problem auf die Spur zu kommen. Es ändert nichts. Wie /bpet probe."
-L["Commands"] = "Befehle"
-L["Lists every /bpet command in chat. Same as /bpet help."] = "Listet jeden /bpet-Befehl im Chat. Wie /bpet help."
 L["The Pet Compendium, the beast arrow and TomTom"] = "Das Begleiterkompendium, der Wildtierpfeil und TomTom"
 L["GENERAL"] = "ALLGEMEIN"
-L["The minimap button, window position, text size and debug output"] =
-    "Minikartenknopf, Fensterposition, Textgröße und Debug-Ausgabe"
 L["Pets' settings have a window of their own."] = "Die Einstellungen von Pets haben ein eigenes Fenster."
 L["Open Pets settings"] = "Einstellungen von Pets öffnen"
 L["Or type /bpet settings, or click the minimap button."] =
@@ -444,14 +361,56 @@ L["Motion"] = "Bewegung"
 L["Got it"] = "Alles klar"
 L["there is no news to show yet."] = "es gibt noch keine Neuigkeiten."
 L["open the What's New window for every Blackthornes addon"] = "öffnet das Neuigkeiten-Fenster für alle Blackthornes-Addons"
-L["Opens the What's New window: what changed in each of your Blackthornes addons. Same as /bpet whatsnew."] = "Öffnet das Neuigkeiten-Fenster: was sich in jedem deiner Blackthornes-Addons geändert hat. Wie /bpet whatsnew."
-L["After an update"] = "Nach einem Update"
-L["Brings up the What's New window the first time you play after a Blackthornes addon updates. Turning it off here turns it off in all of them."] = "Zeigt das Neuigkeiten-Fenster, wenn du nach einem Update eines Blackthornes-Addons zum ersten Mal spielst. Hier ausgeschaltet ist es in allen aus."
-L["Show What's New"] = "Neuigkeiten zeigen"
-L["What's New motion"] = "Bewegung der Neuigkeiten"
-L["The What's New window rises in, and its news slides up and glows. Turning it off here turns it off in all of them."] = "Das Neuigkeiten-Fenster gleitet herein, und seine Neuigkeiten schieben sich hoch und leuchten. Hier ausgeschaltet ist es in allen aus."
 
 -- ======================================================================
+-- Settings rows (the owner's walk-through, 2026-10-15)
+L["On"] = "An"
+L["Show"] = "Anzeigen"
+L["Open"] = "Öffnen"
+L["Feed Warning:"] = "Futterwarnung:"
+L["Only When Unhappy"] = "Nur wenn unglücklich"
+L["Warns you when your pet isn't happy. Only When Unhappy waits until it's unhappy."] =
+    "Warnt dich, wenn dein Begleiter nicht glücklich ist. Mit Nur wenn unglücklich wartet sie, bis er unglücklich ist."
+L["Low Food Warning:"] = "Warnung bei wenig Futter:"
+L["Warns you in chat when you have fewer than %d food your pet will eat."] =
+    "Warnt dich im Chat, wenn du weniger als %d Futter hast, das dein Begleiter frisst."
+L["Never Feed Buff Food:"] = "Nie Buff-Essen füttern:"
+L["Food that gives a buff is always fed last. Tick this to never feed it."] =
+    "Essen mit einem Buff wird immer zuletzt verfüttert. Setz den Haken, damit es nie verfüttert wird."
+L["Feed Button:"] = "Füttern-Knopf:"
+L["A Feed button above your quests while your pet is hungry."] =
+    "Ein Füttern-Knopf über deinen Quests, solange dein Begleiter Hunger hat."
+L["Taming Skills:"] = "Zähmfertigkeiten:"
+L["A beast's tooltip shows what it teaches. Green you know, red you don't."] =
+    "Der Tooltip eines Wildtiers zeigt, was es lehrt. Grün kennst du, rot nicht."
+L["Pet Compendium:"] = "Begleiterkompendium:"
+L["Beast Arrow:"] = "Wildtierpfeil:"
+L["Points the way to a beast. Shift-click one in the compendium to aim it."] =
+    "Zeigt den Weg zu einem Wildtier. Umschalt-Klick auf eins im Kompendium richtet ihn aus."
+L["Check the Arrow:"] = "Pfeil prüfen:"
+L["Lists in chat what the arrow can read here."] = "Zeigt im Chat, was der Pfeil hier lesen kann."
+L["Stop Following:"] = "Nicht mehr folgen:"
+L["Use TomTom:"] = "TomTom nutzen:"
+L["With TomTom installed, its arrow shows the way instead."] = "Ist TomTom installiert, zeigt stattdessen sein Pfeil den Weg."
+L["Pets:"] = "Pets:"
+L["Window Position:"] = "Fensterposition:"
+L["Reset the UI windows to their defaults."] = "Setzt die Fenster auf ihre Standardplätze zurück."
+L["Set Default"] = "Zurücksetzen"
+L["UI windows set to defaults."] = "Fenster auf ihre Standardplätze zurückgesetzt."
+L["Text Size:"] = "Textgröße:"
+L["Window Style:"] = "Fensterstil:"
+L["Debug:"] = "Debug:"
+L["Extra chat messages to help track down a problem."] = "Zusätzliche Chat-Nachrichten, um einem Problem auf die Spur zu kommen."
+L["Sister Addons:"] = "Schwester-Addons:"
+L["Says once in chat which Blackthornes addons you don't have."] = "Sagt einmal im Chat, welche Blackthornes-Addons dir fehlen."
+L["What's New:"] = "Neuigkeiten:"
+L["What's New After Updates:"] = "Neuigkeiten nach Updates:"
+L["Opens What's New the first time you play after an update."] = "Öffnet die Neuigkeiten, wenn du nach einem Update zum ersten Mal spielst."
+L["What's New Motion:"] = "Bewegung der Neuigkeiten:"
+L["Client Check:"] = "Spiel prüfen:"
+L["Lists in chat what the game tells Pets about your pet."] = "Zeigt im Chat, was das Spiel Pets über deinen Begleiter verrät."
+L["Window position, text size and debug output"] = "Fensterposition, Textgröße und Debug-Ausgabe"
+
 -- About (UI/About.lua) and the note in What's New
 -- ======================================================================
 L["A few of you have asked if AI is used in the creation of my AddOns. It is."] = "Einige von euch haben gefragt, ob beim Erstellen meiner AddOns KI genutzt wird. Ja, das wird sie."

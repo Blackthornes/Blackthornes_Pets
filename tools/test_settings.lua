@@ -53,14 +53,7 @@ SettingsUI:Show()
 
 local controls = SettingsUI.controls
 
--- The minimap checkbox.
-local minimapBox = controls.minimap
-suite.check("the minimap box starts ticked", minimapBox:GetChecked())
-minimapBox:GetScript("OnClick")(minimapBox)
-suite.check("unticking hides the button",
-    ns.db.minimapHidden == true and not ns.MinimapButton.button:IsShown())
-ns.HandleSlash("minimap")
-suite.check("/bpet minimap ticks it again", minimapBox:GetChecked())
+suite.check("there is no minimap row", controls.minimap == nil)
 
 -- Debug.
 controls.debug:GetScript("OnClick")(controls.debug)
@@ -94,7 +87,7 @@ suite.check("it opens again on the page left", pages.shown == "general")
 -- What a setting does is a tooltip until Show descriptions is ticked.
 local feedRow
 for _, row in ipairs(pages.pages.pet.rows) do
-    if row.labelText == "Feed warning" then feedRow = row end
+    if row.labelText == "Feed Warning:" then feedRow = row end
 end
 suite.check("descriptions start hidden", ns.db.settingsDescriptions == false
     and not feedRow.hint:IsShown())
@@ -102,12 +95,14 @@ GameTooltip._lines = {}
 feedRow:GetScript("OnEnter")(feedRow)
 suite.check("a row lights under the mouse", feedRow.hover:IsShown())
 suite.check("and says what it does in a tooltip", GameTooltip._lines[1] and
-    GameTooltip._lines[1]:find("no longer happy") ~= nil)
+    GameTooltip._lines[1]:find("isn't happy") ~= nil)
 local before = SettingsUI.frame:GetHeight()
 pages.describe:GetScript("OnClick")(pages.describe)
 suite.check("Show descriptions is saved", ns.db.settingsDescriptions == true)
 suite.check("and puts the words under the rows", feedRow.hint:IsShown())
-suite.check("and the window grows to fit them", SettingsUI.frame:GetHeight() > before)
+-- The window fits its fullest page, which may already have room for them.
+suite.check("and the row grows to fit them", feedRow:GetHeight() > feedRow.compactHeight
+    and SettingsUI.frame:GetHeight() >= before)
 pages.describe:GetScript("OnClick")(pages.describe)
 suite.check("unticked, the window goes back", SettingsUI.frame:GetHeight() == before)
 
@@ -150,12 +145,44 @@ suite.check("back to Normal needs no reload", ns.db.textSize == "normal"
 local ran = {}
 local realSlash = ns.HandleSlash
 ns.HandleSlash = function(text) ran[#ran + 1] = text end
-for _, key in ipairs({ "food", "taming", "tamed", "openWindow", "probe", "help", "beastArrowCheck" }) do
+for _, key in ipairs({ "openWindow", "probe", "beastArrowCheck" }) do
     controls[key]:GetScript("OnClick")(controls[key])
 end
 ns.HandleSlash = realSlash
 suite.check("the command buttons run their commands",
-    table.concat(ran, ",") == "food,taming,tamed,window,probe,help,arrow check")
+    table.concat(ran, ",") == "window,probe,arrow check")
+
+-- Chat-only commands are typed only (the owner, 2026-10-15): the ones
+-- that just list things in chat have no button here, but still work.
+for _, key in ipairs({ "food", "taming", "tamed", "help" }) do
+    suite.check("no button for /bpet " .. key, controls[key] == nil)
+    suite.check("and /bpet " .. key .. " is still a command", ns.commands[key] ~= nil)
+end
+
+-- A row with nothing to say has no tooltip, and nothing under it.
+local compendiumRow
+for _, row in ipairs(pages.pages.compendium.rows) do
+    if row.labelText == "Pet Compendium:" then compendiumRow = row end
+end
+GameTooltip._lines = {}
+compendiumRow:GetScript("OnEnter")(compendiumRow)
+suite.check("an empty row shows no tooltip", #GameTooltip._lines == 0)
+pages.describe:GetScript("OnClick")(pages.describe)
+suite.check("and nothing under it with descriptions on", compendiumRow.description == ""
+    and compendiumRow.fullHeight == compendiumRow.compactHeight)
+pages.describe:GetScript("OnClick")(pages.describe)
+
+-- Feed warning and Only when unhappy share one row.
+suite.check("the two feed ticks share a row",
+    controls.feedWarnOnlyUnhappy:GetParent() == controls.feedWarning:GetParent())
+
+-- Window position says so in chat.
+local printed = {}
+local realPrint = ns.Print
+ns.Print = function(...) printed[#printed + 1] = table.concat({ ... }, " ") end
+controls.resetPositions:GetScript("OnClick")(controls.resetPositions)
+ns.Print = realPrint
+suite.check("Set Default says so in chat", printed[1] == "UI windows set to defaults.", printed[1])
 
 -- Position.
 ns.db.settingsX = 400

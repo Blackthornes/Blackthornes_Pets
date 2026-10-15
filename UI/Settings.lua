@@ -26,7 +26,7 @@ local EDGE_PAD = 11
 
 local COLUMN_WIDTH = 330
 local COLUMN_GAP = 18
--- Where the controls start: room for a label like "Minimap button" in the
+-- Where the controls start: room for a label like "Window Position:" in the
 -- game's font, which runs wider than it looks.
 local CONTROL_X = 150
 
@@ -40,7 +40,7 @@ local PAGES = {
     { key = "compendium", text = L["COMPENDIUM"],
       tip = L["The Pet Compendium, the beast arrow and TomTom"] },
     { key = "general", text = L["GENERAL"],
-      tip = L["The minimap button, window position, text size and debug output"] },
+      tip = L["Window position, text size and debug output"] },
     { key = "about", text = L["ABOUT"],
       tip = L["How these addons are made, the version, the Discord and the other Blackthornes addons"] },
 }
@@ -175,8 +175,20 @@ function SettingsUI:BuildHeader()
     version:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -(PADDING - EDGE_PAD), 8)
 end
 
---- A row whose button runs a /bpet command, so every command has a button
---- here (a house rule).
+--- A row whose button runs a /bpet command.
+--- Make a row taller by `by`, for a control that sits under the first
+--- line, with its description moved down to match (as Farmer has it).
+local function GrowRow(row, by)
+    local top = row.compactHeight
+    row.hint:ClearAllPoints()
+    row.hint:SetPoint("TOPLEFT", 0, -(top + by))
+    row.compactHeight = top + by
+    row.fullHeight = row.fullHeight + by
+    local described = ns.db and ns.db.settingsDescriptions == true
+    row.shownHeight = described and row.fullHeight or row.compactHeight
+    row:SetHeight(row.shownHeight)
+end
+
 local function CommandRow(pages, page, column, label, description, buttonText, command)
     local row = pages:Row(page, column, label, description)
     local button = Widgets.CreateButton(row, buttonText, function()
@@ -242,83 +254,73 @@ function SettingsUI:BuildPages()
     -- Hunter pet: feeding on the left, taming on the right.
     pages:Section("pet", 1, L["FEEDING"])
 
-    local feedRow = pages:Row("pet", 1, L["Feed warning"],
-        L["A warning in chat and on screen when your pet is no longer happy."])
+    -- The warning and its "only when unhappy" share a row: the second tick
+    -- only matters while the first is on. The saved keys are unchanged.
+    local feedRow = pages:Row("pet", 1, L["Feed Warning:"],
+        L["Warns you when your pet isn't happy. Only When Unhappy waits until it's unhappy."])
 
-    controls.feedWarning = Widgets.CreateCheckbox(feedRow, L["Warn me"], function(checked)
+    controls.feedWarning = Widgets.CreateCheckbox(feedRow, L["On"], function(checked)
         ns.db.feedWarning = checked
     end, true)
     controls.feedWarning:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local unhappyRow = pages:Row("pet", 1, L["Only when unhappy"],
-        L["No warning while your pet is content. You only hear about it once your pet is unhappy."])
-
-    controls.feedWarnOnlyUnhappy = Widgets.CreateCheckbox(unhappyRow, L["Enabled"], function(checked)
+    controls.feedWarnOnlyUnhappy = Widgets.CreateCheckbox(feedRow, L["Only When Unhappy"], function(checked)
         ns.db.feedWarnOnlyUnhappy = checked
         -- The Feed button by the quests follows the same line.
         if ns.Food then ns.Food:Update() end
     end, false)
-    controls.feedWarnOnlyUnhappy:SetPoint("TOPLEFT", CONTROL_X, -2)
+    local gap = 10
+    if CONTROL_X + controls.feedWarning:GetWidth() + gap + controls.feedWarnOnlyUnhappy:GetWidth() <= COLUMN_WIDTH then
+        controls.feedWarnOnlyUnhappy:SetPoint("LEFT", controls.feedWarning, "RIGHT", gap, 0)
+    else
+        -- Too wide for one line (German runs longer): it goes under the first.
+        controls.feedWarnOnlyUnhappy:SetPoint("TOPLEFT", CONTROL_X, -22)
+        GrowRow(feedRow, 20)
+    end
 
-    local lowFoodRow = pages:Row("pet", 1, L["Low food warning"],
-        L.Format("A warning in chat when you have fewer than %d food your pet will eat.", ns.Food.LOW_FOOD))
+    local lowFoodRow = pages:Row("pet", 1, L["Low Food Warning:"],
+        L.Format("Warns you in chat when you have fewer than %d food your pet will eat.", ns.Food.LOW_FOOD))
 
-    controls.lowFoodWarning = Widgets.CreateCheckbox(lowFoodRow, L["Warn me"], function(checked)
+    controls.lowFoodWarning = Widgets.CreateCheckbox(lowFoodRow, L["On"], function(checked)
         ns.db.lowFoodWarning = checked
     end, true)
     controls.lowFoodWarning:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local buffFoodRow = pages:Row("pet", 1, L["Buff food"],
-        L["Food that gives a buff, like stat food, is always fed last. Tick this to never feed it."])
+    local buffFoodRow = pages:Row("pet", 1, L["Never Feed Buff Food:"],
+        L["Food that gives a buff is always fed last. Tick this to never feed it."])
 
-    controls.neverFeedBuffFood = Widgets.CreateCheckbox(buffFoodRow, L["Never feed it"], function(checked)
+    controls.neverFeedBuffFood = Widgets.CreateCheckbox(buffFoodRow, L["On"], function(checked)
         ns.db.neverFeedBuffFood = checked
         if ns.Food then ns.Food:Update() end
     end, false)
     controls.neverFeedBuffFood:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local quickFeedRow = pages:Row("pet", 1, L["Feed button by quests"],
-        L["A small Feed button above the quest list while your pet needs feeding."])
+    local quickFeedRow = pages:Row("pet", 1, L["Feed Button:"],
+        L["A Feed button above your quests while your pet is hungry."])
 
-    controls.quickFeed = Widgets.CreateCheckbox(quickFeedRow, L["Show it"], function(checked)
+    controls.quickFeed = Widgets.CreateCheckbox(quickFeedRow, L["Show"], function(checked)
         ns.db.quickFeed = checked
         if ns.Food then ns.Food:Update() end
     end, true)
     controls.quickFeed:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local _, foodButton = CommandRow(pages, "pet", 1, L["Food in your bags"],
-        L["Lists the food in your bags in chat and says whether your pet will eat it. Same as /bpet food."],
-        L["List it"], "food")
-    controls.food = foodButton
-
     pages:Section("pet", 2, L["TAMING"])
 
-    local tamingRow = pages:Row("pet", 2, L["Taming skills"],
-        L["A beast's tooltip shows the pet skills you get by taming it. Green means you know it, red means you don't."])
+    local tamingRow = pages:Row("pet", 2, L["Taming Skills:"],
+        L["A beast's tooltip shows what it teaches. Green you know, red you don't."])
 
-    controls.tamingTooltip = Widgets.CreateCheckbox(tamingRow, L["Show them"], function(checked)
+    controls.tamingTooltip = Widgets.CreateCheckbox(tamingRow, L["Show"], function(checked)
         ns.db.tamingTooltip = checked
     end, true)
     controls.tamingTooltip:SetPoint("TOPLEFT", CONTROL_X, -2)
-
-    local _, skillsButton = CommandRow(pages, "pet", 2, L["Your pet skills"],
-        L["Lists the pet skills this hunter knows in chat. Same as /bpet taming."],
-        L["List them"], "taming")
-    controls.taming = skillsButton
-
-    local _, tamedButton = CommandRow(pages, "pet", 2, L["Beasts you tamed"],
-        L["Lists the beasts you've tamed in chat, and what each one taught. Same as /bpet tamed."],
-        L["List them"], "tamed")
-    controls.tamed = tamedButton
 
     -- The compendium on the left, the arrow that leads to its beasts on
     -- the right.
     pages:Section("compendium", 1, L["PET COMPENDIUM"])
 
-    local compendiumRow = pages:Row("compendium", 1, L["Pet Compendium"],
-        L["Every beast you can tame: what it teaches, its level, where it lives and how rare it is. Also /bpet compendium."])
+    local compendiumRow = pages:Row("compendium", 1, L["Pet Compendium:"], nil)
 
-    local openCompendium = Widgets.CreateButton(compendiumRow, L["Open it"], function()
+    local openCompendium = Widgets.CreateButton(compendiumRow, L["Open"], function()
         if ns.CompendiumUI then ns.CompendiumUI:Toggle() end
     end, { width = 100, height = 20, primary = true })
     openCompendium:SetPoint("TOPLEFT", CONTROL_X, 0)
@@ -328,124 +330,110 @@ function SettingsUI:BuildPages()
     -- switch it, and /bpet arrow check as a button.
     pages:Section("compendium", 2, L["BEAST ARROW"])
 
-    local arrowRow = pages:Row("compendium", 2, L["Beast arrow"],
-        L["A dial that points the way to a beast. Shift-click one in the compendium to aim it. Also /bpet arrow."])
-    controls.beastArrow = Widgets.CreateCheckbox(arrowRow, L["Show it"], function(checked)
+    local arrowRow = pages:Row("compendium", 2, L["Beast Arrow:"],
+        L["Points the way to a beast. Shift-click one in the compendium to aim it."])
+    controls.beastArrow = Widgets.CreateCheckbox(arrowRow, L["Show"], function(checked)
         if ns.BeastArrow then ns.BeastArrow:SetOn(checked) end
     end, false)
     controls.beastArrow:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local checkRow = pages:Row("compendium", 2, L["Check the arrow"],
-        L["Tells you in chat what the arrow can see where you stand, like your spot, which way you face and the map. Same as /bpet arrow check."])
+    local checkRow = pages:Row("compendium", 2, L["Check the Arrow:"],
+        L["Lists in chat what the arrow can read here."])
     controls.beastArrowCheck = Widgets.CreateButton(checkRow, L["Check"], function()
         ns.HandleSlash("arrow check")
     end, { width = 64, height = 20 })
     controls.beastArrowCheck:SetPoint("TOPLEFT", CONTROL_X, 0)
 
-    local clearRow = pages:Row("compendium", 2, L["Stop following"],
-        L["The arrow stops following its beast. Same as /bpet arrow clear."])
+    local clearRow = pages:Row("compendium", 2, L["Stop Following:"], nil)
     controls.beastArrowClear = Widgets.CreateButton(clearRow, L["Clear"], function()
         ns.HandleSlash("arrow clear")
     end, { width = 64, height = 20 })
     controls.beastArrowClear:SetPoint("TOPLEFT", CONTROL_X, 0)
 
     -- TomTom's arrow instead of the dial, when TomTom is installed.
-    local tomtomRow = pages:Row("compendium", 2, L["Use TomTom"],
-        L["With TomTom installed, its arrow points the way instead of this one. Same as /bpet arrow tomtom."])
-    controls.useTomTom = Widgets.CreateCheckbox(tomtomRow, L["When installed"], function(checked)
+    local tomtomRow = pages:Row("compendium", 2, L["Use TomTom:"],
+        L["With TomTom installed, its arrow shows the way instead."])
+    controls.useTomTom = Widgets.CreateCheckbox(tomtomRow, L["On"], function(checked)
         if ns.TomTom then ns.TomTom:SetOn(checked) end
     end, true)
     controls.useTomTom:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    -- General: windows and text on the left, debug on the right.
+    -- General: windows and text on the left, debug on the right. The
+    -- minimap button always shows, so it has no row (the owner, 2026-10-15).
     pages:Section("general", 1, L["WINDOWS"])
 
-    local windowRow = pages:Row("general", 1, L["Pets window"],
-        L["Your pet that's out, how it's doing and its food. Same as /bpet window, or /bpet on its own."])
-    controls.openWindow = Widgets.CreateButton(windowRow, L["Open it"], function()
+    local windowRow = pages:Row("general", 1, L["Pets:"], nil)
+    controls.openWindow = Widgets.CreateButton(windowRow, L["Open"], function()
         ns.HandleSlash("window")
     end, { width = 100, height = 20, primary = true })
     controls.openWindow:SetPoint("TOPLEFT", CONTROL_X, 0)
 
-    local minimapRow = pages:Row("general", 1, L["Minimap button"],
-        L["Click it for the pets window, right-click for this page. Drag it to move it. Also /bpet minimap."])
+    local positionRow = pages:Row("general", 1, L["Window Position:"],
+        L["Reset the UI windows to their defaults."])
 
-    controls.minimap = Widgets.CreateCheckbox(minimapRow, L["Show it"], function(checked)
-        ns.db.minimapHidden = not checked
-        if ns.MinimapButton then ns.MinimapButton:ApplyVisibility() end
-    end, true)
-    controls.minimap:SetPoint("TOPLEFT", CONTROL_X, -2)
-
-    local positionRow = pages:Row("general", 1, L["Window position"],
-        L["Moves this window and the beast arrow back where they started, if one ends up off screen."])
-
-    local reset = Widgets.CreateButton(positionRow, L["Put it back"], function()
+    local reset = Widgets.CreateButton(positionRow, L["Set Default"], function()
         SettingsUI:ResetPositions()
-    end, { width = 100, height = 20 })
+        ns.Print(L["UI windows set to defaults."])
+    end, { width = 110, height = 20 })
     reset:SetPoint("TOPLEFT", CONTROL_X, 0)
+    controls.resetPositions = reset
 
     -- Bigger letters in the same windows, as Tradeskills has. Every size
     -- is read as text is drawn, so it waits for /reload.
-    local textRow = pages:Row("general", 1, L["Text size"],
-        L["Large and Larger add a point or two to all of this addon's text. Takes effect after /reload."])
+    local textRow = pages:Row("general", 1, L["Text Size:"], nil)
     controls.textSize = ns.SettingsPages.TextSizeControl(textRow, CONTROL_X, function() return ns.db end)
 
     -- Asked 2026-10-10: the game's own look for players who would rather
     -- the windows matched the rest of their screen. Read at login, so it
     -- waits for /reload as Text size does. See UI/BlizzardLook.lua.
-    local styleRow = pages:Row("general", 1, L["Window style"],
-        L["Titanforged has a gold rim and glowing edges. Blizzard looks like the game's own windows. Type /reload to see the change."])
+    local styleRow = pages:Row("general", 1, L["Window Style:"], nil)
     controls.windowStyle = SettingsUI.WindowStyleControl(styleRow, CONTROL_X)
 
     pages:Section("general", 2, L["ADVANCED"])
 
-    local debugRow = pages:Row("general", 2, L["Debug output"],
-        L["Extra messages in chat, to help track down a problem."])
+    local debugRow = pages:Row("general", 2, L["Debug:"],
+        L["Extra chat messages to help track down a problem."])
 
-    controls.debug = Widgets.CreateCheckbox(debugRow, L["Enabled"], function(checked)
+    controls.debug = Widgets.CreateCheckbox(debugRow, L["On"], function(checked)
         ns.db.debug = checked
     end, false)
     controls.debug:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     -- Core/SisterNote.lua: one chat line, once, naming the Blackthornes
     -- addons the player does not have. Off here is off in all of them.
-    local sistersRow = pages:Row("general", 2, L["Sister addons"],
-        L["A few seconds after you log in, chat lists the Blackthornes addons you don't have yet and what each one does. It only happens once. Turning it off here turns it off in all of them. Same as /bpet sisters."])
-    controls.sisters = Widgets.CreateCheckbox(sistersRow, L["Mention them"], function(checked)
+    local sistersRow = pages:Row("general", 2, L["Sister Addons:"],
+        L["Says once in chat which Blackthornes addons you don't have."])
+    controls.sisters = Widgets.CreateCheckbox(sistersRow, L["On"], function(checked)
         ns.SisterNote:SetOn(checked)
     end, true)
     controls.sisters:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     -- UI/WhatsNew.lua: one window after an update for every Blackthornes
     -- addon. Off here is off in all of them, as the sister note is.
-    local _, whatsNewButton = CommandRow(pages, "general", 2, L["What's New"],
-        L["Opens the What's New window: what changed in each of your Blackthornes addons. Same as /bpet whatsnew."],
-        L["Show it"], "whatsnew")
+    local _, whatsNewButton = CommandRow(pages, "general", 2, L["What's New:"], nil,
+        L["Open"], "whatsnew")
     controls.whatsnew = whatsNewButton
 
-    local whatsNewRow = pages:Row("general", 2, L["After an update"],
-        L["Brings up the What's New window the first time you play after a Blackthornes addon updates. Turning it off here turns it off in all of them."])
-    controls.whatsNewPopup = Widgets.CreateCheckbox(whatsNewRow, L["Show What's New"], function(checked)
+    local whatsNewRow = pages:Row("general", 2, L["What's New After Updates:"],
+        L["Opens What's New the first time you play after an update."])
+    controls.whatsNewPopup = Widgets.CreateCheckbox(whatsNewRow, L["On"], function(checked)
         ns.WhatsNew:SetOn(checked)
     end, true)
     controls.whatsNewPopup:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local whatsNewMotionRow = pages:Row("general", 2, L["What's New motion"],
-        L["The What's New window rises in, and its news slides up and glows. Turning it off here turns it off in all of them."])
-    controls.whatsNewMotion = Widgets.CreateCheckbox(whatsNewMotionRow, L["Motion"], function(checked)
+    local whatsNewMotionRow = pages:Row("general", 2, L["What's New Motion:"], nil)
+    controls.whatsNewMotion = Widgets.CreateCheckbox(whatsNewMotionRow, L["On"], function(checked)
         ns.WhatsNew:SetMotionOn(checked)
     end, true)
     controls.whatsNewMotion:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local _, probeButton = CommandRow(pages, "general", 2, L["Client check"],
-        L["Lists in chat what the game tells Pets about your pet, to help track down a problem. It doesn't change anything. Same as /bpet probe."],
+    local _, probeButton = CommandRow(pages, "general", 2, L["Client Check:"],
+        L["Lists in chat what the game tells Pets about your pet."],
         L["Check"], "probe")
     controls.probe = probeButton
 
-    local _, helpButton = CommandRow(pages, "general", 2, L["Commands"],
-        L["Lists every /bpet command in chat. Same as /bpet help."],
-        L["List them"], "help")
-    controls.help = helpButton
+    -- The chat-only commands (food, taming, tamed, help) have no button
+    -- here: they are typed only (the owner, 2026-10-15).
 end
 
 --------------------------------------------------------------------------------
@@ -459,7 +447,6 @@ function SettingsUI:Refresh()
     if not (self.frame and self.frame:IsShown() and ns.db) then return end
 
     local controls = self.controls
-    controls.minimap:SetChecked(not ns.db.minimapHidden)
     controls.feedWarning:SetChecked(ns.db.feedWarning ~= false)
     controls.feedWarnOnlyUnhappy:SetChecked(ns.db.feedWarnOnlyUnhappy == true)
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
