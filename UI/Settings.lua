@@ -394,7 +394,7 @@ function SettingsUI:BuildPages()
     -- the windows matched the rest of their screen. Read at login, so it
     -- waits for /reload as Text size does. See UI/BlizzardLook.lua.
     local styleRow = pages:Row("general", 1, L["Window style"],
-        L["Titanforged is the house look, with a gold rim and glowing edges. Blizzard uses the game's own frames, red buttons and tick boxes. Takes effect after /reload."])
+        L["Titanforged has a gold rim and glowing edges. Blizzard looks like the game's own windows. Type /reload to see the change."])
     controls.windowStyle = SettingsUI.WindowStyleControl(styleRow, CONTROL_X)
 
     pages:Section("general", 2, L["ADVANCED"])
@@ -410,7 +410,7 @@ function SettingsUI:BuildPages()
     -- Core/SisterNote.lua: one chat line, once, naming the Blackthornes
     -- addons the player does not have. Off here is off in all of them.
     local sistersRow = pages:Row("general", 2, L["Sister addons"],
-        L["Once, a few seconds after login, says in chat which Blackthornes addons you don't have and what each adds. Turning it off here turns it off in all of them. Same as /bpet sisters."])
+        L["A few seconds after you log in, chat lists the Blackthornes addons you don't have yet and what each one does. It only happens once. Turning it off here turns it off in all of them. Same as /bpet sisters."])
     controls.sisters = Widgets.CreateCheckbox(sistersRow, L["Mention them"], function(checked)
         ns.SisterNote:SetOn(checked)
     end, true)
