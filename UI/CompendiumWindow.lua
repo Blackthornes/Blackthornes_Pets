@@ -138,7 +138,7 @@ function CompendiumUI:Build()
     hint:SetPoint("BOTTOMLEFT", PADDING, 12)
     hint:SetWidth(WIDTH - PADDING * 2)
     hint:SetWordWrap(true)
-    hint:SetText(L.Format("Click a beast to pin it on your map, or Shift-click to point the arrow at it. %s marks what WoW: Forever has shown. The rest comes from Classic 1.12.",
+    hint:SetText(L.Format("Click a beast to pin it on your map, or Shift-click to point the arrow at it. %s marks what WoW: Forever has shown.",
         Colored("good", "Forever")))
     self.hint = hint
 
@@ -571,13 +571,10 @@ function CompendiumUI:ShowTooltip(row)
 
     local speed = C.SpeedText(entry)
     if speed then
-        local where = entry.speedSeen and L["from a pet tamed on Forever"] or L["Classic data"]
         local key = entry.speed < USUAL_SPEED and "good" or entry.speed > USUAL_SPEED and "warn" or "text"
-        GameTooltip:AddLine(L.Format("Attack speed %s (%s)", speed, where), Theme.Unpack(key))
-        if entry.speedSeen and entry.classicSpeed and entry.classicSpeed ~= entry.speed then
-            GameTooltip:AddLine(L.Format("Classic said %s.", C.SpeedText({ speed = entry.classicSpeed })),
-                0.7, 0.7, 0.7, true)
-        end
+        local text = entry.speedSeen and L.Format("Attack speed %s (seen on Forever)", speed)
+            or L.Format("Attack speed %s", speed)
+        GameTooltip:AddLine(text, Theme.Unpack(key))
     end
 
     GameTooltip:AddLine(" ")
@@ -617,10 +614,6 @@ function CompendiumUI:ShowTooltip(row)
     if forever then
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine(forever, Theme.Unpack("good"))
-        local classic = entry.classic
-        if classic and classic.zone and classic.zone ~= entry.zone then
-            GameTooltip:AddLine(L.Format("Classic had it in %s.", classic.zone), 0.7, 0.7, 0.7, true)
-        end
     end
 
     GameTooltip:AddLine(" ")

@@ -181,8 +181,8 @@ L["The game won't say where you are"] = "Das Spiel sagt nicht, wo du bist"
 
 -- The compendium window
 L["Pet Compendium"] = "Begleiterkompendium"
-L["Click a beast to pin it on your map, or Shift-click to point the arrow at it. %s marks what WoW: Forever has shown. The rest comes from Classic 1.12."] =
-    "Klick auf ein Wildtier markiert es auf deiner Karte, Shift-Klick richtet den Pfeil darauf aus. %s zeigt, was WoW: Forever gezeigt hat. Der Rest stammt aus Classic 1.12."
+L["Click a beast to pin it on your map, or Shift-click to point the arrow at it. %s marks what WoW: Forever has shown."] =
+    "Klick auf ein Wildtier markiert es auf deiner Karte, Shift-Klick richtet den Pfeil darauf aus. %s zeigt, was WoW: Forever gezeigt hat."
 L["Settings"] = "Einstellungen"
 L["Arrow"] = "Pfeil"
 L["All families"] = "Alle Familien"
@@ -220,10 +220,8 @@ L["Eats %s"] = "Frisst %s"
 L["Level %s. You can tame it now."] = "Stufe %s. Du kannst es jetzt zähmen."
 L["Level %s. You can tame it from level %d."] = "Stufe %s. Du kannst es ab Stufe %d zähmen."
 L["Level %s"] = "Stufe %s"
-L["from a pet tamed on Forever"] = "von einem auf Forever gezähmten Begleiter"
-L["Classic data"] = "Classic-Daten"
-L["Attack speed %s (%s)"] = "Angriffstempo %s (%s)"
-L["Classic said %s."] = "Laut Classic %s."
+L["Attack speed %s"] = "Angriffstempo %s"
+L["Attack speed %s (seen on Forever)"] = "Angriffstempo %s (auf Forever gesehen)"
 L["Where it lives is not known yet."] = "Wo es lebt, ist noch nicht bekannt."
 L["Shift-click to point the arrow at it."] = "Umschalt-Klick richtet den Pfeil darauf."
 L["Also in %s"] = "Auch in %s"
@@ -233,7 +231,6 @@ L["Taming it teaches nothing new."] = "Es zu zähmen lehrt nichts Neues."
 L["Taming it teaches"] = "Es zu zähmen lehrt"
 L["(known)"] = "(bekannt)"
 L["(not known)"] = "(nicht bekannt)"
-L["Classic had it in %s."] = "In Classic war es in %s."
 L["Click to pin it on your map."] = "Klicken markiert es auf deiner Karte."
 L["No exact spot to pin. Shift-click to point the arrow at its zone."] =
     "Keine genaue Stelle zum Markieren. Shift-Klick richtet den Pfeil auf seine Zone aus."
@@ -301,8 +298,6 @@ L["Drag to move it round the minimap"] = "Ziehen verschiebt ihn um die Minikarte
 -- Settings
 L["Changes save as you make them."] = "Änderungen werden sofort gespeichert."
 L["Reload"] = "Neu laden"
-L["Reload the interface so the new window style shows (/reload)"] =
-    "Lädt die Oberfläche neu, damit der neue Fensterstil erscheint (/reload)"
 L["FEEDING"] = "FÜTTERN"
 L["TAMING"] = "ZÄHMEN"
 L["PET COMPENDIUM"] = "BEGLEITERKOMPENDIUM"
@@ -329,8 +324,6 @@ L["Find a setting"] = "Einstellung suchen"
 L["Normal"] = "Normal"
 L["Large"] = "Groß"
 L["Larger"] = "Größer"
-L["Reload the interface so the new text size shows (/reload)"] =
-    "Lädt die Oberfläche neu, damit die neue Textgröße erscheint (/reload)"
 
 -- The taming tooltip
 L["Taming teaches"] = "Zähmen lehrt"
