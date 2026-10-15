@@ -198,8 +198,8 @@ L["Only rare and rare elite beasts."] = "Nur seltene Wildtiere und seltene Elite
 L["Teaches me something new"] = "Lehrt mich etwas Neues"
 L["Only beasts that teach a skill this hunter doesn't have yet."] =
     "Nur Wildtiere, die eine Fähigkeit lehren, die dieser Jäger noch nicht hat."
-L["Only beasts WoW: Forever has shown, whether seen, tamed or named in a Forever guide."] =
-    "Nur Wildtiere, die WoW: Forever gezeigt hat, ob gesehen, gezähmt oder in einem Forever-Guide genannt."
+L["Only beasts that have been seen, tamed or named in a guide on WoW: Forever."] =
+    "Nur Wildtiere, die auf WoW: Forever gesehen, gezähmt oder in einem Guide genannt wurden."
 L["Click again to flip the order, and once more to sort by beast again."] =
     "Klick noch mal, um die Reihenfolge umzudrehen, und ein weiteres Mal, um wieder nach Wildtier zu sortieren."
 L["Beast"] = "Wildtier"
@@ -210,8 +210,8 @@ L["Level"] = "Stufe"
 L["Sort by level"] = "Nach Stufe sortieren"
 L["Speed"] = "Tempo"
 L["Sort by speed"] = "Nach Tempo sortieren"
-L["Seconds between its bites and claws, so lower is faster. Sorts fastest first."] =
-    "Sekunden zwischen Bissen und Krallenhieben, weniger ist also schneller. Sortiert die schnellsten zuerst."
+L["How many seconds between its attacks. Lower is faster. Sorts the fastest first."] =
+    "Wie viele Sekunden zwischen seinen Angriffen liegen. Weniger ist schneller. Sortiert die schnellsten zuerst."
 L["Where"] = "Wo"
 L["Sort by where"] = "Nach Ort sortieren"
 L["Teaches"] = "Lehrt"
@@ -323,8 +323,8 @@ L["A warning in chat and on screen when your pet is no longer happy."] =
     "Eine Warnung im Chat und auf dem Bildschirm, wenn dein Begleiter nicht mehr glücklich ist."
 L["Warn me"] = "Warnen"
 L["Only when unhappy"] = "Nur wenn unglücklich"
-L["Stay quiet while the pet is content, and warn only once it is unhappy."] =
-    "Bleibt still, solange der Begleiter zufrieden ist, und warnt erst, wenn er unglücklich ist."
+L["No warning while your pet is content. You only hear about it once your pet is unhappy."] =
+    "Keine Warnung, solange dein Begleiter zufrieden ist. Du hörst erst davon, wenn er unglücklich ist."
 L["Enabled"] = "Aktiviert"
 L["Low food warning"] = "Warnung bei wenig Futter"
 L["A warning in chat when you have fewer than %d food your pet will eat."] =
@@ -343,8 +343,8 @@ L["Lists the food in your bags in chat and says whether your pet will eat it. Sa
 L["List it"] = "Auflisten"
 L["TAMING"] = "ZÄHMEN"
 L["Taming skills"] = "Fertigkeiten beim Zähmen"
-L["On a beast's tooltip, the pet skills taming it teaches: green if you know them, red if not."] =
-    "Im Tooltip eines Wildtiers die Begleiterfertigkeiten, die das Zähmen lehrt: grün, wenn du sie kennst, sonst rot."
+L["A beast's tooltip shows the pet skills you get by taming it. Green means you know it, red means you don't."] =
+    "Der Tooltip eines Wildtiers zeigt die Begleiterfertigkeiten, die du durchs Zähmen bekommst. Grün heißt, du kennst sie, rot heißt, du kennst sie nicht."
 L["Show them"] = "Anzeigen"
 L["Your pet skills"] = "Deine Begleiterfertigkeiten"
 L["Lists the pet skills this hunter knows in chat. Same as /bpet taming."] =
@@ -361,8 +361,8 @@ L["BEAST ARROW"] = "WILDTIERPFEIL"
 L["A dial that points the way to a beast. Shift-click one in the compendium to aim it. Also /bpet arrow."] =
     "Eine Scheibe, die den Weg zu einem Wildtier zeigt. Umschalt-Klick auf eins im Kompendium richtet sie aus. Auch /bpet arrow."
 L["Check the arrow"] = "Pfeil prüfen"
-L["Says in chat what the arrow can read where you're standing, like your spot, which way you face and the map. Same as /bpet arrow check."] =
-    "Zeigt im Chat, was der Pfeil dort lesen kann, wo du stehst, etwa deine Position, deine Blickrichtung und die Karte. Wie /bpet arrow check."
+L["Tells you in chat what the arrow can see where you stand, like your spot, which way you face and the map. Same as /bpet arrow check."] =
+    "Sagt dir im Chat, was der Pfeil dort sieht, wo du stehst, etwa deine Position, deine Blickrichtung und die Karte. Wie /bpet arrow check."
 L["Check"] = "Prüfen"
 L["Stop following"] = "Nicht mehr folgen"
 L["Clear"] = "Lösen"
@@ -402,8 +402,8 @@ L["A few seconds after you log in, chat lists the Blackthornes addons you don't 
 L["Mention them"] = "Erwähnen"
 L["Client check"] = "Spiel prüfen"
 L["COMPENDIUM"] = "KOMPENDIUM"
-L["Lists in chat which pet calls this client has, to help track down a problem. It doesn't change anything. Same as /bpet probe."] =
-    "Zeigt im Chat, welche Begleiter-Aufrufe dieses Spiel kennt, um einem Problem auf die Spur zu kommen. Es ändert nichts. Wie /bpet probe."
+L["Lists in chat what the game tells Pets about your pet, to help track down a problem. It doesn't change anything. Same as /bpet probe."] =
+    "Zeigt im Chat, was das Spiel Pets über deinen Begleiter verrät, um einem Problem auf die Spur zu kommen. Es ändert nichts. Wie /bpet probe."
 L["Commands"] = "Befehle"
 L["Lists every /bpet command in chat. Same as /bpet help."] = "Listet jeden /bpet-Befehl im Chat. Wie /bpet help."
 L["The Pet Compendium, the beast arrow and TomTom"] = "Das Begleiterkompendium, der Wildtierpfeil und TomTom"

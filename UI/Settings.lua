@@ -251,7 +251,7 @@ function SettingsUI:BuildPages()
     controls.feedWarning:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local unhappyRow = pages:Row("pet", 1, L["Only when unhappy"],
-        L["Stay quiet while the pet is content, and warn only once it is unhappy."])
+        L["No warning while your pet is content. You only hear about it once your pet is unhappy."])
 
     controls.feedWarnOnlyUnhappy = Widgets.CreateCheckbox(unhappyRow, L["Enabled"], function(checked)
         ns.db.feedWarnOnlyUnhappy = checked
@@ -294,7 +294,7 @@ function SettingsUI:BuildPages()
     pages:Section("pet", 2, L["TAMING"])
 
     local tamingRow = pages:Row("pet", 2, L["Taming skills"],
-        L["On a beast's tooltip, the pet skills taming it teaches: green if you know them, red if not."])
+        L["A beast's tooltip shows the pet skills you get by taming it. Green means you know it, red means you don't."])
 
     controls.tamingTooltip = Widgets.CreateCheckbox(tamingRow, L["Show them"], function(checked)
         ns.db.tamingTooltip = checked
@@ -336,7 +336,7 @@ function SettingsUI:BuildPages()
     controls.beastArrow:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local checkRow = pages:Row("compendium", 2, L["Check the arrow"],
-        L["Says in chat what the arrow can read where you're standing, like your spot, which way you face and the map. Same as /bpet arrow check."])
+        L["Tells you in chat what the arrow can see where you stand, like your spot, which way you face and the map. Same as /bpet arrow check."])
     controls.beastArrowCheck = Widgets.CreateButton(checkRow, L["Check"], function()
         ns.HandleSlash("arrow check")
     end, { width = 64, height = 20 })
@@ -438,7 +438,7 @@ function SettingsUI:BuildPages()
     controls.whatsNewMotion:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     local _, probeButton = CommandRow(pages, "general", 2, L["Client check"],
-        L["Lists in chat which pet calls this client has, to help track down a problem. It doesn't change anything. Same as /bpet probe."],
+        L["Lists in chat what the game tells Pets about your pet, to help track down a problem. It doesn't change anything. Same as /bpet probe."],
         L["Check"], "probe")
     controls.probe = probeButton
 

@@ -40,7 +40,7 @@ local COLUMNS = {
     { key = "family", label = L["Family"], sortTip = L["Sort by family"], x = 200, width = 88 },
     { key = "level", label = L["Level"], sortTip = L["Sort by level"], x = 292, width = 48 },
     { key = "speed", label = L["Speed"], sortTip = L["Sort by speed"], x = 344, width = 46,
-      tip = L["Seconds between its bites and claws, so lower is faster. Sorts fastest first."] },
+      tip = L["How many seconds between its attacks. Lower is faster. Sorts the fastest first."] },
     { key = "zone", label = L["Where"], sortTip = L["Sort by where"], x = 394, width = 180 },
     { key = "skills", label = L["Teaches"], x = 578, width = 188 },
 }
@@ -249,7 +249,7 @@ function CompendiumUI:BuildBar()
         { key = "newSkills", text = L["Teaches me something new"],
           tip = L["Only beasts that teach a skill this hunter doesn't have yet."] },
         { key = "foreverOnly", text = L["Seen on Forever"],
-          tip = L["Only beasts WoW: Forever has shown, whether seen, tamed or named in a Forever guide."] },
+          tip = L["Only beasts that have been seen, tamed or named in a guide on WoW: Forever."] },
     }
     self.ticks = {}
     local previous
