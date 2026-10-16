@@ -137,6 +137,55 @@ function PetStatus:Read()
     return status
 end
 
+--- The pet's fighting numbers, read only for the pets window, so the feed
+--- checks and Butler's questions never pay for them. Hunters' pets and
+--- demons alike. Any number the client keeps back (a secret) is left out.
+--- `damageMin`/`damageMax` already carry the pet's buffs and happiness, as
+--- the game's own character sheet shows them.
+function PetStatus:ReadStats()
+    local stats = {}
+    if Call("UnitExists", "pet") ~= true then return stats end
+
+    stats.healthMax = Number(Call("UnitHealthMax", "pet"))
+
+    local speed = Number(Call("UnitAttackSpeed", "pet"))
+    if speed and speed > 0 then stats.speed = speed end
+
+    local low, high = Call("UnitDamage", "pet")
+    low, high = Number(low), Number(high)
+    if low and high and high > 0 then
+        stats.damageMin = math.max(math.floor(low), 1)
+        stats.damageMax = math.max(math.ceil(high), 1)
+        if stats.speed then stats.dps = (low + high) / 2 / stats.speed end
+    end
+
+    local base, plus, minus = Call("UnitAttackPower", "pet")
+    base = Number(base)
+    if base then stats.attackPower = math.max(base + (Number(plus) or 0) + (Number(minus) or 0), 0) end
+
+    local _, armor = Call("UnitArmor", "pet")
+    stats.armor = Number(armor)
+
+    local resist = {}
+    for _, school in ipairs(PetStatus.SCHOOLS) do
+        local _, total = Call("UnitResistance", "pet", school.index)
+        total = Number(total)
+        if total and total > 0 then resist[#resist + 1] = { name = school.name, value = total } end
+    end
+    stats.resistances = resist
+
+    return stats
+end
+
+-- UnitResistance's schools, in the game's own order.
+PetStatus.SCHOOLS = {
+    { index = 2, name = L["Fire"] },
+    { index = 3, name = L["Nature"] },
+    { index = 4, name = L["Frost"] },
+    { index = 5, name = L["Shadow"] },
+    { index = 6, name = L["Arcane"] },
+}
+
 --------------------------------------------------------------------------------
 -- Describing it
 --------------------------------------------------------------------------------
@@ -189,6 +238,61 @@ end
 function PetStatus:FoodText(status)
     if not (status and status.foods) then return nil end
     return table.concat(status.foods, ", ")
+end
+
+--- 1234567 as "1,234,567".
+local function Whole(number)
+    local text = tostring(math.floor(number + 0.5))
+    local sign, digits = text:match("^(-?)(%d+)$")
+    if not digits then return text end
+    digits = digits:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+    return sign .. digits
+end
+
+PetStatus.Whole = Whole
+
+--- "1,234" or nil.
+function PetStatus:HealthText(stats)
+    if not (stats and stats.healthMax and stats.healthMax > 0) then return nil end
+    return Whole(stats.healthMax)
+end
+
+--- "2.00 seconds" or nil.
+function PetStatus:SpeedText(stats)
+    if not (stats and stats.speed) then return nil end
+    return L.Format("%.2f seconds", stats.speed)
+end
+
+--- "41 to 55 (24.0 a second)" or nil.
+function PetStatus:DamageText(stats)
+    if not (stats and stats.damageMin) then return nil end
+    if stats.dps then
+        return L.Format("%d to %d (%.1f a second)", stats.damageMin, stats.damageMax, stats.dps)
+    end
+    return L.Format("%d to %d", stats.damageMin, stats.damageMax)
+end
+
+--- "120" or nil.
+function PetStatus:AttackPowerText(stats)
+    if not (stats and stats.attackPower) then return nil end
+    return Whole(stats.attackPower)
+end
+
+--- "1,450" or nil.
+function PetStatus:ArmorText(stats)
+    if not (stats and stats.armor) then return nil end
+    return Whole(stats.armor)
+end
+
+--- "Fire 10, Shadow 25", or nil when the pet has none.
+function PetStatus:ResistanceText(stats)
+    local list = stats and stats.resistances
+    if not (list and #list > 0) then return nil end
+    local parts = {}
+    for _, entry in ipairs(list) do
+        parts[#parts + 1] = L.Format("%s %d", entry.name, entry.value)
+    end
+    return table.concat(parts, ", ")
 end
 
 --------------------------------------------------------------------------------

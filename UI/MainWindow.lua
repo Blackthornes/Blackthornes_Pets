@@ -21,7 +21,8 @@ local HEADER = 44
 -- room to spare (UI/Titanforged.lua).
 local EDGE_PAD = 11
 local WIDTH = 520
-local HEIGHT = 360
+-- Tall enough for every row with the Feed button below them.
+local HEIGHT = 470
 
 -- The status rows: a label on the left, its value beside it.
 local ROW_HEIGHT = 24
@@ -37,6 +38,13 @@ local ROWS = {
     { key = "training", label = L["Training points"] },
     { key = "foods", label = L["Eats"] },
     { key = "food", label = L["Food"] },
+    -- How it fights, read for demons too.
+    { key = "health", label = L["Health"] },
+    { key = "speed", label = L["Attack speed"] },
+    { key = "damage", label = L["Damage"] },
+    { key = "attackPower", label = L["Attack power"] },
+    { key = "armor", label = L["Armor"] },
+    { key = "resistances", label = L["Resistances"] },
 }
 
 --------------------------------------------------------------------------------
@@ -98,6 +106,7 @@ function UI:Build()
 
     self:BuildStatus()
     self:BuildFeedButton()
+    self:WatchStats()
 
     -- The Feed button lives outside the window (see BuildFeedButton), so it
     -- has to be told when the window goes.
@@ -193,6 +202,31 @@ function UI:BuildFeedButton()
     self.feedButton = button
 
     ns.RegisterEvent(self, "PLAYER_REGEN_DISABLED", function() UI:PlaceFeedButton(nil, true) end)
+end
+
+-- The pet's speed, damage and the rest move with buffs, which come in
+-- bursts, so one redraw follows a moment after the last of them, and only
+-- while the window is up.
+local STAT_SETTLE = 0.2
+
+function UI:WatchStats()
+    local function Soon()
+        if not (UI.frame and UI.frame:IsShown()) or UI.statsPending then return end
+        if not (C_Timer and C_Timer.After) then return pcall(UI.Refresh, UI) end
+        UI.statsPending = true
+        C_Timer.After(STAT_SETTLE, function()
+            UI.statsPending = nil
+            pcall(UI.Refresh, UI)
+        end)
+    end
+    for _, event in ipairs({
+        "UNIT_ATTACK_SPEED", "UNIT_DAMAGE", "UNIT_ATTACK_POWER", "UNIT_RESISTANCES",
+        "UNIT_MAXHEALTH", "UNIT_STATS",
+    }) do
+        ns.RegisterPetEvent(self, event, function(_, _, unit)
+            if unit == nil or unit == "pet" then Soon() end
+        end)
+    end
 end
 
 local function InCombat()
@@ -299,6 +333,14 @@ function UI:ShowStatus(status)
         values.experience = PetStatus:ExperienceText(status)
         values.training = PetStatus:TrainingText(status)
         values.foods = PetStatus:FoodText(status)
+
+        local stats = PetStatus:ReadStats()
+        values.health = PetStatus:HealthText(stats)
+        values.speed = PetStatus:SpeedText(stats)
+        values.damage = PetStatus:DamageText(stats)
+        values.attackPower = PetStatus:AttackPowerText(stats)
+        values.armor = PetStatus:ArmorText(stats)
+        values.resistances = PetStatus:ResistanceText(stats)
 
         if status.foods then
             -- The kept scan, unless the bags changed: this runs on every

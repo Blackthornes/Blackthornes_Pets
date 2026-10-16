@@ -142,6 +142,37 @@ suite.check("unticking it turns the warning off", ns.db.feedWarning == false)
 controls.feedWarnOnlyUnhappy:GetScript("OnClick")(controls.feedWarnOnlyUnhappy)
 suite.check("the unhappy box sets its switch", ns.db.feedWarnOnlyUnhappy == true)
 
+-- The pet's fighting numbers for the window.
+_G.UnitExists = function() return true end
+_G.UnitHealthMax = function() return 1234 end
+_G.UnitAttackSpeed = function() return 2 end
+_G.UnitDamage = function() return 40.6, 54.2, 0, 0, 0, 0, 1 end
+_G.UnitAttackPower = function() return 100, 25, -5 end
+_G.UnitArmor = function() return 900, 1450 end
+_G.UnitResistance = function(_, school)
+    if school == 2 then return 10, 10 end
+    if school == 5 then return 20, 25 end
+    return 0, 0
+end
+local stats = PetStatus:ReadStats()
+suite.check("reads the speed", PetStatus:SpeedText(stats) == "2.00 seconds", PetStatus:SpeedText(stats))
+suite.check("reads the damage", PetStatus:DamageText(stats) == "40 to 55 (23.7 a second)", PetStatus:DamageText(stats))
+suite.check("adds up attack power", PetStatus:AttackPowerText(stats) == "120")
+suite.check("reads armor with buffs", PetStatus:ArmorText(stats) == "1,450")
+suite.check("reads health", PetStatus:HealthText(stats) == "1,234")
+suite.check("lists only resistances it has", PetStatus:ResistanceText(stats) == "Fire 10, Shadow 25",
+    PetStatus:ResistanceText(stats))
+
+-- A secret or missing number only leaves its row out.
+_G.UnitAttackSpeed = function() return secret end
+_G.UnitResistance = nil
+stats = PetStatus:ReadStats()
+suite.check("a secret speed is left out", PetStatus:SpeedText(stats) == nil
+    and PetStatus:DamageText(stats) == "40 to 55" and PetStatus:ResistanceText(stats) == nil)
+_G.UnitExists = function() return false end
+suite.check("no pet, no numbers", next(PetStatus:ReadStats()) == nil)
+_G.UnitHealthMax, _G.UnitAttackSpeed, _G.UnitDamage, _G.UnitAttackPower, _G.UnitArmor = nil, nil, nil, nil, nil
+
 _G.UIErrorsFrame, _G.C_PetInfo = nil, nil
 _G.UnitExists, _G.UnitName, _G.UnitCreatureFamily, _G.UnitLevel, _G.GetPetExperience = nil, nil, nil, nil, nil
 
