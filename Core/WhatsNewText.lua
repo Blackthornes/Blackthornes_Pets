@@ -5,6 +5,9 @@
 local _, ns = ...
 
 ns.WHATS_NEW = {
+    { version = "0.17.0", lines = {
+        "The pets window shows how your pet fights: health, attack speed, damage, attack power, armor and resistances.",
+    } },
     { version = "0.16.0", lines = {
         "This is the largest AddOn update so far across the whole suite of Blackthornes addons.",
         "The pet arrow lies back like a compass on the ground. It's a bit smaller, too.",
@@ -14,8 +17,5 @@ ns.WHATS_NEW = {
     } },
     { version = "0.14.0", lines = {
         "The Compendium's family picker is a dropdown list.",
-    } },
-    { version = "0.13.0", lines = {
-        "Pets is in Deutsch on a German client.",
     } },
 }
