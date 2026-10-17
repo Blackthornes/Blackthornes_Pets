@@ -20,28 +20,66 @@ local HEADER = 44
 -- The metal rim sits on the window's edge and reaches this far inward, with
 -- room to spare (UI/Titanforged.lua).
 local EDGE_PAD = 11
-local WIDTH = 520
--- Tall enough for every row with the Feed button below them.
-local HEIGHT = 470
+local WIDTH = 540
+-- Tall enough for a hunter's pet card: the top card, three bars and the
+-- two cards under them, with room for a wrapped line or two. One size for
+-- every pet, so the window never jumps as a pet is called or dismissed.
+local HEIGHT = 440
 
--- The status rows: a label on the left, its value beside it.
-local ROW_HEIGHT = 24
-local VALUE_X = 150
+-- The pet card (the owner asked 2026-10-17, from a mockup): the pet on a
+-- gold-edged card at the top, its experience, happiness and loyalty as bars
+-- and lights, then two dark glass cards side by side, its food and how it
+-- fights. A warlock's demon has no food card, so its fight card is the
+-- whole width.
+local GAP = 10
+local HERO_HEIGHT = 64
+local PORTRAIT = 46
+local METER_HEIGHT = 24
+local METER_X = 108
+local METER_WIDTH = 190
+local CARD_HEAD = 24
+local CARD_ROW = 22
+local BAND_HEIGHT = 46
+-- The food line in the food card: the icon and its name.
+local FOOD_LINE = 44
+-- The space under the cards for the version and the footer.
+local FOOT = 30
+-- About how many hours of food fill the bar under it.
+local FOOD_BAR_HOURS = 8
 
--- In the order they are shown. A row whose value the client does not give
--- (a demon has no happiness) is hidden, and the rows below close up.
-local ROWS = {
-    { key = "pet", label = L["Pet"] },
-    { key = "happiness", label = L["Happiness"] },
-    { key = "loyalty", label = L["Loyalty"] },
-    { key = "experience", label = L["Experience"] },
-    { key = "training", label = L["Training points"] },
+-- Loyalty's six levels, by the name C_PetInfo.GetPetLoyalty gives (it
+-- gives no number). The German names are the classic client's; a name in
+-- neither list shows as words alone, with no gems.
+local LOYALTY_LEVELS = {
+    { "rebellious", "rebellisch" },
+    { "unruly", "widerspenstig", "aufsässig" },
+    { "submissive", "unterwürfig" },
+    { "dependable", "zuverlässig" },
+    { "faithful", "treu", "loyal" },
+    { "best friend", "bester freund" },
+}
+
+--- 1 to 6 for a loyalty name, or nil when it is not one we know.
+function UI.LoyaltyLevel(name)
+    if type(name) ~= "string" then return nil end
+    local lower = name:lower()
+    for level, names in ipairs(LOYALTY_LEVELS) do
+        for _, known in ipairs(names) do
+            if lower == known then return level end
+        end
+    end
+    return nil
+end
+
+-- The status values, by key, and which card each one sits in. `rows` keeps
+-- the label and value of every one, so the tests and the food check can read
+-- what is shown.
+local FOOD_ROWS = {
     { key = "foods", label = L["Eats"] },
-    { key = "food", label = L["Food"] },
-    -- How it fights, read for demons too.
+}
+local FIGHT_ROWS = {
     { key = "health", label = L["Health"] },
     { key = "speed", label = L["Attack speed"] },
-    { key = "damage", label = L["Damage"] },
     { key = "attackPower", label = L["Attack power"] },
     { key = "armor", label = L["Armor"] },
     { key = "resistances", label = L["Resistances"] },
@@ -166,17 +204,432 @@ function UI:BuildHeader()
     self.compendiumButton = compendium
 end
 
+--------------------------------------------------------------------------------
+-- The pet card's pieces
+--------------------------------------------------------------------------------
+
+--- A frame filled with a palette colour, with a fine border.
+local function Glass(parent, key, borderAlpha)
+    local frame = CreateFrame("Frame", nil, parent)
+    frame.background = Theme.Fill(frame, key or "glass")
+    if borderAlpha ~= false then Theme.Border(frame, "border", borderAlpha or 0.6) end
+    return frame
+end
+
+--- A bar in a dark well: `bar:Set(fraction)` eases its fill there.
+local function CreateBar(parent, colorKey, height)
+    local bar = CreateFrame("Frame", nil, parent)
+    bar:SetHeight(height or 12)
+    bar.background = Theme.Fill(bar, "well")
+    Theme.Border(bar, "border", 0.9)
+
+    local fill = bar:CreateTexture(nil, "ARTWORK")
+    fill:SetPoint("TOPLEFT", 1, -1)
+    fill:SetPoint("BOTTOMLEFT", 1, 1)
+    fill:SetColorTexture(Theme.Unpack(colorKey))
+    fill:SetWidth(1)
+    bar.fill = fill
+
+    -- A light along the top of the fill, so it reads as lit glass.
+    local shine = bar:CreateTexture(nil, "OVERLAY")
+    shine:SetPoint("TOPLEFT", fill, "TOPLEFT")
+    shine:SetPoint("TOPRIGHT", fill, "TOPRIGHT")
+    shine:SetHeight(math.max(math.floor((height or 12) / 2), 1))
+    shine:SetColorTexture(1, 1, 1, 0.18)
+    bar.shine = shine
+
+    -- Fifths, like the game's own experience bar.
+    for i = 1, 4 do
+        local tick = bar:CreateTexture(nil, "OVERLAY", nil, 1)
+        tick:SetPoint("TOP", bar, "TOPLEFT", 0, -1)
+        tick:SetPoint("BOTTOM", bar, "BOTTOMLEFT", 0, 1)
+        tick:SetWidth(1)
+        tick:SetColorTexture(1, 1, 1, 0.08)
+        tick.fifth = i
+        bar["tick" .. i] = tick
+    end
+
+    Theme.Halo(bar, 4, 0, colorKey)
+
+    -- Kept here rather than on the frame: the fill as drawn, where it is
+    -- going, and how wide the bar is.
+    local shown, target, barWidth = 0, nil, METER_WIDTH
+
+    local function Draw(fraction)
+        shown = fraction
+        local inner = math.max(barWidth - 2, 1)
+        fill:SetWidth(math.max(math.floor(inner * fraction + 0.5), 1))
+        fill:SetShown(fraction > 0)
+        shine:SetShown(fraction > 0)
+    end
+
+    function bar:Set(fraction)
+        fraction = math.min(math.max(tonumber(fraction) or 0, 0), 1)
+        -- The window redraws on every pet event, so a bar that has not moved
+        -- is left as it is.
+        if target == fraction then return end
+        target = fraction
+        Theme.SetHalo(self, fraction > 0 and 0.25 or 0)
+        local from = shown
+        if ns.Motion then
+            ns.Motion:Run(self, "fill", 0.35, function(p)
+                Draw(from + (fraction - from) * p)
+            end)
+        else
+            Draw(fraction)
+        end
+    end
+
+    --- Where the bar is going, 0 to 1, or nil before it is first set.
+    function bar:Fraction() return target end
+
+    function bar:SetBarWidth(width)
+        barWidth = width
+        self:SetWidth(width)
+        for i = 1, 4 do
+            local x = math.floor(width * i / 5)
+            self["tick" .. i]:SetPoint("TOP", self, "TOPLEFT", x, -1)
+            self["tick" .. i]:SetPoint("BOTTOM", self, "BOTTOMLEFT", x, 1)
+        end
+        Draw(shown)
+    end
+
+    return bar
+end
+
+--- A small rounded-off label in a dark well, with its edge in a colour.
+local function CreateChip(parent)
+    local chip = CreateFrame("Frame", nil, parent)
+    chip:SetHeight(18)
+    chip.background = Theme.Fill(chip, "well")
+    Theme.Border(chip, "border")
+    chip.label = Theme.CreateLabel(chip, "small", "text", "CENTER")
+    chip.label:SetPoint("CENTER", 0, 0)
+
+    function chip:Set(text, colorKey)
+        self:SetShown(text ~= nil)
+        if not text then return end
+        self.label:SetText(text)
+        self.label:SetTextColor(Theme.Unpack(colorKey or "text"))
+        Theme.SetBorderColor(self, colorKey or "border", 0.8)
+        self:SetWidth(Theme.TextWidth("small", text) + 16)
+    end
+
+    return chip
+end
+
+--- A heading strip for a card: a gold stripe down its left and the name in
+--- capitals.
+local function CardHeading(card, text)
+    local head = CreateFrame("Frame", nil, card)
+    head:SetPoint("TOPLEFT", 1, -1)
+    head:SetPoint("TOPRIGHT", -1, -1)
+    head:SetHeight(CARD_HEAD)
+    Theme.Fill(head, "glass")
+    Theme.AccentStripe(head, 3)
+    local glow = head:CreateTexture(nil, "BORDER")
+    glow:SetAllPoints(head)
+    glow:SetColorTexture(1, 1, 1, 1)
+    Theme.SetGradientAlpha(glow, "HORIZONTAL", "accent", 0.16, 0)
+    local label = Theme.CreateLabel(head, "small", "accentHi")
+    label:SetPoint("LEFT", 12, 0)
+    label:SetText(text)
+    head.label = label
+    return head
+end
+
+--- A label and value line in a card, dark glass: it lights up under the
+--- mouse with a gold edge, as every list in the house does.
+local function CreateCardRow(card, labelText)
+    local row = CreateFrame("Frame", nil, card)
+    row.background = Theme.Fill(row, "glass")
+    local line = row:CreateTexture(nil, "BORDER")
+    line:SetPoint("BOTTOMLEFT")
+    line:SetPoint("BOTTOMRIGHT")
+    line:SetHeight(1)
+    line:SetColorTexture(Theme.Unpack("border", 0.6))
+    local edge = row:CreateTexture(nil, "ARTWORK")
+    edge:SetPoint("TOPLEFT")
+    edge:SetPoint("BOTTOMLEFT")
+    edge:SetWidth(2)
+    edge:SetColorTexture(Theme.Unpack("accentHi"))
+    edge:Hide()
+
+    row.label = Theme.CreateLabel(row, "small", "muted")
+    row.label:SetPoint("TOPLEFT", 10, -5)
+    row.label:SetText(labelText)
+    row.value = Theme.CreateLabel(row, "normal", "text", "RIGHT")
+    row.value:SetPoint("TOPRIGHT", -10, -4)
+    row.value:SetWordWrap(true)
+
+    row:EnableMouse(true)
+    row:SetScript("OnEnter", function(self)
+        self.background:SetColorTexture(Theme.Unpack("glassHover"))
+        edge:Show()
+    end)
+    row:SetScript("OnLeave", function(self)
+        self.background:SetColorTexture(Theme.Unpack(self.glassKey or "glass"))
+        edge:Hide()
+    end)
+    return row
+end
+
+--- Lay a card's rows out from `y` down, hiding those with nothing to say
+--- and taking turns light and dark. A value too long for its line wraps and
+--- pushes the rows below down. Returns where the last row ended.
+local function LayRows(card, rows, specs, values, y, width)
+    local place = 0
+    for _, spec in ipairs(specs) do
+        local row = rows[spec.key]
+        local text = values[spec.key]
+        row:SetShown(text ~= nil)
+        if text then
+            place = place + 1
+            row.glassKey = place % 2 == 1 and "glass" or "glassAlt"
+            row.background:SetColorTexture(Theme.Unpack(row.glassKey))
+            row.value:SetText(text)
+            row.value:SetWidth(math.max(width - Theme.TextWidth("small", spec.label) - 34, 60))
+            local height = CARD_ROW
+            local ok, textHeight = pcall(row.value.GetStringHeight, row.value)
+            if ok and type(textHeight) == "number" and textHeight + 9 > height then
+                height = math.ceil(textHeight + 9)
+            end
+            row:ClearAllPoints()
+            row:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
+            row:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y)
+            row:SetHeight(height)
+            y = y - height
+        end
+    end
+    return y
+end
+
 function UI:BuildStatus()
+    local frame = self.frame
     self.rows = {}
-    for _, spec in ipairs(ROWS) do
-        local label = Theme.CreateLabel(self.frame, "small", "muted")
-        label:SetText(spec.label)
 
-        local value = Theme.CreateLabel(self.frame, "normal", "text")
-        value:SetWidth(WIDTH - VALUE_X - PADDING)
-        value:SetWordWrap(true)
+    -- Everything about the pet, so it all goes at once when none is out.
+    local body = CreateFrame("Frame", nil, frame)
+    body:SetPoint("TOPLEFT", PADDING, -(HEADER + GAP))
+    body:SetPoint("BOTTOMRIGHT", -PADDING, FOOT)
+    self.body = body
+    local inner = WIDTH - PADDING * 2
 
-        self.rows[spec.key] = { label = label, value = value }
+    -- The top card: the pet's face, name, family and level, gold in the
+    -- dark with a bright gold edge, as the open row is everywhere else.
+    local hero = Glass(body, "glassActive", 0.8)
+    hero:SetPoint("TOPLEFT")
+    hero:SetPoint("TOPRIGHT")
+    hero:SetHeight(HERO_HEIGHT)
+    local edge = hero:CreateTexture(nil, "ARTWORK")
+    edge:SetPoint("TOPLEFT")
+    edge:SetPoint("BOTTOMLEFT")
+    edge:SetWidth(3)
+    edge:SetColorTexture(Theme.Unpack("accentHi"))
+    local wash = hero:CreateTexture(nil, "BORDER")
+    wash:SetAllPoints(hero)
+    wash:SetColorTexture(1, 1, 1, 1)
+    Theme.SetGradientAlpha(wash, "HORIZONTAL", "accent", 0.14, 0)
+    Theme.Halo(hero, 6, 0.10, "accent")
+    self.hero = hero
+
+    local portrait = CreateFrame("Frame", nil, hero)
+    portrait:SetSize(PORTRAIT, PORTRAIT)
+    portrait:SetPoint("LEFT", 12, 0)
+    Theme.Fill(portrait, "well")
+    Theme.Border(portrait, "accent")
+    Theme.Halo(portrait, 4, 0.25, "accent")
+    local face = portrait:CreateTexture(nil, "ARTWORK")
+    face:SetPoint("TOPLEFT", 1, -1)
+    face:SetPoint("BOTTOMRIGHT", -1, 1)
+    self.portrait = face
+
+    local badge = CreateFrame("Frame", nil, portrait)
+    badge:SetSize(22, 16)
+    badge:SetPoint("CENTER", portrait, "BOTTOMRIGHT", -2, 2)
+    badge:SetFrameLevel(portrait:GetFrameLevel() + 2)
+    Theme.Fill(badge, "well")
+    Theme.Border(badge, "accent")
+    local level = Theme.CreateLabel(badge, "tiny", "accentHi", "CENTER")
+    level:SetPoint("CENTER", 0, 0)
+    self.levelBadge, self.levelLabel = badge, level
+
+    local name = Theme.CreateLabel(hero, "title", "accentHi")
+    name:SetPoint("TOPLEFT", portrait, "TOPRIGHT", 14, 1)
+    name:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
+    self.nameLabel = name
+
+    local sub = Theme.CreateLabel(hero, "small", "muted")
+    sub:SetPoint("TOPLEFT", name, "BOTTOMLEFT", 0, -3)
+    sub:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
+    self.rows.pet = { value = sub }
+
+    self.moodChip = CreateChip(hero)
+    self.moodChip:SetPoint("BOTTOMLEFT", portrait, "BOTTOMRIGHT", 14, -1)
+    self.trainingChip = CreateChip(hero)
+    self.trainingChip:SetPoint("LEFT", self.moodChip, "RIGHT", 6, 0)
+    self.rows.training = { value = self.trainingChip.label }
+    -- The whole count under the mouse: free, total and spent.
+    self.trainingChip:EnableMouse(true)
+    self.trainingChip:SetScript("OnEnter", function(chip)
+        if not (chip.detail and GameTooltip) then return end
+        GameTooltip:SetOwner(chip, "ANCHOR_BOTTOM")
+        GameTooltip:AddLine(L["Training points"], 1, 0.82, 0)
+        GameTooltip:AddLine(chip.detail, 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    self.trainingChip:SetScript("OnLeave", function()
+        if GameTooltip then GameTooltip:Hide() end
+    end)
+
+    -- The three bars: experience, happiness and loyalty, a label on the
+    -- left and the words on the right.
+    self.meters = {}
+    local function Meter(key, labelText)
+        local meter = CreateFrame("Frame", nil, body)
+        meter:SetHeight(METER_HEIGHT)
+        meter.label = Theme.CreateLabel(meter, "small", "muted")
+        meter.label:SetPoint("LEFT", 4, 0)
+        meter.label:SetText(labelText)
+        meter.value = Theme.CreateLabel(meter, "normal", "text")
+        meter.value:SetPoint("LEFT", METER_X + METER_WIDTH + 12, 0)
+        meter.value:SetPoint("RIGHT", meter, "RIGHT", -4, 0)
+        self.meters[key] = meter
+        self.rows[key] = meter
+        return meter
+    end
+
+    local xp = Meter("experience", L["Experience"])
+    local bar = CreateBar(xp, "xp", 12)
+    bar:SetPoint("LEFT", METER_X, 0)
+    bar:SetBarWidth(METER_WIDTH)
+    xp.bar = bar
+
+    -- Happiness: three lights, as many lit as the pet is happy, in its colour.
+    local mood = Meter("happiness", L["Happiness"])
+    mood.lights = {}
+    local lightWidth = math.floor((METER_WIDTH - 8) / 3)
+    for i = 1, 3 do
+        local light = CreateFrame("Frame", nil, mood)
+        light:SetSize(lightWidth, 12)
+        light:SetPoint("LEFT", METER_X + (i - 1) * (lightWidth + 4), 0)
+        light.background = Theme.Fill(light, "well")
+        Theme.Border(light, "border", 0.9)
+        light.shine = Theme.TopSheen(light, 0.12)
+        Theme.Halo(light, 4, 0, "good")
+        mood.lights[i] = light
+    end
+
+    -- Loyalty: six gold gems, as many lit as its level.
+    local loyalty = Meter("loyalty", L["Loyalty"])
+    loyalty.gems = {}
+    for i = 1, 6 do
+        local gem = loyalty:CreateTexture(nil, "ARTWORK")
+        gem:SetSize(10, 10)
+        gem:SetPoint("LEFT", METER_X + 3 + (i - 1) * 20, 0)
+        gem:SetColorTexture(Theme.Unpack("border"))
+        if gem.SetRotation then pcall(gem.SetRotation, gem, math.pi / 4) end
+        loyalty.gems[i] = gem
+    end
+
+    -- The two cards.
+    local cardWidth = math.floor((inner - GAP) / 2)
+    self.cardWidth, self.fullWidth = cardWidth, inner
+
+    local food = Glass(body, "glassAlt")
+    food:SetWidth(cardWidth)
+    CardHeading(food, L["FOOD"])
+    self.foodCard = food
+
+    local line = CreateFrame("Frame", nil, food)
+    line:SetPoint("TOPLEFT", 1, -(CARD_HEAD + 1))
+    line:SetPoint("TOPRIGHT", -1, -(CARD_HEAD + 1))
+    line:SetHeight(FOOD_LINE)
+    Theme.Fill(line, "glass")
+    local underline = line:CreateTexture(nil, "BORDER")
+    underline:SetPoint("BOTTOMLEFT")
+    underline:SetPoint("BOTTOMRIGHT")
+    underline:SetHeight(1)
+    underline:SetColorTexture(Theme.Unpack("border", 0.6))
+    local slot = CreateFrame("Frame", nil, line)
+    slot:SetSize(32, 32)
+    slot:SetPoint("LEFT", 10, 0)
+    Theme.Fill(slot, "well")
+    Theme.Border(slot, "metal")
+    local icon = slot:CreateTexture(nil, "ARTWORK")
+    icon:SetPoint("TOPLEFT", 1, -1)
+    icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    local count = Theme.CreateLabel(slot, "small", "text", "RIGHT")
+    count:SetPoint("BOTTOMRIGHT", -2, 2)
+    if count.SetShadowColor then
+        count:SetShadowColor(0, 0, 0, 1)
+        count:SetShadowOffset(1, -1)
+    end
+    local foodName = Theme.CreateLabel(line, "normal", "text")
+    foodName:SetPoint("TOPLEFT", slot, "TOPRIGHT", 10, -2)
+    foodName:SetPoint("RIGHT", line, "RIGHT", -8, 0)
+    local foodSub = Theme.CreateLabel(line, "small", "muted")
+    foodSub:SetPoint("TOPLEFT", foodName, "BOTTOMLEFT", 0, -3)
+    foodSub:SetPoint("RIGHT", line, "RIGHT", -8, 0)
+    self.foodIcon, self.foodCount, self.foodName = icon, count, foodName
+    self.rows.food = { value = foodSub }
+
+    -- How long the food lasts, as a gold bar and the words under it.
+    local lasts = CreateFrame("Frame", nil, food)
+    lasts:SetPoint("TOPLEFT", line, "BOTTOMLEFT", 0, 0)
+    lasts:SetPoint("TOPRIGHT", line, "BOTTOMRIGHT", 0, 0)
+    lasts:SetHeight(34)
+    Theme.Fill(lasts, "glassAlt")
+    local lastsBar = CreateBar(lasts, "accent", 8)
+    lastsBar:SetPoint("TOPLEFT", 10, -7)
+    lastsBar:SetBarWidth(cardWidth - 22)
+    local lastsText = Theme.CreateLabel(lasts, "small", "muted")
+    lastsText:SetPoint("TOPLEFT", lastsBar, "BOTTOMLEFT", 0, -4)
+    lastsText:SetPoint("RIGHT", lasts, "RIGHT", -10, 0)
+    self.lasts, self.lastsBar, self.lastsText = lasts, lastsBar, lastsText
+
+    self.foodRows = {}
+    for _, spec in ipairs(FOOD_ROWS) do
+        local row = CreateCardRow(food, spec.label)
+        self.foodRows[spec.key] = row
+        self.rows[spec.key] = row
+    end
+
+    -- How it fights: damage a second and a hit large, the rest in rows.
+    local fight = Glass(body, "glassAlt")
+    CardHeading(fight, L["IN A FIGHT"])
+    self.fightCard = fight
+
+    local band = CreateFrame("Frame", nil, fight)
+    band:SetPoint("TOPLEFT", 1, -(CARD_HEAD + 1))
+    band:SetPoint("TOPRIGHT", -1, -(CARD_HEAD + 1))
+    band:SetHeight(BAND_HEIGHT)
+    Theme.Fill(band, "glass")
+    local bandLine = band:CreateTexture(nil, "BORDER")
+    bandLine:SetPoint("BOTTOMLEFT")
+    bandLine:SetPoint("BOTTOMRIGHT")
+    bandLine:SetHeight(1)
+    bandLine:SetColorTexture(Theme.Unpack("border", 0.6))
+    local function Big(anchorX)
+        local number = Theme.CreateLabel(band, "title", "text")
+        number:SetPoint("TOPLEFT", anchorX, -7)
+        local caption = Theme.CreateLabel(band, "tiny", "muted")
+        caption:SetPoint("TOPLEFT", number, "BOTTOMLEFT", 0, -3)
+        return number, caption
+    end
+    self.dpsNumber, self.dpsCaption = Big(12)
+    self.hitNumber, self.hitCaption = Big(12)
+    self.dpsCaption:SetText(L["Damage a second"])
+    self.hitCaption:SetText(L["Damage a hit"])
+    self.band = band
+    -- Kept under its old name too: the damage line as a whole.
+    self.rows.damage = { value = self.hitNumber }
+
+    self.fightRows = {}
+    for _, spec in ipairs(FIGHT_ROWS) do
+        local row = CreateCardRow(fight, spec.label)
+        self.fightRows[spec.key] = row
+        self.rows[spec.key] = row
     end
 end
 
@@ -248,7 +701,8 @@ function UI:PlaceFeedButton(stack, beforeCombat)
         button:SetAttribute("macrotext", ns.Food:FeedMacro(stack))
         button:SetText(L.Format("Feed %s", stack.name))
         button:ClearAllPoints()
-        button:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", -PADDING, 10)
+        -- At the foot of the food card, where the food is.
+        button:SetPoint("BOTTOMRIGHT", self.foodCard or self.frame, "BOTTOMRIGHT", -8, 8)
         button:SetFrameLevel(self.frame:GetFrameLevel() + 10)
         button:Show()
         self.feedStack = stack
@@ -261,17 +715,13 @@ function UI:PlaceFeedButton(stack, beforeCombat)
     self:PlaceVersion()
 end
 
---- The version sits just above the Feed button while it shows, which would
---- otherwise cover it, and back in the corner when it goes.
+--- The version stays in the corner, under the cards. The Feed button sits
+--- inside the food card now, so it no longer covers it.
 function UI:PlaceVersion()
-    local version, button = self.versionLabel, self.feedButton
+    local version = self.versionLabel
     if not version then return end
     version:ClearAllPoints()
-    if button and button:IsShown() then
-        version:SetPoint("BOTTOMRIGHT", button, "TOPRIGHT", 0, 4)
-    else
-        version:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", -PADDING, 14)
-    end
+    version:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT", -PADDING, 12)
 end
 
 --- Is the Settings window or the Pet Compendium open? The Feed button sits
@@ -314,69 +764,244 @@ function UI:FeedButtonState()
     return ok and text or "could not read the Feed button"
 end
 
---- Fill the status rows from a PetStatus reading, hiding the ones with
---- nothing to say and closing up the gaps.
-function UI:ShowStatus(status)
+--- The icon of an item, by its ID, or nil.
+local function ItemIcon(itemID)
+    if not itemID then return nil end
+    if C_Item and C_Item.GetItemIconByID then
+        local ok, icon = pcall(C_Item.GetItemIconByID, itemID)
+        if ok and icon then return icon end
+    end
+    if type(GetItemIcon) == "function" then
+        local ok, icon = pcall(GetItemIcon, itemID)
+        if ok and icon then return icon end
+    end
+    return nil
+end
+
+-- The palette key for each happiness level's colour (PetStatus names them
+-- by the shared colours, where "bad" is the window's "loss").
+local function MoodColor(level)
+    local info = level and ns.PetStatus.HAPPINESS[level]
+    if not info then return nil end
+    return info.color == "bad" and "loss" or info.color
+end
+
+--- The top card: the pet's face, name, family, level and the two chips.
+function UI:ShowHero(status)
     local PetStatus = ns.PetStatus
-    local values = {}
+    self.nameLabel:SetText(status.name or L["Your pet"])
 
-    if status.exists then
-        local pet = status.name or L["Your pet"]
-        local details = {}
-        if status.family and status.family ~= status.name then details[#details + 1] = status.family end
-        if status.level then details[#details + 1] = L.Format("level %s", status.level) end
-        if #details > 0 then pet = pet .. ", " .. table.concat(details, ", ") end
+    local sub
+    local family = status.family ~= status.name and status.family or nil
+    if family and status.level then
+        sub = L.Format("%s, level %s", family, status.level)
+    elseif family then
+        sub = family
+    elseif status.level then
+        sub = L.Format("Level %s", status.level)
+    end
+    self.rows.pet.value:SetText(sub or "")
 
-        values.pet = pet
-        values.happiness = PetStatus:HappinessText(status)
-        values.loyalty = PetStatus:LoyaltyText(status)
-        values.experience = PetStatus:ExperienceText(status)
-        values.training = PetStatus:TrainingText(status)
-        values.foods = PetStatus:FoodText(status)
+    self.levelBadge:SetShown(status.level ~= nil)
+    if status.level then self.levelLabel:SetText(tostring(status.level)) end
 
-        local stats = PetStatus:ReadStats()
-        values.health = PetStatus:HealthText(stats)
-        values.speed = PetStatus:SpeedText(stats)
-        values.damage = PetStatus:DamageText(stats)
-        values.attackPower = PetStatus:AttackPowerText(stats)
-        values.armor = PetStatus:ArmorText(stats)
-        values.resistances = PetStatus:ResistanceText(stats)
+    if type(SetPortraitTexture) == "function" then
+        pcall(SetPortraitTexture, self.portrait, "pet")
+    end
 
-        if status.foods then
-            -- The kept scan, unless the bags changed: this runs on every
-            -- pet event and the status check while the window is open.
-            local stacks = ns.Food:Latest(status)
-            values.food = ns.Food:Summary(stacks)
-            self:PlaceFeedButton(stacks[1])
+    local mood = status.happiness and PetStatus.HAPPINESS[status.happiness]
+    self.moodChip:Set(mood and mood.name or nil, MoodColor(status.happiness))
+
+    local free = status.trainingFree
+    local chip
+    if free and status.trainingTotal and (status.trainingTotal > 0 or status.trainingSpent > 0) then
+        if free < 0 then
+            chip = { L.Format("%d training points over", -free), "loss" }
+        elseif free == 1 then
+            chip = { L["1 training point free"], "good" }
         else
-            self:PlaceFeedButton(nil)
+            chip = { L.Format("%d training points free", free), free > 0 and "good" or "muted" }
         end
+    end
+    self.trainingChip:Set(chip and chip[1] or nil, chip and chip[2] or nil)
+    self.trainingChip.detail = PetStatus:TrainingText(status)
+    if not chip then self.trainingChip.label:Hide() else self.trainingChip.label:Show() end
+    -- With no happiness, the training chip moves up to its place.
+    self.trainingChip:ClearAllPoints()
+    if mood then
+        self.trainingChip:SetPoint("LEFT", self.moodChip, "RIGHT", 6, 0)
     else
+        self.trainingChip:SetPoint("BOTTOMLEFT", self.portrait, "BOTTOMRIGHT", 15, 0)
+    end
+end
+
+--- The bars under the top card, stacked from `y`, the ones with nothing to
+--- say left out. Returns where the last one ended.
+function UI:ShowMeters(status, y)
+    local PetStatus = ns.PetStatus
+    local values = {
+        experience = PetStatus:ExperienceText(status),
+        happiness = PetStatus:HappinessText(status),
+        loyalty = PetStatus:LoyaltyText(status),
+    }
+
+    for _, key in ipairs({ "experience", "happiness", "loyalty" }) do
+        local meter = self.meters[key]
+        local text = values[key]
+        meter:SetShown(text ~= nil)
+        meter.value:SetShown(text ~= nil)
+        if text then
+            meter.value:SetText(text)
+            meter:ClearAllPoints()
+            meter:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, y)
+            meter:SetPoint("TOPRIGHT", self.body, "TOPRIGHT", 0, y)
+            y = y - METER_HEIGHT
+        end
+    end
+
+    if values.experience then
+        self.meters.experience.bar:Set(status.xp / status.xpMax)
+    end
+
+    if values.happiness then
+        local key = MoodColor(status.happiness)
+        for i, light in ipairs(self.meters.happiness.lights) do
+            local lit = i <= status.happiness
+            light.background:SetColorTexture(Theme.Unpack(lit and key or "well"))
+            Theme.SetHalo(light, lit and 0.3 or 0, key)
+            light.shine:SetShown(lit)
+        end
+    end
+
+    if values.loyalty then
+        local level = UI.LoyaltyLevel(status.loyalty)
+        for i, gem in ipairs(self.meters.loyalty.gems) do
+            gem:SetShown(level ~= nil)
+            gem:SetColorTexture(Theme.Unpack(level and i <= level and "accentHi" or "border"))
+        end
+        -- With no gems to show, the words take their place.
+        self.meters.loyalty.value:ClearAllPoints()
+        self.meters.loyalty.value:SetPoint("LEFT", level and METER_X + METER_WIDTH + 12 or METER_X, 0)
+        self.meters.loyalty.value:SetPoint("RIGHT", self.meters.loyalty, "RIGHT", -4, 0)
+    end
+    return y
+end
+
+--- The food card: the food it eats next, how long the bags will keep it
+--- happy, and what it eats. Returns the stacks, best first.
+function UI:ShowFood(status, top)
+    local card = self.foodCard
+    card:ClearAllPoints()
+    card:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, top)
+    card:SetPoint("BOTTOMLEFT", self.body, "BOTTOMLEFT", 0, 0)
+    card:SetWidth(self.cardWidth)
+
+    -- The kept scan, unless the bags changed: this runs on every pet event
+    -- and the status check while the window is open.
+    local stacks = ns.Food:Latest(status)
+    local best = stacks[1]
+    local total = ns.Food:Count(stacks)
+    self.foodIcon:SetShown(best ~= nil)
+    if best then
+        local icon = ItemIcon(best.itemID)
+        if icon then self.foodIcon:SetTexture(icon) end
+        self.foodCount:SetText(tostring(total))
+        self.foodName:SetText(best.name)
+        local sub = L.Format("%d in your bags (%s)", total, ns.Food:EffectLabel(best.effect))
+        if total < ns.Food.LOW_FOOD then
+            sub = sub .. (", |c%s%s|r"):format(ns.COLORS.warn, L["running low"])
+        end
+        self.rows.food.value:SetText(sub)
+    else
+        self.foodCount:SetText("")
+        self.foodName:SetText(L["No food"])
+        self.rows.food.value:SetText(("|c%s%s|r"):format(ns.COLORS.bad, L["None in your bags"]))
+    end
+
+    local hours = ns.Butler and ns.Butler.Hours and ns.Butler.Hours(stacks)
+    local y = -(CARD_HEAD + 1 + FOOD_LINE)
+    self.lasts:SetShown(hours ~= nil)
+    if hours then
+        self.lastsBar:Set(hours / FOOD_BAR_HOURS)
+        if hours >= 0.1 then
+            self.lastsText:SetText(L.Format("Enough food for about %.1f hours", hours))
+            self.lastsText:SetTextColor(Theme.Unpack("muted"))
+        else
+            self.lastsText:SetText(L["Not enough food to keep it happy"])
+            self.lastsText:SetTextColor(Theme.Unpack("loss"))
+        end
+        y = y - 34
+    end
+
+    LayRows(card, self.foodRows, FOOD_ROWS, { foods = ns.PetStatus:FoodText(status) },
+        y, self.cardWidth - 2)
+    return stacks
+end
+
+--- The fight card: damage a second and a hit large, then the rest.
+function UI:ShowFight(stats, top, full)
+    local PetStatus = ns.PetStatus
+    local card = self.fightCard
+    local width = full and self.fullWidth or self.cardWidth
+    card:ClearAllPoints()
+    if full then
+        card:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, top)
+    else
+        card:SetPoint("TOPRIGHT", self.body, "TOPRIGHT", 0, top)
+    end
+    card:SetWidth(width)
+    card:SetPoint("BOTTOMRIGHT", self.body, "BOTTOMRIGHT", 0, 0)
+
+    local y = -(CARD_HEAD + 1)
+    local hasHit = stats.damageMin ~= nil
+    self.band:SetShown(hasHit)
+    if hasHit then
+        local hasDps = stats.dps ~= nil
+        self.dpsNumber:SetShown(hasDps)
+        self.dpsCaption:SetShown(hasDps)
+        if hasDps then self.dpsNumber:SetText(("%.1f"):format(stats.dps)) end
+        self.hitNumber:SetText(L.Format("%d to %d", stats.damageMin, stats.damageMax))
+        self.hitNumber:ClearAllPoints()
+        self.hitNumber:SetPoint("TOPLEFT", self.band, "TOPLEFT",
+            hasDps and math.floor(width / 2) or 12, -7)
+        y = y - BAND_HEIGHT
+    end
+
+    LayRows(card, self.fightRows, FIGHT_ROWS, {
+        health = PetStatus:HealthText(stats),
+        speed = PetStatus:SpeedText(stats),
+        attackPower = PetStatus:AttackPowerText(stats),
+        armor = PetStatus:ArmorText(stats),
+        resistances = PetStatus:ResistanceText(stats),
+    }, y, width - 2)
+end
+
+--- Fill the pet card from a PetStatus reading: everything with nothing to
+--- say is left out, and what is left closes up.
+function UI:ShowStatus(status)
+    self.body:SetShown(status.exists == true)
+    self.emptyLabel:SetShown(not status.exists)
+    self.rows.pet.value:SetShown(status.exists == true)
+    if not status.exists then
+        self:PlaceFeedButton(nil)
+        return
+    end
+
+    self:ShowHero(status)
+    local y = self:ShowMeters(status, -(HERO_HEIGHT + GAP))
+    if y < -(HERO_HEIGHT + GAP) then y = y - GAP + 4 end
+
+    local stats = ns.PetStatus:ReadStats()
+    if status.foods then
+        self.foodCard:Show()
+        local stacks = self:ShowFood(status, y)
+        self:ShowFight(stats, y, false)
+        self:PlaceFeedButton(stacks[1])
+    else
+        self.foodCard:Hide()
+        self:ShowFight(stats, y, true)
         self:PlaceFeedButton(nil)
     end
-
-    local y = -(HEADER + 14)
-    for _, spec in ipairs(ROWS) do
-        local row = self.rows[spec.key]
-        local text = values[spec.key]
-        row.label:SetShown(text ~= nil)
-        row.value:SetShown(text ~= nil)
-        if text then
-            row.label:SetPoint("TOPLEFT", PADDING, y - 1)
-            row.value:SetPoint("TOPLEFT", VALUE_X, y)
-            row.value:SetText(text)
-            -- A value that wraps onto a second line pushes the rows below
-            -- down, rather than running into the next one.
-            local step = ROW_HEIGHT
-            local ok, height = pcall(row.value.GetStringHeight, row.value)
-            if ok and type(height) == "number" and height + 10 > step then
-                step = math.ceil(height + 10)
-            end
-            y = y - step
-        end
-    end
-
-    self.emptyLabel:SetShown(not status.exists)
 end
 
 --------------------------------------------------------------------------------

@@ -175,8 +175,10 @@ bags[0] = { [3] = { itemID = 117, stackCount = 30 } }
 Food:BagsChanged()
 local UI = ns.UI
 UI:Show()
-suite.check("the window has a food row",
-    UI.rows.food.value:GetText():find("Tough Jerky (full), 30 in bags", 1, true), UI.rows.food.value:GetText())
+suite.check("the food card names the food", UI.foodName:GetText() == "Tough Jerky", UI.foodName:GetText())
+suite.check("and how many are in the bags",
+    UI.rows.food.value:GetText():find("30 in your bags (full)", 1, true), UI.rows.food.value:GetText())
+suite.check("with the count on its icon", UI.foodCount:GetText() == "30")
 suite.check("the Feed button is shown", UI.feedButton:IsShown())
 suite.check("on a layer above the window, which rises when clicked",
     UI.feedButton:GetFrameStrata() == "FULLSCREEN_DIALOG" and UI.frame:GetFrameStrata() == "DIALOG",
@@ -203,8 +205,10 @@ suite.check("combat starting takes it away", not UI.feedButton:IsShown())
 -- The button is a layer above every window, so it goes while Settings or
 -- the Compendium is open, or it would take their clicks.
 UI:Refresh()
-suite.check("the version moves up over the Feed button",
-    select(2, UI.versionLabel:GetPoint(1)) == UI.feedButton)
+suite.check("the Feed button sits in the food card",
+    select(2, UI.feedButton:GetPoint(1)) == UI.foodCard)
+suite.check("so the version stays in the corner",
+    select(2, UI.versionLabel:GetPoint(1)) == UI.frame)
 -- The test frames do not run OnShow and OnHide themselves.
 local function Fire(window, script)
     local frame = window.frame
