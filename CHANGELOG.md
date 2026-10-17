@@ -4,6 +4,16 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 0.18.0
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Pet card:** the pets window has a new look. The pet sits on a gold card
+  with its face, name, level and mood. Experience, happiness and loyalty get a
+  bar, lights and gems, and Food and fighting stats sit side by side.
+- **Food:** the hours a food lasts count every tick of Feed Pet, so they are no
+  longer ten times too short.
+
 ## 0.17.0
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.

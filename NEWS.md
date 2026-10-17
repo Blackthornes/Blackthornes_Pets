@@ -23,6 +23,13 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 0.18.0
+
+Fixes and changes:
+
+- The pets window has a new look.
+- The hours your food lasts are right now.
+
 ## 0.17.0
 
 - The pets window shows how your pet fights: health, attack speed, damage, attack power, armor and resistances.
