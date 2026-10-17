@@ -16,11 +16,16 @@ local _, ns = ...
 local Butler = ns.NewModule("Butler")
 
 -- How happy a food makes the pet, by how much good it does, and how fast
--- the pet grows unhappy: the classic rule (35,000 points for food within 10
--- levels, 17,000 and 8,000 below that; 670 points lost every 7.5 seconds).
--- Forever may differ and a fighting pet grows hungry faster, so `hours` is
--- only "about".
-local HAPPINESS_PER_FOOD = { full = 35000, half = 17000, low = 8000 }
+-- the pet grows unhappy: the classic rule, which the Forever client's Feed
+-- Pet still carries. A food gives 35,000 points a tick for food within 10
+-- levels (17,000 and 8,000 below that), and Feed Pet Effect ticks every 2
+-- seconds for 20 seconds, so ten ticks a food. 670 points are lost every
+-- 7.5 seconds, and a full bar is 1,050,000. A fighting pet grows hungry
+-- faster, so `hours` is only "about".
+local TICKS_PER_FOOD = 10
+local HAPPINESS_PER_FOOD = {
+    full = 35000 * TICKS_PER_FOOD, half = 17000 * TICKS_PER_FOOD, low = 8000 * TICKS_PER_FOOD,
+}
 local HAPPINESS_PER_SECOND = 670 / 7.5
 
 -- A kept reading lasts at most this long with no bag event, so a pet
