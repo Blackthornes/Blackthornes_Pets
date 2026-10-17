@@ -45,6 +45,7 @@ Theme.colors = {
     warn      = { 0.910, 0.757, 0.353 },
     rare      = { 0.722, 0.808, 0.957 },   -- a rare beast, the silver of the game's rare dragon
     loss      = { 0.898, 0.376, 0.310 },   -- #E5604F, a downgrade, or a close button under the mouse
+    xp        = { 0.643, 0.424, 0.941 },   -- #A46CF0, the pet's experience bar
 
     text      = { 0.902, 0.910, 0.925 },   -- #E6E8EC
     muted     = { 0.478, 0.502, 0.541 },   -- #7A8089
