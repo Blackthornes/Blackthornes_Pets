@@ -65,8 +65,8 @@ local jerky = Butler:Advise(117)
 suite.check("food the pet eats", jerky and jerky.eats == true and jerky.buff == false)
 suite.check("counts every stack of it", jerky.count == 15, jerky and jerky.count)
 -- 15 + 4 full (Haunch is level 15, pet 9) + 2 buff sausage = 21 pieces at
--- 35,000 each, 670 lost every 7.5 s: about 2.3 hours.
-suite.check("about how many hours all the food lasts", jerky.hours == 2.3, jerky.hours)
+-- 35,000 a tick for ten ticks each, 670 lost every 7.5 s: about 22.9 hours.
+suite.check("about how many hours all the food lasts", jerky.hours == 22.9, jerky.hours)
 
 local sausage = Butler:Advise(3220)
 suite.check("buff food says so", sausage and sausage.buff == true and sausage.eats == true
