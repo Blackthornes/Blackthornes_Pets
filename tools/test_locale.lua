@@ -1,6 +1,6 @@
 -- The translations: on a German client the windows and settings speak
--- Deutsch, on any other they speak English, and a word with no German line
--- falls back to its English key. L.Format puts values named by place
+-- Deutsch, on a Simplified Chinese client Chinese, on any other English, and
+-- a word with no line falls back to its English key. L.Format puts values named by place
 -- ("%2$s ... %1$d") in order, which the tests' Lua 5.1 cannot do itself.
 
 local env = dofile(lfs_cwd .. "/tools/testenv.lua")
@@ -55,6 +55,23 @@ suite.check("values named by place go where German puts them",
 suite.check("a %% stays a percent sign",
     L.Format("%s (%d%% damage)", "Glücklich", 25) == "Glücklich (25% Schaden)")
 suite.check("yards are metres", L.Format("%d,%03d yd", 1, 250) == "1.250 m")
+
+-- A Simplified Chinese client.
+ns = env.Load("zhCN")
+L = ns.L
+_G.UnitClass = function() return "猎人", "HUNTER" end
+ns.UI:Show()
+suite.check("the pets window speaks Simplified Chinese", ns.UI.emptyLabel:GetText() == "没有召唤宠物。",
+    ns.UI.emptyLabel:GetText())
+labels = SettingsLabels(ns)
+suite.check("the settings rows in Simplified Chinese", labels["喂食提醒："] == true)
+suite.check("and none is left in English", labels["Feed Warning:"] == nil)
+suite.check("the diet words in Simplified Chinese", ns.PetFood.Label("Cheese") == "奶酪")
+suite.check("values named by place go where Chinese puts them",
+    L.Format("Only %d food left that %s will eat.", 4, "野猪") == "野猪愿意吃的食物只剩4份了。",
+    L.Format("Only %d food left that %s will eat.", 4, "野猪"))
+suite.check("a word with no Chinese line falls back to English",
+    L["A string nobody translated"] == "A string nobody translated")
 
 -- Another language that has no file shows English.
 ns = env.Load("frFR")
