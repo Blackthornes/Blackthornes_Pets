@@ -303,9 +303,20 @@ function SettingsUI:BuildPages()
     local tamingRow = pages:Row("pet", 2, L["Taming Skills:"],
         L["A beast's tooltip shows what it teaches. Green you know, red you don't."])
 
-    controls.tamingTooltip = Widgets.CreateCheckbox(tamingRow, L["Show"], function(checked)
-        ns.db.tamingTooltip = checked
-    end, true)
+    -- Off, Shift or Always (UI/TooltipShift.lua): on or off stays in
+    -- tamingTooltip, Shift is kept apart.
+    local TooltipShift = ns.TooltipShift
+    local shiftKey = ns.TamingTooltip.SHIFT_KEY
+    controls.tamingTooltip = Widgets.CreateStepper(tamingRow, {
+        min = 0, max = 2, step = 1,
+        format = function(value) return TooltipShift.NAMES[value] end,
+        onChange = function(value)
+            TooltipShift:Apply(value, shiftKey, ns.db.tamingTooltip ~= false, function(on)
+                ns.db.tamingTooltip = on
+            end)
+        end,
+    })
+    ns.SettingsPages.FitStepper(controls.tamingTooltip, TooltipShift.NAMES)
     controls.tamingTooltip:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     -- The compendium on the left, the arrow that leads to its beasts on
@@ -446,7 +457,8 @@ function SettingsUI:Refresh()
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
     controls.neverFeedBuffFood:SetChecked(ns.db.neverFeedBuffFood == true)
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
-    controls.tamingTooltip:SetChecked(ns.db.tamingTooltip ~= false)
+    controls.tamingTooltip:SetValue(ns.TooltipShift:Mode(ns.db.tamingTooltip ~= false,
+        ns.TamingTooltip.SHIFT_KEY), true)
     controls.debug:SetChecked(ns.db.debug == true)
     controls.sisters:SetChecked(ns.SisterNote:IsOn())
     controls.whatsNewPopup:SetChecked(ns.WhatsNew:IsOn())

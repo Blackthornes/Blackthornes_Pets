@@ -14,6 +14,12 @@ local L = ns.L
 local TamingTooltip = ns.NewModule("TamingTooltip")
 
 local Taming = ns.Taming
+local TooltipShift = ns.TooltipShift
+
+-- The line's key for Off, Shift or Always (UI/TooltipShift.lua). Whether it
+-- is on at all stays in ns.db.tamingTooltip.
+TamingTooltip.SHIFT_KEY = "taming"
+TooltipShift.KEYS = { TamingTooltip.SHIFT_KEY }
 
 local ICON = "|TInterface\\Icons\\Ability_Hunter_BeastTaming:14:14:0:0:64:64:5:59:5:59|t"
 
@@ -101,7 +107,8 @@ local function LineCount(tooltip)
 end
 
 --- Put the lines on a tooltip.
--- @return "added", "quiet" (nothing to say), "duplicate" or "nounit"
+-- @return "added", "held" (on Shift, Shift up), "quiet" (nothing to say),
+-- "duplicate" or "nounit"
 function TamingTooltip:Decorate(tooltip, data)
     if not self:IsEnabled() then return "quiet" end
     if tooltip ~= _G.GameTooltip then return "quiet" end
@@ -120,6 +127,13 @@ function TamingTooltip:Decorate(tooltip, data)
 
     local lines = self:Lines(npcID)
     if not lines then return "quiet" end
+
+    -- On Shift and Shift is up: only the hint, which goes on once. The
+    -- tooltip is drawn again when Shift goes down.
+    if not TooltipShift:Shows(self.SHIFT_KEY) then
+        TooltipShift:Held(tooltip)
+        return "held"
+    end
 
     local addLine = Field(tooltip, "AddLine")
     local addDouble = Field(tooltip, "AddDoubleLine")
