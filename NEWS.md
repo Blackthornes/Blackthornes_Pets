@@ -23,6 +23,10 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 0.20.0
+
+- The taming skills on a beast's tooltip can be Off, Shift or Always. You pick in Settings.
+
 ## 0.19.0
 
 - Pets speaks Simplified Chinese, French, Spanish and Russian now if your game is in one of those.
