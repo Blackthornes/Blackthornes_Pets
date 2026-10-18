@@ -101,6 +101,89 @@ local function RequestItem(id)
 end
 
 --------------------------------------------------------------------------------
+-- Food names in their rarity colour
+--
+-- The owner (2026-10-18): an item's name always shows its rarity colour.
+-- Only what is drawn is coloured; the Feed macro, saved data and anything
+-- compared keep the plain name. The bag slot says the quality; else the
+-- item cache does, kept per item once known; else the item is asked for
+-- and the name keeps the line's colour until the bags are read again.
+--------------------------------------------------------------------------------
+
+local qualityOf = {}   -- [itemID] = quality, once known
+local hexOf = {}       -- [quality] = "ffrrggbb"
+
+local function QualityNumber(value)
+    local ok, number = pcall(function()
+        local n = tonumber(value)
+        if n and n >= 0 and n <= 9 then return n end
+    end)
+    return ok and number or nil
+end
+
+--- The colour code of a quality ("ff1eff00" for green), or nil.
+function Food.QualityHex(quality)
+    if type(quality) ~= "number" then return nil end
+    if hexOf[quality] then return hexOf[quality] end
+    local hex
+    local colors = rawget(_G, "ITEM_QUALITY_COLORS")
+    local color = type(colors) == "table" and colors[quality] or nil
+    local ok, made = pcall(function()
+        if type(color) == "table" and type(color.r) == "number" then
+            return ("ff%02x%02x%02x"):format(math.floor(color.r * 255 + 0.5),
+                math.floor(color.g * 255 + 0.5), math.floor(color.b * 255 + 0.5))
+        end
+        local fn = (C_Item and C_Item.GetItemQualityColor) or rawget(_G, "GetItemQualityColor")
+        if type(fn) ~= "function" then return nil end
+        local r, g, b, h = fn(quality)
+        if type(h) == "string" and h:match("^%x%x%x%x%x%x%x%x$") then return h:lower() end
+        if type(r) == "number" then
+            return ("ff%02x%02x%02x"):format(math.floor(r * 255 + 0.5), math.floor(g * 255 + 0.5),
+                math.floor(b * 255 + 0.5))
+        end
+    end)
+    if ok and made then hex = made end
+    if hex then hexOf[quality] = hex end
+    return hex
+end
+
+--- An item's quality, from the slot's own reading or the item cache.
+function Food.QualityOf(itemID, given)
+    local quality = QualityNumber(given)
+    if quality then
+        if type(itemID) == "number" then qualityOf[itemID] = quality end
+        return quality
+    end
+    if type(itemID) ~= "number" then return nil end
+    if qualityOf[itemID] then return qualityOf[itemID] end
+    local getInfo = (C_Item and C_Item.GetItemInfo) or _G.GetItemInfo
+    if type(getInfo) == "function" then
+        local ok, _, _, raw = pcall(getInfo, itemID)
+        quality = ok and QualityNumber(raw) or nil
+    end
+    if quality then qualityOf[itemID] = quality end
+    return quality
+end
+
+--- A food's name to show: in its rarity colour once its quality is known.
+--- `stack` is a stack as Scan lists it, or anything with itemID and name.
+function Food.ShownName(stack)
+    if type(stack) ~= "table" then return nil end
+    local name = stack.name
+    if type(name) ~= "string" or name == "" or name:find("|c", 1, true) then return name end
+    local quality = Food.QualityOf(stack.itemID, stack.quality)
+    local hex = Food.QualityHex(quality)
+    if not hex then
+        if not quality and type(stack.itemID) == "number" then
+            Food.waitingForQuality = true
+            RequestItem(stack.itemID)
+        end
+        return name
+    end
+    return "|c" .. hex .. name .. "|r"
+end
+
+--------------------------------------------------------------------------------
 -- Buff food
 --
 -- Food that also gives a buff (stat food: "you will become well fed and
@@ -227,6 +310,7 @@ function Food:Inspect(bag, slot, info, status, eats)
         bag = bag, slot = slot, itemID = itemID, buff = buff or nil, buffUnsure = unsure or nil,
         name = name, level = level, diet = diet, effect = effect,
         count = tonumber(Plain(info.stackCount)) or 1,
+        quality = QualityNumber(Plain(info.quality)),
     }, nil, name, level
 end
 
@@ -338,7 +422,7 @@ function Food:Summary(stacks)
     end
     local best = stacks[1]
     local total = self:Count(stacks)
-    local text = L.Format("%s (%s), %d in bags", best.name, self:EffectLabel(best.effect), total)
+    local text = L.Format("%s (%s), %d in bags", Food.ShownName(best), self:EffectLabel(best.effect), total)
     if total < LOW_FOOD then
         text = text .. (", |c%s%s|r"):format(ns.COLORS.warn, L["running low"])
     end
@@ -439,21 +523,27 @@ function Food:Report()
             if info then
                 items = items + 1
                 local stack, why, name, level = self:Inspect(bag, slot, info, status, eats)
-                local label = ("%s%s"):format(name or L.Format("item %s", tostring(Plain(info.itemID) or "?")),
-                    level and L.Format(" (level %s)", level) or "")
+                -- The name in its rarity colour, the level in the line's.
+                local shown = name and Food.ShownName({ itemID = Plain(info.itemID), name = name,
+                    quality = Plain(info.quality) })
+                    or L.Format("item %s", tostring(Plain(info.itemID) or "?"))
+                local levelText = level and L.Format(" (level %s)", level) or ""
+                local function Tail(color)
+                    return levelText ~= "" and ("|c%s%s|r"):format(color, levelText) or ""
+                end
                 if stack then
                     found = found + stack.count
-                    ns.PrintRaw(("  |c%s%s|r  %s x%d, %s%s"):format(ns.COLORS.good, label,
+                    ns.PrintRaw(("  %s%s  %s x%d, %s%s"):format(shown, Tail(ns.COLORS.good),
                         ns.PetFood.Label(stack.diet), stack.count, self:EffectLabel(stack.effect),
                         stack.buff and L[", buff food (fed last)"] or ""))
                 elseif why == "not in the food list" then
                     if not seen[name] then
                         seen[name] = true
-                        unlisted[#unlisted + 1] = name
+                        unlisted[#unlisted + 1] = { name = name, shown = shown }
                     end
                 else
                     if why == "no name from the client" then why = L["no name from the client"] end
-                    ns.PrintRaw(("  |c%s%s|r  %s"):format(ns.COLORS.muted, label, why))
+                    ns.PrintRaw(("  %s%s  %s"):format(shown, Tail(ns.COLORS.muted), why))
                 end
             end
         end
@@ -462,8 +552,10 @@ function Food:Report()
     -- On one line, since most of a bag is not food: if a food is missing from
     -- Data/PetFood.lua, this is where it shows up.
     if #unlisted > 0 then
-        table.sort(unlisted)
-        ns.PrintRaw(("  |c%s%s|r %s"):format(ns.COLORS.muted, L["not in the food list:"], table.concat(unlisted, ", ")))
+        table.sort(unlisted, function(a, b) return a.name < b.name end)
+        local names = {}
+        for index, entry in ipairs(unlisted) do names[index] = entry.shown end
+        ns.PrintRaw(("  |c%s%s|r %s"):format(ns.COLORS.muted, L["not in the food list:"], table.concat(names, ", ")))
     end
 
     if slots == 0 then
@@ -561,7 +653,9 @@ function Food:OnEnable()
     -- while the last scan was missing names: other addons ask the client for
     -- items all the time, and each answer used to read the bags again.
     ns.RegisterEvent(self, "GET_ITEM_INFO_RECEIVED", function()
-        if not Food.waitingForNames then return end
+        -- Also while a name was drawn plain for want of its quality.
+        if not (Food.waitingForNames or Food.waitingForQuality) then return end
+        Food.waitingForQuality = nil
         Food:BagsChanged()
         if Food.retryPending or not (C_Timer and C_Timer.After) then return end
         Food.retryPending = true

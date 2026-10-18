@@ -41,7 +41,7 @@ function FeedButton:Build()
         local stack = FeedButton.stack
         if not (stack and GameTooltip) then return end
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-        GameTooltip:AddLine(L.Format("Feed %s", stack.name))
+        GameTooltip:AddLine(L.Format("Feed %s", ns.Food.ShownName(stack)))
         GameTooltip:AddLine(L.Format("%s is %s.", FeedButton.petName or L["Your pet"],
             FeedButton.mood or L["hungry"]), 0.7, 0.7, 0.7)
         GameTooltip:Show()
