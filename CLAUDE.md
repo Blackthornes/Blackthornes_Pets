@@ -207,6 +207,24 @@ in chat (food, taming, tamed, help), which are typed only (the owner,
 2026-10-15). The minimap button always shows: no row and no `/bpet
 minimap` (2026-10-15); a saved `minimapHidden` is kept but not read.
 
+## Off, Shift or Always on tooltips
+
+A player asked, the owner said yes (2026-10-18): each tooltip line an
+addon adds is Off, Shift (only while Shift is held) or Always, picked on a
+stepper in Settings. Nobody's settings change: a line that was on reads as
+Always and one that was off as Off. `UI/TooltipShift.lua` is the same file
+in all five addons (a fix to it belongs in all five); `ns.TooltipShift`
+`:Mode`, `:Apply`, `:Shows` (asked every time the tooltip is built) and
+`:Held` (adds "Hold Shift for more." once a tooltip, shared through
+`_G.BlackthornesTooltipShift`, whose one frame redraws GameTooltip on Shift
+only while a line is on Shift). Pets has one line, key `taming`: the
+taming skills on a beast's tooltip ("Taming Skills:", the stepper in
+`controls.tamingTooltip`). Whether it is on stays in `tamingTooltip`; the
+Shift choice is kept account wide in `tooltipShift[key] = true` (never
+rename either; nothing is written until Shift is picked).
+`TamingTooltip:Decorate` answers "held" while it waits. Tested in
+`tools/test_tooltipshift.lua`.
+
 ## German translation
 
 The owner said yes (2026-10-11) to a German translation, piloted here

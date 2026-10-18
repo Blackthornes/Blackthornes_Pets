@@ -438,3 +438,9 @@ L["A note from Blackthornes."] = "来自 Blackthornes 的一段话。"
 L["ABOUT"] = "关于"
 L["HOW THESE ADDONS ARE MADE"] = "这些插件是怎么做的"
 L["How these addons are made, the version, the Discord and the other Blackthornes addons"] = "这些插件是怎么做的、版本、Discord 和其他 Blackthornes 插件"
+
+-- Off, Shift or Always for a tooltip line (UI/TooltipShift.lua).
+L["Off"] = "关"
+L["Shift"] = "Shift"
+L["Always"] = "总是"
+L["Hold Shift for more."] = "按住 Shift 查看更多。"

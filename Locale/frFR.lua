@@ -439,3 +439,9 @@ L["A note from Blackthornes."] = "Un mot de Blackthornes."
 L["ABOUT"] = "À PROPOS"
 L["HOW THESE ADDONS ARE MADE"] = "COMMENT CES ADDONS SONT FAITS"
 L["How these addons are made, the version, the Discord and the other Blackthornes addons"] = "Comment ces addons sont faits, la version, le Discord et les autres addons Blackthornes"
+
+-- Off, Shift or Always for a tooltip line (UI/TooltipShift.lua).
+L["Off"] = "Aucun"
+L["Shift"] = "Maj"
+L["Always"] = "Toujours"
+L["Hold Shift for more."] = "Maintiens Maj pour en voir plus."
