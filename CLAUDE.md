@@ -242,6 +242,21 @@ before the other four. Players are told the language as "Deutsch", or
   `UI/Titanforged.lua` read `ns.L` with an English stand-in, so they still
   work unchanged in an addon without `Locale/`.
 
+## Simplified Chinese translation
+
+The owner said yes (2026-10-18) to Simplified Chinese, piloted here as
+German was, after a player asked for it. It is written by us from the
+English keys: never take a translation file or text from a player or
+anyone outside (the owner turned down a player's zip for safety). Talk to
+the owner about "Simplified Chinese"; the code names are `zhCN` and
+`Locale/zhCN.lua`, which works the same way as `Locale/deDE.lua` (loads
+only when `GetLocale()` is "zhCN"; a missing line shows English). Use the
+game's own Chinese words (宠物, 野兽, 驯服, 野兽训练, 食物, 等级, 码) and
+full-width punctuation. Every new string gets a zhCN line beside its
+deDE line; `tools/check_locale.py` checks both. The fonts come from the
+client (`Theme.FONT` reads `GameFontNormal`), so Chinese shows on a
+Chinese client. Tested in `tools/test_locale.lua`. Not yet seen in game.
+
 ## The house frame (Titanforged)
 
 The owner picked this look for all four addons on 2026-10-04 from two mockups

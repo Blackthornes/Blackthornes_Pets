@@ -16,6 +16,7 @@
 
 Locale\Locale.lua
 Locale\deDE.lua
+Locale\zhCN.lua
 
 Core\Init.lua
 Core\SisterNote.lua
