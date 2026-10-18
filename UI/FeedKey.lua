@@ -267,7 +267,7 @@ function FeedKey:State()
     local andWord = L[", and "]
     if self.mends then absent = (absent and (absent .. andWord) or "") .. L["mends it in combat"] end
     if self.stack then
-        return L.Format("%s feeds %s%s.", bound, self.stack.name, absent and (andWord .. absent) or "")
+        return L.Format("%s feeds %s%s.", bound, ns.Food.ShownName(self.stack), absent and (andWord .. absent) or "")
     end
     if absent then return ("%s %s."):format(bound, absent) end
     return L.Format("%s has nothing to feed: %s", bound, self.why or L["not checked yet."])

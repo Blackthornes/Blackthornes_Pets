@@ -252,8 +252,8 @@ env.chat = {}
 ns.HandleSlash("food")
 local report = env.ChatText()
 suite.check("the report names what the pet eats", report:find("Boar (level 9) eats Meat, Fish, Bread", 1, true), report)
-suite.check("food it eats is listed with the count", report:find("Tough Jerky|r  Meat x4, full", 1, true), report)
-suite.check("food of another diet says why", report:find("Shiny Red Apple|r  Fruit, which it doesn't eat", 1, true), report)
+suite.check("food it eats is listed with the count", report:find("Tough Jerky  Meat x4, full", 1, true), report)
+suite.check("food of another diet says why", report:find("Shiny Red Apple  Fruit, which it doesn't eat", 1, true), report)
 suite.check("everything else is on one line", report:find("not in the food list:|r Linen Cloth", 1, true), report)
 suite.check("and it adds up", report:find("pieces your pet will eat", 1, true), report)
 

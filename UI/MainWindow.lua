@@ -699,6 +699,8 @@ function UI:PlaceFeedButton(stack, beforeCombat)
     if stack and self.frame and self.frame:IsShown() and not UI.Covered() then
         button:SetAttribute("type", "macro")
         button:SetAttribute("macrotext", ns.Food:FeedMacro(stack))
+        -- Plain on the gold face: a rarity colour would not read on it.
+        -- The food card above names it in its colour.
         button:SetText(L.Format("Feed %s", stack.name))
         button:ClearAllPoints()
         -- At the foot of the food card, where the food is.
@@ -906,7 +908,7 @@ function UI:ShowFood(status, top)
         local icon = ItemIcon(best.itemID)
         if icon then self.foodIcon:SetTexture(icon) end
         self.foodCount:SetText(tostring(total))
-        self.foodName:SetText(best.name)
+        self.foodName:SetText(ns.Food.ShownName(best))
         local sub = L.Format("%d in your bags (%s)", total, ns.Food:EffectLabel(best.effect))
         if total < ns.Food.LOW_FOOD then
             sub = sub .. (", |c%s%s|r"):format(ns.COLORS.warn, L["running low"])
