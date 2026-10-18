@@ -73,8 +73,76 @@ suite.check("values named by place go where Chinese puts them",
 suite.check("a word with no Chinese line falls back to English",
     L["A string nobody translated"] == "A string nobody translated")
 
--- Another language that has no file shows English.
+-- A French client.
 ns = env.Load("frFR")
+L = ns.L
+_G.UnitClass = function() return "Chasseur", "HUNTER" end
+ns.UI:Show()
+suite.check("the pets window speaks French", ns.UI.emptyLabel:GetText() == "Aucun familier sorti.",
+    ns.UI.emptyLabel:GetText())
+labels = SettingsLabels(ns)
+suite.check("the settings rows in French", labels["Alerte pour nourrir :"] == true)
+suite.check("and none is left in English (French)", labels["Feed Warning:"] == nil)
+suite.check("the diet words in French", ns.PetFood.Label("Cheese") == "Fromage")
+suite.check("values go where French puts them",
+    L.Format("Only %d food left that %s will eat.", 4, "Sanglier") == "Sanglier n'a plus que 4 nourriture à manger.",
+    L.Format("Only %d food left that %s will eat.", 4, "Sanglier"))
+suite.check("a word with no French line falls back to English",
+    L["A string nobody translated"] == "A string nobody translated")
+
+-- A Spanish (Spain) client.
+ns = env.Load("esES")
+L = ns.L
+_G.UnitClass = function() return "Cazador", "HUNTER" end
+ns.UI:Show()
+suite.check("the pets window speaks Spanish (Spain)", ns.UI.emptyLabel:GetText() == "No tienes mascota fuera.",
+    ns.UI.emptyLabel:GetText())
+labels = SettingsLabels(ns)
+suite.check("the settings rows in Spanish (Spain)", labels["Aviso de comida:"] == true)
+suite.check("and none is left in English (Spanish (Spain))", labels["Feed Warning:"] == nil)
+suite.check("the diet words in Spanish (Spain)", ns.PetFood.Label("Cheese") == "Queso")
+suite.check("values go where Spanish (Spain) puts them",
+    L.Format("Only %d food left that %s will eat.", 4, "Jabalí") == "A Jabalí solo le queda 4 de comida.",
+    L.Format("Only %d food left that %s will eat.", 4, "Jabalí"))
+suite.check("a word with no Spanish (Spain) line falls back to English",
+    L["A string nobody translated"] == "A string nobody translated")
+
+-- A Spanish (Latin America) client.
+ns = env.Load("esMX")
+L = ns.L
+_G.UnitClass = function() return "Cazador", "HUNTER" end
+ns.UI:Show()
+suite.check("the pets window speaks Spanish (Latin America)", ns.UI.emptyLabel:GetText() == "No tienes mascota fuera.",
+    ns.UI.emptyLabel:GetText())
+labels = SettingsLabels(ns)
+suite.check("the settings rows in Spanish (Latin America)", labels["Aviso de comida:"] == true)
+suite.check("and none is left in English (Spanish (Latin America))", labels["Feed Warning:"] == nil)
+suite.check("the diet words in Spanish (Latin America)", ns.PetFood.Label("Cheese") == "Queso")
+suite.check("values go where Spanish (Latin America) puts them",
+    L.Format("Only %d food left that %s will eat.", 4, "Jabalí") == "A Jabalí solo le queda 4 de comida.",
+    L.Format("Only %d food left that %s will eat.", 4, "Jabalí"))
+suite.check("a word with no Spanish (Latin America) line falls back to English",
+    L["A string nobody translated"] == "A string nobody translated")
+
+-- A Russian client.
+ns = env.Load("ruRU")
+L = ns.L
+_G.UnitClass = function() return "Охотник", "HUNTER" end
+ns.UI:Show()
+suite.check("the pets window speaks Russian", ns.UI.emptyLabel:GetText() == "Питомец не призван.",
+    ns.UI.emptyLabel:GetText())
+labels = SettingsLabels(ns)
+suite.check("the settings rows in Russian", labels["Напоминание о корме:"] == true)
+suite.check("and none is left in English (Russian)", labels["Feed Warning:"] == nil)
+suite.check("the diet words in Russian", ns.PetFood.Label("Cheese") == "Сыр")
+suite.check("values go where Russian puts them",
+    L.Format("Only %d food left that %s will eat.", 4, "Кабан") == "Еды, которую ест Кабан, осталось: 4.",
+    L.Format("Only %d food left that %s will eat.", 4, "Кабан"))
+suite.check("a word with no Russian line falls back to English",
+    L["A string nobody translated"] == "A string nobody translated")
+
+-- Another language that has no file shows English.
+ns = env.Load("itIT")
 suite.check("a client in a language with no file shows English", ns.L["Feed"] == "Feed")
 
 _G.UnitClass, _G.GetLocale = nil, nil

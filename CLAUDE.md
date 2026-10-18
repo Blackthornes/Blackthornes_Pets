@@ -257,6 +257,18 @@ deDE line; `tools/check_locale.py` checks both. The fonts come from the
 client (`Theme.FONT` reads `GameFontNormal`), so Chinese shows on a
 Chinese client. Tested in `tools/test_locale.lua`. Not yet seen in game.
 
+## French, Spanish and Russian translations
+
+The owner asked (2026-10-18) for French, Spanish and Russian in every
+addon, beside Simplified Chinese. They follow the same rules as German and
+Simplified Chinese: written by us from the English keys, never from a
+player's or anyone else's file. `Locale/frFR.lua` (informal "tu"),
+`Locale/esES.lua` (one Spanish for both Spanish clients: it loads on
+"esES" and "esMX", neutral words, "tú") and `Locale/ruRU.lua` ("ты"),
+each in the game's own words, yards shown as metres as in German. Every
+new string gets a line in each of the five files; `tools/check_locale.py`
+checks them all. Tested in `tools/test_locale.lua`. Not yet seen in game.
+
 ## The house frame (Titanforged)
 
 The owner picked this look for all four addons on 2026-10-04 from two mockups
