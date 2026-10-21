@@ -119,6 +119,12 @@ function CompendiumUI:Build()
         self:StopMovingOrSizing()
         CompendiumUI:SavePosition()
     end)
+
+    -- The house size grip under the bottom right corner (Widgets.WindowGrip),
+    -- saved as `compendiumScale`.
+    self.sizeGrip = Widgets.WindowGrip(frame, "compendiumScale", function()
+        CompendiumUI:SavePosition()
+    end)
     frame:EnableMouseWheel(true)
     frame:SetScript("OnMouseWheel", function(_, delta) CompendiumUI:ScrollBy(-delta) end)
 
@@ -779,7 +785,9 @@ function CompendiumUI:Refresh()
     if shown == total then
         self.footer:SetText(L.Format("%d beasts", total))
     else
-        self.footer:SetText(L.Format("%d of %d beasts", shown, total))
+        local hidden = total - shown
+        self.footer:SetText(hidden == 1 and L["Your filters hide 1 beast."]
+            or L.Format("Your filters hide %d beasts.", hidden))
     end
 end
 

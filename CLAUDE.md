@@ -306,9 +306,16 @@ It lives in `UI/Titanforged.lua` (`Titanforged:Dress(frame, opts)`,
 stay apart at the 36 px the portrait shows it. The pets window wears the
 full frame; Settings has the plate and close gem but no portrait, which
 would sit over its first heading. The Feed buttons keep their place and
-secure setup and only wear the shared button look. Pets has no Window
-effects setting, so `Motion.Level()` is always "full" and the glint always
-runs; if one is added, the glint and portrait light already follow it.
+secure setup and only wear the shared button look. "Effects:" under
+EFFECTS on the General page (2026-10-21, as Farmer's) picks Full, Subtle
+or Off: `effectsLevel` (nil for Full; account wide, never rename it), read
+by `Motion.Level()`, which the glint and portrait light follow.
+
+Every window wears the house size grip (2026-10-21, as Farmer's):
+`Widgets.WindowGrip(frame, key, done)` scales it 50% to 150% from its top
+left, right-click is normal size. Saved in percent, account wide, never
+renamed: `windowScale`, `compendiumScale`, `settingsScale`. A new window
+gets one too.
 
 ## The Blizzard window style
 
