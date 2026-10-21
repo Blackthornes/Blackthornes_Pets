@@ -505,7 +505,7 @@ function Food:Report()
         return
     end
     if not status.foods then
-        ns.Print(L["food: the client did not say what your pet eats."])
+        ns.Print(L["Couldn't tell what your pet eats yet."])
         return
     end
 
@@ -542,7 +542,7 @@ function Food:Report()
                         unlisted[#unlisted + 1] = { name = name, shown = shown }
                     end
                 else
-                    if why == "no name from the client" then why = L["no name from the client"] end
+                    if why == "no name from the client" then why = L["Name not loaded yet"] end
                     ns.PrintRaw(("  %s%s  %s"):format(shown, Tail(ns.COLORS.muted), why))
                 end
             end
@@ -559,7 +559,7 @@ function Food:Report()
     end
 
     if slots == 0 then
-        ns.Print(L["food: could not read your bags on this client."])
+        ns.Print(L["Couldn't read your bags. Try again in a moment."])
     else
         ns.Print(L.Format("food: %d items in %d slots, %d pieces your pet will eat.",
             items, slots, found))

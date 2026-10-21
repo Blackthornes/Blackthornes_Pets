@@ -223,7 +223,7 @@ suite.check("leaving, the edge and wash are hidden", not hovered.stripe:IsShown(
 
 UI.ticks.raresOnly:GetScript("OnClick")(UI.ticks.raresOnly)
 suite.check("ticking a box is saved", ns.db.compendium.raresOnly == true)
-suite.check("and filters the list", UI.footer:GetText():find(" of ", 1, true), UI.footer:GetText())
+suite.check("and filters the list", UI.footer:GetText():find("Your filters hide", 1, true), UI.footer:GetText())
 
 local before = ns.db.compendium.raresOnly
 ns.db.compendium.raresOnly = false

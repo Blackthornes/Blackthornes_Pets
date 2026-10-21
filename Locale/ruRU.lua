@@ -111,16 +111,11 @@ L["You have no food %s will eat."] = "У тебя нет еды, которую 
 L["your pet"] = "твой питомец"
 L["Only %d food left that %s will eat."] = "Еды, которую ест %2$s, осталось: %1$d."
 L["food: no pet out."] = "еда: питомец не призван."
-L["food: the client did not say what your pet eats."] =
-    "еда: игра не сказала, что ест твой питомец."
 L["food: %s (level %s) eats %s"] = "еда: %s (уровень %s) ест: %s"
 L["item %s"] = "предмет %s"
 L[" (level %s)"] = " (уровень %s)"
 L[", buff food (fed last)"] = ", еда с бонусом (даётся последней)"
-L["no name from the client"] = "игра не дала название"
 L["not in the food list:"] = "нет в списке еды:"
-L["food: could not read your bags on this client."] =
-    "еда: в этой игре не удалось прочитать твои сумки."
 L["food: %d items in %d slots, %d pieces your pet will eat."] =
     "еда: предметов %d, ячеек %d, из них питомец съест %d."
 L["food: %s."] = "еда: %s."
@@ -240,7 +235,6 @@ L["Beasts a hunter can tame."] = "Звери, которых может прир
 L["No beast matches. Untick a box or clear the search."] =
     "Ни один зверь не подходит. Сними галочку или очисти поиск."
 L["%d beasts"] = "Зверей: %d"
-L["%d of %d beasts"] = "Зверей: %d из %d"
 L["open the Pet Compendium: every beast you can tame"] =
     "открыть атлас питомцев: все звери, которых можно приручить"
 
@@ -445,3 +439,14 @@ L["Off"] = "Выкл"
 L["Shift"] = "Shift"
 L["Always"] = "Всегда"
 L["Hold Shift for more."] = "Зажми Shift, чтобы увидеть больше."
+L["Drag to make the window bigger or smaller."] = "Тяни, чтобы сделать окно больше или меньше."
+L["Right-click to go back to normal size."] = "Правый щелчок вернёт обычный размер."
+L["EFFECTS"] = "ЭФФЕКТЫ"
+L["Effects:"] = "Эффекты:"
+L["Full"] = "Полностью"
+L["Subtle"] = "Слабо"
+L["Couldn't tell what your pet eats yet."] = "Пока не удалось узнать, что ест твой питомец."
+L["Couldn't read your bags. Try again in a moment."] = "Не удалось прочитать сумки. Попробуй ещё раз чуть позже."
+L["Name not loaded yet"] = "Имя ещё не загружено"
+L["Your filters hide 1 beast."] = "Фильтры скрывают 1 зверя."
+L["Your filters hide %d beasts."] = "Фильтры скрывают зверей: %d."

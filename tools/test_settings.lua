@@ -55,6 +55,16 @@ local controls = SettingsUI.controls
 
 suite.check("there is no minimap row", controls.minimap == nil)
 
+-- Effects: Full until picked, so nobody's windows change.
+suite.check("effects start at Full", ns.Motion.Level() == "full" and controls.effects.text:GetText() == "Full",
+    controls.effects.text:GetText())
+controls.effects:SetValue(2)
+suite.check("Subtle is kept", ns.db.effectsLevel == "subtle" and ns.Motion.Level() == "subtle")
+controls.effects:SetValue(3)
+suite.check("Off is kept", ns.db.effectsLevel == "off" and ns.Motion.Level() == "off")
+controls.effects:SetValue(1)
+suite.check("Full saves nothing", ns.db.effectsLevel == nil and ns.Motion.Level() == "full")
+
 -- Debug.
 controls.debug:GetScript("OnClick")(controls.debug)
 suite.check("the debug box sets debug", ns.db.debug == true)
