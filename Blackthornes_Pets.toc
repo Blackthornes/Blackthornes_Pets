@@ -3,7 +3,7 @@
 ## Notes: Looks after everything to do with pets for hunters and warlocks.
 ## Author: Blackthornes
 ## Version: @project-version@
-## X-License: MIT
+## X-License: All Rights Reserved
 ## SavedVariables: BlackthornesPetsDB
 ## SavedVariablesPerCharacter: BlackthornesPetsCharDB
 ## IconTexture: Interface\Icons\Ability_Hunter_BeastTaming
