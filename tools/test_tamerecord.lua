@@ -165,7 +165,7 @@ suite.check("a recorded beast's skills come from the record",
     #skills == 2 and skills[1].seen and skills[1].teach == 26184, skills[1] and skills[1].teach)
 suite.check("a skill new to Forever has no Classic teach spell", skills[2].teach == nil)
 _G.IsPlayerSpell = function() return false end
-suite.check("and the spell check is not asked about it", Taming:Knows(skills[2]) == nil)
+suite.check("but Beast Training lists its rank, so the spell check is asked", Taming:Knows(skills[2]) == false)
 _G.IsPlayerSpell = nil
 
 -- The report.

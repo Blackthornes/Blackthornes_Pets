@@ -114,6 +114,7 @@ function SettingsUI:Build()
     end
 
     self.frame = frame
+    if ns.PetsTabs then ns.PetsTabs:Attach(self, "settings") end
     -- The pets window puts its Feed button away while this is open.
     if ns.UI and ns.UI.WatchCover then ns.UI:WatchCover(frame) end
     self.controls = {}
@@ -525,6 +526,7 @@ function SettingsUI:SavePosition()
     ns.db.settingsRelativePoint = relativePoint
     ns.db.settingsX = x
     ns.db.settingsY = y
+    if ns.PetsTabs then ns.PetsTabs:Save(self.frame) end
 end
 
 function SettingsUI:RestorePosition()
@@ -545,9 +547,11 @@ function SettingsUI:Show()
     self:Build()
 
     if not self.frame:IsShown() then
-        self:RestorePosition()
+        local how = ns.PetsTabs and ns.PetsTabs:Take(self)
+        if not how then self:RestorePosition() end
         self.frame:Show()
-        ns.Motion:Open(self.frame)
+        if not how and ns.PetsTabs then ns.PetsTabs:Settle(self.frame) end
+        if how ~= "switch" then ns.Motion:Open(self.frame) end
     end
 
     self:Refresh()

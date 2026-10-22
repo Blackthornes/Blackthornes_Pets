@@ -143,6 +143,8 @@ function UI:Build()
     end
 
     self.frame = frame
+    -- Pet, Compendium and Settings hang below it (UI/PetsTabs.lua).
+    if ns.PetsTabs then ns.PetsTabs:Attach(self, "pet") end
     self:BuildHeader()
 
     local empty = Theme.CreateLabel(frame, "normal", "muted")
@@ -176,8 +178,8 @@ end
 
 --- The header row. The window's name is on the plate across the top edge
 --- and the close gem sits on the top right corner (UI/Titanforged.lua), so
---- the row holds whose pets these are and the Settings button, clear of the
---- portrait on the left.
+--- the row holds whose pets these are, clear of the portrait on the left.
+--- Settings and the Compendium are tabs below the window now.
 function UI:BuildHeader()
     local frame = self.frame
 
@@ -197,19 +199,6 @@ function UI:BuildHeader()
     local subtitle = Theme.CreateLabel(header, "small", "muted")
     subtitle:SetPoint("LEFT", header, "LEFT", 48, -4)
     self.subtitle = subtitle
-
-    -- Below the close gem on the corner.
-    local settings = Widgets.CreateButton(header, L["Settings"], function()
-        if ns.SettingsUI then ns.SettingsUI:Toggle() end
-    end, { width = 70, height = 20 })
-    settings:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
-
-    -- Every beast a hunter can tame (UI/CompendiumWindow.lua).
-    local compendium = Widgets.CreateButton(header, L["Pet Compendium"], function()
-        if ns.CompendiumUI then ns.CompendiumUI:Toggle() end
-    end, { width = 110, height = 20 })
-    compendium:SetPoint("RIGHT", settings, "LEFT", -8, 0)
-    self.compendiumButton = compendium
 end
 
 --------------------------------------------------------------------------------
@@ -639,6 +628,216 @@ function UI:BuildStatus()
         self.fightRows[spec.key] = row
         self.rows[spec.key] = row
     end
+
+    self:BuildSkills()
+end
+
+--------------------------------------------------------------------------------
+-- The skills card
+--
+-- A hunter's pet only (a player asked, the owner said build it from a
+-- mockup, 2026-10-22): under the food and fight cards, what the pet knows,
+-- what it can learn now and what comes later (Logic/PetSkills.lua), and the
+-- nearest pet trainer with Show the Way. The window grows to fit it.
+--------------------------------------------------------------------------------
+
+local SKILL_HEAD = 20
+local SKILL_ROW = 22
+local SKILL_FOOT = 34
+
+--- A section's heading inside the card: its name on the left and what the
+--- right column says.
+local function SkillHeading(card, left, right)
+    local head = CreateFrame("Frame", nil, card)
+    head:SetHeight(SKILL_HEAD)
+    local name = Theme.CreateLabel(head, "tiny", "muted")
+    name:SetPoint("LEFT", 12, -1)
+    name:SetText(left)
+    local value = Theme.CreateLabel(head, "tiny", "muted", "RIGHT")
+    value:SetPoint("RIGHT", -10, -1)
+    value:SetText(right)
+    return head
+end
+
+--- A skill line: dark glass, the skill on the left and its rank, cost or
+--- when on the right. A beast skill lights up under the mouse and opens the
+--- Compendium on the beasts that teach it.
+local function CreateSkillRow(card)
+    local row = CreateFrame("Button", nil, card)
+    row:SetHeight(SKILL_ROW)
+    row.background = Theme.Fill(row, "glass")
+    local line = row:CreateTexture(nil, "BORDER")
+    line:SetPoint("BOTTOMLEFT")
+    line:SetPoint("BOTTOMRIGHT")
+    line:SetHeight(1)
+    line:SetColorTexture(Theme.Unpack("border", 0.6))
+    local edge = row:CreateTexture(nil, "ARTWORK")
+    edge:SetPoint("TOPLEFT")
+    edge:SetPoint("BOTTOMLEFT")
+    edge:SetWidth(2)
+    edge:SetColorTexture(Theme.Unpack("accentHi"))
+    edge:Hide()
+    row.value = Theme.CreateLabel(row, "small", "text", "RIGHT")
+    row.value:SetPoint("RIGHT", -10, 0)
+    row.label = Theme.CreateLabel(row, "normal", "text")
+    row.label:SetPoint("LEFT", 12, 0)
+    row.label:SetPoint("RIGHT", row.value, "LEFT", -10, 0)
+    row.label:SetWordWrap(false)
+
+    row:SetScript("OnEnter", function(self)
+        self.background:SetColorTexture(Theme.Unpack("glassHover"))
+        edge:Show()
+        if self.beast and GameTooltip then
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(self.beast, Theme.Unpack("accent"))
+            GameTooltip:AddLine(L["Click to see the beasts that teach it."], 0.9, 0.9, 0.9, true)
+            GameTooltip:Show()
+        end
+    end)
+    row:SetScript("OnLeave", function(self)
+        self.background:SetColorTexture(Theme.Unpack(self.glassKey or "glass"))
+        edge:Hide()
+        if GameTooltip then GameTooltip:Hide() end
+    end)
+    row:SetScript("OnClick", function(self)
+        if self.beast then UI:ShowBeastsFor(self.beast) end
+    end)
+    return row
+end
+
+function UI:BuildSkills()
+    local card = Glass(self.body, "glassAlt")
+    CardHeading(card, L["SKILLS"])
+    card:Hide()
+    self.skillsCard = card
+    self.skillHeads = {
+        known = SkillHeading(card, L["YOUR PET KNOWS"], L["RANK"]),
+        learn = SkillHeading(card, L["CAN LEARN NOW"], L["COST"]),
+        later = SkillHeading(card, L["LATER"], L["WHEN"]),
+    }
+    self.skillRows = {}
+
+    local foot = CreateFrame("Frame", nil, card)
+    foot:SetHeight(SKILL_FOOT)
+    Theme.Fill(foot, "glass")
+    local way = Widgets.CreateButton(foot, L["Show the Way"], function() UI:ShowTheWayToTrainer() end,
+        { primary = true, width = 100, height = 22 })
+    way:SetPoint("RIGHT", -8, 0)
+    local trainer = Theme.CreateLabel(foot, "small", "muted")
+    trainer:SetPoint("LEFT", 12, 0)
+    trainer:SetPoint("RIGHT", way, "LEFT", -10, 0)
+    trainer:SetWordWrap(false)
+    self.skillFoot, self.skillWay, self.skillTrainer = foot, way, trainer
+end
+
+--- Skills a beast teaches when tamed: those a click looks up in the
+--- Compendium.
+function UI.IsBeastSkill(name)
+    if not UI.beastSkillNames then
+        UI.beastSkillNames = {}
+        for _, skill in pairs(ns.BeastSkills and ns.BeastSkills.SKILLS or {}) do
+            UI.beastSkillNames[skill.name] = true
+        end
+    end
+    return UI.beastSkillNames[name] == true
+end
+
+--- The words on a skill line: { label, value, beast } for each line of a
+--- plan's section. `beast` is set for a skill taming teaches.
+function UI.SkillLines(plan, section)
+    local muted = ns.COLORS.muted
+    local out = {}
+    for _, skill in ipairs(plan[section] or {}) do
+        local name = L.Format("%s Rank %d", skill.name, skill.rank)
+        local label, value = name, nil
+        if section == "known" then
+            value = L.Format("Rank %d", skill.rank)
+            label = skill.name
+        elseif section == "learn" then
+            local from = skill.from == "hunter" and L["from your Beast Training"] or L["from a pet trainer"]
+            label = ("%s |c%s\194\183 %s|r"):format(name, muted, from)
+            if skill.cost then
+                value = skill.cost == 1 and L.Format("%d point", skill.cost) or L.Format("%d points", skill.cost)
+            end
+        else
+            value = skill.level and L.Format("Pet level %d", skill.level) or L["Tame a beast that knows it"]
+        end
+        out[#out + 1] = { label = label, value = value or "", beast = UI.IsBeastSkill(skill.name) and skill.name or nil,
+            muted = section == "later" }
+    end
+    return out
+end
+
+--- Lay the skills card out from `top` (below the cards above it). Returns
+--- how tall it is, or nil when it has nothing to show and is hidden.
+function UI:ShowSkills(plan, trainer, top)
+    local card = self.skillsCard
+    local any = plan and (#plan.known + #plan.learn + #plan.later > 0)
+    if not (any or trainer) then
+        card:Hide()
+        return nil
+    end
+    card:ClearAllPoints()
+    card:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, top)
+    card:SetPoint("TOPRIGHT", self.body, "TOPRIGHT", 0, top)
+    card:Show()
+
+    local y, used = -(CARD_HEAD + 1), 0
+    for _, section in ipairs({ "known", "learn", "later" }) do
+        local head = self.skillHeads[section]
+        local lines = plan and UI.SkillLines(plan, section) or {}
+        head:SetShown(#lines > 0)
+        if #lines > 0 then
+            head:ClearAllPoints()
+            head:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
+            head:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y)
+            y = y - SKILL_HEAD
+            for index, line in ipairs(lines) do
+                used = used + 1
+                local row = self.skillRows[used]
+                if not row then
+                    row = CreateSkillRow(card)
+                    self.skillRows[used] = row
+                end
+                row.glassKey = index % 2 == 1 and "glass" or "glassAlt"
+                row.background:SetColorTexture(Theme.Unpack(row.glassKey))
+                row.label:SetText(line.label)
+                row.value:SetText(line.value)
+                row.value:SetTextColor(Theme.Unpack(line.muted and "muted" or "text"))
+                row.beast = line.beast
+                row:ClearAllPoints()
+                row:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
+                row:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y)
+                row:Show()
+                y = y - SKILL_ROW
+            end
+        end
+    end
+    for i = used + 1, #self.skillRows do self.skillRows[i]:Hide() end
+
+    self.skillTrainerPlace = trainer
+    self.skillFoot:SetShown(trainer ~= nil)
+    if trainer then
+        self.skillTrainer:SetText(L.Format("Pet trainer: %s", ("%s, %s"):format(trainer.name, trainer.zone)))
+        self.skillFoot:ClearAllPoints()
+        self.skillFoot:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y - 2)
+        self.skillFoot:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y - 2)
+        y = y - 2 - SKILL_FOOT
+    end
+    return -y + 2
+end
+
+--- Show the Way: the beast arrow points at the nearest pet trainer.
+function UI:ShowTheWayToTrainer()
+    local trainer = self.skillTrainerPlace or (ns.PetSkills and ns.PetSkills:Trainer())
+    if trainer and ns.BeastArrow then ns.BeastArrow:FollowPlace(trainer) end
+end
+
+--- A click on a beast skill: the Compendium, searching for that skill.
+function UI:ShowBeastsFor(name)
+    local window = ns.CompendiumUI
+    if not (window and window.ShowSearch) then return end
+    window:ShowSearch(name)
 end
 
 --- The Feed button. It is a secure action button, because casting Feed Pet
@@ -943,9 +1142,9 @@ function UI:ShowFood(status, top)
         y = y - 34
     end
 
-    LayRows(card, self.foodRows, FOOD_ROWS, { foods = ns.PetStatus:FoodText(status) },
+    y = LayRows(card, self.foodRows, FOOD_ROWS, { foods = ns.PetStatus:FoodText(status) },
         y, self.cardWidth - 2)
-    return stacks
+    return stacks, y
 end
 
 --- The fight card: damage a second and a hit large, then the rest.
@@ -977,7 +1176,7 @@ function UI:ShowFight(stats, top, full)
         y = y - BAND_HEIGHT
     end
 
-    LayRows(card, self.fightRows, FIGHT_ROWS, {
+    return LayRows(card, self.fightRows, FIGHT_ROWS, {
         health = PetStatus:HealthText(stats),
         speed = PetStatus:SpeedText(stats),
         attackPower = PetStatus:AttackPowerText(stats),
@@ -1002,16 +1201,58 @@ function UI:ShowStatus(status)
     if y < -(HERO_HEIGHT + GAP) then y = y - GAP + 4 end
 
     local stats = ns.PetStatus:ReadStats()
+    local stacks, foodEnd, fightEnd
     if status.foods then
         self.foodCard:Show()
-        local stacks = self:ShowFood(status, y)
-        self:ShowFight(stats, y, false)
-        self:PlaceFeedButton(stacks[1])
+        stacks, foodEnd = self:ShowFood(status, y)
+        fightEnd = self:ShowFight(stats, y, false)
     else
         self.foodCard:Hide()
-        self:ShowFight(stats, y, true)
-        self:PlaceFeedButton(nil)
+        fightEnd = self:ShowFight(stats, y, true)
     end
+    self:ShowSkillsUnder(y, stacks and stacks[1], foodEnd, fightEnd)
+    self:PlaceFeedButton(stacks and stacks[1] or nil)
+end
+
+--- The skills card under the food and fight cards. With it, the two cards
+--- are as tall as the fuller of them, the skills card fills what is left
+--- and the window grows to fit, never below its usual height. Without it,
+--- the cards fill the window as they always have.
+function UI:ShowSkillsUnder(top, feeding, foodEnd, fightEnd)
+    local plan = ns.PetSkills and ns.PetSkills:Current()
+    local trainer = plan and ns.PetSkills:Trainer()
+    if not (plan or trainer) then
+        self.skillsCard:Hide()
+        self:SetPetHeight(HEIGHT)
+        return
+    end
+    local cardsHeight = -(fightEnd or 0) + 6
+    if foodEnd then
+        cardsHeight = math.max(cardsHeight, -foodEnd + (feeding and 38 or 6))
+    end
+    for _, card in ipairs({ self.foodCard, self.fightCard }) do
+        if card:IsShown() then
+            local left = card == self.fightCard and self.foodCard:IsShown()
+            card:ClearAllPoints()
+            card:SetPoint(left and "TOPRIGHT" or "TOPLEFT", self.body, left and "TOPRIGHT" or "TOPLEFT", 0, top)
+            card:SetHeight(cardsHeight)
+        end
+    end
+    local skillsTop = top - cardsHeight - GAP
+    local skillsHeight = self:ShowSkills(plan, trainer, skillsTop)
+    if not skillsHeight then
+        self:SetPetHeight(math.max(HEIGHT, HEADER + GAP + (-top + cardsHeight) + FOOT))
+        return
+    end
+    local needed = HEADER + GAP + (-skillsTop + skillsHeight) + FOOT
+    self.skillsCard:SetPoint("BOTTOMRIGHT", self.body, "BOTTOMRIGHT", 0, 0)
+    self:SetPetHeight(math.max(HEIGHT, needed))
+end
+
+--- How tall the window is on the Pet tab.
+function UI:SetPetHeight(height)
+    self.petHeight = height
+    if self.frame then self.frame:SetHeight(height) end
 end
 
 --------------------------------------------------------------------------------
@@ -1063,6 +1304,7 @@ function UI:SavePosition()
     if not (ns.db and self.frame) then return end
     local point, _, relativePoint, x, y = self.frame:GetPoint()
     ns.db.point, ns.db.relativePoint, ns.db.x, ns.db.y = point, relativePoint, x, y
+    if ns.PetsTabs then ns.PetsTabs:Save(self.frame) end
 end
 
 function UI:RestorePosition()
@@ -1076,11 +1318,17 @@ end
 function UI:Show()
     self:Build()
     if not self.frame:IsShown() then
-        self:RestorePosition()
+        -- Opened from another tab, it takes that tab's place and does not
+        -- open again with a flourish: it is the same window.
+        local how = ns.PetsTabs and ns.PetsTabs:Take(self)
+        if not how then self:RestorePosition() end
         self.frame:Show()
-        ns.Motion:Open(self.frame)
-        -- A light runs round the portrait as it opens.
-        if ns.Titanforged then ns.Titanforged:Opened(self.frame) end
+        if not how and ns.PetsTabs then ns.PetsTabs:Settle(self.frame) end
+        if how ~= "switch" then
+            ns.Motion:Open(self.frame)
+            -- A light runs round the portrait as it opens.
+            if ns.Titanforged then ns.Titanforged:Opened(self.frame) end
+        end
     end
     self:Refresh()
 end

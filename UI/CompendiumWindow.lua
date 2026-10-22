@@ -101,7 +101,7 @@ function CompendiumUI:Build()
 
     if ns.Titanforged then
         local trim = ns.Titanforged:Dress(frame, {
-            title = L["Pet Compendium"],
+            title = "Blackthornes Pets",
             portrait = true,
             close = function() CompendiumUI:Hide() end,
         })
@@ -133,6 +133,7 @@ function CompendiumUI:Build()
     end
 
     self.frame = frame
+    if ns.PetsTabs then ns.PetsTabs:Attach(self, "compendium") end
     -- The pets window puts its Feed button away while this is open.
     if ns.UI and ns.UI.WatchCover then ns.UI:WatchCover(frame) end
     self:BuildHeader()
@@ -177,16 +178,12 @@ function CompendiumUI:BuildHeader()
     subtitle:SetPoint("LEFT", header, "LEFT", 48, -4)
     self.subtitle = subtitle
 
-    local settings = Widgets.CreateButton(header, L["Settings"], function()
-        if ns.SettingsUI then ns.SettingsUI:Toggle() end
-    end, { width = 70, height = 20 })
-    settings:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
-
-    -- The beast arrow: lit green while it is up.
+    -- The beast arrow: lit green while it is up. Settings is a tab below
+    -- the window now (UI/PetsTabs.lua).
     local arrow = Widgets.CreateButton(header, L["Arrow"], function()
         if ns.BeastArrow then ns.HandleSlash(ns.BeastArrow.IsOn() and "arrow off" or "arrow on") end
     end, { width = 60, height = 20 })
-    arrow:SetPoint("RIGHT", settings, "LEFT", -8, 0)
+    arrow:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
     arrow:HookScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
         GameTooltip:AddLine(L["Beast arrow"], Theme.Unpack("accent"))
@@ -800,6 +797,7 @@ function CompendiumUI:SavePosition()
     local point, _, relativePoint, x, y = self.frame:GetPoint()
     local o = self:Options()
     o.point, o.relativePoint, o.x, o.y = point, relativePoint, x, y
+    if ns.PetsTabs then ns.PetsTabs:Save(self.frame) end
 end
 
 function CompendiumUI:RestorePosition()
@@ -812,10 +810,14 @@ end
 function CompendiumUI:Show()
     self:Build()
     if not self.frame:IsShown() then
-        self:RestorePosition()
+        local how = ns.PetsTabs and ns.PetsTabs:Take(self)
+        if not how then self:RestorePosition() end
         self.frame:Show()
-        ns.Motion:Open(self.frame)
-        if ns.Titanforged then ns.Titanforged:Opened(self.frame) end
+        if not how and ns.PetsTabs then ns.PetsTabs:Settle(self.frame) end
+        if how ~= "switch" then
+            ns.Motion:Open(self.frame)
+            if ns.Titanforged then ns.Titanforged:Opened(self.frame) end
+        end
     end
     self:Refresh()
 end
@@ -845,13 +847,19 @@ function CompendiumUI:Toggle()
     end
 end
 
+--- Open the compendium searching for `text` (a beast, a zone or a skill),
+--- from the first row.
+function CompendiumUI:ShowSearch(text)
+    self.searchText = tostring(text or ""):match("^%s*(.-)%s*$")
+    self:Show()
+    if self.search then self.search:SetText(self.searchText) end
+    self.offset = 0
+    self:Refresh()
+end
+
 ns.RegisterCommand("compendium", L["open the Pet Compendium: every beast you can tame"], function(rest)
     if type(rest) == "string" and rest:match("%S") then
-        CompendiumUI.searchText = rest:match("^%s*(.-)%s*$")
-        CompendiumUI:Show()
-        if CompendiumUI.search then CompendiumUI.search:SetText(CompendiumUI.searchText) end
-        CompendiumUI.offset = 0
-        CompendiumUI:Refresh()
+        CompendiumUI:ShowSearch(rest)
         return
     end
     CompendiumUI:Toggle()
