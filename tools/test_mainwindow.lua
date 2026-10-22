@@ -94,8 +94,12 @@ suite.check("a hunter's pet has the food card", UI.foodCard:IsShown())
 suite.check("beside the fight card", UI.fightCard._point[1] == "BOTTOMRIGHT"
     and UI.fightCard._width == UI.cardWidth)
 
+-- The chips sit under the family and level line, not over it.
+suite.check("the mood chip sits under the level line",
+    UI.moodChip._point[2] == rows.pet.value and UI.moodChip._point[3] == "BOTTOMLEFT", UI.moodChip._point[3])
+
 -- The meters stack under the top card, the cards under them.
-local metersEnd = -(64 + 10) - 3 * 24
+local metersEnd = -(76 + 10) - 3 * 24
 suite.check("the loyalty bar is the third",
     UI.meters.loyalty._point[5] == metersEnd + 24, UI.meters.loyalty._point[5])
 

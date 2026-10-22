@@ -24,7 +24,7 @@ local WIDTH = 540
 -- Tall enough for a hunter's pet card: the top card, three bars and the
 -- two cards under them, with room for a wrapped line or two. One size for
 -- every pet, so the window never jumps as a pet is called or dismissed.
-local HEIGHT = 440
+local HEIGHT = 452
 
 -- The pet card (the owner asked 2026-10-17, from a mockup): the pet on a
 -- gold-edged card at the top, its experience, happiness and loyalty as bars
@@ -32,7 +32,9 @@ local HEIGHT = 440
 -- fights. A warlock's demon has no food card, so its fight card is the
 -- whole width.
 local GAP = 10
-local HERO_HEIGHT = 64
+-- Tall enough for the name, the family and level line and the chips under
+-- it, each on its own line (the chips once sat over the level line).
+local HERO_HEIGHT = 76
 local PORTRAIT = 46
 local METER_HEIGHT = 24
 local METER_X = 108
@@ -461,7 +463,7 @@ function UI:BuildStatus()
     self.levelBadge, self.levelLabel = badge, level
 
     local name = Theme.CreateLabel(hero, "title", "accentHi")
-    name:SetPoint("TOPLEFT", portrait, "TOPRIGHT", 14, 1)
+    name:SetPoint("TOPLEFT", hero, "TOPLEFT", 12 + PORTRAIT + 14, -11)
     name:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
     self.nameLabel = name
 
@@ -471,7 +473,7 @@ function UI:BuildStatus()
     self.rows.pet = { value = sub }
 
     self.moodChip = CreateChip(hero)
-    self.moodChip:SetPoint("BOTTOMLEFT", portrait, "BOTTOMRIGHT", 14, -1)
+    self.moodChip:SetPoint("TOPLEFT", sub, "BOTTOMLEFT", 0, -5)
     self.trainingChip = CreateChip(hero)
     self.trainingChip:SetPoint("LEFT", self.moodChip, "RIGHT", 6, 0)
     self.rows.training = { value = self.trainingChip.label }
@@ -839,7 +841,7 @@ function UI:ShowHero(status)
     if mood then
         self.trainingChip:SetPoint("LEFT", self.moodChip, "RIGHT", 6, 0)
     else
-        self.trainingChip:SetPoint("BOTTOMLEFT", self.portrait, "BOTTOMRIGHT", 15, 0)
+        self.trainingChip:SetPoint("TOPLEFT", self.rows.pet.value, "BOTTOMLEFT", 0, -5)
     end
 end
 
