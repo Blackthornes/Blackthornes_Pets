@@ -157,16 +157,47 @@ function Taming:HasRecord()
     return record ~= nil and record.readAt ~= nil
 end
 
---- true, false, or nil when nothing can say.
+--- The spell the hunter learns for each rank of each skill, by the data's
+--- English name: { [name] = { [rank] = teach } }. Laid out once.
+function Taming:Ranks()
+    if self.ranks then return self.ranks end
+    local ranks = {}
+    for _, skill in pairs(ns.BeastSkills.SKILLS) do
+        ranks[skill.name] = ranks[skill.name] or {}
+        ranks[skill.name][skill.rank] = skill.teach
+    end
+    self.ranks = ranks
+    return ranks
+end
+
+--- true, false, or nil when nothing can say. A rank counts as known when it
+--- or a higher rank of the same skill is: the game stops calling a lower
+--- rank known once the next one is learned. The same name and rank always
+--- gets the same answer, whatever list it came from.
 function Taming:Knows(skill)
+    local name = self:EnglishName(skill.name)
+    local rank = tonumber(skill.rank) or 1
     local record = Record()
-    if record and record.known[Key(skill.name, skill.rank)] then return true end
+    if record then
+        for key in pairs(record.known) do
+            local knownName, knownRank = key:match("^(.-)#(%d+)$")
+            if knownName == name and tonumber(knownRank) >= rank then return true end
+        end
+    end
+
+    local teaches = {}
+    for r, teach in pairs(self:Ranks()[name] or {}) do
+        if r >= rank then teaches[#teaches + 1] = teach end
+    end
+    if skill.teach and #teaches == 0 then teaches[1] = skill.teach end
 
     local spellSays
-    for _, api in ipairs(skill.teach and { "IsPlayerSpell", "IsSpellKnown" } or {}) do
-        local known = Call(api, skill.teach)
-        if known == true then return true end
-        if known == false then spellSays = false end
+    for _, teach in ipairs(teaches) do
+        for _, api in ipairs({ "IsPlayerSpell", "IsSpellKnown" }) do
+            local known = Call(api, teach)
+            if known == true then return true end
+            if known == false then spellSays = false end
+        end
     end
 
     if record and record.readAt then return false end

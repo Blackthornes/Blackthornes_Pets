@@ -50,6 +50,12 @@ _G.IsPlayerSpell = function(id) return known[id] == true end
 suite.check("the spell check can say no", Taming:Knows(charge) == false)
 known[7370] = true
 suite.check("and yes", Taming:Knows(charge) == true)
+local claw1 = Data.SKILLS[16827]
+known[2981] = true
+suite.check("knowing Claw 2 means Claw 1 is known too", Taming:Knows(claw1) == true)
+suite.check("but not Claw 3", Taming:Knows(Data.SKILLS[16829]) == false)
+suite.check("a Claw 1 with no spell to check says the same",
+    Taming:Knows({ name = "Claw", rank = 1 }) == true)
 _G.IsPlayerSpell = function() error("secret value") end
 suite.check("a spell check that raises says nothing", Taming:Knows(charge) == nil)
 _G.IsPlayerSpell = nil
@@ -67,7 +73,11 @@ suite.check("reads the Beast Training window", Taming:ReadBeastTraining() == 2)
 suite.check("and remembers it on the character", ns.charDB.beastTraining.known["Charge#1"] == true)
 suite.check("a skill in it is known", Taming:Knows(charge) == true)
 suite.check("once read, a skill missing from it is not known",
-    Taming:Knows(Data.SKILLS[17253]) == false)
+    Taming:Knows(Data.SKILLS[17256]) == false)
+suite.check("a lower rank of a skill in it is known", Taming:Knows(Data.SKILLS[17253]) == true)
+suite.check("a skill named with no spell to check gets the same answer",
+    Taming:Knows({ name = "Bite", rank = 1, forever = true }) == true
+    and Taming:Knows({ name = "Bite", rank = 3, forever = true }) == false)
 crafts = { { "Enchant Bracer - Stamina", "", "optimal" } }
 suite.check("an enchanting window is not read", Taming:ReadBeastTraining() == nil)
 suite.check("and forgets nothing", Taming:Knows(charge) == true)
@@ -88,7 +98,7 @@ local tip = Tooltip()
 _G.GameTooltip = tip
 local unitClass = "HUNTER"
 _G.UnitClass = function() return "Hunter", unitClass end
-_G.IsPlayerSpell = function(id) return id == 26184 end -- Charge (Rank 2)
+_G.IsPlayerSpell = function(id) return id == 7370 end -- Charge (Rank 1)
 for _, module in ipairs(ns.moduleOrder) do
     if module.OnEnable then module:OnEnable() end
 end
@@ -115,13 +125,13 @@ suite.check("found a beast that teaches Charge (Rank 2)", charge2 ~= nil)
 suite.check("the lines go on a hunter's tooltip", Hover(charge2) == "added")
 local text = table.concat(tip._lines, "\n")
 suite.check("under a heading", text:find("Taming teaches", 1, true), text)
-suite.check("a known skill is green and says so",
-    text:find("|c" .. ns.COLORS.good .. "   Charge (Rank 2)|r || |c" .. ns.COLORS.good .. "Known|r", 1, true), text)
+suite.check("a skill not known is red and says so",
+    text:find("|c" .. ns.COLORS.bad .. "   Charge (Rank 2)|r || |c" .. ns.COLORS.bad .. "Not known|r", 1, true), text)
 
 suite.check("a beast teaching Charge (Rank 1) is added", Hover(3099) == "added")
 text = table.concat(tip._lines, "\n")
-suite.check("a skill not known is red and says so",
-    text:find("|c" .. ns.COLORS.bad .. "   Charge (Rank 1)|r || |c" .. ns.COLORS.bad .. "Not known|r", 1, true), text)
+suite.check("a known skill is green and says so",
+    text:find("|c" .. ns.COLORS.good .. "   Charge (Rank 1)|r || |c" .. ns.COLORS.good .. "Known|r", 1, true), text)
 suite.check("no hint while the client can tell", not text:find("Beast Training", 1, true), text)
 
 suite.check("two skills get a line each", Hover(pairNpc) == "added" and #tip._lines == 3, #tip._lines)
