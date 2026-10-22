@@ -90,8 +90,15 @@ end
 -- What it follows
 --------------------------------------------------------------------------------
 
---- The beast the arrow follows: its compendium entry, or nil.
+--- The beast the arrow follows: its compendium entry, or nil. A place
+--- followed instead (the pet trainer, from the Skills card) comes back
+--- shaped like an entry, with `place` set.
 function BeastArrow:Beast()
+    local place = ns.charDB and ns.charDB.arrowPlace
+    if type(place) == "table" and type(place.zone) == "string" then
+        return { id = "place:" .. tostring(place.id or place.name), name = place.name, zone = place.zone,
+            x = tonumber(place.x), y = tonumber(place.y), place = true, npc = tonumber(place.id) }
+    end
     local id = ns.charDB and tonumber(ns.charDB.arrowBeast)
     if not (id and ns.Compendium) then return nil end
     local ok, entry = pcall(ns.Compendium.Get, ns.Compendium, id)
@@ -104,6 +111,7 @@ function BeastArrow:Follow(entry)
     if type(entry) ~= "table" or not tonumber(entry.id) then return false end
     if not entry.zone then return false end
     ns.charDB.arrowBeast = tonumber(entry.id)
+    ns.charDB.arrowPlace = nil
     if not BeastArrow.IsOn() then
         self:SetOn(true)
     elseif ns.BeastArrowUI and ns.BeastArrowUI.Claim then
@@ -113,10 +121,42 @@ function BeastArrow:Follow(entry)
     return true
 end
 
---- Stop following any beast.
-function BeastArrow:Clear()
-    if ns.charDB then ns.charDB.arrowBeast = nil end
+--- Follow a place that is not a beast: { id (an NPC), name, zone, x, y },
+--- x and y 0-100. Kept per character in `arrowPlace` until it is reached,
+--- cleared or a beast is followed. False with no zone.
+function BeastArrow:FollowPlace(place)
+    if type(place) ~= "table" or type(place.zone) ~= "string" then return false end
+    ns.charDB.arrowPlace = { id = tonumber(place.id), name = place.name, zone = place.zone,
+        x = tonumber(place.x), y = tonumber(place.y) }
+    if not BeastArrow.IsOn() then
+        self:SetOn(true)
+    elseif ns.BeastArrowUI and ns.BeastArrowUI.Claim then
+        ns.BeastArrowUI:Claim()
+    end
     self:Changed()
+    return true
+end
+
+--- Stop following any beast or place.
+function BeastArrow:Clear()
+    if ns.charDB then ns.charDB.arrowBeast, ns.charDB.arrowPlace = nil, nil end
+    self:Changed()
+end
+
+--- A trainer's window opened: if the arrow led to that trainer, it is put
+--- away, since you are there.
+function BeastArrow:OnTrainer()
+    local place = ns.charDB and ns.charDB.arrowPlace
+    if type(place) ~= "table" then return end
+    local npc = ns.Taming:NpcID(Read(_G.UnitGUID, "npc"))
+    if npc and npc == tonumber(place.id) then
+        ns.charDB.arrowPlace = nil
+        self:Changed()
+    end
+end
+
+function BeastArrow:OnEnable()
+    ns.RegisterEvent(self, "TRAINER_SHOW", self.OnTrainer)
 end
 
 --- A beast was just tamed (TameRecord:Capture): if the arrow was following
@@ -125,7 +165,7 @@ end
 --- True when it was.
 function BeastArrow:Tamed(npcID, name)
     local followed = ns.charDB and tonumber(ns.charDB.arrowBeast)
-    if not followed then return false end
+    if not followed or ns.charDB.arrowPlace then return false end
     local entry = self:Beast()
     local same = tonumber(npcID) == followed
     if not same and type(name) == "string" and entry and type(entry.name) == "string" then
@@ -368,6 +408,7 @@ function BeastArrow.Note(target, entry)
     if target.far then return L.Format("Far from here. Head for %s", target.zone or L["it"]), "muted" end
     if target.here then return L["No exact spot for it in this zone yet"], "accent" end
     if target.area then return L["The middle of the zone, since there's no exact spot yet"], "accent" end
+    if entry and entry.place then return L["Pet trainer"], "good" end
     local why = ns.Compendium and ns.Compendium.ForeverText and ns.Compendium.ForeverText(entry)
     if why then return why, "good" end
     return L["Where it lived in Classic"], "muted"

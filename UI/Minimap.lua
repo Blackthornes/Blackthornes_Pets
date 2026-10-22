@@ -24,7 +24,9 @@ local ICON = [[Interface\Icons\Ability_Hunter_BeastTaming]]
 --- What a left-click does: the main window once there is one, the settings
 --- page until then.
 function MinimapButton:Open()
-    if ns.UI and ns.UI.Toggle then
+    if ns.PetsTabs then
+        ns.PetsTabs:Toggle()
+    elseif ns.UI and ns.UI.Toggle then
         ns.UI:Toggle()
     elseif ns.SettingsUI then
         ns.SettingsUI:Toggle()

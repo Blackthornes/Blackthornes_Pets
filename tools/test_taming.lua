@@ -69,7 +69,7 @@ local crafts = {
 }
 _G.GetNumCrafts = function() return #crafts end
 _G.GetCraftInfo = function(i) return unpack(crafts[i]) end
-suite.check("reads the Beast Training window", Taming:ReadBeastTraining() == 2)
+suite.check("reads the Beast Training window, Growl too", Taming:ReadBeastTraining() == 3)
 suite.check("and remembers it on the character", ns.charDB.beastTraining.known["Charge#1"] == true)
 suite.check("a skill in it is known", Taming:Knows(charge) == true)
 suite.check("once read, a skill missing from it is not known",

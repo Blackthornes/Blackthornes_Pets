@@ -76,14 +76,30 @@ function Taming:SkillNames()
     if self.skillNames then return self.skillNames end
     local names, any = {}, false
     local canAsk = Resolve("C_Spell.GetSpellName") ~= nil
-    for spell, skill in pairs(ns.BeastSkills.SKILLS) do
-        names[skill.name] = skill.name
-        for _, id in ipairs(canAsk and { spell, skill.teach } or {}) do
+    local function Learn(english, ids)
+        names[english] = english
+        for _, id in ipairs(canAsk and ids or {}) do
             local name = Call("C_Spell.GetSpellName", id)
             if type(name) == "string" and name ~= "" then
                 any = true
-                names[name] = names[name] or skill.name
+                names[name] = names[name] or english
             end
+        end
+    end
+    for spell, skill in pairs(ns.BeastSkills.SKILLS) do
+        Learn(skill.name, { spell, skill.teach })
+    end
+    -- Every skill Beast Training teaches (Data/PetTraining.lua), Growl and
+    -- the trainer's ones too: one rank each is enough to learn the name.
+    for english, skill in pairs(ns.PetTrainingData and ns.PetTrainingData.SKILLS or {}) do
+        if not names[english] then
+            local first
+            for rank, row in pairs(skill) do
+                if type(rank) == "number" and (not first or rank < first.rank) then
+                    first = { rank = rank, spell = row.spell, teach = row.teach }
+                end
+            end
+            Learn(english, first and { first.spell, first.teach } or {})
         end
     end
     self.skillNameTries = (self.skillNameTries or 0) + 1
@@ -158,13 +174,22 @@ function Taming:HasRecord()
 end
 
 --- The spell the hunter learns for each rank of each skill, by the data's
---- English name: { [name] = { [rank] = teach } }. Laid out once.
+--- English name: { [name] = { [rank] = teach } }, from both data files.
+--- Laid out once.
 function Taming:Ranks()
     if self.ranks then return self.ranks end
     local ranks = {}
     for _, skill in pairs(ns.BeastSkills.SKILLS) do
         ranks[skill.name] = ranks[skill.name] or {}
         ranks[skill.name][skill.rank] = skill.teach
+    end
+    for name, skill in pairs(ns.PetTrainingData and ns.PetTrainingData.SKILLS or {}) do
+        for rank, row in pairs(skill) do
+            if type(rank) == "number" then
+                ranks[name] = ranks[name] or {}
+                ranks[name][rank] = ranks[name][rank] or row.teach
+            end
+        end
     end
     self.ranks = ranks
     return ranks

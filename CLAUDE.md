@@ -204,6 +204,34 @@ Keep the global, `Butler` and `Advise(itemID)` with these fields stable; if
 one has to change, change Butler's `Logic/Sisters.lua` too. Tested in
 `tools/test_butler.lua`.
 
+## The Skills card and one window with tabs
+
+A player asked, the owner said build it from a mockup (2026-10-22).
+
+The pets window has a SKILLS card for a hunter's pet: YOUR PET KNOWS
+(RANK), CAN LEARN NOW (COST, in training points, and whether Beast
+Training or a pet trainer teaches it) and LATER (WHEN: a pet level, or a
+beast to tame), then "Pet trainer: NAME, ZONE" and Show the Way, which
+points the beast arrow at the nearest pet trainer of your side
+(`BeastArrow:FollowPlace`, kept per character in `arrowPlace`, never
+rename it; opening that trainer's window puts it away, `OnTrainer`). A
+skill taming teaches opens the Compendium searching for it
+(`CompendiumUI:ShowSearch`). `Logic/PetSkills.lua` works it out
+(`Plan`, `Known` from the pet's spell book or bar, `Trainer`), read only
+and in a pcall. `Data/PetTraining.lua` holds every rank (pet level,
+cost, families, which a trainer teaches) and the pet trainers, written by
+`tools/make_pet_training.py` from the Forever client's game tables and
+Classic data; never edit it by hand. Tested in `tools/test_petskills.lua`.
+
+Pet, Compendium and Settings are one window with hanging tabs
+(`UI/PetsTabs.lua`). Each is still its own window with its own size and
+grip; only one shows, and each opens where the last stood, top left
+corner on top left corner, kept account wide in `windowLeft` and
+`windowTop` (never rename them). The plate reads "Blackthornes Pets" on
+every tab. The minimap button's click is `PetsTabs:Toggle()`; `/bpet
+compendium` opens the Compendium tab. The Feed button and the arrow are
+unchanged. Tested in `tools/test_petstabs.lua`. Not yet seen in game.
+
 ## The settings pages (from Tradeskills)
 
 The owner asked (2026-10-09) for Tradeskills' Settings upgrade in Pets,

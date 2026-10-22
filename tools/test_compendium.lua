@@ -208,7 +208,7 @@ local UI = ns.CompendiumUI
 ns.HandleSlash("compendium")
 suite.check("/bpet compendium opens it", UI.frame and UI.frame:IsShown())
 suite.check("it wears the house frame", UI.frame.titan and UI.frame.titan.plate.label:GetText()
-    == "Pet Compendium")
+    == "Blackthornes Pets")
 suite.check("the first row is filled", UI.rows[1]:IsShown() and UI.rows[1].name:GetText() ~= "")
 suite.check("the footer counts the beasts", UI.footer:GetText():find("beasts", 1, true))
 
@@ -315,8 +315,9 @@ ns.SettingsUI.controls.openCompendium:GetScript("OnClick")(ns.SettingsUI.control
 suite.check("Settings has a button for it", UI.frame:IsShown())
 ns.CompendiumUI:Hide()
 ns.UI:Show()
-ns.UI.compendiumButton:GetScript("OnClick")(ns.UI.compendiumButton)
-suite.check("so does the pets window", UI.frame:IsShown())
+suite.check("the Pet tab opens", ns.UI.frame:IsShown())
+ns.PetsTabs:Open("compendium")
+suite.check("so does its tab", UI.frame:IsShown() and not ns.UI.frame:IsShown())
 
 -- The tame record notes where a beast was tamed and what it is.
 local map = {

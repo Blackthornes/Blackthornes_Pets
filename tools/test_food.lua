@@ -215,17 +215,22 @@ local function Fire(window, script)
     local fn = frame:GetScript(script)
     if fn then fn(frame) end
 end
+-- Settings and the Compendium are tabs of one window now: opening either
+-- puts the Pet tab away, and the Feed button goes with it.
 ns.SettingsUI:Show()
-Fire(ns.SettingsUI, "OnShow")
-suite.check("Settings open puts the Feed button away", not UI.feedButton:IsShown())
-ns.SettingsUI:Hide()
-Fire(ns.SettingsUI, "OnHide")
-suite.check("and closing it brings it back", UI.feedButton:IsShown())
+Fire(ns.UI, "OnHide")
+suite.check("Settings open puts the Pet tab away", not UI.frame:IsShown())
+suite.check("and the Feed button with it", not UI.feedButton:IsShown())
+ns.PetsTabs:Open("pet")
+Fire(ns.UI, "OnShow")
+UI:Refresh()
+suite.check("the Pet tab takes Settings' place", not ns.SettingsUI.frame:IsShown())
+suite.check("and the Feed button comes back", UI.feedButton:IsShown())
 ns.CompendiumUI:Show()
-Fire(ns.CompendiumUI, "OnShow")
+Fire(ns.UI, "OnHide")
 suite.check("so does the Compendium", not UI.feedButton:IsShown())
-ns.CompendiumUI:Hide()
-Fire(ns.CompendiumUI, "OnHide")
+ns.PetsTabs:Open("pet")
+UI:Refresh()
 suite.check("and back again", UI.feedButton:IsShown())
 
 -- Settings.
