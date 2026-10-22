@@ -29,6 +29,8 @@ Data\PetFood.lua
 Data\BeastSkills.lua
 Data\Compendium.lua
 Data\ForeverBeasts.lua
+Data\Travel.lua
+Data\TravelZones.lua
 
 Logic\PetStatus.lua
 Logic\Food.lua
@@ -37,6 +39,7 @@ Logic\Taming.lua
 Logic\TameRecord.lua
 Logic\Waypoints.lua
 Logic\Compendium.lua
+Logic\Travel.lua
 Logic\BeastArrow.lua
 Logic\TomTom.lua
 
@@ -56,5 +59,7 @@ UI\FeedKey.lua
 UI\TamingTooltip.lua
 UI\CompendiumWindow.lua
 UI\BeastArrow.lua
+UI\TravelCard.lua
+UI\TravelMap.lua
 
 Probe\Probe.lua

@@ -55,13 +55,21 @@ function TomTomLink.Fits(state)
     if type(state) ~= "table" or not (state.mode == "point" or state.mode == "arrived") then
         return false
     end
-    local target = state.target
+    local target = TomTomLink.Point(state)
     return type(target) == "table" and type(target.map) == "number"
         and type(target.mx) == "number" and type(target.my) == "number"
 end
 
+--- The place TomTom is given: the next stop on a trip (Logic/Travel.lua),
+--- else the place itself.
+function TomTomLink.Point(state)
+    if type(state.trip) == "table" then return state.trip.point end
+    return state.target
+end
+
 --- What the waypoint is called: "Mangy Wolf  6-7: Elwynn Forest".
 function TomTomLink.Title(state)
+    if type(state.trip) == "table" and state.trip.line then return state.trip.line end
     local place = state.target.zone or "?"
     local name = state.name
     if type(name) == "string" and name ~= "" then return name .. ": " .. place end
@@ -85,7 +93,7 @@ function TomTomLink:Take(state)
         return false
     end
 
-    local target = state.target
+    local target = TomTomLink.Point(state)
     local title = TomTomLink.Title(state)
     local key = ("%s|%s|%.4f|%.4f"):format(title, tostring(target.map), target.mx, target.my)
     if self.uid and self.key == key then
