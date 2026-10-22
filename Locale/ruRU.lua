@@ -75,11 +75,11 @@ L["beast arrow on, pointing at %s."] = "стрелка к зверю включ�
 L["beast arrow on. Shift-click a beast in the Pet Compendium to aim it."] =
     "стрелка к зверю включена. Нажми Shift и щёлкни по зверю в атласе питомцев, чтобы навести её."
 L["beast arrow off. /bpet arrow on shows it."] = "стрелка к зверю выключена. /bpet arrow on покажет её."
-L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, reset)"] =
-    "стрелка к зверю из атласа питомцев (on, off, clear, check, tomtom, reset)"
+L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, route, reset)"] =
+    "стрелка к зверю из атласа питомцев (on, off, clear, check, tomtom, route, reset)"
 L["the beast arrow isn't following a beast right now."] = "стрелка сейчас не ведёт ни к какому зверю."
 L["beast arrow put back where it started."] = "стрелка к зверю возвращена на место."
-L["/bpet arrow on, off, clear, check, tomtom or reset."] = "/bpet arrow on, off, clear, check, tomtom или reset."
+L["/bpet arrow on, off, clear, check, tomtom, route or reset."] = "/bpet arrow on, off, clear, check, tomtom, route или reset."
 
 -- The compendium's data
 L["Rare"] = "Редкий"
@@ -450,3 +450,29 @@ L["Couldn't read your bags. Try again in a moment."] = "Не удалось пр
 L["Name not loaded yet"] = "Имя ещё не загружено"
 L["Your filters hide 1 beast."] = "Фильтры скрывают 1 зверя."
 L["Your filters hide %d beasts."] = "Фильтры скрывают зверей: %d."
+
+-- The way there (Logic/Travel.lua, the same in every addon).
+L["Fly to %s"] = "Лети в %s"
+L["Talk to the flight master"] = "Поговори с распорядителем полетов"
+L["Wait here for the boat to %s"] = "Жди здесь корабль до %s"
+L["Get on when it stops"] = "Садись, когда он остановится"
+L["Take the boat to %s"] = "Садись на корабль до %s"
+L["Wait here for the zeppelin to %s"] = "Жди здесь дирижабль до %s"
+L["Take the zeppelin to %s"] = "Садись на дирижабль до %s"
+L["Use your Hearthstone"] = "Используй камень возвращения"
+L["It takes you to %s"] = "Он перенесет тебя в %s"
+L["Walk to %s"] = "Иди в %s"
+L["toward %s"] = "в сторону %s"
+L["Next: %s."] = "Дальше: %s."
+L["Your Way There"] = "Твой путь"
+L["Show on Map"] = "На карте"
+L["Stop"] = "Стоп"
+L["Done"] = "Готово"
+L["Now"] = "Сейчас"
+L["About 1 minute"] = "Около 1 минуты"
+L["About %d minutes"] = "Около %d мин."
+L["Guide Me:"] = "Веди меня:"
+L["Step %d of %d"] = "Шаг %d из %d"
+L["The arrow leads you step by step to places far away."] = "Стрелка ведет тебя шаг за шагом в дальние места."
+L["The arrow points straight at places far away."] = "Стрелка показывает прямо на дальние места."
+L["When the place is in another zone or across the sea, the arrow leads you there step by step."] = "Если место в другой зоне или за морем, стрелка ведет тебя туда шаг за шагом."

@@ -369,6 +369,15 @@ function SettingsUI:BuildPages()
     end, true)
     controls.useTomTom:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    -- A trip step by step to a far place (Logic/Travel.lua), off unless
+    -- ticked.
+    local routeRow = pages:Row("compendium", 2, L["Guide Me:"],
+        L["When the place is in another zone or across the sea, the arrow leads you there step by step."])
+    controls.arrowRoute = Widgets.CreateCheckbox(routeRow, L["On"], function(checked)
+        if ns.Travel then ns.Travel:SetOn(checked) end
+    end, false)
+    controls.arrowRoute:SetPoint("TOPLEFT", CONTROL_X, -2)
+
     -- General: windows and text on the left, debug on the right. The
     -- minimap button always shows, so it has no row (the owner, 2026-10-15).
     pages:Section("general", 1, L["WINDOWS"])
@@ -492,6 +501,7 @@ function SettingsUI:Refresh()
     controls.whatsNewMotion:SetChecked(ns.WhatsNew:IsMotionOn())
     controls.beastArrow:SetChecked(ns.db.beastArrow == true)
     controls.useTomTom:SetChecked(ns.db.useTomTom ~= false)
+    controls.arrowRoute:SetChecked(ns.db.arrowRoute == true)
     controls.textSize:Sync()
     controls.windowStyle:Sync()
     controls.effects:SetValue(controls.effectsIndex(), true)

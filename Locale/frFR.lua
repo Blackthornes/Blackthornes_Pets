@@ -75,11 +75,11 @@ L["beast arrow on, pointing at %s."] = "flèche des bêtes activée, elle montre
 L["beast arrow on. Shift-click a beast in the Pet Compendium to aim it."] =
     "flèche des bêtes activée. Fais Maj-clic sur une bête dans le Compendium des familiers pour la viser."
 L["beast arrow off. /bpet arrow on shows it."] = "flèche des bêtes coupée. /bpet arrow on la remet."
-L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, reset)"] =
-    "une flèche vers une bête du Compendium des familiers (on, off, clear, check, tomtom, reset)"
+L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, route, reset)"] =
+    "une flèche vers une bête du Compendium des familiers (on, off, clear, check, tomtom, route, reset)"
 L["the beast arrow isn't following a beast right now."] = "la flèche des bêtes ne suit aucune bête pour le moment."
 L["beast arrow put back where it started."] = "flèche des bêtes remise à sa place de départ."
-L["/bpet arrow on, off, clear, check, tomtom or reset."] = "/bpet arrow on, off, clear, check, tomtom ou reset."
+L["/bpet arrow on, off, clear, check, tomtom, route or reset."] = "/bpet arrow on, off, clear, check, tomtom, route ou reset."
 
 -- The compendium's data
 L["Rare"] = "Rare"
@@ -450,3 +450,29 @@ L["Couldn't read your bags. Try again in a moment."] = "Impossible de lire tes s
 L["Name not loaded yet"] = "Nom pas encore chargé"
 L["Your filters hide 1 beast."] = "Tes filtres cachent 1 bête."
 L["Your filters hide %d beasts."] = "Tes filtres cachent %d bêtes."
+
+-- The way there (Logic/Travel.lua, the same in every addon).
+L["Fly to %s"] = "Vole jusqu'à %s"
+L["Talk to the flight master"] = "Parle au maître de vol"
+L["Wait here for the boat to %s"] = "Attends ici le bateau pour %s"
+L["Get on when it stops"] = "Monte quand il s'arrête"
+L["Take the boat to %s"] = "Prends le bateau pour %s"
+L["Wait here for the zeppelin to %s"] = "Attends ici le zeppelin pour %s"
+L["Take the zeppelin to %s"] = "Prends le zeppelin pour %s"
+L["Use your Hearthstone"] = "Utilise ta pierre de foyer"
+L["It takes you to %s"] = "Elle t'emmène à %s"
+L["Walk to %s"] = "Marche jusqu'à %s"
+L["toward %s"] = "vers %s"
+L["Next: %s."] = "Ensuite : %s."
+L["Your Way There"] = "Ton chemin"
+L["Show on Map"] = "Voir sur la carte"
+L["Stop"] = "Arrêter"
+L["Done"] = "Fini"
+L["Now"] = "Maintenant"
+L["About 1 minute"] = "Environ 1 minute"
+L["About %d minutes"] = "Environ %d minutes"
+L["Guide Me:"] = "Guide-moi :"
+L["Step %d of %d"] = "Étape %d sur %d"
+L["The arrow leads you step by step to places far away."] = "La flèche te mène étape par étape aux endroits lointains."
+L["The arrow points straight at places far away."] = "La flèche pointe tout droit vers les endroits lointains."
+L["When the place is in another zone or across the sea, the arrow leads you there step by step."] = "Quand l'endroit est dans une autre zone ou de l'autre côté de la mer, la flèche t'y mène étape par étape."

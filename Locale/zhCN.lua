@@ -74,11 +74,11 @@ L["beast arrow on, pointing at %s."] = "野兽箭头已打开，指向%s。"
 L["beast arrow on. Shift-click a beast in the Pet Compendium to aim it."] =
     "野兽箭头已打开。在宠物图鉴里按住 Shift 点击一只野兽，箭头就会指向它。"
 L["beast arrow off. /bpet arrow on shows it."] = "野兽箭头已关闭。输入 /bpet arrow on 可以再显示。"
-L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, reset)"] =
+L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, route, reset)"] =
     "指向宠物图鉴里一只野兽的箭头（on, off, clear, check, tomtom, reset）"
 L["the beast arrow isn't following a beast right now."] = "野兽箭头现在没有跟随任何野兽。"
 L["beast arrow put back where it started."] = "野兽箭头已放回原来的位置。"
-L["/bpet arrow on, off, clear, check, tomtom or reset."] = "/bpet arrow on、off、clear、check、tomtom 或 reset。"
+L["/bpet arrow on, off, clear, check, tomtom, route or reset."] = "/bpet arrow on、off、clear、check、tomtom、route 或 reset。"
 
 -- The compendium's data
 L["Rare"] = "稀有"
@@ -449,3 +449,29 @@ L["Couldn't read your bags. Try again in a moment."] = "无法读取你的背包
 L["Name not loaded yet"] = "名称尚未载入"
 L["Your filters hide 1 beast."] = "筛选隐藏了 1 只野兽。"
 L["Your filters hide %d beasts."] = "筛选隐藏了 %d 只野兽。"
+
+-- The way there (Logic/Travel.lua, the same in every addon).
+L["Fly to %s"] = "飞往%s"
+L["Talk to the flight master"] = "和飞行管理员对话"
+L["Wait here for the boat to %s"] = "在这里等前往%s的船"
+L["Get on when it stops"] = "它停下时上去"
+L["Take the boat to %s"] = "乘船前往%s"
+L["Wait here for the zeppelin to %s"] = "在这里等前往%s的飞艇"
+L["Take the zeppelin to %s"] = "乘坐飞艇前往%s"
+L["Use your Hearthstone"] = "使用你的炉石"
+L["It takes you to %s"] = "它会把你带到%s"
+L["Walk to %s"] = "走到%s"
+L["toward %s"] = "朝%s方向"
+L["Next: %s."] = "下一步：%s。"
+L["Your Way There"] = "前往路线"
+L["Show on Map"] = "在地图上显示"
+L["Stop"] = "停止"
+L["Done"] = "完成"
+L["Now"] = "现在"
+L["About 1 minute"] = "大约 1 分钟"
+L["About %d minutes"] = "大约 %d 分钟"
+L["Guide Me:"] = "为我引路："
+L["Step %d of %d"] = "第 %d 步，共 %d 步"
+L["The arrow leads you step by step to places far away."] = "箭头会一步一步带你去远处的地点。"
+L["The arrow points straight at places far away."] = "箭头会直接指向远处的地点。"
+L["When the place is in another zone or across the sea, the arrow leads you there step by step."] = "目的地在别的区域或海的另一边时，箭头会一步一步带你过去。"

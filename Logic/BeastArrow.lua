@@ -408,6 +408,11 @@ function BeastArrow:State(clock)
     state.place = target.zone or "?"
     state.note, state.noteColor = BeastArrow.Note(target, entry)
 
+    -- A place in another zone or on the other continent: the way there,
+    -- step by step, the arrow on the next stop (Logic/Travel.lua).
+    local trip = ns.Travel and ns.Travel:Use(target, here, clock)
+    if trip then return self:TripState(state, trip, here) end
+
     if target.far then
         state.mode = "far"
         state.distance = target.zone or L["Far away"]
@@ -447,6 +452,33 @@ function BeastArrow:State(clock)
     return state
 end
 
+--- The dial's words and turn for a step of a trip.
+function BeastArrow:TripState(state, trip, here)
+    state.trip = trip
+    state.distance = L.Format("Step %d of %d", trip.index, trip.count)
+    state.place = trip.line
+    state.note, state.noteColor = trip.small, "muted"
+
+    if trip.continent and trip.continent == here.continent and not trip.onTaxi then
+        local yards, bearing = BeastArrow.Measure(trip.north - here.north, trip.west - here.west)
+        state.yards, state.bearing = yards, bearing
+        local facing = BeastArrow.Facing()
+        state.turn = BeastArrow.Turn(bearing, facing)
+        state.facing = facing ~= nil
+        state.mode = "point"
+        local point = ns.Travel.MapPos(trip.continent, trip.north, trip.west)
+        if point then point.mx, point.my = point.x, point.y end
+        trip.point = point
+        if not trip.atStop then
+            local far = BeastArrow.Yards(yards)
+            state.note = state.note ~= "" and (state.note .. ", " .. far) or far
+        end
+        return state
+    end
+    state.mode = "trip"
+    return state
+end
+
 --------------------------------------------------------------------------------
 -- Checking what the client allows
 --------------------------------------------------------------------------------
@@ -478,6 +510,14 @@ function BeastArrow:Check()
 
     ns.PrintRaw(("  in an instance: %s"):format(BeastArrow.Inside() and "yes, so the arrow hides" or "no"))
     if ns.TomTom then ns.PrintRaw(ns.TomTom.CheckLine()) end
+    if ns.Travel then
+        local count = 0
+        for _ in pairs(ns.Travel:AllFlights()) do count = count + 1 end
+        ns.PrintRaw(("  way there: %s, %d flight paths known%s"):format(ns.Travel.IsOn() and "on" or "off", count,
+            count == 0 and " (open a flight master's map to read them)" or ""))
+        local map = _G.C_Map
+        ns.PrintRaw(("  world to map: %s"):format(YesNo(map and type(map.GetMapPosFromWorldPos) == "function")))
+    end
 
     local state = self:State(Number(Read(_G.GetTime)) or 0)
     if state.beast then
@@ -504,7 +544,7 @@ local function Status()
     end
 end
 
-ns.RegisterCommand("arrow", L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, reset)"], function(rest)
+ns.RegisterCommand("arrow", L["an arrow to a beast from the Pet Compendium (on, off, clear, check, tomtom, route, reset)"], function(rest)
     local word = (rest or ""):lower():match("^%s*(%a*)") or ""
     if word == "" then
         BeastArrow:SetOn(not BeastArrow.IsOn())
@@ -519,10 +559,49 @@ ns.RegisterCommand("arrow", L["an arrow to a beast from the Pet Compendium (on, 
         ns.KeepCheck("arrow check", BeastArrow.Check, BeastArrow)
     elseif word == "tomtom" then
         ns.TomTom:Command((rest or ""):lower():match("^%s*%a+%s+(%a+)"))
+    elseif word == "route" then
+        local Travel = ns.Travel
+        local switch = (rest or ""):lower():match("^%s*%a+%s+(%a+)")
+        if switch == "on" or switch == "off" then Travel:SetOn(switch == "on") else Travel:SetOn(not Travel.IsOn()) end
+        if Travel.IsOn() then
+            ns.Print(L["The arrow leads you step by step to places far away."])
+        else
+            ns.Print(L["The arrow points straight at places far away."])
+        end
+        if ns.SettingsUI and ns.SettingsUI.Refresh then pcall(ns.SettingsUI.Refresh, ns.SettingsUI) end
     elseif word == "reset" then
         if ns.BeastArrowUI and ns.BeastArrowUI.ResetPosition then ns.BeastArrowUI:ResetPosition() end
         ns.Print(L["beast arrow put back where it started."])
     else
-        ns.Print(L["/bpet arrow on, off, clear, check, tomtom or reset."])
+        ns.Print(L["/bpet arrow on, off, clear, check, tomtom, route or reset."])
     end
 end)
+
+--------------------------------------------------------------------------------
+-- What Logic/Travel.lua (the same file in every addon) asks of Pets
+--------------------------------------------------------------------------------
+
+ns.TravelHost = {
+    DB = function() return ns.db end,
+    Owner = function()
+        local ok, guid = pcall(function() return _G.UnitGUID and _G.UnitGUID("player") end)
+        return ok and type(guid) == "string" and guid or nil
+    end,
+    ZoneOf = function(zone)
+        local name = zone
+        if type(zone) == "string" and ns.Waypoints and ns.Waypoints.DataZone then
+            local ok, english = pcall(ns.Waypoints.DataZone, ns.Waypoints, zone)
+            if ok and type(english) == "string" then name = english end
+        end
+        return ns.Travel.Defaults.ZoneOf(name)
+    end,
+    Here = function() return BeastArrow:Here() end,
+    InInstance = function() return BeastArrow.Inside() end,
+    Key = function(target)
+        return ("%s|%s|%s|%s"):format(tostring(target.zone), tostring(target.name), tostring(target.x), tostring(target.y))
+    end,
+    Changed = function() BeastArrow:Changed() end,
+    Refresh = function() if ns.BeastArrowUI and ns.BeastArrowUI.Refresh then ns.BeastArrowUI:Refresh() end end,
+    State = function() return ns.BeastArrowUI and ns.BeastArrowUI.state end,
+    Print = function(text) ns.Print(text) end,
+}

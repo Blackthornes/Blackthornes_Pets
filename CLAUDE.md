@@ -152,6 +152,21 @@ the latest claim is drawn; the others wait hidden. The lines are the same
 in each dial's file (`ArrowUI:Claim`, `ArrowUI.Wins`); a change to them
 belongs in all three.
 
+The way there (the owner said build it, 2026-10-21, in every addon with
+an arrow): a beast in another zone or on the other continent is reached
+step by step (flights this character knows, the boats and zeppelins of
+its side, its Hearthstone, walks through the zones between). Off unless
+ticked: "Guide Me:" on the Compendium page (`arrowRoute`, account wide,
+never rename it) and `/bpet arrow route [on|off]`. `Logic/Travel.lua`,
+`Data/Travel.lua`, `Data/TravelZones.lua`, `UI/TravelCard.lua`,
+`UI/TravelMap.lua`, `Media/Frame/TravelDot.tga` and the two
+`tools/make_travel*.py` are Farmer's, the same in every addon (a fix to
+one belongs in all; Farmer's `CLAUDE.md` has the details); Pets' side is
+`ns.TravelHost` at the end of `Logic/BeastArrow.lua` and
+`BeastArrow:TripState`, and TomTom gets the next stop
+(`TomTomLink.Point`). Tested in `tools/test_travel.lua`. Not yet seen in
+game.
+
 The CurseForge project ID is **1720056** (the owner created it 2026-09-30), on the
 TOC's `X-Curse-Project-ID` line. The first release is 0.1.0.
 
