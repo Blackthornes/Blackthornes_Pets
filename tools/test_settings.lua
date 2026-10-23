@@ -142,7 +142,7 @@ end
 suite.check("an empty search lights nothing", lit == 0)
 
 -- Text size, saved as a word, waits for a reload.
-controls.textSize.plus:GetScript("OnClick")(controls.textSize.plus)
+controls.textSize:Pick(controls.textSize:GetValue() + 1)
 suite.check("Text size saves Large", ns.db.textSize == "large")
 suite.check("and offers Reload", controls.textSize.reload:IsShown())
 suite.check("under the stepper, at its right edge", controls.textSize.reload._point[1] == "TOPRIGHT"
@@ -156,9 +156,18 @@ do
     local word = ns.Theme.TextWidth("small", "Titanforged")
     suite.check("the style's box holds Titanforged", width - 22 * 2 - 4 * 2 >= word, width)
 end
-controls.textSize.minus:GetScript("OnClick")(controls.textSize.minus)
+controls.textSize:Pick(controls.textSize:GetValue() - 1)
 suite.check("back to Normal needs no reload", ns.db.textSize == "normal"
     and not controls.textSize.reload:IsShown())
+
+-- The words are a drop-down now (the owner, 2026-10-23), picked from its menu.
+controls.textSize:GetScript("OnMouseDown")(controls.textSize)
+suite.check("Text size opens a menu of its three words", controls.textSize.menu:IsShown()
+    and #controls.textSize.options == 3 and controls.textSize.options[3].text == "Larger")
+controls.textSize.entries[3]:GetScript("OnClick")()
+suite.check("a line of it picks Larger and closes it", ns.db.textSize == "larger"
+    and not controls.textSize.menu:IsShown() and controls.textSize.text:GetText() == "Larger")
+controls.textSize:Pick(1)
 
 -- Every /bpet command has a button here.
 local ran = {}

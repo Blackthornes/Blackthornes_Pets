@@ -70,7 +70,7 @@ SettingsUI:Show()
 local stepper = SettingsUI.controls.tamingTooltip
 suite.check("the row is a stepper showing Always", stepper.GetValue and stepper:GetValue() == Shift.ALWAYS
     and stepper.text:GetText() == "Always", stepper.text and stepper.text:GetText())
-stepper.minus:GetScript("OnClick")(stepper.minus)
+stepper:Pick(stepper:GetValue() - 1)
 suite.check("one step down is Shift, and it is kept", ns.db.tooltipShift and ns.db.tooltipShift[KEY] == true
     and ns.db.tamingTooltip == true and stepper.text:GetText() == "Shift")
 
@@ -97,11 +97,11 @@ Shift.shared.OnModifier("LCTRL")
 suite.check("another key redraws nothing", refreshed == 1)
 
 -- Off and back to Always.
-stepper.minus:GetScript("OnClick")(stepper.minus)
+stepper:Pick(stepper:GetValue() - 1)
 suite.check("Off turns the line's own setting off", ns.db.tamingTooltip == false and stepper.text:GetText() == "Off")
 suite.check("and nothing shows", Hover() == "quiet" and #tip._lines == 0)
-stepper.plus:GetScript("OnClick")(stepper.plus)
-stepper.plus:GetScript("OnClick")(stepper.plus)
+stepper:Pick(stepper:GetValue() + 1)
+stepper:Pick(stepper:GetValue() + 1)
 suite.check("Always turns it on again", ns.db.tamingTooltip == true and stepper:GetValue() == Shift.ALWAYS)
 suite.check("and Shift is no longer kept", ns.db.tooltipShift[KEY] == nil)
 shiftDown = false
