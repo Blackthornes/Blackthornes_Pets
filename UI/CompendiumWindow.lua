@@ -19,8 +19,8 @@ local CompendiumUI = ns.NewModule("CompendiumUI")
 local Theme = ns.Theme
 local Widgets = ns.Widgets
 
-local WIDTH = 820
-local HEIGHT = 586
+local WIDTH = ns.PetsTabs and ns.PetsTabs.WIDTH or 820
+local HEIGHT = ns.PetsTabs and ns.PetsTabs.HEIGHT or 586
 local PADDING = 18
 local EDGE_PAD = 11
 local HEADER = 44
@@ -121,8 +121,9 @@ function CompendiumUI:Build()
     end)
 
     -- The house size grip under the bottom right corner (Widgets.WindowGrip),
-    -- saved as `compendiumScale`.
-    self.sizeGrip = Widgets.WindowGrip(frame, "compendiumScale", function()
+    -- saved as `windowScale`, the one every tab shares (`compendiumScale`,
+    -- from before the tabs, stays in the save unread).
+    self.sizeGrip = Widgets.WindowGrip(frame, "windowScale", function()
         CompendiumUI:SavePosition()
     end)
     frame:EnableMouseWheel(true)
@@ -323,11 +324,12 @@ end
 
 function CompendiumUI:BuildList()
     local frame = self.frame
+    self.visible = VISIBLE
 
     local well = Theme.CreatePanel(frame, "panel", "border")
     well:SetPoint("TOPLEFT", PADDING - 3, self.listTop + 3)
     well:SetPoint("TOPRIGHT", -(PADDING - 3), self.listTop + 3)
-    well:SetHeight(VISIBLE * ROW_HEIGHT + 6)
+    well:SetHeight(self.visible * ROW_HEIGHT + 6)
     if Theme.Recess then Theme.Recess(well) end
     self.well = well
 
@@ -343,7 +345,7 @@ function CompendiumUI:BuildList()
 
     local track = well:CreateTexture(nil, "ARTWORK")
     track:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PADDING, self.listTop)
-    track:SetSize(self.scrollWidth, VISIBLE * ROW_HEIGHT)
+    track:SetSize(self.scrollWidth, self.visible * ROW_HEIGHT)
     track:SetColorTexture(Theme.Unpack("rowAlt"))
     self.track = track
 
@@ -351,7 +353,7 @@ function CompendiumUI:BuildList()
     -- rows. Holding it drags the thumb; a click on the bar jumps there.
     local grip = CreateFrame("Frame", nil, frame)
     grip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -(PADDING - (GRIP_WIDTH - self.scrollWidth) / 2), self.listTop)
-    grip:SetSize(GRIP_WIDTH, VISIBLE * ROW_HEIGHT)
+    grip:SetSize(GRIP_WIDTH, self.visible * ROW_HEIGHT)
     grip:SetFrameLevel(frame:GetFrameLevel() + 10)
     grip:EnableMouse(true)
     grip:SetScript("OnMouseDown", function(_, button)
@@ -361,14 +363,37 @@ function CompendiumUI:BuildList()
     grip:SetScript("OnHide", function() CompendiumUI:StopScrollDrag() end)
     self.grip = grip
 
-    self.rows = {}
-    for index = 1, VISIBLE do self.rows[index] = self:BuildRow(index) end
+    self.rows, self.allRows = {}, {}
+    for index = 1, self.visible do
+        self.allRows[index] = self:BuildRow(index)
+        self.rows[index] = self.allRows[index]
+    end
 
     local empty = Theme.CreateLabel(well, "normal", "muted", "CENTER")
     empty:SetPoint("TOP", frame, "TOP", 0, self.listTop - 60)
     empty:SetWidth(WIDTH - PADDING * 4)
     empty:SetWordWrap(true)
     self.empty = empty
+end
+
+--- The window took the size every tab shares (UI/PetsTabs.lua): more rows
+--- fill a taller window, so the list never ends short of the hint.
+function CompendiumUI:OnTabSize(_, height)
+    if not self.allRows then return end
+    local visible = math.max(VISIBLE, VISIBLE + math.floor(((height or HEIGHT) - HEIGHT) / ROW_HEIGHT))
+    if visible == self.visible then return end
+    self.visible = visible
+    self.rows = {}
+    for index = 1, visible do
+        self.allRows[index] = self.allRows[index] or self:BuildRow(index)
+        self.rows[index] = self.allRows[index]
+    end
+    for index = visible + 1, #self.allRows do self.allRows[index]:Hide() end
+    self.well:SetHeight(visible * ROW_HEIGHT + 6)
+    self.track:SetHeight(visible * ROW_HEIGHT)
+    self.grip:SetHeight(visible * ROW_HEIGHT)
+    self.offset = math.min(self.offset or 0, math.max(0, #(self.lines or {}) - visible))
+    if self.frame:IsShown() then self:Draw() end
 end
 
 local function Cell(row, column, size, color)
@@ -662,7 +687,7 @@ end
 
 --- Show the list from `offset` on; only redraws the rows when it moved.
 function CompendiumUI:ScrollTo(offset)
-    local most = math.max(0, #(self.lines or {}) - VISIBLE)
+    local most = math.max(0, #(self.lines or {}) - self.visible)
     offset = math.max(0, math.min(most, math.floor(offset + 0.5)))
     if offset == self.offset then return end
     self.offset = offset
@@ -683,16 +708,16 @@ end
 --- Put the thumb's top `pos` pixels down the bar, and the list with it.
 function CompendiumUI:ScrollToThumb(pos)
     local total = #(self.lines or {})
-    local room = VISIBLE * ROW_HEIGHT - (self.thumbSize or 0)
-    if total <= VISIBLE or room <= 0 then return end
-    self:ScrollTo(math.max(0, math.min(room, pos)) / room * (total - VISIBLE))
+    local room = self.visible * ROW_HEIGHT - (self.thumbSize or 0)
+    if total <= self.visible or room <= 0 then return end
+    self:ScrollTo(math.max(0, math.min(room, pos)) / room * (total - self.visible))
 end
 
 --- The mouse went down on the bar: hold the thumb where it was caught, or,
 --- off the thumb, jump so the thumb's middle is under the cursor. Until the
 --- button comes up, the list follows the cursor (OnUpdate runs only then).
 function CompendiumUI:StartScrollDrag()
-    if #(self.lines or {}) <= VISIBLE then return end
+    if #(self.lines or {}) <= self.visible then return end
     local pos = self:CursorOnBar()
     if not pos then return end
     local top, size = self.thumbTop or 0, self.thumbSize or 0
@@ -725,10 +750,10 @@ function CompendiumUI:Draw()
     end
 
     local total = #lines
-    if total > VISIBLE then
-        local height = VISIBLE * ROW_HEIGHT
-        local size = math.max(16, height * VISIBLE / total)
-        local top = (height - size) * offset / (total - VISIBLE)
+    if total > self.visible then
+        local height = self.visible * ROW_HEIGHT
+        local size = math.max(16, height * self.visible / total)
+        local top = (height - size) * offset / (total - self.visible)
         self.thumbTop, self.thumbSize = top, size
         self.thumb:SetHeight(size)
         self.thumb:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -PADDING, self.listTop - top)
@@ -768,7 +793,7 @@ function CompendiumUI:Refresh()
     self:SyncControls()
 
     self.lines = ns.Compendium:List(self:Filter())
-    local most = math.max(0, #self.lines - VISIBLE)
+    local most = math.max(0, #self.lines - self.visible)
     self.offset = math.min(self.offset or 0, most)
     self:Draw()
 

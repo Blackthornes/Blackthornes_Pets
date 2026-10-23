@@ -60,4 +60,52 @@ suite.check("the tab opened is the one lit", ns.UI.tabStrip.selected == "pet",
     tostring(ns.UI.tabStrip.selected))
 Tabs:Close()
 
+-- Opened another way (the minimap's right-click, Settings' Open button),
+-- a window still lights its own tab, not the one picked last on it.
+ns.SettingsUI.tabStrip:Select("pet")
+ns.SettingsUI:Show()
+suite.check("Settings opened on its own lights Settings", ns.SettingsUI.tabStrip.selected == "settings",
+    tostring(ns.SettingsUI.tabStrip.selected))
+ns.CompendiumUI:Show()
+suite.check("and so does the Compendium", ns.CompendiumUI.tabStrip.selected == "compendium",
+    tostring(ns.CompendiumUI.tabStrip.selected))
+Tabs:Close()
+
+-- One size for every tab, so the window never jumps as they are clicked.
+local function SizeOf(window) return window.frame:GetWidth(), window.frame:GetHeight() end
+local sizes = {}
+for _, key in ipairs({ "pet", "compendium", "settings" }) do
+    Tabs:Open(key)
+    sizes[key] = { SizeOf(Tabs.Owner(key)) }
+end
+local width, height = Tabs:Size()
+local same = true
+for _, size in pairs(sizes) do
+    if size[1] ~= width or size[2] ~= height then same = false end
+end
+local said = ""
+for key, size in pairs(sizes) do said = said .. (" %s %s x %s"):format(key, tostring(size[1]), tostring(size[2])) end
+suite.check("every tab is the same size", same, ("%d x %d"):format(width, height) .. said)
+suite.check("at least the Compendium's", width >= Tabs.WIDTH and height >= Tabs.HEIGHT)
+
+-- A tab that needs more room makes every tab grow, and the Compendium's
+-- list fills it with more rows.
+local rowsBefore = #ns.CompendiumUI.rows
+Tabs:Need("pet", nil, height + 3 * 34)
+suite.check("a taller Pet tab makes every tab taller",
+    ns.CompendiumUI.frame:GetHeight() == height + 3 * 34 and ns.SettingsUI.frame:GetHeight() == height + 3 * 34)
+suite.check("and the Compendium shows more rows", #ns.CompendiumUI.rows == rowsBefore + 3,
+    tostring(#ns.CompendiumUI.rows))
+Tabs:Need("pet", nil, nil)
+suite.check("and they come back down with it", ns.CompendiumUI.frame:GetHeight() == height
+    and #ns.CompendiumUI.rows == rowsBefore)
+
+-- One size grip: what it sets, every tab opens at.
+ns.db.windowScale = 120
+Tabs:Open("compendium")
+suite.check("one scale for every tab", math.abs(ns.CompendiumUI.frame:GetScale() - 1.2) < 0.001,
+    tostring(ns.CompendiumUI.frame:GetScale()))
+ns.db.windowScale = nil
+Tabs:Close()
+
 suite.done()

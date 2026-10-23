@@ -4,10 +4,12 @@
 -- 2026-10-22), as Tradeskills' and Farmer's windows wear theirs.
 --
 -- Each tab is still its own window underneath (UI/MainWindow.lua,
--- UI/CompendiumWindow.lua, UI/Settings.lua), each with its own size and its
--- own size grip, so nothing they save moves. Only one shows at a time: a
--- tab opens in the place the last one stood, top left corner on top left
--- corner, so it reads as one window that changes size with the tab. That
+-- UI/CompendiumWindow.lua, UI/Settings.lua), but they are all one size and
+-- share one size grip (the owner, 2026-10-23: the window jumped as the tabs
+-- were clicked). The size is the Compendium's, or more when a tab needs it
+-- (`PetsTabs:Need`), and the scale is `windowScale`. Only one shows at a
+-- time: a tab opens in the place the last one stood, top left corner on
+-- top left corner, so it reads as one window. That
 -- place is kept account wide in `windowLeft` and `windowTop` (screen
 -- units from the bottom left; never rename them). A window that has never
 -- had one opens where it was saved before the tabs.
@@ -24,6 +26,13 @@ PetsTabs.INSET = 34
 
 -- How far below the window the tabs reach, kept on screen with it.
 PetsTabs.REACH = 32
+
+-- The one size every tab shares, the Compendium's, unless a tab needs more.
+PetsTabs.WIDTH = 820
+PetsTabs.HEIGHT = 586
+
+-- The one size grip's saved scale, for every tab.
+PetsTabs.SCALE_KEY = "windowScale"
 
 --- The tabs, in order, and the window behind each.
 function PetsTabs.Tabs()
@@ -50,6 +59,14 @@ local function Shown(frame)
     if not frame then return false end
     local ok, shown = pcall(frame.IsShown, frame)
     return ok and shown == true
+end
+
+--- The tab a window is, or nil.
+function PetsTabs:KeyOf(window)
+    for _, tab in ipairs(PetsTabs.Tabs()) do
+        if Owner(tab.key) == window then return tab.key end
+    end
+    return nil
 end
 
 --- The tab showing now, and its window, or nil.
@@ -82,6 +99,57 @@ function PetsTabs:Attach(window, key)
         frame:SetClampRectInsets(-left, right, top, -math.max(bottom or 0, PetsTabs.REACH))
     end
     return strip
+end
+
+--------------------------------------------------------------------------------
+-- The one size
+--------------------------------------------------------------------------------
+
+-- What each tab needs at least, { width, height }, as it last said.
+PetsTabs.needs = {}
+
+--- The size every tab shares: the usual one, or the most any tab needs.
+function PetsTabs:Size()
+    local width, height = PetsTabs.WIDTH, PetsTabs.HEIGHT
+    for _, need in pairs(self.needs) do
+        if need[1] and need[1] > width then width = need[1] end
+        if need[2] and need[2] > height then height = need[2] end
+    end
+    return math.ceil(width), math.ceil(height)
+end
+
+--- Size one tab's window to the shared size, and tell it, so it can lay
+--- out again what follows its height.
+function PetsTabs:Fit(window)
+    local frame = FrameOf(window)
+    if not frame then return end
+    local width, height = self:Size()
+    frame:SetSize(width, height)
+    if type(window.OnTabSize) == "function" then window:OnTabSize(width, height) end
+end
+
+--- Size every tab's window built so far.
+function PetsTabs:FitAll()
+    for _, tab in ipairs(PetsTabs.Tabs()) do self:Fit(Owner(tab.key)) end
+end
+
+--- A tab says how much room it needs; nil for either keeps the usual. Every
+--- window follows when that moves the shared size.
+function PetsTabs:Need(key, width, height)
+    local before1, before2 = self:Size()
+    self.needs[key] = { width, height }
+    local after1, after2 = self:Size()
+    if before1 ~= after1 or before2 ~= after2 then
+        self:FitAll()
+    else
+        self:Fit(Owner(key))
+    end
+end
+
+--- Give a window the shared scale, which the one size grip sets.
+function PetsTabs.ApplyScale(frame)
+    if not (frame and Widgets and Widgets.ApplySize and ns.db) then return end
+    Widgets.ApplySize(frame, ns.db[PetsTabs.SCALE_KEY])
 end
 
 --- Open a tab. The tab showing already stays as it is.
@@ -158,6 +226,13 @@ end
 function PetsTabs:Take(window)
     local frame = FrameOf(window)
     if not frame then return nil end
+    -- One size and one scale, whichever grip set it last, and its own tab
+    -- lit, however it was opened.
+    self:Fit(window)
+    PetsTabs.ApplyScale(frame)
+    local strip = rawget(window, "tabStrip")
+    local key = self:KeyOf(window)
+    if strip and strip.Select and key then strip:Select(key) end
     for _, tab in ipairs(PetsTabs.Tabs()) do
         local other = Owner(tab.key)
         local otherFrame = FrameOf(other)

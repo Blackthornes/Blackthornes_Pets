@@ -224,10 +224,17 @@ cost, families, which a trainer teaches) and the pet trainers, written by
 Classic data; never edit it by hand. Tested in `tools/test_petskills.lua`.
 
 Pet, Compendium and Settings are one window with hanging tabs
-(`UI/PetsTabs.lua`). Each is still its own window with its own size and
-grip; only one shows, and each opens where the last stood, top left
-corner on top left corner, kept account wide in `windowLeft` and
-`windowTop` (never rename them). The plate reads "Blackthornes Pets" on
+(`UI/PetsTabs.lua`). Each is still its own window underneath, but they
+share one size and one size grip (the owner, 2026-10-23: the window jumped
+as the tabs were clicked): `PetsTabs.WIDTH` by `PetsTabs.HEIGHT`, the
+Compendium's, or more when a tab says it needs it (`PetsTabs:Need`, the Pet
+tab's skills card, a Settings page with descriptions), and every tab grows
+with it; the Compendium shows more rows (`CompendiumUI:OnTabSize`). The
+scale is `windowScale`; `compendiumScale` and `settingsScale` stay in the
+save, unread. Each window lights its own tab as it opens, however it was
+opened (`PetsTabs:Take`). Only one shows, and each opens where the last
+stood, top left corner on top left corner, kept account wide in
+`windowLeft` and `windowTop` (never rename them). The plate reads "Blackthornes Pets" on
 every tab. The minimap button's click is `PetsTabs:Toggle()`; `/bpet
 compendium` opens the Compendium tab. The Feed button and the arrow are
 unchanged. Tested in `tools/test_petstabs.lua`. Not yet seen in game.
@@ -357,8 +364,8 @@ by `Motion.Level()`, which the glint and portrait light follow.
 Every window wears the house size grip (2026-10-21, as Farmer's):
 `Widgets.WindowGrip(frame, key, done)` scales it 50% to 150% from its top
 left, right-click is normal size. Saved in percent, account wide, never
-renamed: `windowScale`, `compendiumScale`, `settingsScale`. A new window
-gets one too.
+renamed: `windowScale`, `compendiumScale`, `settingsScale` (the three tabs
+now share `windowScale`). A new window gets one too.
 
 ## The Blizzard window style
 

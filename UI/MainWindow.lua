@@ -20,10 +20,12 @@ local HEADER = 44
 -- The metal rim sits on the window's edge and reaches this far inward, with
 -- room to spare (UI/Titanforged.lua).
 local EDGE_PAD = 11
-local WIDTH = 540
+-- As wide as the other tabs (UI/PetsTabs.lua), so the window keeps its
+-- size as the tabs are clicked.
+local WIDTH = ns.PetsTabs and ns.PetsTabs.WIDTH or 820
 -- Tall enough for a hunter's pet card: the top card, three bars and the
--- two cards under them, with room for a wrapped line or two. One size for
--- every pet, so the window never jumps as a pet is called or dismissed.
+-- two cards under them, with room for a wrapped line or two. The window is
+-- the other tabs' height when that is more, and the cards fill it.
 local HEIGHT = 452
 
 -- The pet card (the owner asked 2026-10-17, from a mockup): the pet on a
@@ -1249,10 +1251,15 @@ function UI:ShowSkillsUnder(top, feeding, foodEnd, fightEnd)
     self:SetPetHeight(math.max(HEIGHT, needed))
 end
 
---- How tall the window is on the Pet tab.
+--- How tall the Pet tab needs to be. Every tab grows with it when it needs
+--- more than the others (UI/PetsTabs.lua).
 function UI:SetPetHeight(height)
     self.petHeight = height
-    if self.frame then self.frame:SetHeight(height) end
+    if ns.PetsTabs then
+        ns.PetsTabs:Need("pet", nil, height)
+    elseif self.frame then
+        self.frame:SetHeight(height)
+    end
 end
 
 --------------------------------------------------------------------------------
