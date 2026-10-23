@@ -23,6 +23,17 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 0.21.0
+
+- The Pet tab shows what your pet knows, what it can learn now and what comes later, and where the pet trainer is.
+- Pet, Compendium and Settings are tabs in one window now.
+- Every window has a size grip, and the General page has an Effects choice.
+
+Fixes and changes:
+
+- New food and count lines.
+- Several bug fixes for the Compendium map pins and the tabs.
+
 ## 0.20.0
 
 - The taming skills on a beast's tooltip can be Off, Shift or Always. You pick in Settings.
