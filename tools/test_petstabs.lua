@@ -52,4 +52,12 @@ suite.check("the Compendium's plate names the addon",
     ns.CompendiumUI.frame.titan.plate.label:GetText() == "Blackthornes Pets")
 Tabs:Close()
 
+-- A tab picked again lights itself on its own strip at once, though that
+-- strip was last lit for another tab.
+ns.UI.tabStrip:Select("settings")
+Tabs:Open("pet")
+suite.check("the tab opened is the one lit", ns.UI.tabStrip.selected == "pet",
+    tostring(ns.UI.tabStrip.selected))
+Tabs:Close()
+
 suite.done()
