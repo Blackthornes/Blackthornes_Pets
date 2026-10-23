@@ -215,13 +215,13 @@ local function CommandRow(pages, page, column, label, description, buttonText, c
     return row, button
 end
 
--- The window styles, in the order the stepper steps through them.
+-- The window styles, in the order their drop-down lists them.
 local STYLES = { "titanforged", "blizzard" }
 local STYLE_LABELS = { titanforged = "Titanforged", blizzard = "Blizzard" }
 
 --- Titanforged or Blizzard, with Reload under it while the pick differs
---- from what is drawn, as the Text size row has. Pets has no dropdown, so
---- it is a stepper like Text size.
+--- from what is drawn, as the Text size row has. A drop-down, like Text
+--- size.
 function SettingsUI.WindowStyleControl(row, x)
     local reload
     local function Drawn()
@@ -229,7 +229,7 @@ function SettingsUI.WindowStyleControl(row, x)
         return Look and Look.Style() or "titanforged"
     end
 
-    local stepper = Widgets.CreateStepper(row, {
+    local stepper = Widgets.CreateChoice(row, {
         min = 1, max = #STYLES, step = 1,
         format = function(value) return STYLE_LABELS[STYLES[value]] end,
         onChange = function(value)
@@ -324,7 +324,7 @@ function SettingsUI:BuildPages()
     -- tamingTooltip, Shift is kept apart.
     local TooltipShift = ns.TooltipShift
     local shiftKey = ns.TamingTooltip.SHIFT_KEY
-    controls.tamingTooltip = Widgets.CreateStepper(tamingRow, {
+    controls.tamingTooltip = Widgets.CreateChoice(tamingRow, {
         min = 0, max = 2, step = 1,
         format = function(value) return TooltipShift.NAMES[value] end,
         onChange = function(value)
@@ -426,7 +426,7 @@ function SettingsUI:BuildPages()
         end
         return 1
     end
-    controls.effects = Widgets.CreateStepper(effectsRow, {
+    controls.effects = Widgets.CreateChoice(effectsRow, {
         min = 1, max = #Motion.LEVELS, step = 1, value = EffectIndex(),
         format = function(index) return effectNames[Motion.LEVELS[index]] end,
         onChange = function(index) Motion.SetLevel(Motion.LEVELS[index]) end,
