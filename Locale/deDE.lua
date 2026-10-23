@@ -169,8 +169,6 @@ L["that"] = "das"
 L["beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back."] =
     "Wildtierpfeil aus. Die Schaltfläche Pfeil im Begleiterkompendium, /bpet arrow oder die Einstellungen holen ihn zurück."
 L["Beast arrow"] = "Wildtierpfeil"
-L["Click to open the Pet Compendium."] = "Klick öffnet das Begleiterkompendium."
-L["Drag to move it."] = "Ziehen verschiebt ihn."
 L["Can't see you here"] = "Hier nicht zu sehen"
 L["The game won't say where you are"] = "Das Spiel sagt nicht, wo du bist"
 

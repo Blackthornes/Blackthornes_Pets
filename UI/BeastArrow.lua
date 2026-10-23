@@ -188,22 +188,8 @@ function ArrowUI:Build()
         self:StopMovingOrSizing()
         ArrowUI:SavePosition()
         ArrowUI:AvoidXPBar()
-        -- The button coming up after a drag is not a click. The client may
-        -- send OnMouseUp before this, after it, or not at all, so the drop
-        -- is remembered by the moment it happened, never as a flag that
-        -- could swallow the next real click.
         ArrowUI.dragging = nil
-        ArrowUI.droppedAt = Clock()
     end)
-    frame:SetScript("OnMouseUp", function(_, button)
-        if ArrowUI.dragging or (ArrowUI.droppedAt and ArrowUI.droppedAt == Clock()) then
-            ArrowUI.dragging, ArrowUI.droppedAt = nil, nil
-            return
-        end
-        ArrowUI:OnClick(button)
-    end)
-    frame:SetScript("OnEnter", function(self) ArrowUI:ShowTooltip(self) end)
-    frame:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
     frame:SetScript("OnUpdate", function(_, elapsed) ArrowUI:Step(elapsed) end)
 
     self.frame = frame
@@ -213,31 +199,13 @@ function ArrowUI:Build()
 end
 
 --------------------------------------------------------------------------------
--- Clicks and the tooltip
+-- The close gem
 --------------------------------------------------------------------------------
-
-function ArrowUI:OnClick()
-    if ns.CompendiumUI and ns.CompendiumUI.Show then ns.CompendiumUI:Show() end
-    self.since = STEP
-    self:Draw(true)
-end
 
 --- The close gem: the arrow off until turned on again.
 function ArrowUI:Close()
     ns.BeastArrow:SetOn(false)
     ns.Print(L["beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back."])
-end
-
-function ArrowUI:ShowTooltip(owner)
-    if not GameTooltip then return end
-    GameTooltip:SetOwner(owner, "ANCHOR_BOTTOM")
-    GameTooltip:AddLine(L["Beast arrow"], Theme.Unpack("accent"))
-    local state = self.state
-    local beast = state and state.beast
-    if beast then GameTooltip:AddLine(ns.Compendium.PlaceText(beast), 1, 1, 1, true) end
-    GameTooltip:AddLine(L["Click to open the Pet Compendium."], 0.9, 0.9, 0.9, true)
-    GameTooltip:AddLine(L["Drag to move it."], 0.9, 0.9, 0.9, true)
-    GameTooltip:Show()
 end
 
 --------------------------------------------------------------------------------
