@@ -261,6 +261,11 @@ fits its fullest page, so no page scrolls. Add a setting with
 in chat (food, taming, tamed, help), which are typed only (the owner,
 2026-10-15). The minimap button always shows: no row and no `/bpet
 minimap` (2026-10-15); a saved `minimapHidden` is kept but not read.
+Word choices are drop-downs, never < > pickers or word steppers (the
+owner, 2026-10-23): `Widgets.CreateChoice` takes a stepper's opts
+(min, max, step, value, format, onChange) on Pets' `Widgets.CreateDropdown`
+and answers `SetValue(value, silent)`, `GetValue()`, `.text` and
+`:Pick(value)` (what a menu click does); only numbers keep a +/- stepper.
 
 ## Off, Shift or Always on tooltips
 
@@ -385,10 +390,10 @@ plain rows with a blue bar for the one picked) and puts out the halos;
 a title tab where the plate sits, a silver-ringed portrait and the game's
 `UIPanelCloseButton`, with the same trim fields); and the widgets call
 `BlizzardLook.Button`, `.Checkbox` and `.Thumb` (the compendium's scroll
-thumb) to wear the game's own texture files. Pets has no hanging tabs, and
-its one dropdown (the compendium's family picker) is drawn in the
-theme's colours, which the Blizzard style recolours, so its Settings row
-is a stepper like Text size; the Feed
+thumb) to wear the game's own texture files. Pets' Settings have no hanging tabs,
+and its drop-downs (the compendium's family picker, the Settings word
+choices) are drawn in the theme's colours, which the Blizzard style
+recolours, so its Settings row is a drop-down like Text size; the Feed
 buttons wear the game's red too, their secure setup untouched.
 It never touches a Blizzard frame. Each file is checked once
 (`BlizzardLook.HasArt`); a client without one keeps that widget in the
