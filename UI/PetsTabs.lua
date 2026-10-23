@@ -88,6 +88,9 @@ end
 function PetsTabs:Open(key)
     local window = Owner(key)
     if window and window.Show then window:Show() end
+    -- Each window keeps its own strip, so light the tab it now shows.
+    local strip = window and rawget(window, "tabStrip")
+    if strip and strip.Select then strip:Select(key) end
 end
 
 --- Close the whole window, whichever tab is up.
