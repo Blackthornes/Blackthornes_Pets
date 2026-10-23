@@ -240,6 +240,6 @@ function Probe:Run()
         .. "; first " .. Read("GetCraftInfo", 1))
 end
 
-ns.RegisterCommand("probe", "check what this client supports for pets (reads only)", function()
+ns.RegisterHiddenCommand("probe", function()
     ns.KeepCheck("probe", Probe.Run, Probe)
 end)

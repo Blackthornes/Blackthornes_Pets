@@ -65,9 +65,18 @@ suite.check("Off is kept", ns.db.effectsLevel == "off" and ns.Motion.Level() == 
 controls.effects:SetValue(1)
 suite.check("Full saves nothing", ns.db.effectsLevel == nil and ns.Motion.Level() == "full")
 
--- Debug.
-controls.debug:GetScript("OnClick")(controls.debug)
-suite.check("the debug box sets debug", ns.db.debug == true)
+-- Debug and the checks are typed only (the owner, 2026-10-23): no row,
+-- and help leaves them out.
+suite.check("there is no debug box", controls.debug == nil and controls.probe == nil
+    and controls.beastArrowCheck == nil)
+ns.HandleSlash("debug")
+suite.check("/bpet debug turns debug on", ns.db.debug == true)
+ns.HandleSlash("debug off")
+suite.check("/bpet debug off turns it off", ns.db.debug == false)
+local listed = {}
+for _, name in ipairs(ns.commandOrder) do listed[name] = true end
+suite.check("help leaves out debug and probe", not listed.debug and not listed.probe
+    and ns.commands.debug and ns.commands.probe)
 
 -- The sister note (Core/SisterNote.lua).
 suite.check("the sister addons box starts ticked", controls.sisters:GetChecked())
@@ -155,12 +164,12 @@ suite.check("back to Normal needs no reload", ns.db.textSize == "normal"
 local ran = {}
 local realSlash = ns.HandleSlash
 ns.HandleSlash = function(text) ran[#ran + 1] = text end
-for _, key in ipairs({ "openWindow", "probe", "beastArrowCheck" }) do
+for _, key in ipairs({ "openWindow" }) do
     controls[key]:GetScript("OnClick")(controls[key])
 end
 ns.HandleSlash = realSlash
 suite.check("the command buttons run their commands",
-    table.concat(ran, ",") == "window,probe,arrow check")
+    table.concat(ran, ",") == "window")
 
 -- Chat-only commands are typed only (the owner, 2026-10-15): the ones
 -- that just list things in chat have no button here, but still work.
