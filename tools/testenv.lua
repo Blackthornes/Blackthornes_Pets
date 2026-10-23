@@ -34,6 +34,7 @@ local function Stub(fields)
     function frame:GetHeight() return self._height end
     function frame:SetWidth(value) self._width = value end
     function frame:GetWidth() return self._width or 500 end
+    function frame:SetSize(width, height) self._width, self._height = width, height end
 
     function frame:SetText(value) self._text = tostring(value or "") end
     function frame:SetTextColor(r, g, b) self._color = { r, g, b } end
@@ -71,6 +72,8 @@ local function Stub(fields)
     function frame:SetPoint(...) self._point = { ... } end
     function frame:GetCenter() return self._cx or 0, self._cy or 0 end
     function frame:GetEffectiveScale() return 1 end
+    function frame:SetScale(value) self._scale = value end
+    function frame:GetScale() return self._scale or 1 end
 
     function frame:RegisterEvent(event) self._events[event] = true end
     function frame:UnregisterEvent(event) self._events[event] = nil end

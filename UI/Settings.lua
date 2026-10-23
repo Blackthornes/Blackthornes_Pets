@@ -24,8 +24,9 @@ local HEADER = 44
 -- room to spare (UI/Titanforged.lua).
 local EDGE_PAD = 11
 
-local COLUMN_WIDTH = 330
 local COLUMN_GAP = 18
+-- Two columns across the width every tab shares (UI/PetsTabs.lua).
+local COLUMN_WIDTH = math.floor(((ns.PetsTabs and ns.PetsTabs.WIDTH or 820) - PADDING * 2 - COLUMN_GAP) / 2)
 -- Where the controls start: room for a label like "Window Position:" in the
 -- game's font, which runs wider than it looks.
 local CONTROL_X = 150
@@ -103,8 +104,9 @@ function SettingsUI:Build()
     end)
 
     -- The house size grip under the bottom right corner (Widgets.WindowGrip),
-    -- saved as `settingsScale`.
-    self.sizeGrip = Widgets.WindowGrip(frame, "settingsScale", function()
+    -- saved as `windowScale`, the one every tab shares (`settingsScale`,
+    -- from before the tabs, stays in the save unread).
+    self.sizeGrip = Widgets.WindowGrip(frame, "windowScale", function()
         SettingsUI:SavePosition()
     end)
 
@@ -143,7 +145,15 @@ function SettingsUI:Build()
         local info = pages:Place("about", 2, ns.About:Info(pages.pages.about.content, COLUMN_WIDTH))
         pages:Searchable("about", info, info.words)
     end
-    self.pages:Fit()
+    -- The pages fit their fullest page; the window is then the size every
+    -- tab shares, or more when a page needs it (UI/PetsTabs.lua).
+    local pages = self.pages
+    local fit = pages.Fit
+    pages.Fit = function(page)
+        fit(page)
+        if ns.PetsTabs then ns.PetsTabs:Need("settings", frame:GetWidth(), frame:GetHeight()) end
+    end
+    pages:Fit()
 
     local footer = Theme.CreateLabel(frame, "tiny", "dim")
     footer:SetPoint("BOTTOMLEFT", PADDING, 14)
