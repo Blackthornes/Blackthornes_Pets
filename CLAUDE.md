@@ -155,8 +155,8 @@ belongs in all three.
 The way there (the owner said build it, 2026-10-21, in every addon with
 an arrow): a beast in another zone or on the other continent is reached
 step by step (flights this character knows, the boats and zeppelins of
-its side, its Hearthstone, walks through the zones between). Off unless
-ticked: "Guide Me:" on the Compendium page (`arrowRoute`, account wide,
+its side, its Hearthstone, walks through the zones between). On unless
+unticked: "Guide Me:" on the Compendium page (`arrowRoute`, account wide,
 never rename it) and `/bpet arrow route [on|off]`. `Logic/Travel.lua`,
 `Data/Travel.lua`, `Data/TravelZones.lua`, `UI/TravelCard.lua`,
 `UI/TravelMap.lua`, `Media/Frame/TravelDot.tga` and the two
