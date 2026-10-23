@@ -40,7 +40,7 @@ local PAGES = {
     { key = "compendium", text = L["COMPENDIUM"],
       tip = L["The Pet Compendium, the beast arrow and TomTom"] },
     { key = "general", text = L["GENERAL"],
-      tip = L["Window position, text size and debug output"] },
+      tip = L["Window position, text size and What's New"] },
     { key = "about", text = L["ABOUT"],
       tip = L["How these addons are made, the version, the Discord and the other Blackthornes addons"] },
 }
@@ -349,13 +349,6 @@ function SettingsUI:BuildPages()
     end, false)
     controls.beastArrow:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local checkRow = pages:Row("compendium", 2, L["Check the Arrow:"],
-        L["Lists in chat what the arrow can read here."])
-    controls.beastArrowCheck = Widgets.CreateButton(checkRow, L["Check"], function()
-        ns.HandleSlash("arrow check")
-    end, { width = 64, height = 20 })
-    controls.beastArrowCheck:SetPoint("TOPLEFT", CONTROL_X, 0)
-
     local clearRow = pages:Row("compendium", 2, L["Stop Following:"], nil)
     controls.beastArrowClear = Widgets.CreateButton(clearRow, L["Clear"], function()
         ns.HandleSlash("arrow clear")
@@ -379,7 +372,7 @@ function SettingsUI:BuildPages()
     end, false)
     controls.arrowRoute:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    -- General: windows and text on the left, debug on the right. The
+    -- General: windows and text on the left, the rest on the right. The
     -- minimap button always shows, so it has no row (the owner, 2026-10-15).
     pages:Section("general", 1, L["WINDOWS"])
 
@@ -433,14 +426,8 @@ function SettingsUI:BuildPages()
 
     pages:Section("general", 2, L["ADVANCED"])
 
-    local debugRow = pages:Row("general", 2, L["Debug:"],
-        L["Extra chat messages to help track down a problem."])
-
-    controls.debug = Widgets.CreateCheckbox(debugRow, L["On"], function(checked)
-        ns.db.debug = checked
-    end, false)
-    controls.debug:SetPoint("TOPLEFT", CONTROL_X, -2)
-
+    -- Debug and the checks are typed only (/bpet debug, probe, arrow check;
+    -- the owner, 2026-10-23): players don't need them.
     -- Core/SisterNote.lua: one chat line, once, naming the Blackthornes
     -- addons the player does not have. Off here is off in all of them.
     local sistersRow = pages:Row("general", 2, L["Sister Addons:"],
@@ -469,11 +456,6 @@ function SettingsUI:BuildPages()
     end, true)
     controls.whatsNewMotion:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local _, probeButton = CommandRow(pages, "general", 2, L["Client Check:"],
-        L["Lists in chat what the game tells Pets about your pet."],
-        L["Check"], "probe")
-    controls.probe = probeButton
-
     -- The chat-only commands (food, taming, tamed, help) have no button
     -- here: they are typed only (the owner, 2026-10-15).
 end
@@ -496,7 +478,6 @@ function SettingsUI:Refresh()
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
     controls.tamingTooltip:SetValue(ns.TooltipShift:Mode(ns.db.tamingTooltip ~= false,
         ns.TamingTooltip.SHIFT_KEY), true)
-    controls.debug:SetChecked(ns.db.debug == true)
     controls.sisters:SetChecked(ns.SisterNote:IsOn())
     controls.whatsNewPopup:SetChecked(ns.WhatsNew:IsOn())
     controls.whatsNewMotion:SetChecked(ns.WhatsNew:IsMotionOn())

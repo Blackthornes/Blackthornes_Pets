@@ -345,9 +345,10 @@ suite.check("Settings has the switch", ns.SettingsUI.controls.beastArrow:GetChec
 ns.SettingsUI.controls.beastArrow:GetScript("OnClick")(ns.SettingsUI.controls.beastArrow)
 suite.check("which turns it off", not Arrow.IsOn())
 env.chat = {}
-ns.SettingsUI.controls.beastArrowCheck:GetScript("OnClick")(ns.SettingsUI.controls.beastArrowCheck)
+suite.check("the check is typed only", ns.SettingsUI.controls.beastArrowCheck == nil)
+ns.HandleSlash("arrow check")
 local text = env.ChatText()
-suite.check("Check runs /bpet arrow check", text:find("beast arrow check", 1, true) ~= nil
+suite.check("/bpet arrow check runs", text:find("beast arrow check", 1, true) ~= nil
     and text:find("world position", 1, true) ~= nil, text)
 
 ns.db.beastArrowX, ns.db.beastArrowY = 10, 10
