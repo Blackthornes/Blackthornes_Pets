@@ -273,6 +273,9 @@ state = Arrow:State(clock)
 suite.check("a beast in a dungeon: no arrow", state.mode == "far" and state.note == "Inside a dungeon", state.note)
 beast.instance, beast.zone = nil, "Westfall"
 
+-- With "Guide Me:" unticked the arrow only names a zone across the sea
+-- (test_travel.lua has it ticked).
+ns.db.arrowRoute = false
 zone = "Durotar"
 where = { map = 1, x = 0.5, y = 0.5 }
 clock = clock + 5
