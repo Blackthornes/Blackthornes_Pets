@@ -168,8 +168,6 @@ L["that"] = "那个"
 L["beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back."] =
     "野兽箭头已关闭。点宠物图鉴里的箭头按钮、输入 /bpet arrow 或在设置里都能找回它。"
 L["Beast arrow"] = "野兽箭头"
-L["Click to open the Pet Compendium."] = "点击打开宠物图鉴。"
-L["Drag to move it."] = "拖动可以移动它。"
 L["Can't see you here"] = "这里看不到你的位置"
 L["The game won't say where you are"] = "游戏没有说你在哪里"
 

@@ -360,37 +360,16 @@ ns.HandleSlash("arrow on")
 ArrowUI:Close()
 suite.check("the red gem turns it off", not Arrow.IsOn())
 
--- Letting go after a drag is not a click, whichever order the client runs
--- the two scripts in, and the click after it still counts.
+-- The dial only moves and closes: no click, no tooltip.
 ns.HandleSlash("arrow on")
 local dial = ArrowUI.frame
 local opened = 0
 ns.CompendiumUI.Show = function() opened = opened + 1 end
--- The client's clock, moved on between one press and the next.
-local now = 100
-_G.GetTime = function() return now end
+suite.check("no click on the dial", dial:GetScript("OnMouseUp") == nil and ArrowUI.OnClick == nil)
+suite.check("no tooltip on the dial", dial:GetScript("OnEnter") == nil and ArrowUI.ShowTooltip == nil)
 dial:GetScript("OnDragStart")(dial)
 dial:GetScript("OnDragStop")(dial)
-dial:GetScript("OnMouseUp")(dial, "LeftButton")
-suite.check("a drop after a drag (drag stop first) is not a click", opened == 0)
-now = now + 1
-dial:GetScript("OnMouseUp")(dial, "LeftButton")
-suite.check("and the next click still opens the compendium", opened == 1)
-dial:GetScript("OnDragStart")(dial)
-dial:GetScript("OnMouseUp")(dial, "LeftButton")
-dial:GetScript("OnDragStop")(dial)
-suite.check("a drop after a drag (mouse up first) is not a click either", opened == 1)
-now = now + 1
-dial:GetScript("OnMouseUp")(dial, "LeftButton")
-suite.check("and the click after that still counts", opened == 2)
--- A drop the client sends no button up for (the dial clamped out from
--- under the cursor) never costs the next click.
-dial:GetScript("OnDragStart")(dial)
-dial:GetScript("OnDragStop")(dial)
-now = now + 1
-dial:GetScript("OnMouseUp")(dial, "LeftButton")
-suite.check("a drop with no button up never costs the next click", opened == 3)
-_G.GetTime = nil
+suite.check("a drag opens nothing", opened == 0)
 ns.HandleSlash("arrow off")
 
 suite.done()

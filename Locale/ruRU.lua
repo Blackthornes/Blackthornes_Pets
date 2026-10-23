@@ -169,8 +169,6 @@ L["that"] = "это"
 L["beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back."] =
     "стрелка к зверю выключена. Вернуть её можно кнопкой «Стрелка» в атласе питомцев, командой /bpet arrow или в настройках."
 L["Beast arrow"] = "Стрелка к зверю"
-L["Click to open the Pet Compendium."] = "Щёлкни, чтобы открыть атлас питомцев."
-L["Drag to move it."] = "Перетащи, чтобы сдвинуть."
 L["Can't see you here"] = "Здесь тебя не видно"
 L["The game won't say where you are"] = "Игра не говорит, где ты"
 

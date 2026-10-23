@@ -169,8 +169,6 @@ L["that"] = "ça"
 L["beast arrow off. The Arrow button in the Pet Compendium, /bpet arrow or Settings brings it back."] =
     "flèche des bêtes coupée. Le bouton Flèche du Compendium des familiers, /bpet arrow ou les options la remettent."
 L["Beast arrow"] = "Flèche des bêtes"
-L["Click to open the Pet Compendium."] = "Clique pour ouvrir le Compendium des familiers."
-L["Drag to move it."] = "Fais-la glisser pour la déplacer."
 L["Can't see you here"] = "Impossible de te voir ici"
 L["The game won't say where you are"] = "Le jeu ne dit pas où tu es"
 
