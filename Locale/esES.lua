@@ -493,3 +493,6 @@ L["WHEN"] = "CUÁNDO"
 L["YOUR PET KNOWS"] = "TU MASCOTA SABE"
 L["from a pet trainer"] = "de un instructor de mascotas"
 L["from your Beast Training"] = "de tu Adiestramiento de bestias"
+-- The fold gem beside a window's close gem (2026-10-24)
+L["Collapse this window"] = "Plegar esta ventana"
+L["Expand this window"] = "Desplegar esta ventana"

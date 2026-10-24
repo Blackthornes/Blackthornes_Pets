@@ -492,3 +492,6 @@ L["WHEN"] = "何时"
 L["YOUR PET KNOWS"] = "你的宠物会"
 L["from a pet trainer"] = "来自宠物训练师"
 L["from your Beast Training"] = "来自你的野兽训练"
+-- The fold gem beside a window's close gem (2026-10-24)
+L["Collapse this window"] = "收起这个窗口"
+L["Expand this window"] = "展开这个窗口"
