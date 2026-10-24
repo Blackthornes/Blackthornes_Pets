@@ -285,6 +285,20 @@ shards [on|off]`. `Logic/SoulShards.lua` reads the client's count of item
 6265 in a pcall, waits `SETTLE` seconds after a loading screen, and saves
 nothing. Tested in `tools/test_soulshards.lua`. Not yet seen in game.
 
+## Healthstone and Soulstone reminder
+
+The owner said yes (2026-10-24): once a fight ends, a warlock who can make
+them hears "You have no Healthstone." when the bags hold none, and "Your
+Soulstone isn't on anyone." when no one in the group (the warlock too)
+carries their own Soulstone buff, in chat and on screen as the soul shard
+warning does. Each says so once, and again only after it was put right;
+nothing while dead. Off unless ticked: "Stone Reminder:" under WARLOCK on
+the Pet page (`stoneReminder`, account wide, never rename it) and `/bpet
+stones [on|off]`. `Logic/Stones.lua` knows Classic's Healthstone items,
+Create Healthstone and Create Soulstone ranks and the Soulstone buffs by
+ID, reads all in a pcall, and saves nothing. Tested in
+`tools/test_stones.lua`. Not yet seen in game.
+
 ## The settings pages (from Tradeskills)
 
 The owner asked (2026-10-09) for Tradeskills' Settings upgrade in Pets,

@@ -41,6 +41,7 @@ Logic\Taming.lua
 Logic\PetSkills.lua
 Logic\DemonSkills.lua
 Logic\SoulShards.lua
+Logic\Stones.lua
 Logic\TameRecord.lua
 Logic\Waypoints.lua
 Logic\Compendium.lua

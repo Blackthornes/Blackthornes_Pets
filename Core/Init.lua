@@ -341,6 +341,10 @@ local DEFAULTS = {
     -- (Logic/SoulShards.lua). Off unless ticked.
     soulShards = false,
 
+    -- A note after a fight when a warlock has no Healthstone, or the
+    -- Soulstone is on nobody (Logic/Stones.lua). Off unless ticked.
+    stoneReminder = false,
+
     -- Food that gives a buff (stat food) is always fed last; ticked, it is
     -- never fed at all.
     neverFeedBuffFood = false,
