@@ -25,12 +25,13 @@ local DemonSkills = ns.NewModule("DemonSkills")
 -- How many "later" lines the card shows at most, the nearest first.
 DemonSkills.LATER_MOST = 4
 -- The demons in the order the warlock gets them, with each one's summon
--- spell (the same as UI/FeedKey.lua's).
+-- spell (the same as UI/FeedKey.lua's) and the level its trainer's quest
+-- opens at (Classic's).
 DemonSkills.ORDER = {
-    { name = "Imp", summon = 688 },
-    { name = "Voidwalker", summon = 697 },
-    { name = "Succubus", summon = 712 },
-    { name = "Felhunter", summon = 691 },
+    { name = "Imp", summon = 688, level = 1 },
+    { name = "Voidwalker", summon = 697, level = 10 },
+    { name = "Succubus", summon = 712, level = 20 },
+    { name = "Felhunter", summon = 691, level = 30 },
 }
 -- How long after a vendor's window opens its list is read, so it has
 -- filled in.
@@ -168,6 +169,18 @@ function DemonSkills:Demons(out)
     return list
 end
 
+--- The demons this warlock does not have yet, each with the level its
+--- quest opens at: { { name, level } }, in the order they come.
+function DemonSkills.Locked(demons)
+    local have = {}
+    for _, name in ipairs(demons or {}) do have[name] = true end
+    local list = {}
+    for _, demon in ipairs(DemonSkills.ORDER) do
+        if not have[demon.name] then list[#list + 1] = { name = demon.name, level = demon.level } end
+    end
+    return list
+end
+
 --------------------------------------------------------------------------------
 -- The plan
 --------------------------------------------------------------------------------
@@ -238,7 +251,7 @@ end
 
 --- The plan for `pick` (a demon's name), else the demon out, or nil for a
 --- character that is not a warlock with a demon out. The plan carries the
---- demons to pick from in `demons`.
+--- demons to pick from in `demons`, and those still to come in `locked`.
 function DemonSkills:Current(pick)
     if not DemonSkills.IsWarlock() then return nil end
     local out = DemonSkills.DemonOut()
@@ -249,7 +262,7 @@ function DemonSkills:Current(pick)
         if name == pick then demon = pick end
     end
     local plan = self:Plan(demon, self:KnownBy(demon, out), DemonSkills.PlayerLevel())
-    if plan then plan.demons, plan.out = demons, out end
+    if plan then plan.demons, plan.out, plan.locked = demons, out, DemonSkills.Locked(demons) end
     return plan
 end
 

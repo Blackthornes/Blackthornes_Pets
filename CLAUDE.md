@@ -250,8 +250,13 @@ The owner asked what Pets could do for warlocks and said build it from a
 mockup (2026-10-24). With a demon out, a warlock's Pet tab shows the same
 SKILLS card as a hunter's: YOUR DEMON KNOWS (RANK), CAN BUY NOW (each
 grimoire, "Demon trainer" and its price in coin colours) and LATER (WHEN,
-"Level N"), with a chip for each demon the warlock has (two or more), so
-the others' books show while one is out. `Logic/DemonSkills.lua` works it
+"Level N"), with a chip for each demon the warlock has, so the others'
+books show while one is out. Demons not had yet follow as dim chips,
+"Succubus at level 20" with the hover "Your trainer has a quest for it at
+level 20." (the owner said build it from a mockup, 2026-10-24;
+`DemonSkills.Locked`, the levels in `DemonSkills.ORDER`, Classic's); a
+click on one does nothing, and the chips wrap onto a second line when
+they run past the card. The row shows while there are two chips or more. `Logic/DemonSkills.lua` works it
 out (`Plan`, `Current`, read only and in a pcall); `UI/MainWindow.lua`
 draws it (`DemonSkillLines`, `ShowDemonChips`, `UI.DEMON_NAMES`). Ranks a
 demon starts with count as known; only the best rank it can buy is

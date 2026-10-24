@@ -768,12 +768,23 @@ local function CreateDemonChip(parent)
     chip.label = Theme.CreateLabel(chip, "small", "muted")
     chip.label:SetPoint("CENTER", 0, 0)
     chip:SetScript("OnEnter", function(self)
+        if self.tip then
+            if GameTooltip then
+                GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+                GameTooltip:AddLine(self.tip, 1, 1, 1, true)
+                GameTooltip:Show()
+            end
+            return
+        end
         if not self.picked then self.background:SetColorTexture(Theme.Unpack("glassHover")) end
     end)
     chip:SetScript("OnLeave", function(self)
+        if GameTooltip then GameTooltip:Hide() end
         self.background:SetColorTexture(Theme.Unpack(self.picked and "glassActive" or "glass"))
     end)
-    chip:SetScript("OnClick", function(self) UI:PickDemon(self.demon) end)
+    chip:SetScript("OnClick", function(self)
+        if not self.tip then UI:PickDemon(self.demon) end
+    end)
     return chip
 end
 
@@ -940,12 +951,26 @@ function UI:ShowSkills(plan, trainer, top)
     return -y + 2
 end
 
---- The demon chips under the card's heading, one for each demon the
---- warlock has, while there are two or more. Returns where the lines go.
+--- What a dim chip says for a demon still to come, and its hover.
+function UI.LockedChipText(demon, level)
+    local name = UI.DEMON_NAMES[demon] or demon
+    return L.Format("%s at level %d", name, level),
+        L.Format("Your trainer has a quest for it at level %d.", level)
+end
+
+--- The demon chips under the card's heading: one for each demon the
+--- warlock has, then a dim one for each still to come, with the level it
+--- opens at. Shown while there are two or more. Returns where the lines go.
 function UI:ShowDemonChips(plan, y)
     local row = self.demonChipRow
     local demons = plan and plan.demons or {}
-    if #demons < 2 then
+    local locked = plan and plan.locked or {}
+    local chips = {}
+    for _, demon in ipairs(demons) do chips[#chips + 1] = { demon = demon } end
+    for _, entry in ipairs(locked) do
+        chips[#chips + 1] = { demon = entry.name, level = entry.level }
+    end
+    if #chips < 2 then
         row:Hide()
         return y
     end
@@ -953,28 +978,46 @@ function UI:ShowDemonChips(plan, y)
     row:SetPoint("TOPLEFT", self.skillsCard, "TOPLEFT", 1, y)
     row:SetPoint("TOPRIGHT", self.skillsCard, "TOPRIGHT", -1, y)
     row:Show()
-    local x = 12
-    for index, demon in ipairs(demons) do
+    local x, lines = 12, 1
+    local ok, width = pcall(self.skillsCard.GetWidth, self.skillsCard)
+    local room = (ok and tonumber(width) or 0) - 2
+    if room < 100 then room = 400 end
+    for index, entry in ipairs(chips) do
         local chip = self.demonChips[index]
         if not chip then
             chip = CreateDemonChip(row)
             self.demonChips[index] = chip
         end
+        local demon = entry.demon
         chip.demon = demon
-        chip.picked = demon == plan.demon
-        chip.label:SetText(UI.DEMON_NAMES[demon] or demon)
-        chip.label:SetTextColor(Theme.Unpack(chip.picked and "accentHi" or "muted"))
+        chip.picked = not entry.level and demon == plan.demon
+        if entry.level then
+            chip.label:SetText((UI.LockedChipText(demon, entry.level)))
+            chip.tip = select(2, UI.LockedChipText(demon, entry.level))
+            chip.label:SetTextColor(Theme.Unpack("dim"))
+            chip:SetAlpha(0.7)
+        else
+            chip.label:SetText(UI.DEMON_NAMES[demon] or demon)
+            chip.tip = false
+            chip.label:SetTextColor(Theme.Unpack(chip.picked and "accentHi" or "muted"))
+            chip:SetAlpha(1)
+        end
         chip.background:SetColorTexture(Theme.Unpack(chip.picked and "glassActive" or "glass"))
         chip.edge:SetShown(chip.picked)
         local width = math.ceil((chip.label:GetStringWidth() or 60) + 24)
+        -- A chip that would run past the card's edge starts a new line.
+        if x > 12 and x + width > room - 12 then
+            x, lines = 12, lines + 1
+        end
         chip:SetWidth(width)
         chip:ClearAllPoints()
-        chip:SetPoint("LEFT", row, "LEFT", x, 0)
+        chip:SetPoint("TOPLEFT", row, "TOPLEFT", x, -((CHIP_ROW - CHIP_HEIGHT) / 2) - (lines - 1) * CHIP_ROW)
         chip:Show()
         x = x + width + 6
     end
-    for i = #demons + 1, #self.demonChips do self.demonChips[i]:Hide() end
-    return y - CHIP_ROW
+    for i = #chips + 1, #self.demonChips do self.demonChips[i]:Hide() end
+    row:SetHeight(lines * CHIP_ROW)
+    return y - lines * CHIP_ROW
 end
 
 --- Show the Way: the beast arrow points at the trainer the card names, a
