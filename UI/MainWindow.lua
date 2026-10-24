@@ -127,6 +127,22 @@ function UI:Build()
         Theme.Border(frame, "borderLit")
     end
 
+    -- The fold gem beside the close gem folds the window down to its plate
+    -- (UI/FoldWindow.lua, a player asked, 2026-10-24). The Feed button sits
+    -- over the window but is not part of it, so in a fight, while it shows,
+    -- the window stays open.
+    if ns.FoldWindow then
+        ns.FoldWindow:Add(frame, {
+            canFold = function()
+                local fighting = InCombatLockdown and InCombatLockdown()
+                return not (fighting and UI.feedButton and UI.feedButton:IsShown())
+            end,
+            onToggle = function(folded)
+                if folded then UI:PlaceFeedButton(nil) else UI:Refresh() end
+            end,
+        })
+    end
+
     frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
     frame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
@@ -905,7 +921,8 @@ function UI:PlaceFeedButton(stack, beforeCombat)
     if not button then return end
     if InCombat() and not beforeCombat then return end
 
-    if stack and self.frame and self.frame:IsShown() and not UI.Covered() then
+    local folded = ns.FoldWindow and ns.FoldWindow:IsFolded(self.frame)
+    if stack and self.frame and self.frame:IsShown() and not UI.Covered() and not folded then
         button:SetAttribute("type", "macro")
         button:SetAttribute("macrotext", ns.Food:FeedMacro(stack))
         -- Plain on the gold face: a rarity colour would not read on it.
@@ -1337,6 +1354,8 @@ function UI:Show()
             if ns.Titanforged then ns.Titanforged:Opened(self.frame) end
         end
     end
+    -- Asked for again while folded: open it full.
+    if ns.FoldWindow then ns.FoldWindow:Unfold(self.frame) end
     self:Refresh()
 end
 

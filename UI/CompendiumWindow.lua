@@ -114,6 +114,14 @@ function CompendiumUI:Build()
         Theme.Border(frame, "borderLit")
     end
 
+    -- The fold gem beside the close gem folds the window down to its plate
+    -- (UI/FoldWindow.lua, a player asked, 2026-10-24).
+    if ns.FoldWindow then
+        ns.FoldWindow:Add(frame, { onToggle = function(folded)
+            if not folded then CompendiumUI:Refresh() end
+        end })
+    end
+
     frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
     frame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
@@ -844,6 +852,7 @@ function CompendiumUI:Show()
             if ns.Titanforged then ns.Titanforged:Opened(self.frame) end
         end
     end
+    if ns.FoldWindow then ns.FoldWindow:Unfold(self.frame) end
     self:Refresh()
 end
 
