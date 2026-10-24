@@ -354,6 +354,14 @@ function SettingsUI:BuildPages()
     end, false)
     controls.soulShards:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    local stonesRow = pages:Row("pet", 2, L["Stone Reminder:"],
+        L["Tells you after a fight when you have no Healthstone, or your Soulstone isn't on anyone."])
+
+    controls.stoneReminder = Widgets.CreateCheckbox(stonesRow, L["On"], function(checked)
+        ns.Stones:Set(checked)
+    end, false)
+    controls.stoneReminder:SetPoint("TOPLEFT", CONTROL_X, -2)
+
     -- The compendium on the left, the arrow that leads to its beasts on
     -- the right.
     pages:Section("compendium", 1, L["PET COMPENDIUM"])
@@ -505,6 +513,7 @@ function SettingsUI:Refresh()
     controls.neverFeedBuffFood:SetChecked(ns.db.neverFeedBuffFood == true)
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
     controls.soulShards:SetChecked(ns.db.soulShards == true)
+    controls.stoneReminder:SetChecked(ns.db.stoneReminder == true)
     controls.tamingTooltip:SetValue(ns.TooltipShift:Mode(ns.db.tamingTooltip ~= false,
         ns.TamingTooltip.SHIFT_KEY), true)
     controls.sisters:SetChecked(ns.SisterNote:IsOn())

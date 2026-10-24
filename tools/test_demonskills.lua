@@ -117,4 +117,33 @@ suite.check("a book to buy names its grimoire and price", bought and bought.valu
 lines = UI.DemonSkillLines(plan, "later")
 suite.check("a later book names its level", lines[1] and lines[1].value:find(tostring(plan.later[1].level)))
 
+-- Demons still to come show as dim chips with the level they open at.
+local locked = DemonSkills.Locked({ "Imp", "Voidwalker" })
+suite.check("the demons not had yet are the rest, in order",
+    #locked == 2 and locked[1].name == "Succubus" and locked[1].level == 20
+        and locked[2].name == "Felhunter" and locked[2].level == 30)
+suite.check("a warlock with every demon has none to come", #DemonSkills.Locked({ "Imp", "Voidwalker", "Succubus", "Felhunter" }) == 0)
+local text, tip = UI.LockedChipText("Succubus", 20)
+suite.check("a dim chip names the demon and its level", text == "Succubus at level 20", text)
+suite.check("and its hover says where it comes from", tip == "Your trainer has a quest for it at level 20.", tip)
+
+_G.UnitClass = function() return "Warlock", "WARLOCK" end
+UI:Show()
+plan = DemonSkills:Plan("Imp", {}, 14)
+plan.demons, plan.locked = { "Imp" }, DemonSkills.Locked({ "Imp" })
+UI:ShowDemonChips(plan, -30)
+local chips = UI.demonChips
+suite.check("one demon and three to come make four chips", chips[4] and chips[4]:IsShown() and UI.demonChipRow:IsShown())
+suite.check("the one had is picked", chips[1].picked and not chips[1].tip)
+suite.check("a dim chip says its level", chips[2].label:GetText() == "Voidwalker at level 10", chips[2].label:GetText())
+suite.check("and carries its hover", chips[2].tip == "Your trainer has a quest for it at level 10.")
+UI:PickDemon(nil)
+local picked = UI.demonPick
+chips[3]:GetScript("OnClick")(chips[3])
+suite.check("a click on a dim chip picks nothing", UI.demonPick == picked)
+plan.demons, plan.locked = { "Imp", "Voidwalker", "Succubus", "Felhunter" }, {}
+UI:ShowDemonChips(plan, -30)
+suite.check("with every demon there are no dim chips", not chips[2].tip and not chips[4].tip)
+_G.UnitClass = nil
+
 suite.done()
