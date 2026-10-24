@@ -143,8 +143,8 @@ function BeastArrow:Clear()
     self:Changed()
 end
 
---- A trainer's window opened: if the arrow led to that trainer, it is put
---- away, since you are there.
+--- A trainer's or vendor's window opened: if the arrow led to that NPC, it
+--- is put away, since you are there.
 function BeastArrow:OnTrainer()
     local place = ns.charDB and ns.charDB.arrowPlace
     if type(place) ~= "table" then return end
@@ -157,6 +157,8 @@ end
 
 function BeastArrow:OnEnable()
     ns.RegisterEvent(self, "TRAINER_SHOW", self.OnTrainer)
+    -- Demon trainers sell their grimoires in a vendor's window.
+    ns.RegisterEvent(self, "MERCHANT_SHOW", self.OnTrainer)
 end
 
 --- A beast was just tamed (TameRecord:Capture): if the arrow was following

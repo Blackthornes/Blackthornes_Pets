@@ -244,6 +244,31 @@ every tab. The minimap button's click is `PetsTabs:Toggle()`; `/bpet
 compendium` opens the Compendium tab. The Feed button and the arrow are
 unchanged. Tested in `tools/test_petstabs.lua`. Not yet seen in game.
 
+## Demon books on the Skills card
+
+The owner asked what Pets could do for warlocks and said build it from a
+mockup (2026-10-24). With a demon out, a warlock's Pet tab shows the same
+SKILLS card as a hunter's: YOUR DEMON KNOWS (RANK), CAN BUY NOW (each
+grimoire, "Demon trainer" and its price in coin colours) and LATER (WHEN,
+"Level N"), with a chip for each demon the warlock has (two or more), so
+the others' books show while one is out. `Logic/DemonSkills.lua` works it
+out (`Plan`, `Current`, read only and in a pcall); `UI/MainWindow.lua`
+draws it (`DemonSkillLines`, `ShowDemonChips`, `UI.DEMON_NAMES`). Ranks a
+demon starts with count as known; only the best rank it can buy is
+offered. `Data/DemonBooks.lua` (every rank's grimoire, level and price) is
+written by `tools/make_demon_books.py <tables folder> --build <build>` from
+the Forever client's game tables; never edit it by hand.
+
+The tables do not say where demon trainers stand, so a vendor window that
+sells a grimoire teaches it (`DemonSkills:ReadMerchant` on MERCHANT_SHOW,
+never inside a dungeon): its spot, name and side, and the prices it asked.
+Until one is seen the card names no trainer and has no Show the Way; then
+"Demon trainer: NAME, ZONE" and Show the Way (the beast arrow, put away at
+that trainer's window). Saved, never rename them: `demonSkills` (per
+character, what each demon was last seen to know), `demonTrainers` and
+`demonBookPrices` (account wide). Tested in `tools/test_demonskills.lua`.
+Not yet seen in game.
+
 ## The settings pages (from Tradeskills)
 
 The owner asked (2026-10-09) for Tradeskills' Settings upgrade in Pets,

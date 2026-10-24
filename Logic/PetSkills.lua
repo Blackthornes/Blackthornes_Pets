@@ -130,6 +130,8 @@ local function SpellBook()
     end
     return out
 end
+-- Logic/DemonSkills.lua reads the demon's book the same way.
+PetSkills.SpellBook = SpellBook
 
 --- What the pet knows: { [English name] = best rank }.
 function PetSkills:Known()
@@ -230,13 +232,15 @@ end
 -- The pet trainer
 --------------------------------------------------------------------------------
 
---- The nearest pet trainer of the player's side: one in the zone you are
---- in, else the nearest the arrow can measure, else the first in a city.
-function PetSkills:Trainer()
+--- The nearest of `trainers` ({ { name, side, zone, x, y } }, x and y 0 to
+--- 100) of the player's side: one in the zone you are in, else the nearest
+--- the arrow can measure, else the first in a city. Logic/DemonSkills.lua
+--- asks it for demon trainers.
+function PetSkills.Nearest(trainers)
     local side = ns.Travel and ns.Travel.Side()
     local here = ns.BeastArrow and ns.BeastArrow:Here()
     local best, bestYards
-    for _, trainer in ipairs(Data().TRAINERS) do
+    for _, trainer in ipairs(trainers) do
         if not side or trainer.side == side then
             if here and here.zone == trainer.zone then return trainer end
             local mapID = here and ns.Waypoints and ns.Waypoints:MapFor(trainer.zone)
@@ -249,9 +253,17 @@ function PetSkills:Trainer()
     end
     if best then return best end
     for _, city in ipairs({ "Orgrimmar", "Stormwind City", "Ironforge", "Undercity", "Darnassus", "Teldrassil" }) do
-        for _, trainer in ipairs(Data().TRAINERS) do
+        for _, trainer in ipairs(trainers) do
             if trainer.zone == city and (not side or trainer.side == side) then return trainer end
         end
     end
+    for _, trainer in ipairs(trainers) do
+        if not side or trainer.side == side then return trainer end
+    end
     return nil
+end
+
+--- The nearest pet trainer of the player's side.
+function PetSkills:Trainer()
+    return PetSkills.Nearest(Data().TRAINERS)
 end

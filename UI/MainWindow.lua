@@ -1,6 +1,6 @@
 -- Blackthornes Pets -- UI/MainWindow.lua
--- The pets window: the pet that is out and how it is doing. The hunter's
--- stable and the warlock's demons will join it here.
+-- The pets window: the pet that is out and how it is doing, and what a
+-- hunter's pet or a warlock's demon can learn next.
 --
 -- It is what a click on the minimap button and a bare /bpet open. Built like
 -- the settings window (same header, palette and row heights) so the two read
@@ -653,15 +653,42 @@ end
 --------------------------------------------------------------------------------
 -- The skills card
 --
--- A hunter's pet only (a player asked, the owner said build it from a
--- mockup, 2026-10-22): under the food and fight cards, what the pet knows,
--- what it can learn now and what comes later (Logic/PetSkills.lua), and the
--- nearest pet trainer with Show the Way. The window grows to fit it.
+-- A hunter's pet (a player asked, the owner said build it from a mockup,
+-- 2026-10-22): under the food and fight cards, what the pet knows, what it
+-- can learn now and what comes later (Logic/PetSkills.lua), and the nearest
+-- pet trainer with Show the Way. The window grows to fit it.
+--
+-- A warlock's demon has the same card (the owner said build it from a
+-- mockup, 2026-10-24): what the demon knows, the grimoires to buy now and
+-- later (Logic/DemonSkills.lua), a chip for each demon to look at its books,
+-- and the nearest demon trainer once one has been seen.
 --------------------------------------------------------------------------------
 
 local SKILL_HEAD = 20
 local SKILL_ROW = 22
 local SKILL_FOOT = 34
+local CHIP_ROW = 30
+local CHIP_HEIGHT = 20
+
+-- The warlock's demons as the chips name them, each a literal so the
+-- language files can carry it.
+UI.DEMON_NAMES = {
+    Imp = L["Imp"],
+    Voidwalker = L["Voidwalker"],
+    Succubus = L["Succubus"],
+    Felhunter = L["Felhunter"],
+}
+
+--- A copper amount in coin colours: "1g 80s".
+function UI.Money(copper)
+    copper = math.floor(tonumber(copper) or 0)
+    local gold, silver, rest = math.floor(copper / 10000), math.floor(copper / 100) % 100, copper % 100
+    local parts = {}
+    if gold > 0 then parts[#parts + 1] = ("|cffffd100%d%s|r"):format(gold, _G.GOLD_AMOUNT_SYMBOL or "g") end
+    if silver > 0 then parts[#parts + 1] = ("|cffc7c7cf%d%s|r"):format(silver, _G.SILVER_AMOUNT_SYMBOL or "s") end
+    if rest > 0 or #parts == 0 then parts[#parts + 1] = ("|cffeda55f%d%s|r"):format(rest, _G.COPPER_AMOUNT_SYMBOL or "c") end
+    return table.concat(parts, " ")
+end
 
 --- A section's heading inside the card: its name on the left and what the
 --- right column says.
@@ -674,6 +701,7 @@ local function SkillHeading(card, left, right)
     local value = Theme.CreateLabel(head, "tiny", "muted", "RIGHT")
     value:SetPoint("RIGHT", -10, -1)
     value:SetText(right)
+    head.left, head.right = name, value
     return head
 end
 
@@ -723,6 +751,36 @@ local function CreateSkillRow(card)
     return row
 end
 
+--- A demon chip: dark glass with the demon's name, gold edged while it is
+--- the one shown.
+local function CreateDemonChip(parent)
+    local chip = CreateFrame("Button", nil, parent)
+    chip:SetHeight(CHIP_HEIGHT)
+    chip.background = Theme.Fill(chip, "glass")
+    Theme.Border(chip, "border", 0.6)
+    chip.edge = chip:CreateTexture(nil, "ARTWORK")
+    chip.edge:SetPoint("TOPLEFT")
+    chip.edge:SetPoint("BOTTOMLEFT")
+    chip.edge:SetWidth(2)
+    chip.edge:SetColorTexture(Theme.Unpack("accentHi"))
+    chip.label = Theme.CreateLabel(chip, "small", "muted")
+    chip.label:SetPoint("CENTER", 0, 0)
+    chip:SetScript("OnEnter", function(self)
+        if not self.picked then self.background:SetColorTexture(Theme.Unpack("glassHover")) end
+    end)
+    chip:SetScript("OnLeave", function(self)
+        self.background:SetColorTexture(Theme.Unpack(self.picked and "glassActive" or "glass"))
+    end)
+    chip:SetScript("OnClick", function(self) UI:PickDemon(self.demon) end)
+    return chip
+end
+
+--- A click on a demon chip: its books show until another is picked.
+function UI:PickDemon(demon)
+    self.demonPick = demon
+    self:Refresh()
+end
+
 function UI:BuildSkills()
     local card = Glass(self.body, "glassAlt")
     CardHeading(card, L["SKILLS"])
@@ -734,6 +792,11 @@ function UI:BuildSkills()
         later = SkillHeading(card, L["LATER"], L["WHEN"]),
     }
     self.skillRows = {}
+
+    local chips = CreateFrame("Frame", nil, card)
+    chips:SetHeight(CHIP_ROW)
+    chips:Hide()
+    self.demonChips, self.demonChipRow = {}, chips
 
     local foot = CreateFrame("Frame", nil, card)
     foot:SetHeight(SKILL_FOOT)
@@ -760,9 +823,33 @@ function UI.IsBeastSkill(name)
     return UI.beastSkillNames[name] == true
 end
 
+--- The words on a demon's skill line.
+function UI.DemonSkillLines(plan, section)
+    local muted = ns.COLORS.muted
+    local out = {}
+    for _, skill in ipairs(plan[section] or {}) do
+        local label, value
+        if section == "known" then
+            label, value = skill.name, L.Format("Rank %d", skill.rank)
+        else
+            local name = section == "learn" and ns.DemonSkills.BookName(skill)
+                or L.Format("%s (Rank %d)", skill.name, skill.rank)
+            label = ("%s |c%s\194\183 %s|r"):format(name, muted, L["Demon trainer"])
+            if section == "learn" then
+                value = skill.cost and UI.Money(skill.cost) or ""
+            else
+                value = L.Format("Level %d", skill.level)
+            end
+        end
+        out[#out + 1] = { label = label, value = value, muted = section == "later" }
+    end
+    return out
+end
+
 --- The words on a skill line: { label, value, beast } for each line of a
 --- plan's section. `beast` is set for a skill taming teaches.
 function UI.SkillLines(plan, section)
+    if plan.kind == "demon" then return UI.DemonSkillLines(plan, section) end
     local muted = ns.COLORS.muted
     local out = {}
     for _, skill in ipairs(plan[section] or {}) do
@@ -800,7 +887,12 @@ function UI:ShowSkills(plan, trainer, top)
     card:SetPoint("TOPRIGHT", self.body, "TOPRIGHT", 0, top)
     card:Show()
 
+    local demon = plan and plan.kind == "demon"
+    self.skillHeads.known.left:SetText(demon and L["YOUR DEMON KNOWS"] or L["YOUR PET KNOWS"])
+    self.skillHeads.learn.left:SetText(demon and L["CAN BUY NOW"] or L["CAN LEARN NOW"])
+
     local y, used = -(CARD_HEAD + 1), 0
+    y = self:ShowDemonChips(demon and plan or nil, y)
     for _, section in ipairs({ "known", "learn", "later" }) do
         local head = self.skillHeads[section]
         local lines = plan and UI.SkillLines(plan, section) or {}
@@ -836,7 +928,8 @@ function UI:ShowSkills(plan, trainer, top)
     self.skillTrainerPlace = trainer
     self.skillFoot:SetShown(trainer ~= nil)
     if trainer then
-        self.skillTrainer:SetText(L.Format("Pet trainer: %s", ("%s, %s"):format(trainer.name, trainer.zone)))
+        self.skillTrainer:SetText(demon and L.Format("Demon trainer: %s", ("%s, %s"):format(trainer.name or "", trainer.zone))
+            or L.Format("Pet trainer: %s", ("%s, %s"):format(trainer.name, trainer.zone)))
         self.skillFoot:ClearAllPoints()
         self.skillFoot:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y - 2)
         self.skillFoot:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y - 2)
@@ -845,9 +938,47 @@ function UI:ShowSkills(plan, trainer, top)
     return -y + 2
 end
 
---- Show the Way: the beast arrow points at the nearest pet trainer.
+--- The demon chips under the card's heading, one for each demon the
+--- warlock has, while there are two or more. Returns where the lines go.
+function UI:ShowDemonChips(plan, y)
+    local row = self.demonChipRow
+    local demons = plan and plan.demons or {}
+    if #demons < 2 then
+        row:Hide()
+        return y
+    end
+    row:ClearAllPoints()
+    row:SetPoint("TOPLEFT", self.skillsCard, "TOPLEFT", 1, y)
+    row:SetPoint("TOPRIGHT", self.skillsCard, "TOPRIGHT", -1, y)
+    row:Show()
+    local x = 12
+    for index, demon in ipairs(demons) do
+        local chip = self.demonChips[index]
+        if not chip then
+            chip = CreateDemonChip(row)
+            self.demonChips[index] = chip
+        end
+        chip.demon = demon
+        chip.picked = demon == plan.demon
+        chip.label:SetText(UI.DEMON_NAMES[demon] or demon)
+        chip.label:SetTextColor(Theme.Unpack(chip.picked and "accentHi" or "muted"))
+        chip.background:SetColorTexture(Theme.Unpack(chip.picked and "glassActive" or "glass"))
+        chip.edge:SetShown(chip.picked)
+        local width = math.ceil((chip.label:GetStringWidth() or 60) + 24)
+        chip:SetWidth(width)
+        chip:ClearAllPoints()
+        chip:SetPoint("LEFT", row, "LEFT", x, 0)
+        chip:Show()
+        x = x + width + 6
+    end
+    for i = #demons + 1, #self.demonChips do self.demonChips[i]:Hide() end
+    return y - CHIP_ROW
+end
+
+--- Show the Way: the beast arrow points at the trainer the card names, a
+--- pet trainer or a demon trainer.
 function UI:ShowTheWayToTrainer()
-    local trainer = self.skillTrainerPlace or (ns.PetSkills and ns.PetSkills:Trainer())
+    local trainer = self.skillTrainerPlace
     if trainer and ns.BeastArrow then ns.BeastArrow:FollowPlace(trainer) end
 end
 
@@ -1240,6 +1371,10 @@ end
 function UI:ShowSkillsUnder(top, feeding, foodEnd, fightEnd)
     local plan = ns.PetSkills and ns.PetSkills:Current()
     local trainer = plan and ns.PetSkills:Trainer()
+    if not plan and ns.DemonSkills then
+        plan = ns.DemonSkills:Current(self.demonPick)
+        trainer = plan and ns.DemonSkills:Trainer()
+    end
     if not (plan or trainer) then
         self.skillsCard:Hide()
         self:SetPetHeight(HEIGHT)
