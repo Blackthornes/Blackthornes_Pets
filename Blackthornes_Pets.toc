@@ -28,6 +28,7 @@ Core\WhatsNewText.lua
 Data\PetFood.lua
 Data\BeastSkills.lua
 Data\PetTraining.lua
+Data\DemonBooks.lua
 Data\Compendium.lua
 Data\ForeverBeasts.lua
 Data\Travel.lua
@@ -38,6 +39,7 @@ Logic\Food.lua
 Logic\Butler.lua
 Logic\Taming.lua
 Logic\PetSkills.lua
+Logic\DemonSkills.lua
 Logic\TameRecord.lua
 Logic\Waypoints.lua
 Logic\Compendium.lua
