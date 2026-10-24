@@ -337,6 +337,10 @@ local DEFAULTS = {
     -- The warning when the bags hold little food the pet will eat.
     lowFoodWarning = true,
 
+    -- A warlock's soul shards on the Pet tab, and a warning at 2 or fewer
+    -- (Logic/SoulShards.lua). Off unless ticked.
+    soulShards = false,
+
     -- Food that gives a buff (stat food) is always fed last; ticked, it is
     -- never fed at all.
     neverFeedBuffFood = false,

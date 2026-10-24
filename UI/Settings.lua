@@ -344,6 +344,16 @@ function SettingsUI:BuildPages()
     ns.SettingsPages.FitStepper(controls.tamingTooltip, TooltipShift.NAMES)
     controls.tamingTooltip:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    pages:Section("pet", 2, L["WARLOCK"])
+
+    local shardsRow = pages:Row("pet", 2, L["Soul Shards:"],
+        L.Format("Shows your soul shards on the Pet tab and warns you at %d or fewer.", ns.SoulShards.LOW))
+
+    controls.soulShards = Widgets.CreateCheckbox(shardsRow, L["On"], function(checked)
+        ns.SoulShards:Set(checked)
+    end, false)
+    controls.soulShards:SetPoint("TOPLEFT", CONTROL_X, -2)
+
     -- The compendium on the left, the arrow that leads to its beasts on
     -- the right.
     pages:Section("compendium", 1, L["PET COMPENDIUM"])
@@ -494,6 +504,7 @@ function SettingsUI:Refresh()
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
     controls.neverFeedBuffFood:SetChecked(ns.db.neverFeedBuffFood == true)
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
+    controls.soulShards:SetChecked(ns.db.soulShards == true)
     controls.tamingTooltip:SetValue(ns.TooltipShift:Mode(ns.db.tamingTooltip ~= false,
         ns.TamingTooltip.SHIFT_KEY), true)
     controls.sisters:SetChecked(ns.SisterNote:IsOn())

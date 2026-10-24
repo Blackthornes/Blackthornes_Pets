@@ -269,6 +269,17 @@ character, what each demon was last seen to know), `demonTrainers` and
 `demonBookPrices` (account wide). Tested in `tools/test_demonskills.lua`.
 Not yet seen in game.
 
+## Soul shards
+
+The owner said yes (2026-10-24): a warlock's soul shards as a chip on the
+Pet tab ("5 soul shards", red at `SoulShards.LOW` (2) or fewer) and a
+warning in chat and on screen once they drop that low, again only after
+there have been more. Off unless ticked: "Soul Shards:" under WARLOCK on
+the Pet page (`soulShards`, account wide, never rename it) and `/bpet
+shards [on|off]`. `Logic/SoulShards.lua` reads the client's count of item
+6265 in a pcall, waits `SETTLE` seconds after a loading screen, and saves
+nothing. Tested in `tools/test_soulshards.lua`. Not yet seen in game.
+
 ## The settings pages (from Tradeskills)
 
 The owner asked (2026-10-09) for Tradeskills' Settings upgrade in Pets,

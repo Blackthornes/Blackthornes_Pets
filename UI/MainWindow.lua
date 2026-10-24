@@ -484,6 +484,8 @@ function UI:BuildStatus()
     self.trainingChip = CreateChip(hero)
     self.trainingChip:SetPoint("LEFT", self.moodChip, "RIGHT", 6, 0)
     self.rows.training = { value = self.trainingChip.label }
+    -- A warlock's soul shards (Logic/SoulShards.lua), after the others.
+    self.shardChip = CreateChip(hero)
     -- The whole count under the mouse: free, total and spent.
     self.trainingChip:EnableMouse(true)
     self.trainingChip:SetScript("OnEnter", function(chip)
@@ -1191,6 +1193,18 @@ function UI:ShowHero(status)
         self.trainingChip:SetPoint("LEFT", self.moodChip, "RIGHT", 6, 0)
     else
         self.trainingChip:SetPoint("TOPLEFT", self.rows.pet.value, "BOTTOMLEFT", 0, -5)
+    end
+
+    local shards, shardColor
+    if ns.SoulShards then shards, shardColor = ns.SoulShards:Chip() end
+    self.shardChip:Set(shards, shardColor)
+    self.shardChip:ClearAllPoints()
+    if chip then
+        self.shardChip:SetPoint("LEFT", self.trainingChip, "RIGHT", 6, 0)
+    elseif mood then
+        self.shardChip:SetPoint("LEFT", self.moodChip, "RIGHT", 6, 0)
+    else
+        self.shardChip:SetPoint("TOPLEFT", self.rows.pet.value, "BOTTOMLEFT", 0, -5)
     end
 end
 
