@@ -5,6 +5,12 @@
 local _, ns = ...
 
 ns.WHATS_NEW = {
+    { version = "1.0.0", lines = {
+        "A warlock's Pet tab shows the demon's books, and dim chips with a level for demons not gotten yet.",
+        "Soul Shards shows your count and warns when it's low. Stone Reminder says after a fight if a Healthstone or Soulstone is missing. Both are under Warlock on the Pet page and off until ticked.",
+        "Arrow Size picks 50%, 75% or 100% for the guide arrow.",
+        "A small gem beside the close button folds a window down to its title.",
+    } },
     { version = "0.21.0", lines = {
         "The Pet tab shows what your pet knows, what it can learn now and what comes later, and where the pet trainer is.",
         "Pet, Compendium and Settings are tabs in one window now.",
@@ -12,8 +18,5 @@ ns.WHATS_NEW = {
     } },
     { version = "0.20.0", lines = {
         "The taming skills on a beast's tooltip can be Off, Shift or Always. You pick in Settings.",
-    } },
-    { version = "0.19.0", lines = {
-        "Pets speaks Simplified Chinese, French, Spanish and Russian now if your game is in one of those.",
     } },
 }
