@@ -408,6 +408,19 @@ function SettingsUI:BuildPages()
     end, true)
     controls.arrowRoute:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    -- How big the whole arrow is drawn, 100% unless picked (the owner,
+    -- 2026-10-26). The arrow keeps its spot.
+    local arrowSizeRow = pages:Row("compendium", 2, L["Arrow Size:"], nil)
+    controls.arrowSize = Widgets.CreateChoice(arrowSizeRow, {
+        min = 50, max = 100, step = 25, value = 100,
+        format = function(percent) return ("%d%%"):format(percent) end,
+        onChange = function(percent)
+            if ns.BeastArrowUI then ns.BeastArrowUI:SetSize(percent) end
+        end,
+    })
+    ns.SettingsPages.FitStepper(controls.arrowSize, { "50%", "75%", "100%" })
+    controls.arrowSize:SetPoint("TOPLEFT", CONTROL_X, -2)
+
     -- General: windows and text on the left, the rest on the right. The
     -- minimap button always shows, so it has no row (the owner, 2026-10-15).
     pages:Section("general", 1, L["WINDOWS"])
@@ -522,6 +535,7 @@ function SettingsUI:Refresh()
     controls.beastArrow:SetChecked(ns.db.beastArrow == true)
     controls.useTomTom:SetChecked(ns.db.useTomTom ~= false)
     controls.arrowRoute:SetChecked(ns.db.arrowRoute ~= false)
+    controls.arrowSize:SetValue(ns.BeastArrowUI and ns.BeastArrowUI.Size() or 100, true)
     controls.textSize:Sync()
     controls.windowStyle:Sync()
     controls.effects:SetValue(controls.effectsIndex(), true)
