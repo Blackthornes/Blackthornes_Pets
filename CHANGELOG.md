@@ -4,6 +4,18 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.0.0
+
+For WoW: Forever (interface 16001). Files were added and the TOC changed, so
+restart the game fully after updating (`/reload` is not enough).
+
+- **Demon books:** a warlock's Pet tab shows the demon's books, and dim chips with a level for demons not gotten yet.
+- **Soul Shards:** shows your count and warns when it's low. It's under Warlock on the Pet page, off until ticked.
+- **Stone Reminder:** after a fight, says if a Healthstone or Soulstone is missing. It's under Warlock on the Pet page, off until ticked.
+- **Arrow Size:** pick 50%, 75% or 100% for the guide arrow.
+- **Fold gem:** a small gem beside the close button folds a window down to its title and opens it again.
+- **Settings:** word choices are drop-downs.
+
 ## 0.21.0
 
 For WoW: Forever (interface 16001). Files were added and the TOC changed, so

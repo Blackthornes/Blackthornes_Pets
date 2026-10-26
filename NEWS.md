@@ -23,6 +23,17 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.0.0
+
+- A warlock's Pet tab shows the demon's books, and dim chips with a level for demons not gotten yet.
+- Soul Shards shows your count and warns when it's low. Stone Reminder says after a fight if a Healthstone or Soulstone is missing. Both are under Warlock on the Pet page and off until ticked.
+- Arrow Size picks 50%, 75% or 100% for the guide arrow.
+- A small gem beside the close button folds a window down to its title.
+
+Fixes and changes:
+
+- Word choices in Settings are now drop-downs.
+
 ## 0.21.0
 
 - The Pet tab shows what your pet knows, what it can learn now and what comes later, and where the pet trainer is.
