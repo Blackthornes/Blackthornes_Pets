@@ -45,6 +45,12 @@ suite.check("just above the tracker's top left",
     point == "BOTTOMLEFT" and relativeTo == UIParent and relativePoint == "BOTTOMLEFT"
         and x == 950 and y == 704, table.concat({ tostring(point), tostring(relativePoint), tostring(x), tostring(y) }, " "))
 
+-- The gold plaque's words: the pet by name, then the food and how many.
+local first, second = button.first:GetText(), button.second:GetText()
+suite.check("the plaque names the pet", first == "Feed Scorpid", first)
+suite.check("and the food with how many are carried",
+    type(second) == "string" and second:find("Tough Jerky", 1, true) and second:find("x30", 1, true), second)
+
 ns.db.feedWarnOnlyUnhappy = true
 Refresh()
 suite.check("only when unhappy follows the warning's setting", not button:IsShown())

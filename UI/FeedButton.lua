@@ -28,13 +28,14 @@ end
 function FeedButton:Build()
     if self.button then return self.button end
 
-    local button = ns.Widgets.CreateButton(UIParent, L["Feed"], nil, {
+    -- The gold plaque (UI/Plaque.lua, the owner's pick, 2026-10-27): the
+    -- food's icon, "Feed NAME" and the food with how many are carried, and
+    -- a soft glow while the pet waits.
+    local button = ns.Plaque.Create(UIParent, {
         name = "BlackthornesPetsQuickFeed",
         template = "SecureActionButtonTemplate",
-        primary = true,
-        width = 50,
-        height = 20,
     })
+    button:SetLines(L["Feed"])
     button:SetFrameStrata("HIGH")
     button:RegisterForClicks("AnyUp", "AnyDown")
     button:HookScript("OnEnter", function(self)
@@ -110,14 +111,51 @@ function FeedButton:Update(status, stacks, beforeCombat)
         button:Show()
         self.stack = stack
         self.petName = status.name
+        self:Dress(status, stack, stacks)
         local info = ns.PetStatus.HAPPINESS[status.happiness]
         self.mood = info and info.name:lower()
     else
         button:Hide()
+        button:SetGlowing(false)
         button:ClearAllPoints()
         button:SetAttribute("macrotext", nil)
         self.stack = nil
     end
+end
+
+--- The icon of an item, by its ID, or nil.
+local function ItemIcon(itemID)
+    if not itemID then return nil end
+    if C_Item and C_Item.GetItemIconByID then
+        local ok, icon = pcall(C_Item.GetItemIconByID, itemID)
+        if ok and icon then return icon end
+    end
+    if type(GetItemIcon) == "function" then
+        local ok, icon = pcall(GetItemIcon, itemID)
+        if ok and icon then return icon end
+    end
+    return nil
+end
+
+--- How many of the stack's food the bags hold, over every stack of it.
+function FeedButton.Carried(stack, stacks)
+    local total = 0
+    for _, other in ipairs(stacks or { stack }) do
+        if other.itemID == stack.itemID then total = total + (tonumber(other.count) or 1) end
+    end
+    return math.max(total, tonumber(stack.count) or 1)
+end
+
+--- The plaque's words and icon: "Feed Cat", then "Roasted Quail x5".
+function FeedButton:Dress(status, stack, stacks)
+    local button = self.button
+    local pet = status and type(status.name) == "string" and status.name ~= "" and status.name
+    local first = pet and L.Format("Feed %s", pet) or L["Feed"]
+    local food = ns.Food.ShownName(stack) or stack.name
+    local second = food and L.Format("%s x%d", food, FeedButton.Carried(stack, stacks)) or nil
+    button:SetIcon(ItemIcon(stack.itemID))
+    button:SetLines(first, second)
+    button:SetGlowing(true)
 end
 
 function FeedButton:OnEnable()
