@@ -5,6 +5,9 @@
 local _, ns = ...
 
 ns.WHATS_NEW = {
+    { version = "1.0.1", lines = {
+        "The small Feed button has the gold plaque look.",
+    } },
     { version = "1.0.0", lines = {
         "A warlock's Pet tab shows the demon's books, and dim chips with a level for demons not gotten yet.",
         "Soul Shards shows your count and warns when it's low. Stone Reminder says after a fight if a Healthstone or Soulstone is missing. Both are under Warlock on the Pet page and off until ticked.",
@@ -15,8 +18,5 @@ ns.WHATS_NEW = {
         "The Pet tab shows what your pet knows, what it can learn now and what comes later, and where the pet trainer is.",
         "Pet, Compendium and Settings are tabs in one window now.",
         "Every window has a size grip, and the General page has an Effects choice.",
-    } },
-    { version = "0.20.0", lines = {
-        "The taming skills on a beast's tooltip can be Off, Shift or Always. You pick in Settings.",
     } },
 }
