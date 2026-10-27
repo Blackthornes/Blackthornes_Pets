@@ -332,7 +332,7 @@ L["Or type /bpet settings, or click the minimap button."] =
 L["open the settings window"] = "打开设置窗口"
 
 -- The settings pages
-L["Show descriptions"] = "显示说明"
+L["Show Descriptions"] = "显示说明"
 L["Find a setting"] = "查找设置"
 L["Normal"] = "正常"
 L["Large"] = "大"
