@@ -237,6 +237,7 @@ L["open the Pet Compendium: every beast you can tame"] =
 -- The Feed buttons
 L["Feed"] = "喂食"
 L["Feed %s"] = "喂%s"
+L["%s x%d"] = "%s x%d"
 L["%s is %s."] = "%s%s。"
 L["hungry"] = "饿了"
 

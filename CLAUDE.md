@@ -440,6 +440,21 @@ left, right-click is normal size. Saved in percent, account wide, never
 renamed: `windowScale`, `compendiumScale`, `settingsScale` (the three tabs
 now share `windowScale`). A new window gets one too.
 
+## The gold plaque
+
+Buttons that sit out on the screen on their own wear the gold plaque (the
+owner picked it from a mockup, 2026-10-27, after the Classic project's
+"Option B"): a gold rim with a red gem at each end round dark glass, the
+item's icon in a small gold frame, a first line saying what the click does
+and a second under it, and a soft glow that breathes while it waits
+(Effects Full; still on Subtle, none on Off). `UI/Plaque.lua` is the same
+file in Pets, Equipment and Farmer (a fix to it belongs in all three):
+`Plaque.Create(parent, { name, template, width, minWidth })` and
+`:SetLines`, `:SetSecondColor`, `:SetIcon`, `:SetGlowing`, `:Flash`.
+Here it is the small Feed button over the quest tracker: "Feed NAME" and
+"FOOD x5" (`FeedButton:Dress`). Tested in `tools/test_feedbutton.lua`.
+Not yet seen in game.
+
 ## The fold gem
 
 A player asked, the owner picked the mockup (2026-10-24), in all five
