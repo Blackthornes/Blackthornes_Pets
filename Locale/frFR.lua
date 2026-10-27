@@ -333,7 +333,7 @@ L["Or type /bpet settings, or click the minimap button."] =
 L["open the settings window"] = "ouvre la fenêtre des options"
 
 -- The settings pages
-L["Show descriptions"] = "Afficher les descriptions"
+L["Show Descriptions"] = "Afficher les descriptions"
 L["Find a setting"] = "Chercher une option"
 L["Normal"] = "Normal"
 L["Large"] = "Grand"
