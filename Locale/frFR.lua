@@ -528,3 +528,9 @@ L["Soul Shards:"] = "Fragments d'âme :"
 L["Shows your soul shards on the Pet tab and warns you at %d or fewer."] = "Affiche tes fragments d'âme dans l'onglet Familier et te prévient à %d ou moins."
 L["%s at level %d"] = "%s au niveau %d"
 L["Your trainer has a quest for it at level %d."] = "Ton maître a une quête pour l'obtenir au niveau %d."
+
+-- The shared Blackthornes minimap button (2026-10-28)
+L["Click a name to open it. Right-click for its settings."] = "Clique sur un nom pour l'ouvrir. Clic droit pour ses réglages."
+L["Click to pick an addon"] = "Clique pour choisir un addon"
+L["Combine Addon Buttons:"] = "Regrouper les boutons d'addons :"
+L["Your pet, its food and skills"] = "Ton familier, sa nourriture et ses techniques"

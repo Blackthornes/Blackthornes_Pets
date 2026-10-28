@@ -528,3 +528,9 @@ L["Soul Shards:"] = "Осколки души:"
 L["Shows your soul shards on the Pet tab and warns you at %d or fewer."] = "Показывает осколки души на вкладке питомца и предупреждает, когда их %d или меньше."
 L["%s at level %d"] = "%s на %d-м уровне"
 L["Your trainer has a quest for it at level %d."] = "У твоего наставника есть задание на него с %d-го уровня."
+
+-- The shared Blackthornes minimap button (2026-10-28)
+L["Click a name to open it. Right-click for its settings."] = "Нажми на название, чтобы открыть. Правый клик открывает его настройки."
+L["Click to pick an addon"] = "Нажми, чтобы выбрать аддон"
+L["Combine Addon Buttons:"] = "Объединить кнопки аддонов:"
+L["Your pet, its food and skills"] = "Твой питомец, его корм и навыки"

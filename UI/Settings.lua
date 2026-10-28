@@ -422,7 +422,8 @@ function SettingsUI:BuildPages()
     controls.arrowSize:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     -- General: windows and text on the left, the rest on the right. The
-    -- minimap button always shows, so it has no row (the owner, 2026-10-15).
+    -- minimap button always shows (the owner, 2026-10-15), alone or in the
+    -- shared Blackthornes button.
     pages:Section("general", 1, L["WINDOWS"])
 
     local windowRow = pages:Row("general", 1, L["Pets:"], nil)
@@ -451,6 +452,14 @@ function SettingsUI:BuildPages()
     -- waits for /reload as Text size does. See UI/BlizzardLook.lua.
     local styleRow = pages:Row("general", 1, L["Window Style:"], nil)
     controls.windowStyle = SettingsUI.WindowStyleControl(styleRow, CONTROL_X)
+
+    -- One minimap button for every Blackthornes addon (UI/SharedMinimap.lua,
+    -- the owner, 2026-10-28): ticked unless unticked, the same in all five.
+    local combineRow = pages:Row("general", 1, L["Combine Addon Buttons:"], nil)
+    controls.combineButtons = Widgets.CreateCheckbox(combineRow, L["On"], function(checked)
+        if ns.SharedMinimap then ns.SharedMinimap.SetCombined(checked) end
+    end, true)
+    controls.combineButtons:SetPoint("TOPLEFT", CONTROL_X, -2)
 
     -- How much the windows move: they rise in, glow and glint at Full,
     -- only fade at Subtle and stay still at Off. Full until picked.
@@ -530,6 +539,7 @@ function SettingsUI:Refresh()
     controls.tamingTooltip:SetValue(ns.TooltipShift:Mode(ns.db.tamingTooltip ~= false,
         ns.TamingTooltip.SHIFT_KEY), true)
     controls.sisters:SetChecked(ns.SisterNote:IsOn())
+    controls.combineButtons:SetChecked(not ns.SharedMinimap or ns.SharedMinimap.Combined())
     controls.whatsNewPopup:SetChecked(ns.WhatsNew:IsOn())
     controls.whatsNewMotion:SetChecked(ns.WhatsNew:IsMotionOn())
     controls.beastArrow:SetChecked(ns.db.beastArrow == true)
