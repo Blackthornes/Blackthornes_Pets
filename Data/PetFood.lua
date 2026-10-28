@@ -5,7 +5,9 @@
 -- "Fish", ...) but not what diet an item is, so this list says. It is the
 -- classic vendor, drop and cooked foods up to level 60. A food missing from
 -- it is simply not offered; add it here under its diet. The item's level
--- comes from the client, not from here.
+-- comes from the client, not from here. Data/ForeverPetFood.lua, made by
+-- tools/make_pet_food.py from the Forever client's game tables, is laid
+-- over this list (see below), so Forever's own foods are known too.
 --
 -- Each food is { item ID, "English name" }: the ID is what is matched, so
 -- the list works on a client in any language, and the name keeps a line
@@ -251,6 +253,21 @@ for diet, foods in pairs(DIETS) do
         else
             byName[food] = diet
         end
+    end
+end
+
+-- The Forever client's own list (Data/ForeverPetFood.lua, from its game
+-- tables) goes over this one: its diet wins, a food it adds is offered too,
+-- and a food it says no pet eats is dropped.
+local forever = ns.ForeverPetFood
+if forever then
+    for itemID, name in pairs(forever.NOT_FOOD or {}) do
+        if byID[itemID] then byID[itemID] = nil end
+        byName[name] = nil
+    end
+    for itemID, food in pairs(forever.FOOD or {}) do
+        byID[itemID] = food[1]
+        if food[2] and not byName[food[2]] then byName[food[2]] = food[1] end
     end
 end
 
