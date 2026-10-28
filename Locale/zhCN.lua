@@ -527,3 +527,9 @@ L["Soul Shards:"] = "灵魂碎片："
 L["Shows your soul shards on the Pet tab and warns you at %d or fewer."] = "在宠物页显示你的灵魂碎片，剩 %d 个或更少时提醒你。"
 L["%s at level %d"] = "%s（%d级）"
 L["Your trainer has a quest for it at level %d."] = "你的训练师在%d级时有获得它的任务。"
+
+-- The shared Blackthornes minimap button (2026-10-28)
+L["Click a name to open it. Right-click for its settings."] = "点击名称即可打开。右键点击打开它的设置。"
+L["Click to pick an addon"] = "点击选择插件"
+L["Combine Addon Buttons:"] = "合并插件按钮："
+L["Your pet, its food and skills"] = "你的宠物、食物和技能"
