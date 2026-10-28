@@ -25,6 +25,7 @@ Core\Init.lua
 Core\SisterNote.lua
 Core\WhatsNewText.lua
 
+Data\ForeverPetFood.lua
 Data\PetFood.lua
 Data\BeastSkills.lua
 Data\PetTraining.lua

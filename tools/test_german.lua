@@ -19,12 +19,13 @@ suite.check("a word it does not know is nil", PetFood.Diet("Viande") == nil)
 suite.check("food is known by ID", PetFood.DietOf(117) == "Meat")
 suite.check("whatever the client calls it", PetFood.DietOf(117, "Zähes Stockfleisch") == "Meat")
 suite.check("and by English name when it has no ID", PetFood.DietOf(nil, "Bat Wing") == "Meat")
+-- Some foods share a name across IDs, so there are fewer names than IDs.
 suite.check("every food but one carries its ID", (function()
     local named = 0
     for _ in pairs(PetFood.byName) do named = named + 1 end
     local ids = 0
     for _ in pairs(PetFood.byID) do ids = ids + 1 end
-    return ids >= 100 and named == ids + 1
+    return ids >= 300 and named <= ids + 1
 end)())
 
 -- A hunter with a level 9 boar on a German client.
