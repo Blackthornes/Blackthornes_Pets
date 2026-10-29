@@ -342,7 +342,6 @@ L["Here's what changed since you last played."] = "Esto es lo que cambió desde 
 L["The newest changes in each of your Blackthornes addons."] = "Los cambios más nuevos de cada uno de tus addons de Blackthornes."
 L["Show after updates"] = "Mostrar tras actualizar"
 L["Motion"] = "Animación"
-L["Got it"] = "Entendido"
 L["there is no news to show yet."] = "aún no hay novedades que mostrar."
 L["open the What's New window for every Blackthornes addon"] = "abre la ventana de Novedades de todos los addons de Blackthornes"
 
@@ -530,3 +529,4 @@ L["Show All"] = "Mostrar todo"
 L["Tameable Now"] = "Domesticable ahora"
 L["Teaches Me Something New"] = "Me enseña algo nuevo"
 L["You are level %d."] = "Eres nivel %d."
+L["Got It"] = "Entendido"

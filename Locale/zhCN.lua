@@ -341,7 +341,6 @@ L["Here's what changed since you last played."] = "这是你上次玩之后的�
 L["The newest changes in each of your Blackthornes addons."] = "你每个 Blackthornes 插件的最新改动。"
 L["Show after updates"] = "更新后显示"
 L["Motion"] = "动画"
-L["Got it"] = "知道了"
 L["there is no news to show yet."] = "还没有可以显示的更新。"
 L["open the What's New window for every Blackthornes addon"] = "打开所有 Blackthornes 插件的更新内容窗口"
 
@@ -529,3 +528,4 @@ L["Show All"] = "全部显示"
 L["Tameable Now"] = "现在可驯服"
 L["Teaches Me Something New"] = "能学到新技能"
 L["You are level %d."] = "你是%d级。"
+L["Got It"] = "知道了"

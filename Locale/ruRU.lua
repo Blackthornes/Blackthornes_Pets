@@ -342,7 +342,6 @@ L["Here's what changed since you last played."] = "Вот что изменил�
 L["The newest changes in each of your Blackthornes addons."] = "Свежие изменения в каждом твоём аддоне Blackthornes."
 L["Show after updates"] = "Показывать после обновлений"
 L["Motion"] = "Анимация"
-L["Got it"] = "Понятно"
 L["there is no news to show yet."] = "пока нет новостей."
 L["open the What's New window for every Blackthornes addon"] = "открыть окно «Что нового» для всех аддонов Blackthornes"
 
@@ -530,3 +529,4 @@ L["Show All"] = "Показать все"
 L["Tameable Now"] = "Можно приручить"
 L["Teaches Me Something New"] = "Учит новому"
 L["You are level %d."] = "У тебя %d-й уровень."
+L["Got It"] = "Понятно"
