@@ -57,6 +57,10 @@ UI\SpotMarker.lua
 UI\Plaque.lua
 UI\Titanforged.lua
 UI\FoldWindow.lua
+UI\HouseKit.lua
+UI\RowMenu.lua
+UI\Notice.lua
+UI\SharedChoices.lua
 UI\About.lua
 UI\WhatsNew.lua
 UI\SettingsPages.lua
