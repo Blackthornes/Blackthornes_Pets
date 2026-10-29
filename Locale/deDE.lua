@@ -162,6 +162,8 @@ L["there's no exact spot for that one"] = "für dieses gibt es keine genaue Stel
 L["this client can't put a pin on the map"] = "dieses Spiel kann keine Markierung auf die Karte setzen"
 L["couldn't find the map for that zone"] = "die Karte dieser Zone war nicht zu finden"
 L["pinned %s on your map: %s (%s, %s)"] = "%s auf deiner Karte markiert: %s (%s, %s)"
+L["head for %s."] = "geh nach %s."
+L["Somewhere in %s"] = "Irgendwo in %s"
 L["can't pin %s%s: %s"] = "%s%s kann nicht markiert werden: %s"
 L["that"] = "das"
 
@@ -224,8 +226,6 @@ L["Taming it teaches"] = "Es zu zähmen lehrt"
 L["(known)"] = "(bekannt)"
 L["(not known)"] = "(nicht bekannt)"
 L["Click to pin it on your map."] = "Klicken markiert es auf deiner Karte."
-L["No exact spot to pin. Shift-click to point the arrow at its zone."] =
-    "Keine genaue Stelle zum Markieren. Shift-Klick richtet den Pfeil auf seine Zone aus."
 L["No place to pin yet."] = "Noch kein Ort zum Markieren."
 L["Beasts a hunter can tame. You are level %d."] = "Wildtiere, die ein Jäger zähmen kann. Du bist Stufe %d."
 L["Beasts a hunter can tame."] = "Wildtiere, die ein Jäger zähmen kann."

@@ -162,6 +162,8 @@ L["there's no exact spot for that one"] = "для него нет точного
 L["this client can't put a pin on the map"] = "эта игра не умеет ставить метку на карту"
 L["couldn't find the map for that zone"] = "не удалось найти карту этой зоны"
 L["pinned %s on your map: %s (%s, %s)"] = "метка на карте: %s, %s (%s, %s)"
+L["head for %s."] = "отправляйся в %s."
+L["Somewhere in %s"] = "Где-то в %s"
 L["can't pin %s%s: %s"] = "не удалось отметить %s%s: %s"
 L["that"] = "это"
 
@@ -224,8 +226,6 @@ L["Taming it teaches"] = "Если приручить, научит"
 L["(known)"] = "(знаешь)"
 L["(not known)"] = "(не знаешь)"
 L["Click to pin it on your map."] = "Щёлкни, чтобы отметить его на карте."
-L["No exact spot to pin. Shift-click to point the arrow at its zone."] =
-    "Точного места для метки нет. Нажми Shift и щёлкни, чтобы стрелка указала на его зону."
 L["No place to pin yet."] = "Пока нечего отметить."
 L["Beasts a hunter can tame. You are level %d."] = "Звери, которых может приручить охотник. Твой уровень: %d."
 L["Beasts a hunter can tame."] = "Звери, которых может приручить охотник."

@@ -416,7 +416,14 @@ function Compendium.ForeverText(entry) return entry.forever and WHY[entry.foreve
 --------------------------------------------------------------------------------
 
 --- Put the game's map pin on where the beast lives.
+--- Show a beast on the map: our own marker always (Forever turns the
+--- game's pin down), and the beast arrow when the game took no pin.
 function Compendium:Pin(entry)
     if not ns.Waypoints then return false end
-    return ns.Waypoints:Show({ zone = entry.zone, x = entry.x, y = entry.y }, entry.name)
+    local shown, gamePin = ns.Waypoints:Show({ zone = entry.zone, x = entry.x, y = entry.y }, entry.name,
+        { icon = [[Interface\Icons\Ability_Hunter_BeastTaming]], arrow = ns.BeastArrow })
+    if shown and not gamePin and ns.BeastArrow and ns.BeastArrow.Follow then
+        pcall(ns.BeastArrow.Follow, ns.BeastArrow, entry)
+    end
+    return shown
 end

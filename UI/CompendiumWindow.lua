@@ -653,11 +653,9 @@ function CompendiumUI:ShowTooltip(row)
     end
 
     GameTooltip:AddLine(" ")
-    -- Only a beast with a spot can be pinned (Waypoints:Pin); the arrow
-    -- can still point at its zone.
-    local pinText = (entry.zone and entry.x and entry.y) and L["Click to pin it on your map."]
-        or entry.zone and L["No exact spot to pin. Shift-click to point the arrow at its zone."]
-        or L["No place to pin yet."]
+    -- Any beast with a zone shows on the map (Compendium:Pin): a spot, or
+    -- the middle of its zone.
+    local pinText = entry.zone and L["Click to pin it on your map."] or L["No place to pin yet."]
     GameTooltip:AddLine(pinText, 0.6, 0.6, 0.6, true)
     GameTooltip:Show()
 end

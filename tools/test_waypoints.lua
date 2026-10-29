@@ -34,12 +34,13 @@ suite.check("a zone's own map beats a cave of the same name", Waypoints:MapFor("
 suite.check("pinning works", Waypoints:Show(place, "it") == true and waypoint and waypoint.id == 1429)
 suite.check("and opens that map", opened == 1429)
 
--- A pin the game turns down is never called pinned.
+-- A pin the game turns down still shows: our own marker is on the spot.
 _G.C_Map.HasUserWaypoint = function() return false end
-local before = #env.chat
-suite.check("a pin the game turns down fails", Waypoints:Show(place, "it") == false)
-local said = table.concat(env.chat, "\n", before + 1)
-suite.check("and never says pinned", said ~= "" and said:find("pinned", 1, true) == nil, said)
+local shown, gamePin = Waypoints:Show(place, "it")
+suite.check("a pin the game turns down still shows", shown == true and gamePin == false)
+suite.check("on our own marker", ns.SpotMarker.current and ns.SpotMarker.current.map == 1429
+    and ns.SpotMarker.current.gamePin == false)
+ns.SpotMarker:Clear()
 _G.C_Map.HasUserWaypoint = function() return waypoint ~= nil end
 
 -- A map that takes no pin: the map around it, the spot moved over.
