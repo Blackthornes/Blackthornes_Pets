@@ -307,15 +307,21 @@ function PetStatus:WarnBelow()
     return 3
 end
 
---- Put a message where it cannot be missed: the big raid-warning text in the
---- middle of the screen, with its sound. The first run of the feed warning
---- used the red error line near the top, which fades too fast to notice.
---- Falls back on that line if this client has no raid warning frame.
+--- Put a message where it cannot be missed: the house note under the top of
+--- the screen (`UI/Notice.lua`, shared by every Blackthornes addon, so two
+--- notes never land on each other), with the raid warning's sound. Falls back
+--- on the game's raid warning text, then the red error line, where the note
+--- can't be shown.
 function PetStatus:Alert(message)
+    local shown = false
+    if ns.Notice and ns.Notice.Show then
+        local ok, card = pcall(ns.Notice.Show, ns.Notice, message,
+            { key = "pets:" .. tostring(message), icon = [[Interface\Icons\Ability_Hunter_BeastTraining]] })
+        shown = ok and card ~= nil
+    end
     local frame = _G.RaidWarningFrame
     local add = _G.RaidNotice_AddMessage
-    local shown = false
-    if type(frame) == "table" and type(add) == "function" then
+    if not shown and type(frame) == "table" and type(add) == "function" then
         local color = type(ChatTypeInfo) == "table" and ChatTypeInfo.RAID_WARNING
             or { r = 1, g = 0.82, b = 0.35 }
         shown = pcall(add, frame, message, color)

@@ -34,12 +34,13 @@ PetsTabs.HEIGHT = 586
 -- The one size grip's saved scale, for every tab.
 PetsTabs.SCALE_KEY = "windowScale"
 
---- The tabs, in order, and the window behind each.
+--- The tabs, in order, and the window behind each. Settings is always
+--- last, flush right.
 function PetsTabs.Tabs()
     return {
         { key = "pet", text = L["Pet"] },
         { key = "compendium", text = L["Compendium"] },
-        { key = "settings", text = L["Settings"] },
+        { key = "settings", text = L["Settings"], right = true },
     }
 end
 
@@ -124,7 +125,13 @@ function PetsTabs:Fit(window)
     local frame = FrameOf(window)
     if not frame then return end
     local width, height = self:Size()
+    local okW, oldW = pcall(frame.GetWidth, frame)
     frame:SetSize(width, height)
+    -- Settings stays flush right as the window grows.
+    local strip = rawget(window, "tabStrip")
+    if strip and strip.SetRoom and not (okW and oldW == width) then
+        strip:SetRoom(width - 2 * PetsTabs.INSET)
+    end
     if type(window.OnTabSize) == "function" then window:OnTabSize(width, height) end
 end
 
@@ -150,6 +157,21 @@ end
 function PetsTabs.ApplyScale(frame)
     if not (frame and Widgets and Widgets.ApplySize and ns.db) then return end
     Widgets.ApplySize(frame, ns.db[PetsTabs.SCALE_KEY])
+end
+
+--- Settings' Window Size: every tab drawn at `percent`, the one showing
+--- kept by its top left corner.
+function PetsTabs:SetScale(percent)
+    if not ns.db then return end
+    ns.db[PetsTabs.SCALE_KEY] = tonumber(percent)
+    for _, tab in ipairs(PetsTabs.Tabs()) do
+        local frame = FrameOf(Owner(tab.key))
+        if frame then
+            local left, top = PetsTabs.TopLeft(frame)
+            PetsTabs.ApplyScale(frame)
+            if left and Shown(frame) then PetsTabs.PlaceAt(frame, left, top) end
+        end
+    end
 end
 
 --- Open a tab. The tab showing already stays as it is.

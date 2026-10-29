@@ -66,6 +66,8 @@ Hunter()
 -- The warning.
 local shown = {}
 _G.UIErrorsFrame = { AddMessage = function(_, text) shown[#shown + 1] = text end }
+-- The house note stands in for the screen here.
+ns.Notice.Show = function(_, text) shown[#shown + 1] = text return {} end
 
 happiness = 3
 suite.check("a happy pet is left alone", PetStatus:CheckFeed() == false and #env.chat == 0)
@@ -94,9 +96,11 @@ suite.check("and only once", PetStatus:CheckFeed() == false)
 _G.UnitName = function() return "Boar" end
 PetStatus:CheckFeed()
 
--- Where the client has the raid warning frame, the warning goes there, with
--- its sound, rather than on the red error line that fades too fast.
-local raid, sounds = {}, {}
+-- The warning is the house note under the top of the screen, with the raid
+-- warning's sound, rather than the red error line that fades too fast.
+local raid, sounds, notes = {}, {}, {}
+local realShow = ns.Notice.Show
+ns.Notice.Show = function(_, text) notes[#notes + 1] = text return {} end
 _G.RaidWarningFrame = {}
 _G.RaidNotice_AddMessage = function(_, text) raid[#raid + 1] = text end
 _G.SOUNDKIT = { RAID_WARNING = 8959 }
@@ -106,9 +110,17 @@ happiness = 3
 PetStatus:CheckFeed()
 happiness = 1
 PetStatus:CheckFeed()
-suite.check("the warning goes to the raid warning frame", raid[1] == "Boar is unhappy. Feed it.", raid[1])
+suite.check("the warning is a house note", notes[1] == "Boar is unhappy. Feed it.", notes[1])
+suite.check("not the raid warning text", #raid == 0)
 suite.check("not the error line", #shown == before)
 suite.check("with the raid warning sound", sounds[1] == 8959)
+ns.Notice.Show = function() return nil end
+happiness = 3
+PetStatus:CheckFeed()
+happiness = 1
+PetStatus:CheckFeed()
+suite.check("with no note it falls back on the raid warning", raid[1] == "Boar is unhappy. Feed it.", raid[1])
+ns.Notice.Show = realShow
 _G.RaidWarningFrame, _G.RaidNotice_AddMessage, _G.SOUNDKIT, _G.PlaySound = nil, nil, nil, nil
 
 -- Only when unhappy.
