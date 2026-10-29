@@ -213,10 +213,25 @@ function UI:BuildHeader()
     rule:SetHeight(1)
     Theme.SetGradientAlpha(rule, "HORIZONTAL", "accent", 0.6, 0.05)
 
-    -- Past the portrait, which reaches 48 pixels into the window.
+    -- Whose pets these are ("Hunter", "Warlock") is no line of its own any
+    -- more (the unified look, card 4): it shows on the portrait's hover.
     local subtitle = Theme.CreateLabel(header, "small", "muted")
     subtitle:SetPoint("LEFT", header, "LEFT", 48, -4)
+    subtitle:Hide()
     self.subtitle = subtitle
+    local portrait = CreateFrame("Frame", nil, header)
+    portrait:SetPoint("TOPLEFT", -EDGE_PAD, EDGE_PAD)
+    portrait:SetSize(48, 48)
+    portrait:EnableMouse(true)
+    portrait:SetScript("OnEnter", function(owner)
+        local text = UI.subtitle and UI.subtitle:GetText()
+        if not text or text == "" then return end
+        GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(text, 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    portrait:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    self.portraitHover = portrait
 end
 
 --------------------------------------------------------------------------------

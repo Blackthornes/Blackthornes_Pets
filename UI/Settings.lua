@@ -36,7 +36,7 @@ local TITLE = "Blackthornes Pets"
 -- The pages along the top (UI/SettingsPages.lua), as Tradeskills' Settings
 -- tab has them. Every setting kept its saved name; only its place moved.
 local PAGES = {
-    { key = "pet", text = L["HUNTER PET"],
+    { key = "pet", text = L["PET"],
       tip = L["Feeding warnings, the Feed button and taming skills on tooltips"] },
     { key = "compendium", text = L["COMPENDIUM"],
       tip = L["The Pet Compendium, the beast arrow and TomTom"] },
@@ -165,7 +165,7 @@ function SettingsUI:Build()
 
     local footer = Theme.CreateLabel(frame, "tiny", "dim")
     footer:SetPoint("BOTTOMLEFT", PADDING, 14)
-    footer:SetPoint("BOTTOMRIGHT", -PADDING, 14)
+    footer:SetPoint("BOTTOMRIGHT", -PADDING - 90, 14)
     footer:SetText(L["Changes save as you make them."])
     self.footer = footer
 
@@ -175,7 +175,7 @@ end
 
 --- The header row. The addon's name is on the plate across the top edge
 --- and the close gem sits on the top right corner (UI/Titanforged.lua), so
---- the row says which page this is and which version is running.
+--- the row is the rule under the plate.
 function SettingsUI:BuildHeader()
     local frame = self.frame
 
@@ -191,13 +191,11 @@ function SettingsUI:BuildHeader()
     rule:SetHeight(1)
     Theme.SetGradientAlpha(rule, "HORIZONTAL", "accent", 0.6, 0.05)
 
-    local subtitle = Theme.CreateLabel(header, "small", "muted")
-    subtitle:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", PADDING - EDGE_PAD, 7)
-    subtitle:SetText(L["Settings"])
-
-    local version = Theme.CreateLabel(header, "tiny", "dim", "RIGHT")
+    -- The tab says Settings; the version sits small in the footer's right
+    -- corner, as on every tab (the unified look, cards 4 and 5).
+    local version = Theme.CreateLabel(frame, "tiny", "dim", "RIGHT")
     version:SetText(ns.VersionLabel())
-    version:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -(PADDING - EDGE_PAD), 8)
+    version:SetPoint("BOTTOMRIGHT", -PADDING, 14)
 end
 
 --- A row whose button runs a /bpet command.
@@ -242,6 +240,7 @@ function SettingsUI.WindowStyleControl(row, x)
         format = function(value) return STYLE_LABELS[STYLES[value]] end,
         onChange = function(value)
             ns.db.windowStyle = STYLES[value]
+            if ns.SharedChoices then ns.SharedChoices:Changed("windowStyle", STYLES[value]) end
             reload:SetShown(STYLES[value] ~= Drawn())
         end,
     })
@@ -376,7 +375,7 @@ function SettingsUI:BuildPages()
 
     -- The beast arrow, as the compendium's Arrow button and /bpet arrow
     -- switch it, and /bpet arrow check as a button.
-    pages:Section("compendium", 2, L["BEAST ARROW"])
+    pages:Section("compendium", 2, L["ARROW"])
 
     local arrowRow = pages:Row("compendium", 2, L["Beast Arrow:"],
         L["Points the way to a beast. Shift-click one in the compendium to aim it."])
@@ -421,31 +420,11 @@ function SettingsUI:BuildPages()
     ns.SettingsPages.FitStepper(controls.arrowSize, { "50%", "75%", "100%" })
     controls.arrowSize:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    -- General: windows and text on the left, the rest on the right. The
-    -- minimap button always shows (the owner, 2026-10-15), alone or in the
-    -- shared Blackthornes button.
+    -- General: the same two sections in every Blackthornes addon (the
+    -- owner, 2026-10-29), WINDOWS on the left and ADDONS on the right, then
+    -- this addon's own window rows. The minimap button always shows (the
+    -- owner, 2026-10-15), alone or in the shared Blackthornes button.
     pages:Section("general", 1, L["WINDOWS"])
-
-    local windowRow = pages:Row("general", 1, L["Pets:"], nil)
-    controls.openWindow = Widgets.CreateButton(windowRow, L["Open"], function()
-        ns.HandleSlash("window")
-    end, { width = 100, height = 20, primary = true })
-    controls.openWindow:SetPoint("TOPLEFT", CONTROL_X, 0)
-
-    local positionRow = pages:Row("general", 1, L["Window Position:"],
-        L["Reset the UI windows to their defaults."])
-
-    local reset = Widgets.CreateButton(positionRow, L["Set Default"], function()
-        SettingsUI:ResetPositions()
-        ns.Print(L["UI windows set to defaults."])
-    end, { width = 110, height = 20 })
-    reset:SetPoint("TOPLEFT", CONTROL_X, 0)
-    controls.resetPositions = reset
-
-    -- Bigger letters in the same windows, as Tradeskills has. Every size
-    -- is read as text is drawn, so it waits for /reload.
-    local textRow = pages:Row("general", 1, L["Text Size:"], nil)
-    controls.textSize = ns.SettingsPages.TextSizeControl(textRow, CONTROL_X, function() return ns.db end)
 
     -- Asked 2026-10-10: the game's own look for players who would rather
     -- the windows matched the rest of their screen. Read at login, so it
@@ -453,17 +432,19 @@ function SettingsUI:BuildPages()
     local styleRow = pages:Row("general", 1, L["Window Style:"], nil)
     controls.windowStyle = SettingsUI.WindowStyleControl(styleRow, CONTROL_X)
 
-    -- One minimap button for every Blackthornes addon (UI/SharedMinimap.lua,
-    -- the owner, 2026-10-28): ticked unless unticked, the same in all five.
-    local combineRow = pages:Row("general", 1, L["Combine Addon Buttons:"], nil)
-    controls.combineButtons = Widgets.CreateCheckbox(combineRow, L["On"], function(checked)
-        if ns.SharedMinimap then ns.SharedMinimap.SetCombined(checked) end
-    end, true)
-    controls.combineButtons:SetPoint("TOPLEFT", CONTROL_X, -2)
+    -- Bigger letters in the same windows, as Tradeskills has. Every size
+    -- is read as text is drawn, so it waits for /reload.
+    local textRow = pages:Row("general", 1, L["Text Size:"], nil)
+    controls.textSize = ns.SettingsPages.TextSizeControl(textRow, CONTROL_X, function() return ns.db end)
+
+    -- The size the window's grip saves, for all three tabs.
+    local sizeRow = pages:Row("general", 1, L["Window Size:"], nil)
+    controls.windowScale = ns.SettingsPages.WindowSizeControl(sizeRow, CONTROL_X,
+        function() return ns.db and ns.db.windowScale end,
+        function(percent) if ns.PetsTabs then ns.PetsTabs:SetScale(percent) end end)
 
     -- How much the windows move: they rise in, glow and glint at Full,
     -- only fade at Subtle and stay still at Off. Full until picked.
-    pages:Section("general", 1, L["EFFECTS"])
     local effectsRow = pages:Row("general", 1, L["Effects:"], nil)
     local Motion = ns.Motion
     local effectNames = { full = L["Full"], subtle = L["Subtle"], off = L["Off"] }
@@ -482,7 +463,31 @@ function SettingsUI:BuildPages()
     controls.effects:SetPoint("TOPLEFT", CONTROL_X, 0)
     controls.effectsIndex = EffectIndex
 
-    pages:Section("general", 2, L["ADVANCED"])
+    -- One minimap button for every Blackthornes addon (UI/SharedMinimap.lua,
+    -- the owner, 2026-10-28): ticked unless unticked, the same in all five.
+    local combineRow = pages:Row("general", 1, L["Combine Addon Buttons:"], nil)
+    controls.combineButtons = Widgets.CreateCheckbox(combineRow, L["On"], function(checked)
+        if ns.SharedMinimap then ns.SharedMinimap.SetCombined(checked) end
+    end, true)
+    controls.combineButtons:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local windowRow = pages:Row("general", 1, L["Pets:"], nil)
+    controls.openWindow = Widgets.CreateButton(windowRow, L["Open"], function()
+        ns.HandleSlash("window")
+    end, { width = 100, height = 20, primary = true })
+    controls.openWindow:SetPoint("TOPLEFT", CONTROL_X, 0)
+
+    local positionRow = pages:Row("general", 1, L["Window Position:"],
+        L["Reset the UI windows to their defaults."])
+
+    local reset = Widgets.CreateButton(positionRow, L["Set Default"], function()
+        SettingsUI:ResetPositions()
+        ns.Print(L["UI windows set to defaults."])
+    end, { width = 110, height = 20 })
+    reset:SetPoint("TOPLEFT", CONTROL_X, 0)
+    controls.resetPositions = reset
+
+    pages:Section("general", 2, L["ADDONS"])
 
     -- Debug and the checks are typed only (/bpet debug, probe, arrow check;
     -- the owner, 2026-10-23): players don't need them.
@@ -549,6 +554,7 @@ function SettingsUI:Refresh()
     controls.textSize:Sync()
     controls.windowStyle:Sync()
     controls.effects:SetValue(controls.effectsIndex(), true)
+    controls.windowScale:Sync()
     self.pages:Refresh()
 end
 
@@ -687,3 +693,28 @@ end)
 -- list, which would otherwise print the same line three times.
 ns.commands.options = ns.commands.settings
 ns.commands.config = ns.commands.settings
+
+--------------------------------------------------------------------------------
+-- Choices every Blackthornes addon shares (UI/SharedChoices.lua): a change
+-- made in a sister is written here the way this addon writes it itself.
+--------------------------------------------------------------------------------
+
+if ns.SharedChoices then
+    ns.SharedChoices:Join("Pets", function(choice, value)
+        if not ns.db then return end
+        if choice == "textSize" then
+            if ns.Theme.TEXT_STEPS and ns.Theme.TEXT_STEPS[value] then ns.db.textSize = value end
+        elseif choice == "windowStyle" then
+            if value == "titanforged" or value == "blizzard" then ns.db.windowStyle = value end
+        elseif choice == "effects" then
+            if value == "full" or value == "subtle" or value == "off" then ns.Motion.SetLevel(value) end
+        elseif choice == "useTomTom" then
+            if ns.TomTom then ns.TomTom:SetOn(value and true or false) end
+        elseif choice == "arrowRoute" then
+            if ns.Travel then ns.Travel:SetOn(value and true or false) end
+        elseif choice == "arrowSize" then
+            if ns.BeastArrowUI then ns.BeastArrowUI:SetSize(value) end
+        end
+        if ns.SettingsUI and ns.SettingsUI.Refresh and ns.SettingsUI.frame and ns.SettingsUI.frame:IsShown() then pcall(ns.SettingsUI.Refresh, ns.SettingsUI) end
+    end)
+end

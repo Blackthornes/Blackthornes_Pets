@@ -159,6 +159,21 @@ function PetsTabs.ApplyScale(frame)
     Widgets.ApplySize(frame, ns.db[PetsTabs.SCALE_KEY])
 end
 
+--- Settings' Window Size: every tab drawn at `percent`, the one showing
+--- kept by its top left corner.
+function PetsTabs:SetScale(percent)
+    if not ns.db then return end
+    ns.db[PetsTabs.SCALE_KEY] = tonumber(percent)
+    for _, tab in ipairs(PetsTabs.Tabs()) do
+        local frame = FrameOf(Owner(tab.key))
+        if frame then
+            local left, top = PetsTabs.TopLeft(frame)
+            PetsTabs.ApplyScale(frame)
+            if left and Shown(frame) then PetsTabs.PlaceAt(frame, left, top) end
+        end
+    end
+end
+
 --- Open a tab. The tab showing already stays as it is.
 function PetsTabs:Open(key)
     local window = Owner(key)

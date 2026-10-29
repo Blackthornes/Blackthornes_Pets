@@ -150,19 +150,17 @@ function CompendiumUI:Build()
     self:BuildHeadings()
     self:BuildList()
 
-    local hint = Theme.CreateLabel(frame, "tiny", "dim")
-    hint:SetPoint("BOTTOMLEFT", PADDING, 12)
-    hint:SetWidth(WIDTH - PADDING * 2)
-    hint:SetWordWrap(true)
-    hint:SetText(L.Format("Click a beast to pin it on your map, or Shift-click to point the arrow at it. %s marks what WoW: Forever has shown.",
-        Colored("good", "Forever")))
-    self.hint = hint
+    -- The house footer (the owner, 2026-10-29): the count on the left,
+    -- the version small and faint on the right. What a click does is the
+    -- last line of each beast's hover.
+    local version = Theme.CreateLabel(frame, "tiny", "dim", "RIGHT")
+    version:SetPoint("BOTTOMRIGHT", -PADDING, 14)
+    version:SetText(ns.VersionLabel and ns.VersionLabel() or "")
+    self.versionLabel = version
 
-    -- Sits on the hint's top, so a hint that wraps to a second line (the
-    -- German one, or a larger text size) pushes it up rather than under it.
     local footer = Theme.CreateLabel(frame, "small", "text")
-    footer:SetPoint("BOTTOMLEFT", hint, "TOPLEFT", 0, 4)
-    footer:SetWidth(WIDTH - PADDING * 2)
+    footer:SetPoint("BOTTOMLEFT", PADDING, 14)
+    footer:SetPoint("RIGHT", version, "LEFT", -12, 0)
     self.footer = footer
 
     frame:Hide()
@@ -182,17 +180,39 @@ function CompendiumUI:BuildHeader()
     rule:SetHeight(1)
     Theme.SetGradientAlpha(rule, "HORIZONTAL", "accent", 0.6, 0.05)
 
-    -- Past the portrait, which reaches 48 pixels into the window.
-    local subtitle = Theme.CreateLabel(header, "small", "muted")
-    subtitle:SetPoint("LEFT", header, "LEFT", 48, -4)
-    self.subtitle = subtitle
+    -- The house header (the owner, 2026-10-29): the search on the left past
+    -- the portrait, which reaches 48 pixels into the window, then the family
+    -- drop-down. What the old line under the plate said is on the hovers.
+    local search = Widgets.CreateSearchBox(header, L["Search beasts, zones or skills"], function(text)
+        CompendiumUI.searchText = text
+        CompendiumUI.offset = 0
+        CompendiumUI:Refresh()
+    end)
+    search:SetPoint("LEFT", header, "LEFT", 48, -2)
+    search:SetWidth(260)
+    self.search = search
 
-    -- The beast arrow: lit green while it is up. Settings is a tab below
-    -- the window now (UI/PetsTabs.lua).
-    local arrow = Widgets.CreateButton(header, L["Arrow"], function()
+    -- A drop-down of every family (a player asked, the owner agreed
+    -- 2026-10-11; it was a stepper that went one family at a time), wide
+    -- enough for the longest name in either language.
+    local options = self:FamilyOptions()
+    local family = Widgets.CreateDropdown(header, options, function(value)
+        CompendiumUI:Options().family = value or nil
+        CompendiumUI.offset = 0
+        CompendiumUI:Refresh()
+    end, { width = Widgets.DropdownWidth(options, 170) })
+    family:SetPoint("LEFT", search, "RIGHT", 14, 0)
+    family:SetValue(false)
+    self.familyDropdown = family
+end
+
+--- The beast arrow's switch, at the right end of the filter row: lit green
+--- while it is up.
+function CompendiumUI:BuildArrowButton(parent, anchorY)
+    local arrow = Widgets.CreateButton(parent, L["Arrow"], function()
         if ns.BeastArrow then ns.HandleSlash(ns.BeastArrow.IsOn() and "arrow off" or "arrow on") end
     end, { width = 60, height = 20 })
-    arrow:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", -10, 4)
+    arrow:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -PADDING, anchorY)
     arrow:HookScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
         GameTooltip:AddLine(L["Beast arrow"], Theme.Unpack("accent"))
@@ -228,37 +248,11 @@ function CompendiumUI:BuildBar()
     local frame = self.frame
     local top = -(HEADER + 12)
 
-    local familyLabel = Theme.CreateLabel(frame, "small", "muted")
-    familyLabel:SetPoint("TOPLEFT", PADDING, top - 4)
-    familyLabel:SetText(L["Family"])
-
-    -- A dropdown of every family (a player asked, the owner agreed
-    -- 2026-10-11; it was a stepper that went one family at a time), wide
-    -- enough for the longest name in either language.
-    local options = self:FamilyOptions()
-    local family = Widgets.CreateDropdown(frame, options, function(value)
-        CompendiumUI:Options().family = value or nil
-        CompendiumUI.offset = 0
-        CompendiumUI:Refresh()
-    end, { width = Widgets.DropdownWidth(options, 170) })
-    family:SetPoint("LEFT", familyLabel, "RIGHT", 8, 0)
-    family:SetValue(false)
-    self.familyDropdown = family
-
-    local search = Widgets.CreateSearchBox(frame, L["Search beasts, zones or skills"], function(text)
-        CompendiumUI.searchText = text
-        CompendiumUI.offset = 0
-        CompendiumUI:Refresh()
-    end)
-    search:SetPoint("LEFT", family, "RIGHT", 14, 0)
-    search:SetWidth(260)
-    self.search = search
-
     local ticks = {
-        { key = "tameNow", text = L["Tameable now"],
+        { key = "tameNow", text = L["Tameable Now"],
           tip = L["Only beasts at or below your level."] },
-        { key = "raresOnly", text = L["Rares only"] },
-        { key = "newSkills", text = L["Teaches me something new"],
+        { key = "raresOnly", text = L["Rares Only"] },
+        { key = "newSkills", text = L["Teaches Me Something New"],
           tip = L["Only beasts that teach a skill you don't have yet."] },
         { key = "foreverOnly", text = L["Seen on Forever"],
           tip = L["Only beasts known to live on WoW: Forever."] },
@@ -274,7 +268,7 @@ function CompendiumUI:BuildBar()
         if previous then
             box:SetPoint("LEFT", previous, "RIGHT", 18, 0)
         else
-            box:SetPoint("TOPLEFT", PADDING, top - 32)
+            box:SetPoint("TOPLEFT", PADDING, top - 2)
         end
         -- A box whose label says it all has no hover.
         if spec.tip then
@@ -282,6 +276,9 @@ function CompendiumUI:BuildBar()
                 GameTooltip:SetOwner(self, "ANCHOR_TOP")
                 GameTooltip:AddLine(spec.text, 1, 1, 1)
                 GameTooltip:AddLine(spec.tip, 0.9, 0.9, 0.9, true)
+                -- The level, which the line under the plate once said.
+                local level = spec.key == "tameNow" and ns.Compendium:PlayerLevel()
+                if level then GameTooltip:AddLine(L.Format("You are level %d.", level), 0.9, 0.9, 0.9, true) end
                 GameTooltip:Show()
             end)
             box:HookScript("OnLeave", function() GameTooltip:Hide() end)
@@ -290,7 +287,8 @@ function CompendiumUI:BuildBar()
         previous = box
     end
 
-    self.barBottom = top - 32 - 18 - BAR_GAP
+    self:BuildArrowButton(frame, top)
+    self.barBottom = top - 18 - BAR_GAP
 end
 
 --- The headings, which sort the list: a click sorts by that column, a
@@ -306,6 +304,15 @@ function CompendiumUI:BuildHeadings()
         label:SetPoint("LEFT", 0, 0)
         label:SetText(column.label:upper())
         heading.label = label
+        -- The house sort arrow (Media/Frame/SortArrow.tga, Equipment's),
+        -- down for the first click, up once flipped.
+        local sortArrow = heading:CreateTexture(nil, "OVERLAY")
+        sortArrow:SetTexture((ns.Titanforged and ns.Titanforged.MEDIA or "") .. "SortArrow")
+        sortArrow:SetSize(10, 10)
+        sortArrow:SetVertexColor(Theme.Unpack("accent"))
+        sortArrow:SetPoint("LEFT", label, "RIGHT", 3, 0)
+        sortArrow:Hide()
+        heading.arrow = sortArrow
         heading.column = column
 
         local sortKey = column.key ~= "skills" and column.key or nil
@@ -377,10 +384,10 @@ function CompendiumUI:BuildList()
         self.rows[index] = self.allRows[index]
     end
 
-    local empty = Theme.CreateLabel(well, "normal", "muted", "CENTER")
-    empty:SetPoint("TOP", frame, "TOP", 0, self.listTop - 60)
-    empty:SetWidth(WIDTH - PADDING * 4)
-    empty:SetWordWrap(true)
+    -- The house empty block (Widgets.CreateEmpty): the paw faint, one line
+    -- and a button that clears every filter.
+    local empty = Widgets.CreateEmpty(well, { width = WIDTH - PADDING * 4 })
+    empty:SetPoint("TOP", frame, "TOP", 0, self.listTop - 40)
     self.empty = empty
 end
 
@@ -450,10 +457,14 @@ function CompendiumUI:BuildRow(index)
     row.zone = Cell(row, COLUMNS[5], "small", "text")
     row.skills = Cell(row, COLUMNS[6], "tiny", "text")
 
-    row:RegisterForClicks("LeftButtonUp")
-    row:SetScript("OnClick", function(self)
+    row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    row:SetScript("OnClick", function(self, button)
         local entry = rawget(self, "entry")
         if not entry then return end
+        if button == "RightButton" then
+            CompendiumUI:OpenMenu(entry)
+            return
+        end
         local shift = type(IsShiftKeyDown) == "function" and select(2, pcall(IsShiftKeyDown))
         if shift then
             CompendiumUI:AimArrow(entry)
@@ -506,23 +517,18 @@ function CompendiumUI:NameText(entry)
     local name = entry.name
     local key = RANK_COLOR[entry.rank]
     if key then name = Colored(key, name) end
-    local below = {}
+    -- One line a row (the owner, 2026-10-29): rare and elite are a tag
+    -- after the name, as Forever is.
     local rank = Compendium().RankText(entry)
-    if rank then below[#below + 1] = rank end
-    if entry.forever then below[#below + 1] = Colored("good", "Forever") end
-    if #below > 0 then name = name .. "\n" .. Colored("dim", table.concat(below, "  ")) end
+    if rank then name = name .. "  " .. Colored(key or "muted", rank) end
+    if entry.forever then name = name .. "  " .. Colored("good", "Forever") end
     return name
 end
 
 function CompendiumUI:ZoneText(entry)
     if not entry.zone then return Colored("dim", L["Not known yet"]) end
-    local where = entry.zone
-    if entry.x and entry.y then
-        where = where .. "\n" .. Colored("dim", ("%.1f, %.1f"):format(entry.x, entry.y))
-    elseif entry.instance then
-        where = where .. "\n" .. Colored("dim", entry.instance == "raid" and L["Raid"] or L["Dungeon"])
-    end
-    return where
+    -- Where in the zone, and a dungeon or raid, are on the hover.
+    return entry.zone
 end
 
 --- "1.2" in green when quicker than usual, amber when slower, with "tamed"
@@ -535,7 +541,6 @@ function CompendiumUI:SpeedCell(entry)
     elseif entry.speed > USUAL_SPEED then
         text = Colored("warn", text)
     end
-    if entry.speedSeen then text = text .. "\n" .. Colored("good", L["tamed"]) end
     return text
 end
 
@@ -555,6 +560,16 @@ function CompendiumUI:FillRow(row, entry, level)
     local skills = Compendium():Skills(entry)
     row.skills:SetText(#skills > 0 and self.SkillText(skills) or Colored("dim", L["Nothing"]))
     row:Show()
+end
+
+--- The row's menu (UI/RowMenu.lua): the click's own action first.
+function CompendiumUI:OpenMenu(entry)
+    if not (ns.RowMenu and entry) then return end
+    local where = entry.zone ~= nil
+    ns.RowMenu:Open({
+        { text = L["Show on Map"], disabled = not where, run = function() ns.Compendium:Pin(entry) end },
+        { text = L["Show the Way"], disabled = not where, run = function() CompendiumUI:AimArrow(entry) end },
+    }, { title = entry.name })
 end
 
 --- Point the beast arrow at a beast, and say so.
@@ -619,9 +634,6 @@ function CompendiumUI:ShowTooltip(row)
     else
         GameTooltip:AddLine(L["Where it lives is not known yet."], 0.9, 0.9, 0.9, true)
     end
-    if entry.zone then
-        GameTooltip:AddLine(L["Shift-click to point the arrow at it."], Theme.Unpack("accent"))
-    end
     if entry.also and #entry.also > 0 then
         GameTooltip:AddLine(L.Format("Also in %s", table.concat(entry.also, ", ")), 0.9, 0.9, 0.9, true)
     end
@@ -657,6 +669,8 @@ function CompendiumUI:ShowTooltip(row)
     -- the middle of its zone.
     local pinText = entry.zone and L["Click to pin it on your map."] or L["No place to pin yet."]
     GameTooltip:AddLine(pinText, 0.6, 0.6, 0.6, true)
+    if entry.zone then GameTooltip:AddLine(L["Shift-click to point the arrow at it."], 0.6, 0.6, 0.6, true) end
+    GameTooltip:AddLine(L["Right-click for more."], 0.6, 0.6, 0.6, true)
     GameTooltip:Show()
 end
 
@@ -681,9 +695,15 @@ function CompendiumUI:SortBy(key)
 end
 
 function CompendiumUI:PaintHeadings()
-    local sort = self:Options().sort or "name"
+    local o = self:Options()
+    local sort = o.sort or "name"
     for _, heading in ipairs(self.headings or {}) do
-        heading.label:SetTextColor(Theme.Unpack(heading.sortKey == sort and "accent" or "muted"))
+        local on = heading.sortKey == sort
+        heading.label:SetTextColor(Theme.Unpack(on and "accent" or "muted"))
+        if heading.arrow then
+            heading.arrow:SetShown(on)
+            if o.descending then heading.arrow:SetTexCoord(0, 1, 1, 0) else heading.arrow:SetTexCoord(0, 1, 0, 1) end
+        end
     end
 end
 
@@ -803,13 +823,12 @@ function CompendiumUI:Refresh()
     self.offset = math.min(self.offset or 0, most)
     self:Draw()
 
-    local level = ns.Compendium:PlayerLevel()
-    self.subtitle:SetText(level and L.Format("Beasts a hunter can tame. You are level %d.", level)
-        or L["Beasts a hunter can tame."])
-
     local shown, total = #self.lines, #ns.Compendium:All()
     self.empty:SetShown(shown == 0)
-    self.empty:SetText(L["No beast matches. Untick a box or clear the search."])
+    if shown == 0 then
+        self.empty:Set(L["No beast matches. Untick a box or clear the search."], L["Show All"],
+            function() CompendiumUI:ShowAll() end)
+    end
     if shown == total then
         self.footer:SetText(L.Format("%d beasts", total))
     else
@@ -851,6 +870,16 @@ function CompendiumUI:Show()
         end
     end
     if ns.FoldWindow then ns.FoldWindow:Unfold(self.frame) end
+    self:Refresh()
+end
+
+--- The empty block's Show All: every filter off and the search cleared.
+function CompendiumUI:ShowAll()
+    local o = self:Options()
+    o.family, o.tameNow, o.raresOnly, o.newSkills, o.foreverOnly = nil, nil, nil, nil, nil
+    self.searchText = nil
+    if self.search then self.search:SetText("") end
+    self.offset = 0
     self:Refresh()
 end
 
