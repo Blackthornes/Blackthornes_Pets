@@ -4,6 +4,14 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.2.0
+
+For WoW: Forever (interface 16001). Files were added, so restart the game fully after updating (`/reload` is not enough).
+
+- **Compendium:** The search and the family picker sit in the header, the tick boxes share one row, and rows take one line with sort arrows and a right-click menu.
+- **Settings:** A new General page holds Window Style, Text Size, Window Size and Effects.
+- **Look:** An empty Compendium offers Show All. Pet warnings share one spot on the screen.
+
 ## 1.1.0
 
 For WoW: Forever (interface 16001). Files were added, so restart the game fully after updating (`/reload` is not enough).
