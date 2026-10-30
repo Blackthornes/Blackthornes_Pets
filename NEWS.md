@@ -25,12 +25,12 @@ tool prints a note for a shipped line that reads like an advert.
 
 ## 1.2.0
 
-- The search and the family picker sit in the header, the tick boxes share one row, and rows take one line with sort arrows and a right-click menu.
-- A new General page holds Window Style, Text Size, Window Size and Effects.
+- The search and family picker are at the top. Each beast takes one line. Click a heading to sort, or right-click a beast for a menu.
+- Settings has a new General page for how the windows look.
 
 Fixes and changes:
 
-- An empty Compendium offers Show All. Pet warnings share one spot on the screen.
+- An empty Compendium lets you show all beasts again. Pet warnings share one spot on the screen.
 
 ## 1.1.0
 

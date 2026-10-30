@@ -8,9 +8,9 @@ the top; a release is refused if its version has no section here.
 
 For WoW: Forever (interface 16001). Files were added, so restart the game fully after updating (`/reload` is not enough).
 
-- **Compendium:** The search and the family picker sit in the header, the tick boxes share one row, and rows take one line with sort arrows and a right-click menu.
-- **Settings:** A new General page holds Window Style, Text Size, Window Size and Effects.
-- **Look:** An empty Compendium offers Show All. Pet warnings share one spot on the screen.
+- **Compendium:** The search and family picker are at the top. Each beast takes one line. Click a heading to sort, or right-click a beast for a menu.
+- **Settings:** Settings has a new General page for how the windows look.
+- **Look:** An empty Compendium lets you show all beasts again. Pet warnings share one spot on the screen.
 
 ## 1.1.0
 

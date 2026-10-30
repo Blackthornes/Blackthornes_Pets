@@ -6,8 +6,8 @@ local _, ns = ...
 
 ns.WHATS_NEW = {
     { version = "1.2.0", lines = {
-        "The search and the family picker sit in the header, the tick boxes share one row, and rows take one line with sort arrows and a right-click menu.",
-        "A new General page holds Window Style, Text Size, Window Size and Effects.",
+        "The search and family picker are at the top. Each beast takes one line. Click a heading to sort, or right-click a beast for a menu.",
+        "Settings has a new General page for how the windows look.",
     } },
     { version = "1.1.0", lines = {
         "One minimap button now covers every Blackthornes addon you have. Click it to pick one. Turn it off with Combine Addon Buttons on the General page.",
