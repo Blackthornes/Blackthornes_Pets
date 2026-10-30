@@ -30,7 +30,7 @@ tool prints a note for a shipped line that reads like an advert.
 
 Fixes and changes:
 
-- An empty Compendium lets you show all beasts again. Pet warnings share one spot on the screen.
+- Various bug fixes for Pets.
 
 ## 1.1.0
 

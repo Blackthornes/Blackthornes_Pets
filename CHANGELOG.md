@@ -10,7 +10,7 @@ For WoW: Forever (interface 16001). Files were added, so restart the game fully 
 
 - **Compendium:** The search and family picker are at the top. Each beast takes one line. Click a heading to sort, or right-click a beast for a menu.
 - **Settings:** Settings has a new General page for how the windows look.
-- **Look:** An empty Compendium lets you show all beasts again. Pet warnings share one spot on the screen.
+- **Bug fixes:** Various bug fixes for Pets.
 
 ## 1.1.0
 
