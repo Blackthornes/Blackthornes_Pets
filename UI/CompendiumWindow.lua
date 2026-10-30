@@ -143,6 +143,8 @@ function CompendiumUI:Build()
 
     self.frame = frame
     if ns.PetsTabs then ns.PetsTabs:Attach(self, "compendium") end
+    -- Inside the one window, it closes with this one.
+    frame:HookScript("OnHide", function() if ns.PetsTabs then ns.PetsTabs:Closed(frame) end end)
     -- The pets window puts its Feed button away while this is open.
     if ns.UI and ns.UI.WatchCover then ns.UI:WatchCover(frame) end
     self:BuildHeader()
@@ -858,6 +860,9 @@ function CompendiumUI:RestorePosition()
 end
 
 function CompendiumUI:Show()
+    -- With "One Window:" ticked, the one window opens on Pets instead
+    -- (UI/PetsTabs.lua), and lays this window in.
+    if ns.PetsTabs and ns.PetsTabs:Route("compendium") then return end
     self:Build()
     if not self.frame:IsShown() then
         local how = ns.PetsTabs and ns.PetsTabs:Take(self)

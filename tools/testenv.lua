@@ -43,6 +43,10 @@ local function Stub(fields)
     function frame:GetStringWidth() return #(self._text or "") * 6 end
 
     function frame:SetScript(script, fn) self._scripts[script] = fn end
+    function frame:RegisterForClicks(...) self._clicks = { ... } end
+    function frame:RegisterForDrag(button) self._drag = button end
+    function frame:SetParent(parent) self._parent = parent end
+    function frame:GetParent() return rawget(self, "_parent") end
     function frame:GetScript(script) return self._scripts[script] end
     -- Runs after whatever script was there, as the game's HookScript does.
     function frame:HookScript(script, fn)
@@ -203,6 +207,9 @@ function env.Load(locale)
     -- ADDON_LOADED installs saved variables; tests that skip the event loop
     -- still need ns.db to exist.
     ns.LoadSavedVariables()
+    -- "One Window:" is on unless unticked; suites test Pets's own windows
+    -- unless they tick it (test_onewindow.lua checks the default).
+    if ns.db then ns.db.oneWindow = false end
 
     env.ns = ns
     return ns
