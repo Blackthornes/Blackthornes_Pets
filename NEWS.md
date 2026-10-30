@@ -23,6 +23,15 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.2.0
+
+- The search and family picker are at the top. Each beast takes one line. Click a heading to sort, or right-click a beast for a menu.
+- Settings has a new General page for how the windows look.
+
+Fixes and changes:
+
+- Various bug fixes for Pets.
+
 ## 1.1.0
 
 - One minimap button now covers every Blackthornes addon you have. Click it to pick one. Turn it off with Combine Addon Buttons on the General page.
