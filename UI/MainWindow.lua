@@ -163,6 +163,8 @@ function UI:Build()
     self.frame = frame
     -- Pet, Compendium and Settings hang below it (UI/PetsTabs.lua).
     if ns.PetsTabs then ns.PetsTabs:Attach(self, "pet") end
+    -- Inside the one window, it closes with this one.
+    frame:HookScript("OnHide", function() if ns.PetsTabs then ns.PetsTabs:Closed(frame) end end)
     self:BuildHeader()
 
     local empty = Theme.CreateLabel(frame, "normal", "muted")
@@ -1547,6 +1549,9 @@ function UI:RestorePosition()
 end
 
 function UI:Show()
+    -- With "One Window:" ticked, the one window opens on Pets instead
+    -- (UI/PetsTabs.lua), and lays this window in.
+    if ns.PetsTabs and ns.PetsTabs:Route("pet") then return end
     self:Build()
     if not self.frame:IsShown() then
         -- Opened from another tab, it takes that tab's place and does not

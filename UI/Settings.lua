@@ -125,6 +125,8 @@ function SettingsUI:Build()
 
     self.frame = frame
     if ns.PetsTabs then ns.PetsTabs:Attach(self, "settings") end
+    -- Inside the one window, it closes with this one.
+    frame:HookScript("OnHide", function() if ns.PetsTabs then ns.PetsTabs:Closed(frame) end end)
     -- The pets window puts its Feed button away while this is open.
     if ns.UI and ns.UI.WatchCover then ns.UI:WatchCover(frame) end
     self.controls = {}
@@ -471,6 +473,15 @@ function SettingsUI:BuildPages()
     end, true)
     controls.combineButtons:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    -- One window for every Blackthornes addon (UI/SharedWindow.lua, the
+    -- owner, 2026-10-30): on unless unticked, the same in all five. Ticked
+    -- or not, Settings opens again where it now belongs.
+    local oneRow = pages:Row("general", 1, L["One Window:"], nil)
+    controls.oneWindow = Widgets.CreateCheckbox(oneRow, L["On"], function(checked)
+        SettingsUI:SetOneWindow(checked)
+    end, true)
+    controls.oneWindow:SetPoint("TOPLEFT", CONTROL_X, -2)
+
     local windowRow = pages:Row("general", 1, L["Pets:"], nil)
     controls.openWindow = Widgets.CreateButton(windowRow, L["Open"], function()
         ns.HandleSlash("window")
@@ -545,6 +556,8 @@ function SettingsUI:Refresh()
         ns.TamingTooltip.SHIFT_KEY), true)
     controls.sisters:SetChecked(ns.SisterNote:IsOn())
     controls.combineButtons:SetChecked(not ns.SharedMinimap or ns.SharedMinimap.Combined())
+    local One = ns.PetsTabs and ns.PetsTabs.One()
+    controls.oneWindow:SetChecked(One ~= nil and One.On() == true)
     controls.whatsNewPopup:SetChecked(ns.WhatsNew:IsOn())
     controls.whatsNewMotion:SetChecked(ns.WhatsNew:IsMotionOn())
     controls.beastArrow:SetChecked(ns.db.beastArrow == true)
@@ -593,6 +606,9 @@ end
 --------------------------------------------------------------------------------
 
 function SettingsUI:Show()
+    -- With "One Window:" ticked, the one window opens on Pets instead
+    -- (UI/PetsTabs.lua), and lays this window in.
+    if ns.PetsTabs and ns.PetsTabs:Route("settings") then return end
     self:Build()
 
     if not self.frame:IsShown() then
@@ -605,6 +621,24 @@ function SettingsUI:Show()
     if ns.FoldWindow then ns.FoldWindow:Unfold(self.frame) end
 
     self:Refresh()
+end
+
+--- Tick or untick "One Window:" in every loaded addon, and open Settings
+--- again in the one window, or in its own.
+function SettingsUI:SetOneWindow(on)
+    local Tabs = ns.PetsTabs
+    local One = Tabs and Tabs.One()
+    if not One then return end
+    local inside = Tabs:Hosted()
+    One.SetOn(on)
+    if on and not inside and self.frame and self.frame:IsShown() then
+        Tabs.switching = true
+        self.frame:Hide()
+        Tabs.switching = false
+        self:Show()
+    elseif not on and inside then
+        self:Show()
+    end
 end
 
 function SettingsUI:Hide()

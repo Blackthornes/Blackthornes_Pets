@@ -361,6 +361,17 @@ close event for the same place changes nothing. At the auction house only
 Tradeskills is needed (`PLACES.auction.only`). Tested in
 `tools/test_sharedwindow.lua`. Not yet seen in game.
 
+Pets' pages have moved in (2026-10-30): `UI/PetsTabs.lua` is the host
+(`PetsTabs.host`, given to `SharedWindow:Join` in `UI/Minimap.lua`). With
+One Window on, opening the Pet tab, the Compendium or Settings opens the
+one window on Pets (`PetsTabs:Route`), each tab laid into its area bare of
+its own rim and grip (`Enter`, `Bare`), its tabs hung under the one
+window. A tab hiding only closes the one window when it is a Pets page in
+the area and no tab change or swap is under way (`PetsTabs:Closed`,
+`switching`, `leaving`), so picking another addon on the rail never drops
+Pets back to its own window. "One Window:" sits on the General page.
+Tested in `tools/test_onewindow.lua`.
+
 ## The shared minimap button
 
 A player asked, the owner said build it from a mockup (2026-10-28), in all

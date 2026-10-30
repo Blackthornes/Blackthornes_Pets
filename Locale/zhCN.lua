@@ -517,6 +517,7 @@ L["Your trainer has a quest for it at level %d."] = "你的训练师在%d级时�
 L["Click a name to open it. Right-click for its settings."] = "点击名称即可打开。右键点击打开它的设置。"
 L["Click to pick an addon"] = "点击选择插件"
 L["Combine Addon Buttons:"] = "合并插件按钮："
+L["One Window:"] = "单一窗口："
 L["Your pet, its food and skills"] = "你的宠物、食物和技能"
 L["ADDONS"] = "插件"
 L["ARROW"] = "箭头"

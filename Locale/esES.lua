@@ -518,6 +518,7 @@ L["Your trainer has a quest for it at level %d."] = "Tu instructor tiene una mis
 L["Click a name to open it. Right-click for its settings."] = "Haz clic en un nombre para abrirlo. Clic derecho para sus ajustes."
 L["Click to pick an addon"] = "Haz clic para elegir un addon"
 L["Combine Addon Buttons:"] = "Unir botones de addons:"
+L["One Window:"] = "Una ventana:"
 L["Your pet, its food and skills"] = "Tu mascota, su comida y sus habilidades"
 L["ADDONS"] = "ADDONS"
 L["ARROW"] = "FLECHA"
