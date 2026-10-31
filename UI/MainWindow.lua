@@ -593,6 +593,8 @@ function UI:BuildStatus()
     local icon = slot:CreateTexture(nil, "ARTWORK")
     icon:SetPoint("TOPLEFT", 1, -1)
     icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    -- The food's quality ring, as every addon's lists draw it.
+    if ns.ItemLook then ns.ItemLook.Attach(icon) end
     local count = Theme.CreateLabel(slot, "small", "text", "RIGHT")
     count:SetPoint("BOTTOMRIGHT", -2, 2)
     if count.SetShadowColor then
@@ -1338,6 +1340,7 @@ function UI:ShowFood(status, top)
     if best then
         local icon = ItemIcon(best.itemID)
         if icon then self.foodIcon:SetTexture(icon) end
+        if ns.ItemLook then ns.ItemLook.SetItem(self.foodIcon, best.itemID) end
         self.foodCount:SetText(tostring(total))
         self.foodName:SetText(ns.Food.ShownName(best))
         local sub = L.Format("%d in your bags (%s)", total, ns.Food:EffectLabel(best.effect))
