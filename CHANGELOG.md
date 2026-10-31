@@ -4,6 +4,14 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.4.0
+
+For WoW: Forever (interface 16001). Files were added, so restart the game fully after updating (`/reload` is not enough).
+
+- **One Window:** Stays beside the auction house, and Settings drop-down lists stay on top.
+- **Pet food:** Food in the bags gets a soft ring for its quality.
+- **Bug fixes:** Various bug fixes for Pets.
+
 ## 1.3.0
 
 For WoW: Forever (interface 16001). Files were added, so restart the game fully after updating (`/reload` is not enough).
