@@ -52,7 +52,15 @@ function SettingsUI:ResetPositions()
     ns.db.settingsRelativePoint = nil
     ns.db.settingsX = nil
     ns.db.settingsY = nil
-    self:RestorePosition()
+    -- The place every tab opens at goes too, so the next one starts there.
+    ns.db.windowLeft, ns.db.windowTop = nil, nil
+    -- Laid into the one window, Settings stays there: placed on UIParent it
+    -- came loose from its frame (a player's report, 2026-10-31).
+    local tabs = ns.PetsTabs
+    if not (tabs and tabs.Hosted and tabs:Hosted()) then
+        self:RestorePosition()
+        if tabs and tabs.Settle and self.frame and self.frame:IsShown() then tabs:Settle(self.frame) end
+    end
     if ns.BeastArrowUI and ns.BeastArrowUI.frame then
         ns.BeastArrowUI:ResetPosition()
     else
