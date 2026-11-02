@@ -244,8 +244,12 @@ function PetSkills.Nearest(trainers)
         if not side or trainer.side == side then
             if here and here.zone == trainer.zone then return trainer end
             local mapID = here and ns.Waypoints and ns.Waypoints:MapFor(trainer.zone)
-            local north, west = mapID and ns.BeastArrow.Offset(here, mapID, trainer.x / 100, trainer.y / 100)
-            if north then
+            -- Offset gives two values; "mapID and Offset()" would keep only the first.
+            local north, west
+            if mapID and trainer.x and trainer.y and ns.BeastArrow.Offset then
+                north, west = ns.BeastArrow.Offset(here, mapID, trainer.x / 100, trainer.y / 100)
+            end
+            if north and west then
                 local yards = math.sqrt(north * north + west * west)
                 if not bestYards or yards < bestYards then best, bestYards = trainer, yards end
             end

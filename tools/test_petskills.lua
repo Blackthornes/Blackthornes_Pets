@@ -84,6 +84,21 @@ suite.check("else one of your side", trainer and trainer.side == "H")
 ns.Travel.Side = function() return "A" end
 trainer = PetSkills:Trainer()
 suite.check("never one of the other side", trainer and trainer.side == "A")
+-- Standing in a zone with no trainer, on a map: the distance is worked out
+-- from both of Offset's values and the window never errors.
+ns.Travel.Side = function() return "H" end
+here = { zone = "The Barrens", map = 1413, continent = 1, x = 0.52, y = 0.31,
+    north = -493.96, west = -2620.30 }
+local realMapFor, realOffset = ns.Waypoints.MapFor, ns.BeastArrow.Offset
+ns.Waypoints.MapFor = function() return 1411 end
+ns.BeastArrow.Offset = function() return 300, 400 end
+local ok, picked = pcall(PetSkills.Trainer, PetSkills)
+suite.check("a trainer in another zone gives no error", ok)
+suite.check("and is one of your side", ok and picked and picked.side == "H")
+ns.BeastArrow.Offset = function() return nil end
+ok, picked = pcall(PetSkills.Trainer, PetSkills)
+suite.check("no distance read still picks one", ok and picked and picked.side == "H")
+ns.Waypoints.MapFor, ns.BeastArrow.Offset = realMapFor, realOffset
 ns.BeastArrow.Here = realHere
 
 -- Show the Way: the arrow follows the trainer, and lets go at its window.
