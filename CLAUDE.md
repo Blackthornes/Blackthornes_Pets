@@ -945,3 +945,26 @@ same.
   compared, concatenated or formatted, so read client values inside a pcall.
   Registering an event the client does not know raises too, which is why
   `ns.RegisterEvent` wraps it.
+
+## Big files (read these in pieces)
+
+Reading a huge file whole fills the context and the thread dies. Sizes are
+from 2026-11-03 and only grow. Find more with `find . -name '*.lua' | xargs wc -lc | sort -n`.
+
+- Never read a file below whole. Use `grep -n` to find the spot, then read
+  about 150 lines at a time (Read with `offset` and `limit`).
+- Never read data tables or locale files whole. Grep them for one key.
+- CLAUDE.md is big too. Grep it for a heading, then read that part only.
+- Generated files (`Data/`) are written by their `tools/` script. Never edit
+  them by hand, and never open them to see what they hold.
+
+Data tables (generated, grep only): `Data/Compendium.lua` 585 lines, 85 KB.
+
+Code:
+- `UI/Widgets.lua` 1630 lines, 62 KB: shared widgets.
+- `UI/MainWindow.lua` 1591 lines, 62 KB: the Pet tab.
+- `UI/CompendiumWindow.lua` 933 lines, 37 KB: the Compendium tab.
+
+Over 800 lines, same rule: `UI/WhatsNew.lua`, `UI/SharedWindow.lua`, `UI/SettingsPages.lua`, `Logic/Travel.lua`.
+
+The same file lives in several addons: `UI/SharedWindow.lua`, `UI/WhatsNew.lua`, `UI/SettingsPages.lua`, `Logic/Travel.lua`. A fix to one belongs in all.
