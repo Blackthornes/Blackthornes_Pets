@@ -231,6 +231,7 @@ L["Feed %s"] = "Alimentar: %s"
 L["%s x%d"] = "%s x%d"
 L["%s is %s."] = "%s está %s."
 L["hungry"] = "con hambre"
+L["Drag to move it. Right-click to put it back."] = "Arrástralo para moverlo. Clic derecho para devolverlo a su sitio."
 
 -- The Pet care key
 L["the Pet care key feeds a hunter's pet."] = "la tecla Cuidar mascota alimenta a la mascota de un cazador."

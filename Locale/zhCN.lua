@@ -230,6 +230,7 @@ L["Feed %s"] = "喂%s"
 L["%s x%d"] = "%s x%d"
 L["%s is %s."] = "%s%s。"
 L["hungry"] = "饿了"
+L["Drag to move it. Right-click to put it back."] = "拖动即可移动。右键点击放回原处。"
 
 -- The Pet care key
 L["the Pet care key feeds a hunter's pet."] = "宠物照料键用来喂猎人的宠物。"

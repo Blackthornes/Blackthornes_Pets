@@ -6,6 +6,12 @@
 -- protected), so it can only be shown, hidden or moved out of combat. It is
 -- put away as combat starts, which is no loss: Feed Pet cannot be cast in
 -- combat anyway.
+--
+-- Drag moves it (the owner said build it, 2026-11-05), out of combat only.
+-- The spot is kept per character in `BlackthornesPetsCharDB.feedButtonSpot`
+-- (`{ x, y }`, its bottom left on UIParent; never rename it). Until it is
+-- dragged it sits above the quest tracker as before, and a right-click puts
+-- it back there.
 
 local _, ns = ...
 local L = ns.L
@@ -38,6 +44,26 @@ function FeedButton:Build()
     button:SetLines(L["Feed"])
     button:SetFrameStrata("HIGH")
     button:RegisterForClicks("AnyUp", "AnyDown")
+    -- Feed on the mouse going up, so a drag does not feed first.
+    button:SetAttribute("useOnKeyDown", false)
+    button:SetMovable(true)
+    button:SetClampedToScreen(true)
+    button:RegisterForDrag("LeftButton")
+    button:SetScript("OnDragStart", function(self)
+        if InCombat() then return end
+        self:StartMoving()
+    end)
+    button:SetScript("OnDragStop", function(self)
+        self:StopMovingOrSizing()
+        -- The game would keep the spot in its own layout file too; ours is
+        -- the only one kept.
+        local setUserPlaced = self.SetUserPlaced
+        if setUserPlaced then setUserPlaced(self, false) end
+        FeedButton:SaveSpot()
+    end)
+    button:HookScript("OnMouseUp", function(_, mouse)
+        if mouse == "RightButton" then FeedButton:ResetSpot() end
+    end)
     button:HookScript("OnEnter", function(self)
         local stack = FeedButton.stack
         if not (stack and GameTooltip) then return end
@@ -45,6 +71,7 @@ function FeedButton:Build()
         GameTooltip:AddLine(L.Format("Feed %s", ns.Food.ShownName(stack)))
         GameTooltip:AddLine(L.Format("%s is %s.", FeedButton.petName or L["Your pet"],
             FeedButton.mood or L["hungry"]), 0.7, 0.7, 0.7)
+        GameTooltip:AddLine(L["Drag to move it. Right-click to put it back."], 0.5, 0.5, 0.5, true)
         GameTooltip:Show()
     end)
     button:HookScript("OnLeave", function()
@@ -71,6 +98,12 @@ function FeedButton:Place()
     local button = self.button
     button:ClearAllPoints()
 
+    local spot = self:Spot()
+    if spot then
+        button:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", spot[1], spot[2])
+        return
+    end
+
     local tracker = Tracker()
     if tracker then
         local ok, left, top, scale = pcall(function()
@@ -83,6 +116,37 @@ function FeedButton:Place()
         end
     end
     button:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", FALLBACK_X, FALLBACK_Y)
+end
+
+--- The spot the player dragged it to, or nil.
+function FeedButton:Spot()
+    local spot = ns.charDB and ns.charDB.feedButtonSpot
+    if type(spot) == "table" and type(spot[1]) == "number" and type(spot[2]) == "number" then
+        return spot
+    end
+    return nil
+end
+
+--- Keep where it was dropped, as its bottom left on UIParent.
+function FeedButton:SaveSpot()
+    local button = self.button
+    if not (button and ns.charDB) then return end
+    local ok, left, bottom, scale = pcall(function()
+        return button:GetLeft(), button:GetBottom(),
+            button:GetEffectiveScale() / UIParent:GetEffectiveScale()
+    end)
+    if not (ok and type(left) == "number" and type(bottom) == "number" and type(scale) == "number") then
+        return
+    end
+    ns.charDB.feedButtonSpot = { left * scale, bottom * scale }
+    if not InCombat() then self:Place() end
+end
+
+--- Back above the quest tracker, out of combat.
+function FeedButton:ResetSpot()
+    if InCombat() or not ns.charDB then return end
+    ns.charDB.feedButtonSpot = nil
+    if self.button and self.button:IsShown() then self:Place() end
 end
 
 --- Whether the pet needs feeding: below the feed warning's line.
