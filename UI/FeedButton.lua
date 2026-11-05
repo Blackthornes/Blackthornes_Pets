@@ -57,7 +57,8 @@ function FeedButton:Build()
         self:StopMovingOrSizing()
         -- The game would keep the spot in its own layout file too; ours is
         -- the only one kept.
-        if self.SetUserPlaced then self:SetUserPlaced(false) end
+        local setUserPlaced = self.SetUserPlaced
+        if setUserPlaced then setUserPlaced(self, false) end
         FeedButton:SaveSpot()
     end)
     button:HookScript("OnMouseUp", function(_, mouse)
