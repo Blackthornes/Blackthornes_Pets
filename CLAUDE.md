@@ -560,7 +560,11 @@ file in Pets, Equipment and Farmer (a fix to it belongs in all three):
 `Plaque.Create(parent, { name, template, width, minWidth })` and
 `:SetLines`, `:SetSecondColor`, `:SetIcon`, `:SetGlowing`, `:Flash`.
 Here it is the small Feed button over the quest tracker: "Feed NAME" and
-"FOOD x5" (`FeedButton:Dress`). Tested in `tools/test_feedbutton.lua`.
+"FOOD x5" (`FeedButton:Dress`). It can be dragged out of a fight (the owner
+said build it, 2026-11-05): the spot is kept per character in
+`BlackthornesPetsCharDB.feedButtonSpot` (`{ x, y }`, never rename it),
+right-click puts it back above the quest tracker, and it feeds on the
+mouse going up (`useOnKeyDown` false) so a drag does not feed first. Tested in `tools/test_feedbutton.lua`.
 Not yet seen in game.
 
 ## The fold gem

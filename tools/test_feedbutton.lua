@@ -94,6 +94,31 @@ suite.check("the settings page shows it on", box:GetChecked())
 box:GetScript("OnClick")(box)
 suite.check("and unticking turns it off", ns.db.quickFeed == false and not button:IsShown())
 
+-- Dragged: the spot is kept for this character and used from then on.
+ns.db.quickFeed = true
+Refresh()
+button._left, button._bottom = 300, 400
+function button:GetBottom() return self._bottom end
+button:GetScript("OnDragStop")(button)
+local spot = ns.charDB.feedButtonSpot
+suite.check("a drag keeps the spot for this character",
+    type(spot) == "table" and spot[1] == 300 and spot[2] == 400, spot and table.concat(spot, ","))
+Refresh()
+point, relativeTo, relativePoint, x, y = unpack(button._point)
+suite.check("and it stays there",
+    point == "BOTTOMLEFT" and relativePoint == "BOTTOMLEFT" and x == 300 and y == 400,
+    table.concat({ tostring(point), tostring(x), tostring(y) }, " "))
+
+_G.InCombatLockdown = function() return true end
+button:GetScript("OnMouseUp")(button, "RightButton")
+suite.check("a right-click in combat changes nothing", ns.charDB.feedButtonSpot ~= nil)
+_G.InCombatLockdown = nil
+button:GetScript("OnMouseUp")(button, "RightButton")
+suite.check("a right-click puts it back", ns.charDB.feedButtonSpot == nil)
+point, relativeTo, relativePoint, x, y = unpack(button._point)
+suite.check("above the tracker again", x == 950 and y == 704,
+    table.concat({ tostring(x), tostring(y) }, " "))
+
 _G.C_Container, _G.C_Item, _G.C_PetInfo, _G.ObjectiveTrackerFrame = nil, nil, nil, nil
 _G.UnitExists, _G.UnitName, _G.UnitLevel = nil, nil, nil
 
