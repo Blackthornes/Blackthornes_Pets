@@ -195,10 +195,12 @@ end
 --------------------------------------------------------------------------------
 
 -- Words in a food's "Use:" text that mean it gives more than health back.
--- The client hands out no flag for it, so this reads its text: English,
--- and the German client's words (classic's, not yet seen on Forever). A
--- client in another language reads every food as plain food, as before.
--- Patterns, matched on the lower-cased text.
+-- The client hands out no flag for it, so this reads its text, in every
+-- language the addon speaks (the German, French, Spanish, Russian and
+-- Chinese are the game's classic words, not yet seen on Forever). A client
+-- in another language reads every food as plain food. Patterns, matched on
+-- the lower-cased text; lower() leaves letters past ASCII alone, so the
+-- words that matter are the lower-case ones in the middle of a sentence.
 local BUFF_WORDS = {
     "well fed", "increases your", "for the next",
     -- A stat a food gives ("gain 2 Stamina and Spirit"): plain food only
@@ -207,6 +209,16 @@ local BUFF_WORDS = {
     -- German: "... werdet Ihr satt", "Erhöht Eure ...", "für die nächsten"
     "%f[%a]satt%f[%A]", "erhöht eure", "erhöht euer", "für die nächsten",
     "ausdauer", "willenskraft", "intelligenz", "stärke", "beweglichkeit",
+    -- French: "vous serez bien nourri et gagnerez 6 en Endurance et Esprit"
+    "bien nourri", "endurance", "esprit", "intelligence", "agilité",
+    "%f[%a]force%f[%A]",
+    -- Spanish: "estarás bien alimentado y ganarás 6 de aguante y espíritu"
+    "bien alimentad", "aguante", "espíritu", "intelecto", "agilidad",
+    "%f[%a]fuerza%f[%A]",
+    -- Russian: "... сытость ... к выносливости и духу"
+    "сыт", "выносливост", "дух", "интеллект", "ловкост",
+    -- Simplified Chinese: "进食充分 ... 耐力和精神"
+    "进食充分", "耐力", "精神", "智力", "力量", "敏捷",
 }
 
 local function GivesBuff(text)

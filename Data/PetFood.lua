@@ -221,15 +221,36 @@ local DIETS = {
 }
 
 -- The words the client uses for each diet (GetPetFoodTypes), to this file's
--- diet keys. English is what the probe read on Forever. The German words
--- are classic's and not yet seen on Forever: a word missing here only means
--- that diet's food is not offered, never the wrong food.
+-- diet keys. The client hands them out in its own language, so every
+-- language the game ships is here. English is what the probe read on
+-- Forever and French ("Viande") was seen on Forever; the others are the
+-- game's classic words. A word missing here only means that diet's food is
+-- not offered, never the wrong food. Matched as written and lower-cased.
 local DIET_WORDS = {
     Meat = "Meat", Fish = "Fish", Bread = "Bread", Cheese = "Cheese",
     Fruit = "Fruit", Fungus = "Fungus",
-    -- German (unverified)
+    -- German
     Fleisch = "Meat", Fisch = "Fish", Brot = "Bread", ["Käse"] = "Cheese",
     Obst = "Fruit", Pilz = "Fungus", Pilze = "Fungus",
+    -- French
+    Viande = "Meat", Poisson = "Fish", Pain = "Bread", Fromage = "Cheese",
+    Fruits = "Fruit", Champignon = "Fungus", Champignons = "Fungus",
+    -- Spanish (Spain and Mexico)
+    Carne = "Meat", Pescado = "Fish", Pan = "Bread", Queso = "Cheese",
+    Fruta = "Fruit", Frutas = "Fruit", Hongo = "Fungus", Hongos = "Fungus",
+    ["Champiñón"] = "Fungus", ["Champiñones"] = "Fungus", Setas = "Fungus",
+    -- Russian, capitalised and not (lower() leaves Cyrillic alone)
+    ["Мясо"] = "Meat", ["мясо"] = "Meat", ["Рыба"] = "Fish", ["рыба"] = "Fish",
+    ["Хлеб"] = "Bread", ["хлеб"] = "Bread", ["Сыр"] = "Cheese", ["сыр"] = "Cheese",
+    ["Фрукты"] = "Fruit", ["фрукты"] = "Fruit", ["Грибы"] = "Fungus", ["грибы"] = "Fungus",
+    -- Simplified Chinese
+    ["肉"] = "Meat", ["鱼"] = "Fish", ["面包"] = "Bread", ["奶酪"] = "Cheese",
+    ["水果"] = "Fruit", ["蘑菇"] = "Fungus",
+    -- Traditional Chinese and Korean clients, though the addon is not
+    -- translated for them
+    ["魚"] = "Fish", ["麵包"] = "Bread", ["乳酪"] = "Cheese",
+    ["고기"] = "Meat", ["생선"] = "Fish", ["빵"] = "Bread", ["치즈"] = "Cheese",
+    ["과일"] = "Fruit", ["버섯"] = "Fungus",
 }
 
 -- Each diet's name as players read it, in their language.
@@ -277,6 +298,7 @@ for word, diet in pairs(DIET_WORDS) do lowerWords[word:lower()] = diet end
 --- This file's diet key for one of the client's diet words, or nil.
 local function Diet(word)
     if type(word) ~= "string" then return nil end
+    word = word:match("^%s*(.-)%s*$")
     return DIET_WORDS[word] or lowerWords[word:lower()]
 end
 
