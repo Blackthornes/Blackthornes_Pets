@@ -3,6 +3,8 @@
 -- the bags, shown as a chip on the Pet tab, and a warning once they drop to
 -- LOW or fewer. Off unless ticked (soulShards, account wide, never rename
 -- it). The count is the client's, read inside a pcall; nothing is saved.
+-- Nothing shows and nothing warns until the warlock knows Drain Soul, the
+-- spell that makes shards (the owner, 2026-11-06).
 
 local _, ns = ...
 local L = ns.L
@@ -16,6 +18,8 @@ SoulShards.LOW = 2
 -- How long after a loading screen before the bags are trusted, as the low
 -- food warning waits (Food's BAGS_SETTLE).
 SoulShards.SETTLE = 10
+-- Drain Soul, every rank (the Forever client's game tables).
+SoulShards.DRAIN_SOUL = { 1120, 8288, 8289, 11675 }
 
 local function Plain(value) return ns.PetStatus.Plain(value) end
 
@@ -31,6 +35,13 @@ function SoulShards.IsWarlock()
     return ok and Plain(token) == "WARLOCK"
 end
 
+--- Does the warlock know Drain Soul yet? Shards mean nothing before it.
+function SoulShards.KnowsDrainSoul()
+    local Stones = ns.Stones
+    if not (Stones and Stones.Knows) then return false end
+    return Stones.Knows(SoulShards.DRAIN_SOUL)
+end
+
 --- How many soul shards are in the bags, or nil when the client won't say.
 function SoulShards:Count()
     local fn = (C_Item and C_Item.GetItemCount) or _G.GetItemCount
@@ -44,7 +55,7 @@ end
 --- What the Pet tab's chip says, and its colour: nil when it is off, or
 --- not a warlock, or the count can't be read.
 function SoulShards:Chip()
-    if not (self:IsOn() and self.IsWarlock()) then return nil end
+    if not (self:IsOn() and self.IsWarlock() and self.KnowsDrainSoul()) then return nil end
     local count = self:Count()
     if not count then return nil end
     local text
@@ -60,6 +71,7 @@ end
 --- there have been more than that.
 function SoulShards:Check()
     if not (self:IsOn() and self.IsWarlock()) or self.ready == false then return false end
+    if not self.KnowsDrainSoul() then return false end
     local count = self:Count()
     if not count then return false end
     if count > self.LOW then
