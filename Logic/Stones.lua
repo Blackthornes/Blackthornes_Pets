@@ -16,6 +16,9 @@ Stones.HEALTHSTONES = {
     5512, 19004, 19005, 5511, 19006, 19007, 5509, 19008, 19009,
     5510, 19010, 19011, 9421, 19012, 19013,
 }
+-- Classic's Soulstones, every rank (Minor to Major), counted by the Shard
+-- Tracker.
+Stones.SOULSTONES = { 5232, 16892, 16893, 16895, 16896 }
 -- Create Healthstone, every rank.
 Stones.HEALTH_SPELLS = { 6201, 6202, 5699, 11729, 11730 }
 -- Create Soulstone, every rank.
@@ -67,6 +70,29 @@ function Stones:HasHealthstone()
     return nil
 end
 
+--- How many of these items the bags hold in all, or nil when the client
+--- won't say.
+function Stones.CountOf(items)
+    local fn = (C_Item and C_Item.GetItemCount) or _G.GetItemCount
+    if type(fn) ~= "function" then return nil end
+    local total, read = 0, false
+    for _, id in ipairs(items) do
+        local ok, count = pcall(fn, id)
+        count = ok and Plain(count) or nil
+        if type(count) == "number" then
+            read = true
+            total = total + count
+        end
+    end
+    return read and total or nil
+end
+
+--- Healthstones in the bags, every rank together.
+function Stones:HealthstoneCount() return self.CountOf(self.HEALTHSTONES) end
+
+--- Soulstones in the bags, every rank together.
+function Stones:SoulstoneCount() return self.CountOf(self.SOULSTONES) end
+
 -- One buff on a unit, as a plain table, or nil.
 local function AuraAt(unit, index)
     if C_UnitAuras and type(C_UnitAuras.GetAuraDataByIndex) == "function" then
@@ -111,12 +137,38 @@ function Stones.Units()
     return units
 end
 
+--- The unit that carries the warlock's Soulstone, or nil.
+function Stones:SoulstoneHolder()
+    for _, unit in ipairs(self.Units()) do
+        if self:HasSoulstone(unit) then return unit end
+    end
+    return nil
+end
+
 --- Is the Soulstone on anyone?
 function Stones:SoulstoneOnSomeone()
-    for _, unit in ipairs(self.Units()) do
-        if self:HasSoulstone(unit) then return true end
+    return self:SoulstoneHolder() ~= nil
+end
+
+--- The whole name of whoever carries the Soulstone, or nil.
+function Stones:SoulstoneHolderName()
+    local unit = self:SoulstoneHolder()
+    if not unit then return nil end
+    local fn = _G.GetUnitName
+    if type(fn) == "function" then
+        local ok, name = pcall(fn, unit, true)
+        name = ok and Plain(name) or nil
+        if type(name) == "string" and name ~= "" then return name end
     end
-    return false
+    if type(UnitName) == "function" then
+        local ok, name, realm = pcall(UnitName, unit)
+        name, realm = ok and Plain(name) or nil, ok and Plain(realm) or nil
+        if type(name) == "string" and name ~= "" then
+            if type(realm) == "string" and realm ~= "" then return name .. "-" .. realm end
+            return name
+        end
+    end
+    return nil
 end
 
 -- Say it on screen and in chat.

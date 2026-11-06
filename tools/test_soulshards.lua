@@ -11,6 +11,8 @@ local shards = 5
 _G.C_Item = _G.C_Item or {}
 _G.C_Item.GetItemCount = function(id) return id == 6265 and shards or 0 end
 _G.UnitClass = function() return "Warlock", "WARLOCK" end
+local knowsDrain = false
+_G.IsPlayerSpell = function(id) return knowsDrain and id == 1120 end
 local warned = {}
 local realWarn = ns.Warn
 ns.Warn = function(text) warned[#warned + 1] = text end
@@ -20,6 +22,13 @@ suite.check("off unless ticked", ns.db.soulShards == false and not SoulShards:Is
 suite.check("off, no chip", SoulShards:Chip() == nil)
 shards = 1
 suite.check("off, no warning", SoulShards:Check() == false and #warned == 0)
+
+-- Not until Drain Soul is learned: no chip and no warning.
+ns.db.soulShards = true
+suite.check("before Drain Soul, no chip", SoulShards:Chip() == nil)
+suite.check("before Drain Soul, no warning", SoulShards:Check() == false and #warned == 0)
+ns.db.soulShards = false
+knowsDrain = true
 
 SoulShards:Set(true)
 suite.check("turning it on warns at once when low", #warned == 1

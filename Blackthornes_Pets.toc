@@ -73,6 +73,7 @@ UI\PetsTabs.lua
 UI\Settings.lua
 UI\MainWindow.lua
 UI\FeedButton.lua
+UI\ShardTracker.lua
 UI\FeedKey.lua
 UI\TamingTooltip.lua
 UI\CompendiumWindow.lua
