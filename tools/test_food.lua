@@ -346,7 +346,50 @@ for _ = 1, 5 do Food:Scan() end
 suite.check("given up on after a few tries", Food.buffKnown[3662] == false)
 stacks = Food:Scan()
 suite.check("and the scan is kept again", Food.kept ~= nil and not Food.waitingForNames)
-Food.buffKnown, Food.buffTries = nil, nil
+Food.buffKnown, Food.buffTries, Food.buffGuessed, Food.buffFirst = nil, nil, nil, nil
+
+-- Food the client has not said about yet sorts after food known to be
+-- plain, even when it would feed the pet better (eggs before bear meat).
+TOOLTIPS[3662] = { "Crocolisk Steak" }
+bags = { [0] = { [1] = { itemID = 3662, stackCount = 5 }, [2] = { itemID = 117, stackCount = 3 } } }
+Food:BagsChanged()
+stacks = Food:Scan()
+suite.check("food not read yet goes after known plain food",
+    stacks[1].name == "Tough Jerky" and stacks[2].buffUnsure == true, stacks[1].name)
+
+-- Given up on, it still goes after known plain food, and is read again
+-- once the client sends it.
+for _ = 1, 5 do Food:Scan() end
+stacks = Food:Scan()
+suite.check("a guessed food still goes after known plain food",
+    stacks[1].name == "Tough Jerky" and stacks[2].buffGuessed == true, stacks[1].name)
+TOOLTIPS[3662] = { "Crocolisk Steak", "Use: Restores 243 health over 21 sec. If you spend at least 10 seconds eating you will become well fed." }
+suite.check("the item arriving clears the guess", Food:ItemArrived(3662) == true and Food.buffKnown[3662] == nil)
+ns.db.neverFeedBuffFood = true
+Food:BagsChanged()
+stacks = Food:Scan()
+suite.check("and Never feed it then holds", #stacks == 1 and stacks[1].name == "Tough Jerky", #stacks)
+ns.db.neverFeedBuffFood = false
+suite.check("an item never guessed changes nothing", Food:ItemArrived(117) == false)
+
+-- With a clock, a slow tooltip is waited on longer than five quick scans.
+Food.buffKnown, Food.buffTries, Food.buffGuessed, Food.buffFirst = nil, nil, nil, nil
+TOOLTIPS[3662] = { "Crocolisk Steak" }
+local clock = 100
+local oldGetTime = _G.GetTime
+_G.GetTime = function() return clock end
+for _ = 1, 8 do Food:IsBuffFood(3662) end
+suite.check("five quick reads are not enough to give up", Food.buffKnown[3662] == nil)
+clock = 131
+Food:IsBuffFood(3662)
+suite.check("half a minute later it is given up on", Food.buffKnown[3662] == false)
+_G.GetTime = oldGetTime
+
+-- A food that names a stat is buff food, even without "well fed".
+Food.buffKnown, Food.buffTries, Food.buffGuessed, Food.buffFirst = nil, nil, nil, nil
+TOOLTIPS[3662] = { "Herb Baked Egg", "Use: Restores 61 health over 15 sec. Also gives 2 Stamina and Spirit for 15 min." }
+suite.check("a food naming a stat is buff food", Food:IsBuffFood(3662) == true)
+Food.buffKnown, Food.buffTries, Food.buffGuessed, Food.buffFirst = nil, nil, nil, nil
 
 -- Without the tooltip call, the use spell's description says.
 _G.C_TooltipInfo = nil

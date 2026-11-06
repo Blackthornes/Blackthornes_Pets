@@ -201,8 +201,12 @@ end
 -- Patterns, matched on the lower-cased text.
 local BUFF_WORDS = {
     "well fed", "increases your", "for the next",
+    -- A stat a food gives ("gain 2 Stamina and Spirit"): plain food only
+    -- gives health back, so it never names one.
+    "stamina", "spirit", "intellect", "strength", "agility",
     -- German: "... werdet Ihr satt", "Erhöht Eure ...", "für die nächsten"
     "%f[%a]satt%f[%A]", "erhöht eure", "erhöht euer", "für die nächsten",
+    "ausdauer", "willenskraft", "intelligenz", "stärke", "beweglichkeit",
 }
 
 local function GivesBuff(text)
@@ -264,26 +268,57 @@ end
 --- True when the food gives a buff as well as feeding. Kept per item ID
 --- once the client has answered, so a bag scan reads each food once. The
 --- second value is true while the client has not answered yet: the food
---- counts as plain food until it does, and after BUFF_TRIES reads with no
---- answer it is taken as plain food for the session, so a client that never
---- answers does not keep the bags being read again.
+--- counts as plain food until it does, but sorts after food known to be
+--- plain. After BUFF_TRIES reads and BUFF_WAIT seconds with no answer it is
+--- taken as plain food, so a client that never answers does not keep the
+--- bags being read again; the third value is then true, and the food is
+--- read again once the client sends it (GET_ITEM_INFO_RECEIVED). Scans come
+--- every few seconds, so five tries alone passed before a slow tooltip
+--- loaded, and buff food was fed with "Never feed buff food" ticked.
+local function Now()
+    local ok, now = pcall(GetTime)
+    return ok and tonumber(now) or nil
+end
+
 local BUFF_TRIES = 5
+local BUFF_WAIT = 30
 
 function Food:IsBuffFood(itemID)
     if type(itemID) ~= "number" then return false end
     self.buffKnown = self.buffKnown or {}
     local known = self.buffKnown[itemID]
-    if known ~= nil then return known end
+    if known ~= nil then
+        return known, nil, (self.buffGuessed and self.buffGuessed[itemID]) or nil
+    end
     known = ReadBuff(itemID)
     if known == nil then
         self.buffTries = self.buffTries or {}
+        self.buffFirst = self.buffFirst or {}
         local tries = (self.buffTries[itemID] or 0) + 1
         self.buffTries[itemID] = tries
-        if tries < BUFF_TRIES then return false, true end
-        known = false
+        local now = Now()
+        self.buffFirst[itemID] = self.buffFirst[itemID] or now
+        local first = self.buffFirst[itemID]
+        local waited = not (now and first) or now - first >= BUFF_WAIT
+        if tries < BUFF_TRIES or not waited then return false, true end
+        self.buffGuessed = self.buffGuessed or {}
+        self.buffGuessed[itemID] = true
+        self.buffKnown[itemID] = false
+        return false, nil, true
     end
     self.buffKnown[itemID] = known
     return known
+end
+
+--- The client sent an item: a food taken as plain for want of an answer is
+--- read again. True when one was.
+function Food:ItemArrived(itemID)
+    if not (self.buffGuessed and self.buffGuessed[itemID]) then return false end
+    self.buffGuessed[itemID] = nil
+    if self.buffKnown then self.buffKnown[itemID] = nil end
+    if self.buffTries then self.buffTries[itemID] = nil end
+    if self.buffFirst then self.buffFirst[itemID] = nil end
+    return true
 end
 
 local function NeverBuffFood()
@@ -303,11 +338,12 @@ function Food:Inspect(bag, slot, info, status, eats)
     end
     local effect = self:Effect(level, status.level)
     if effect == "refused" then return nil, L["too low level"], name, level end
-    local buff, unsure = self:IsBuffFood(itemID)
-    if unsure then RequestItem(itemID) end
+    local buff, unsure, guessed = self:IsBuffFood(itemID)
+    if unsure or guessed then RequestItem(itemID) end
     if buff and NeverBuffFood() then return nil, L["buff food, which you've chosen not to feed"], name, level end
     return {
         bag = bag, slot = slot, itemID = itemID, buff = buff or nil, buffUnsure = unsure or nil,
+        buffGuessed = guessed or nil,
         name = name, level = level, diet = diet, effect = effect,
         count = tonumber(Plain(info.stackCount)) or 1,
         quality = QualityNumber(Plain(info.quality)),
@@ -316,9 +352,19 @@ end
 
 local RANK = { full = 1, half = 2, low = 3 }
 
+-- 1 for food known to be plain, 2 for food the client has not said about
+-- yet, 3 for buff food.
+local function BuffRank(stack)
+    if stack.buff then return 3 end
+    if stack.buffUnsure or stack.buffGuessed then return 2 end
+    return 1
+end
+
 local function BestFirst(a, b)
-    -- Buff food goes last, whatever it would do for the pet.
-    if (a.buff or false) ~= (b.buff or false) then return not a.buff end
+    -- Buff food goes last, whatever it would do for the pet, and food that
+    -- may be buff food goes after food known to be plain.
+    local ra, rb = BuffRank(a), BuffRank(b)
+    if ra ~= rb then return ra < rb end
     if RANK[a.effect] ~= RANK[b.effect] then return RANK[a.effect] < RANK[b.effect] end
     if (a.level or 0) ~= (b.level or 0) then return (a.level or 0) < (b.level or 0) end
     if a.bag ~= b.bag then return a.bag < b.bag end
@@ -333,11 +379,6 @@ end
 --- when the bags read empty and items come back without names).
 -- How long a scan is kept at most, even with no bag event, as a safety net.
 local KEEP_SCAN = 60
-
-local function Now()
-    local ok, now = pcall(GetTime)
-    return ok and tonumber(now) or nil
-end
 
 --- The bags changed (or may have): the next Scan reads them again.
 function Food:BagsChanged()
@@ -652,9 +693,11 @@ function Food:OnEnable()
     -- An item the bags held without a name has arrived. Only listened to
     -- while the last scan was missing names: other addons ask the client for
     -- items all the time, and each answer used to read the bags again.
-    ns.RegisterEvent(self, "GET_ITEM_INFO_RECEIVED", function()
-        -- Also while a name was drawn plain for want of its quality.
-        if not (Food.waitingForNames or Food.waitingForQuality) then return end
+    ns.RegisterEvent(self, "GET_ITEM_INFO_RECEIVED", function(_, _, itemID)
+        -- Also while a name was drawn plain for want of its quality, and for
+        -- a food taken as plain before the client said if it is buff food.
+        local guessed = Food:ItemArrived(tonumber(itemID))
+        if not (guessed or Food.waitingForNames or Food.waitingForQuality) then return end
         Food.waitingForQuality = nil
         Food:BagsChanged()
         if Food.retryPending or not (C_Timer and C_Timer.After) then return end
