@@ -23,6 +23,12 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.6.1
+
+Fixes and changes:
+
+- Pets now finds your pet's food on French, Spanish, Russian and Chinese clients.
+
 ## 1.6.0
 
 - Warlocks get a Shard Tracker, a small plaque that shows your soul shards and stones. It starts off. Turn it on in Settings, on the Pet page.
