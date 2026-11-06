@@ -309,7 +309,7 @@ end
 function ShardTracker:Paint(slot, data, index)
     local kind
     for _, k in ipairs(self.KINDS) do if k.key == data.key then kind = k end end
-    local old = slot.data
+    local old = rawget(slot, "data")
     slot.data = data
     slot.kind = kind
 
@@ -412,7 +412,7 @@ function ShardTracker:Refresh()
     for index, data in ipairs(slots) do
         local slot = frame.slots[index] or self:MakeSlot(index)
         slot.x = RIM + PAD + (index - 1) * self.SLOT
-        local fresh = not slot.placed or slot.key ~= data.key
+        local fresh = not rawget(slot, "placed") or rawget(slot, "key") ~= data.key
         slot.key = data.key
         self:Paint(slot, data, index)
         slot:Show()

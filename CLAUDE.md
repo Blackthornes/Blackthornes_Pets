@@ -308,6 +308,31 @@ the Pet page (`soulShards`, account wide, never rename it) and `/bpet
 shards [on|off]`. `Logic/SoulShards.lua` reads the client's count of item
 6265 in a pcall, waits `SETTLE` seconds after a loading screen, and saves
 nothing. Tested in `tools/test_soulshards.lua`. Not yet seen in game.
+Nothing shows until Drain Soul is learned (the owner, 2026-11-06: you
+can't make shards before it): no chip and no warning
+(`SoulShards.KnowsDrainSoul`, `DRAIN_SOUL` ranks by spell ID).
+
+## The Shard Tracker
+
+The owner said build it (2026-11-06, from a mockup): a movable strip on
+screen in the gold plaque look, a slot each for soul shards and, once
+Create Healthstone or Create Soulstone is learned, Healthstones and
+Soulstones in the bags. Nothing shows until Drain Soul is learned, and
+only for a warlock. Shards go red at `SoulShards.LOW`; an empty stone is
+grey; a gold dot on the Soulstone while it is on someone, the hover naming
+them in full (`Stones:SoulstoneHolderName`). A count going up pops with a
+gold ring, going down dips; a new slot slides in; the rim breathes on
+Effects Full, still on Subtle and Off (`Motion.Level`). `UI/ShardTracker.lua`
+(`BlackthornesPetsShardTracker`), events only while on, coalesced
+`SETTLE`. Off unless ticked: "Shard Tracker:", "Tracker Size:" (75, 100
+or 125) and "Tracker Place:" Set Default under WARLOCK on the Pet page,
+and `/bpet tracker [on|off|reset]`. Drag to move, right-click puts it back.
+Saved, account wide, never rename them: `shardTracker`,
+`shardTrackerScale` (nil for 100), `shardTrackerX`/`shardTrackerY` (its
+bottom left in screen units, so a new size keeps it). Pets has no
+Transparent setting, so the tracker has none. `Stones.SOULSTONES`
+(Classic's item IDs) not yet checked against Forever's tables. Tested in
+`tools/test_shardtracker.lua`. Not yet seen in game.
 
 ## Healthstone and Soulstone reminder
 
