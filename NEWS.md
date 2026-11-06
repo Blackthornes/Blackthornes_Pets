@@ -23,6 +23,15 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.6.0
+
+- Warlocks get a Shard Tracker, a small plaque that shows your soul shards and stones. It starts off. Turn it on in Settings, on the Pet page.
+
+Fixes and changes:
+
+- The shard warning waits until you've learned Drain Soul.
+- The Feed button no longer picks buff food over plain food when you've told it not to.
+
 ## 1.5.0
 
 - You can drag the small Feed button where you want it. Right-click puts it back.

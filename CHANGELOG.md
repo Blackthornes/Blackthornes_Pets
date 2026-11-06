@@ -4,6 +4,14 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.6.0
+
+For WoW: Forever (interface 16001). A full restart is needed after updating, because a file was added.
+
+- **Shard Tracker.** For warlocks, a small gold plaque on screen shows your soul shards, and your Healthstones and Soulstones once you can make them. Shards turn red at 2 or fewer. A gold dot shows while your Soulstone is on someone. Drag it to move it. Turn it on in Settings, on the Pet page, under WARLOCK: Shard Tracker:. It starts off. Tracker Size: and Tracker Place: are there too.
+- **Soul shards.** The shard chip and the low shard warning wait until you've learned Drain Soul.
+- **Feeding.** With Never feed buff food ticked, the Feed button no longer picks buff food over plain food.
+
 ## 1.5.0
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
