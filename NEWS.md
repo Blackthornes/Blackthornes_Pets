@@ -23,6 +23,10 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.7.0
+
+- Hunters can show a bar for their pet's XP. It shows how long to the next level and XP an hour. You can size it and move it. It is in Settings, on the Pet page, under Pet XP Bar.
+
 ## 1.6.1
 
 Fixes and changes:

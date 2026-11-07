@@ -4,6 +4,12 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.7.0
+
+For WoW: Forever (interface 16001). A full restart is needed after updating (the game has to load new files).
+
+- **Pet XP bar.** Hunters get a bar that shows their pet's experience, with the level, time to the next level and XP an hour. Settings, Pet, under PET XP BAR. Off unless you tick it.
+
 ## 1.6.1
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
