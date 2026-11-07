@@ -139,6 +139,21 @@ suite.check("words off: all on the bar", Bar.frame.bar.text:GetText():find("Ashp
     Bar.frame.bar.text:GetText())
 Bar:SetWords(true)
 
+-- Words too long for a narrow bar: the bar itself grows, since the words
+-- are pinned to its corners, and goes back once they fit again.
+Bar:SetWidth(Bar.MIN_WIDTH)
+pet.name = "Ashpaw the Very Long Named Wolf of the Northern Hills"
+Bar:Refresh()
+local barWide = Bar.frame.bar:GetWidth()
+suite.check("long words grow the bar", barWide > Bar.MIN_WIDTH, barWide)
+suite.check("the frame follows the bar", Bar.frame:GetWidth() == barWide + 8, Bar.frame:GetWidth())
+suite.check("the width picked is kept", ns.db.petXPBarWidth == Bar.MIN_WIDTH)
+pet.name = "Ashpaw"
+Bar:SetWidth(Bar.WIDTH)
+Bar:Refresh()
+suite.check("short words, back to the width picked", Bar.frame.bar:GetWidth() == Bar.WIDTH
+    and Bar.wordsWidth == nil, Bar.frame.bar:GetWidth())
+
 -- No pet: it hides.
 pet.exists = false
 Bar:Refresh()
