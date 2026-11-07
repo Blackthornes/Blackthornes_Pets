@@ -75,6 +75,11 @@ function Bar:IsOn() return ns.db ~= nil and ns.db.petXPBar == true end
 function Bar:Width()
     return Clamp(ns.db and ns.db.petXPBarWidth, self.MIN_WIDTH, self.MAX_WIDTH, self.WIDTH)
 end
+--- How wide the bar is drawn: the width picked, or wider while the words
+--- around it need the room (FitWords).
+function Bar:DrawWidth()
+    return math.max(self:Width(), self.wordsWidth or 0)
+end
 function Bar:Height()
     return Clamp(ns.db and ns.db.petXPBarHeight, self.MIN_HEIGHT, self.MAX_HEIGHT, self.HEIGHT)
 end
@@ -301,7 +306,7 @@ end
 function Bar:Layout()
     local frame = self.frame
     if not frame then return end
-    local width, height = self:Width(), self:Height()
+    local width, height = self:DrawWidth(), self:Height()
     local words = self:ShowsWords() and self:WordsFit()
     local line = words and self.LINE or 0
     frame:SetSize(width + 8, height + line * 2 + 8)
@@ -341,7 +346,7 @@ function Bar:Paint(read)
     local frame = self.frame
     if not (frame and read) then return end
     local words = self:Words(read)
-    local width, height = self:Width(), self:Height()
+    local width, height = self:DrawWidth(), self:Height()
     local bar = frame.bar
     local filled = math.max(1, width * words.fraction)
     bar.fill:SetWidth(filled)
@@ -359,20 +364,31 @@ function Bar:Paint(read)
     frame.right:SetText(words.right or "")
     frame.belowLeft:SetText(words.belowLeft or "")
     frame.belowRight:SetText(words.belowRight or "")
-    self:FitWords(width)
+    self:FitWords()
     if self.card and self.card:IsShown() then self:ShowCard() end
 end
 
---- Never cut the words: the bar grows a little when they need the room.
-function Bar:FitWords(width)
+--- Never cut the words: the bar grows a little when they need the room,
+--- and goes back to the width picked when they no longer do. The words are
+--- pinned to the bar's own corners, so the bar itself grows, not only the
+--- frame round it.
+function Bar:FitWords()
     local frame = self.frame
-    if not (frame and frame.name:IsShown()) then return end
-    local TW = ns.Theme.TextWidth
-    local above = TW("small", frame.name:GetText()) + 8 + TW("small", frame.left:GetText())
-        + 12 + TW("small", frame.right:GetText())
-    local below = TW("tiny", frame.belowLeft:GetText()) + 12 + TW("tiny", frame.belowRight:GetText())
-    local need = math.max(above, below)
-    if need > width then frame:SetWidth(need + 8) end
+    if not frame then return end
+    local grown
+    if frame.name:IsShown() then
+        local TW = ns.Theme.TextWidth
+        local above = TW("small", frame.name:GetText()) + 8 + TW("small", frame.left:GetText())
+            + 12 + TW("small", frame.right:GetText())
+        local below = TW("tiny", frame.belowLeft:GetText()) + 12 + TW("tiny", frame.belowRight:GetText())
+        local need = math.ceil(math.max(above, below))
+        if need > self:Width() then grown = need end
+    end
+    if grown == self.wordsWidth then return end
+    -- Laid out again at the new width; the second look finds the same
+    -- words and the same width, so it stops there.
+    self.wordsWidth = grown
+    self:Layout()
 end
 
 --------------------------------------------------------------------------------
