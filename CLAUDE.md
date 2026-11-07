@@ -334,6 +334,35 @@ Transparent setting, so the tracker has none. `Stones.SOULSTONES`
 (Classic's item IDs) not yet checked against Forever's tables. Tested in
 `tools/test_shardtracker.lua`. Not yet seen in game.
 
+## The Pet XP bar
+
+A player asked for a pet XP bar you can size, the owner said build it
+from a mockup (2026-11-07): Farmer's XP bar look (gold fill in dark
+glass, gold rim, a tick every 10%, a white mark where the session
+started, a spark at the tip) for a hunter's pet only. Nothing shows with
+no pet out or for a demon. `Logic/PetXP.lua` reads `GetPetExperience`,
+`UnitLevel` and `UnitName` in a pcall and keeps the session in memory
+only, one per pet name (gains carried across a level, kills, XP an hour
+after `MIN_SECONDS`, minutes and kills to the next level).
+`UI/PetXPBar.lua` (`BlackthornesPetsXPBar`) draws it: the name and
+"Level N" above left, "Level N in about X min" above right, "This
+session +N XP" and "N XP an hour" below, "837 / 1,350 (62%)" on the bar.
+Under `WORDS_FROM` (12) tall the words go to the hover only, and words
+never cut: the bar grows to fit them. At your level it says "Same level
+as you". The hover card (dark glass rows) has XP to level, kills to go,
+this session and your level. A level up cheers "NAME IS LEVEL N" with
+"Took X min" when the level started this session, following Effects, no
+sound. Events `UNIT_PET_EXPERIENCE`, `UNIT_PET`, `UNIT_LEVEL`,
+`PET_UI_UPDATE`, `PLAYER_LEVEL_UP` and `PLAYER_ENTERING_WORLD` only
+while on, coalesced `SETTLE`. Never touches the game's pet frame. Drag
+to move, right-click puts it back. Off unless ticked: PET XP BAR on the
+Pet page ("Pet XP Bar:", "Bar Width:" 200 to 600, "Bar Height:" 6 to
+32, "Show Words:", "Level-Up Cheer:", "Bar Place:" Set Default) and
+`/bpet xpbar [on|off|reset]`. Saved, account wide, never rename them:
+`petXPBar`, `petXPBarWidth` and `petXPBarHeight` (nil for 360 and 16),
+`petXPBarWords`, `petXPBarCheer` (nil reads as on), `petXPBarX`,
+`petXPBarY`. Tested in `tools/test_petxpbar.lua`. Not yet seen in game.
+
 ## Healthstone and Soulstone reminder
 
 The owner said yes (2026-10-24): once a fight ends, a warlock who can make
