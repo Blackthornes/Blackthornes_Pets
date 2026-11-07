@@ -975,6 +975,26 @@ same.
   Registering an event the client does not know raises too, which is why
   `ns.RegisterEvent` wraps it.
 
+## Fold in fresh data at each release
+
+Every release of this addon starts with a fold-in of fresh data from the
+live game (the owner, 2026-11-07), even when nothing else about the data
+changed: the release thread stages the owner's account save and the game's
+English caches, read only, from his live Forever folder (the path is in the
+project's release steps), runs the tools below, runs the tests and commits
+the data in the release PR as "Refresh shipped data". Never announced (no
+CHANGELOG, NEWS, What's New or post), never the save or caches committed,
+nothing else copied out of them. A release whose only change is new data
+does not ship on its own. If his PC can't be reached, the thread asks him
+once (Try again or Skip it); it never skips without saying. If the game
+patched since the client tables were last pulled, those are refreshed
+first.
+
+After Farmer's fold-in (its harvest names the beasts seen):
+
+- `tools/forever_beasts.py --harvest <Blackthornes_Farmer/Data/Data_Harvested.lua>
+  <Blackthornes_Pets.lua>` (`Data/ForeverBeasts.lua`).
+
 ## Big files (read these in pieces)
 
 Reading a huge file whole fills the context and the thread dies. Sizes are
