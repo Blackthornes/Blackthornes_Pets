@@ -335,6 +335,59 @@ function SettingsUI:BuildPages()
     end, true)
     controls.quickFeed:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    -- The Pet XP bar (UI/PetXPBar.lua): a hunter's pet's XP on screen,
+    -- Farmer's XP bar look. Off unless ticked.
+    pages:Section("pet", 1, L["PET XP BAR"])
+
+    local xpBarRow = pages:Row("pet", 1, L["Pet XP Bar:"], nil)
+    controls.petXPBar = Widgets.CreateCheckbox(xpBarRow, L["On"], function(checked)
+        ns.PetXPBar:Set(checked)
+    end, false)
+    controls.petXPBar:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local function Range(row, stepper, text)
+        local hint = Theme.CreateLabel(row, "tiny", "dim", "LEFT")
+        hint:SetPoint("LEFT", stepper, "RIGHT", 8, 0)
+        hint:SetText(text)
+        return hint
+    end
+
+    local xpWidthRow = pages:Row("pet", 1, L["Bar Width:"], nil)
+    controls.petXPBarWidth = Widgets.CreateStepper(xpWidthRow, {
+        min = ns.PetXPBar.MIN_WIDTH, max = ns.PetXPBar.MAX_WIDTH,
+        step = ns.PetXPBar.WIDTH_STEP, value = ns.PetXPBar.WIDTH,
+        onChange = function(value) ns.PetXPBar:SetWidth(value) end,
+    })
+    controls.petXPBarWidth:SetPoint("TOPLEFT", CONTROL_X, -2)
+    Range(xpWidthRow, controls.petXPBarWidth, L["200 to 600"])
+
+    local xpHeightRow = pages:Row("pet", 1, L["Bar Height:"], nil)
+    controls.petXPBarHeight = Widgets.CreateStepper(xpHeightRow, {
+        min = ns.PetXPBar.MIN_HEIGHT, max = ns.PetXPBar.MAX_HEIGHT,
+        step = ns.PetXPBar.HEIGHT_STEP, value = ns.PetXPBar.HEIGHT,
+        onChange = function(value) ns.PetXPBar:SetHeight(value) end,
+    })
+    controls.petXPBarHeight:SetPoint("TOPLEFT", CONTROL_X, -2)
+    Range(xpHeightRow, controls.petXPBarHeight, L["6 to 32"])
+
+    local xpWordsRow = pages:Row("pet", 1, L["Show Words:"], nil)
+    controls.petXPBarWords = Widgets.CreateCheckbox(xpWordsRow, L["On"], function(checked)
+        ns.PetXPBar:SetWords(checked)
+    end, true)
+    controls.petXPBarWords:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local xpCheerRow = pages:Row("pet", 1, L["Level-Up Cheer:"], nil)
+    controls.petXPBarCheer = Widgets.CreateCheckbox(xpCheerRow, L["On"], function(checked)
+        ns.PetXPBar:SetCheer(checked)
+    end, true)
+    controls.petXPBarCheer:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local xpPlaceRow = pages:Row("pet", 1, L["Bar Place:"], nil)
+    controls.petXPBarReset = Widgets.CreateButton(xpPlaceRow, L["Set Default"], function()
+        ns.PetXPBar:Reset()
+    end, { width = 110, height = 20 })
+    controls.petXPBarReset:SetPoint("TOPLEFT", CONTROL_X, 0)
+
     pages:Section("pet", 2, L["TAMING"])
 
     local tamingRow = pages:Row("pet", 2, L["Taming Skills:"],
@@ -588,6 +641,11 @@ function SettingsUI:Refresh()
     controls.stoneReminder:SetChecked(ns.db.stoneReminder == true)
     controls.shardTracker:SetChecked(ns.db.shardTracker == true)
     controls.shardTrackerSize:SetValue(ns.ShardTracker:Size(), true)
+    controls.petXPBar:SetChecked(ns.db.petXPBar == true)
+    controls.petXPBarWidth:SetValue(ns.PetXPBar:Width(), true)
+    controls.petXPBarHeight:SetValue(ns.PetXPBar:Height(), true)
+    controls.petXPBarWords:SetChecked(ns.PetXPBar:ShowsWords())
+    controls.petXPBarCheer:SetChecked(ns.PetXPBar:Cheers())
     controls.tamingTooltip:SetValue(ns.TooltipShift:Mode(ns.db.tamingTooltip ~= false,
         ns.TamingTooltip.SHIFT_KEY), true)
     controls.sisters:SetChecked(ns.SisterNote:IsOn())

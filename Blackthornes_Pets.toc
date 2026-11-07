@@ -43,6 +43,7 @@ Logic\PetSkills.lua
 Logic\DemonSkills.lua
 Logic\SoulShards.lua
 Logic\Stones.lua
+Logic\PetXP.lua
 Logic\TameRecord.lua
 Logic\Waypoints.lua
 Logic\Compendium.lua
@@ -74,6 +75,7 @@ UI\Settings.lua
 UI\MainWindow.lua
 UI\FeedButton.lua
 UI\ShardTracker.lua
+UI\PetXPBar.lua
 UI\FeedKey.lua
 UI\TamingTooltip.lua
 UI\CompendiumWindow.lua
