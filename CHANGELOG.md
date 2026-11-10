@@ -4,6 +4,12 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.7.3
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Reagent bag food.** Pet food in your reagent bag now counts for the low food warning, the Feed button and Butler's food count. Food in your other bags is fed first.
+
 ## 1.7.2
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
