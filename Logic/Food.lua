@@ -11,8 +11,38 @@ local L = ns.L
 
 local Food = ns.NewModule("Food")
 
--- The bags a character carries: the backpack and four bags.
+-- The bags a character carries: the backpack and four bags, then the
+-- reagent bag when the client has one (a player's food in it went uncounted,
+-- 2026-11-10). Its index is read from the client, as Tradeskills'
+-- Data/Inventory.lua does: Enum.BagIndex.ReagentBag first, else a
+-- NUM_TOTAL_EQUIPPED_BAG_SLOTS above the four bags. On a client laid out the
+-- older way container 5 is the first bank bag, so an index that is not past
+-- the four bags and short of the bank counts as no reagent bag.
 local FIRST_BAG, LAST_BAG = 0, 4
+
+function Food.ReagentBag()
+    local enum = rawget(_G, "Enum")
+    local bagIndex = type(enum) == "table" and rawget(enum, "BagIndex") or nil
+    if type(bagIndex) ~= "table" then bagIndex = nil end
+    local index = bagIndex and (rawget(bagIndex, "ReagentBag") or rawget(bagIndex, "Reagentbag"))
+    if type(index) ~= "number" then
+        local total = tonumber(rawget(_G, "NUM_TOTAL_EQUIPPED_BAG_SLOTS"))
+        index = (total and total > LAST_BAG) and LAST_BAG + 1 or nil
+    end
+    if type(index) ~= "number" then return nil end
+    local firstBank = bagIndex and tonumber(rawget(bagIndex, "BankBag_1")) or 6
+    if index <= LAST_BAG or index >= firstBank then return nil end
+    return index
+end
+
+--- Every bag the food is read from, backpack first, the reagent bag last.
+function Food.Bags()
+    local bags = {}
+    for bag = FIRST_BAG, LAST_BAG do bags[#bags + 1] = bag end
+    local reagent = Food.ReagentBag()
+    if reagent then bags[#bags + 1] = reagent end
+    return bags
+end
 
 -- Below this many pieces of food the pet will eat, warn.
 local LOW_FOOD = 10
@@ -429,7 +459,7 @@ function Food:Scan(status)
     local eats = ns.PetFood.Eats(status.foods)
 
     local slots, unsure = 0, false
-    for bag = FIRST_BAG, LAST_BAG do
+    for _, bag in ipairs(Food.Bags()) do
         local count = NumSlots(bag)
         slots = slots + count
         for slot = 1, count do
@@ -568,7 +598,7 @@ function Food:Report()
 
     local slots, items, found = 0, 0, 0
     local unlisted, seen = {}, {}
-    for bag = FIRST_BAG, LAST_BAG do
+    for _, bag in ipairs(Food.Bags()) do
         local count = NumSlots(bag)
         slots = slots + count
         for slot = 1, count do
