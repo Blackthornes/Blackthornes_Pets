@@ -1,13 +1,24 @@
 -- Blackthornes Pets -- UI/ShardTracker.lua
 -- The Shard Tracker (the owner said build it, 2026-11-06, from a mockup):
 -- a small gold plaque on the screen with a warlock's soul shards and, once
--- each is learned, Healthstones and Soulstones. Nothing shows until Drain
--- Soul is known, since shards mean nothing before it.
+-- each is learned, Healthstones, Firestones and Soulstones. Nothing shows
+-- until Drain Soul is known, since shards mean nothing before it.
 --
--- It is our own frame on UIParent, display only (no secure parts), so it
--- can be dragged in a fight too. The house plaque's look (gold rim, red gem
--- at each end, dark glass), built from UI/Plaque.lua's colours without
--- changing that shared file. A count going up pops with a gold ring, going
+-- The plaque itself is our own frame on UIParent with nothing the game
+-- guards, so it can be dragged in a fight too. The house plaque's look
+-- (gold rim and dark glass; no red gems, the owner, 2026-11-11), built
+-- from UI/Plaque.lua's colours without changing that shared file.
+--
+-- The stones can be clicked (the owner said build it, 2026-11-11): with
+-- one in the bags a click uses it (a Healthstone), puts it on your target
+-- or you (a Soulstone) or holds it in your off hand (a Firestone); with
+-- none it casts the best rank of the spell that makes one. Soul Shards
+-- stay a count. Casting needs the game's secure buttons, so each stone has
+-- one on UIParent laid over its slot by screen position, never a child of
+-- the plaque (a guarded child would stop the plaque moving in a fight).
+-- Their spells and places change only out of combat; a stone used or the
+-- plaque moved in a fight waits for PLAYER_REGEN_ENABLED, and a button
+-- whose slot moved is see-through until then. A count going up pops with a gold ring, going
 -- down dips; shards at SoulShards.LOW or fewer turn red; a stone at 0 greys
 -- out; a slot that appears slides in once. Effects Full moves all of it,
 -- Subtle holds the glow still, Off holds everything still.
@@ -31,7 +42,6 @@ ShardTracker.HEIGHT = 50
 ShardTracker.SLOT = 74
 ShardTracker.ICON = 30
 ShardTracker.COUNT_SIZE = 20
-ShardTracker.GEM = 11
 ShardTracker.BREATHE = 1.6
 -- Its first spot, from the top of the screen.
 ShardTracker.FIRST_Y = -150
@@ -44,10 +54,11 @@ ShardTracker.GOLD = { 0.97, 0.84, 0.48 }
 ShardTracker.KINDS = {
     { key = "shards", title = L["Soul Shards"], item = 6265, fallback = 134075 },
     { key = "health", title = L["Healthstone"], item = 5512, fallback = 135230 },
+    { key = "fire", title = L["Firestone"], item = 1254,
+        fallback = [[Interface\Icons\INV_Ammo_FireTar]] },
     { key = "soul", title = L["Soulstone"], item = 5232, fallback = 136210 },
 }
 
-local GEM_ART = ([[Interface\AddOns\%s\Media\Frame\CloseGem.tga]]):format(ADDON)
 local GLOW_ART = ([[Interface\AddOns\%s\Media\Frame\Glow.tga]]):format(ADDON)
 
 local function Level()
@@ -123,6 +134,11 @@ function ShardTracker:Slots()
         local count = Stones:HealthstoneCount()
         slots[#slots + 1] = { key = "health", count = count, empty = count == 0 }
     end
+    if Stones and Stones.Knows(Stones.FIRE_SPELLS) then
+        local count = Stones:FirestoneCount()
+        slots[#slots + 1] = { key = "fire", count = count, empty = count == 0,
+            held = Stones:HeldFirestone() ~= nil }
+    end
     if Stones and Stones.Knows(Stones.SOUL_SPELLS) then
         local count = Stones:SoulstoneCount()
         slots[#slots + 1] = { key = "soul", count = count, empty = count == 0,
@@ -179,13 +195,6 @@ function ShardTracker:Build()
     shine:SetHeight(1)
     shine:SetColorTexture(1, 0.9, 0.63, 0.18)
 
-    for _, side in ipairs({ "LEFT", "RIGHT" }) do
-        local gem = frame:CreateTexture(nil, "OVERLAY", nil, 2)
-        gem:SetSize(self.GEM, self.GEM)
-        gem:SetTexture(GEM_ART)
-        gem:SetPoint("CENTER", frame, side, 0, 0)
-    end
-
     -- Dragging moves it, a fight or not: it has nothing the game guards.
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", function(f) f:StartMoving() end)
@@ -199,6 +208,7 @@ function ShardTracker:Build()
     end)
 
     frame.slots = {}
+    frame.buttons = {}
     self.frame = frame
     return frame
 end
@@ -404,7 +414,10 @@ end
 function ShardTracker:Refresh()
     local slots = self:Slots()
     if not slots then
-        if self.frame then self.frame:Hide() end
+        if self.frame then
+            self.frame:Hide()
+            self:UpdateButtons()
+        end
         return false
     end
     local frame = self:Build()
@@ -437,6 +450,7 @@ function ShardTracker:Refresh()
         frame:Show()
     end
     self:Glow()
+    self:UpdateButtons()
     return true
 end
 
@@ -464,13 +478,171 @@ function ShardTracker:Soon()
 end
 
 --------------------------------------------------------------------------------
+-- Clicking a stone
+--------------------------------------------------------------------------------
+
+local function InCombat()
+    if type(InCombatLockdown) ~= "function" then return false end
+    local ok, locked = pcall(InCombatLockdown)
+    return ok and locked == true
+end
+ShardTracker.InCombat = InCombat
+
+-- What /use and /equip are given: the item's name when the client knows
+-- it, else its item string.
+local function ItemText(id)
+    local name
+    if C_Item and type(C_Item.GetItemNameByID) == "function" then
+        local ok, value = pcall(C_Item.GetItemNameByID, id)
+        if ok and type(value) == "string" and value ~= "" then name = value end
+    end
+    return name or ("item:" .. id)
+end
+
+--- What a click on a stone's slot does now: { type, item, spell,
+--- macrotext, words }, words being the hover's last line. Nil for Soul
+--- Shards, which are a count only.
+function ShardTracker:ActionFor(data)
+    local Stones = ns.Stones
+    if not (Stones and data) then return nil end
+    local function Make(spells)
+        local id = Stones.BestKnown(spells)
+        if not id then return { words = nil } end
+        return { type = "spell", spell = Stones.SpellName(id) or id,
+            words = L["Click to make one."] }
+    end
+    if data.key == "health" then
+        local best = Stones.BestOf(Stones.HEALTHSTONES)
+        if best then
+            return { type = "item", item = "item:" .. best, words = L["Click to use it."] }
+        end
+        return Make(Stones.HEALTH_SPELLS)
+    elseif data.key == "soul" then
+        local best = Stones.BestOf(Stones.SOULSTONES)
+        if best then
+            return { type = "macro",
+                macrotext = "/use [@target,help,nodead][@player] " .. ItemText(best),
+                words = L["Click to put it on your target, or on you."] }
+        end
+        return Make(Stones.SOUL_SPELLS)
+    elseif data.key == "fire" then
+        local held = Stones:HeldFirestone()
+        local best = Stones.BestOf(Stones.FIRESTONES, held)
+        if best then
+            return { type = "macro", macrotext = "/equip " .. ItemText(best),
+                words = L["Click to hold it in your off hand."] }
+        end
+        if held then return { words = L["You are holding one."] } end
+        return Make(Stones.FIRE_SPELLS)
+    end
+    return nil
+end
+
+--- The secure button over one slot, made once.
+function ShardTracker:ButtonFor(index)
+    local frame = self.frame
+    local button = frame.buttons[index]
+    if button then return button end
+    local ok, made = pcall(CreateFrame, "Button", "BlackthornesPetsShardTrackerStone" .. index,
+        UIParent, "SecureActionButtonTemplate")
+    if not (ok and made) then return nil end
+    button = made
+    button:SetFrameStrata(frame:GetFrameStrata())
+    button:RegisterForClicks("LeftButtonUp")
+    -- Cast on the mouse going up, so a drag does not cast first.
+    button:SetAttribute("useOnKeyDown", false)
+
+    local light = button:CreateTexture(nil, "HIGHLIGHT")
+    light:SetAllPoints(button)
+    light:SetColorTexture(1, 0.82, 0.3, 0.16)
+    pcall(light.SetBlendMode, light, "ADD")
+    local edge = button:CreateTexture(nil, "HIGHLIGHT")
+    edge:SetPoint("BOTTOMLEFT")
+    edge:SetPoint("BOTTOMRIGHT")
+    edge:SetHeight(1)
+    edge:SetColorTexture(1, 0.85, 0.4, 0.9)
+
+    -- Drags and right-clicks are still the plaque's.
+    button:RegisterForDrag("LeftButton")
+    button:SetScript("OnDragStart", function() frame:GetScript("OnDragStart")(frame) end)
+    button:SetScript("OnDragStop", function() frame:GetScript("OnDragStop")(frame) end)
+    button:HookScript("OnMouseUp", function(_, mouse)
+        if mouse == "RightButton" then ShardTracker:Reset(true) end
+    end)
+    button:SetScript("OnEnter", function(b)
+        local slot = frame.slots[index]
+        if slot then ShardTracker:ShowTooltip(slot, b) end
+    end)
+    button:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+    button:Hide()
+    frame.buttons[index] = button
+    return button
+end
+
+local ATTRIBUTES = { "type", "item", "spell", "macrotext" }
+
+--- Set each stone's button for what a click does now, and lay it over its
+--- slot. Out of combat only; in a fight it waits, and a button whose slot
+--- may have moved goes see-through until then.
+function ShardTracker:UpdateButtons()
+    local frame = self.frame
+    if not frame then return end
+    if InCombat() then
+        self.buttonsWaiting = true
+        for _, button in pairs(frame.buttons) do
+            local slot = frame.slots[button.index or 0]
+            local spot = slot and slot:IsShown() and frame:IsShown()
+                and { slot:GetLeft(), slot:GetBottom() }
+            local was = rawget(button, "spot")
+            if not (spot and was and spot[1] == was[1] and spot[2] == was[2]) then
+                pcall(button.SetAlpha, button, 0)
+            end
+        end
+        return
+    end
+    self.buttonsWaiting = nil
+    local scale = frame:GetScale() or 1
+    for index, slot in ipairs(frame.slots) do
+        local data = rawget(slot, "data")
+        local action = frame:IsShown() and slot:IsShown() and data and self:ActionFor(data)
+        local button = action and self:ButtonFor(index)
+        if button then
+            button.index = index
+            button.action = action
+            for _, key in ipairs(ATTRIBUTES) do button:SetAttribute(key, action[key]) end
+            button:SetScale(scale)
+            button:SetFrameLevel((frame:GetFrameLevel() or 1) + 20)
+            button:SetSize(slot:GetWidth(), slot:GetHeight())
+            button:ClearAllPoints()
+            local left, bottom = slot:GetLeft(), slot:GetBottom()
+            if type(left) == "number" and type(bottom) == "number" then
+                button:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left, bottom)
+            else
+                button:SetPoint("CENTER", slot, "CENTER")
+            end
+            button.spot = { left, bottom }
+            button:SetAlpha(1)
+            button:Show()
+        elseif frame.buttons[index] then
+            local stale = frame.buttons[index]
+            stale.action = nil
+            for _, key in ipairs(ATTRIBUTES) do stale:SetAttribute(key, nil) end
+            stale:Hide()
+        end
+    end
+    for index, button in pairs(frame.buttons) do
+        if not frame.slots[index] or not frame.slots[index]:IsShown() then button:Hide() end
+    end
+end
+
+--------------------------------------------------------------------------------
 -- The hover
 --------------------------------------------------------------------------------
 
-function ShardTracker:ShowTooltip(slot)
+function ShardTracker:ShowTooltip(slot, owner)
     local data, kind = slot.data, slot.kind
     if not (data and kind and GameTooltip) then return end
-    GameTooltip:SetOwner(slot, "ANCHOR_BOTTOM")
+    GameTooltip:SetOwner(owner or slot, "ANCHOR_BOTTOM")
     GameTooltip:AddLine(kind.title, 1, 0.82, 0.3)
     local gold = self.GOLD
     if GameTooltip.AddDoubleLine then
@@ -482,6 +654,10 @@ function ShardTracker:ShowTooltip(slot)
     if data.key == "soul" and data.onSomeone and ns.Stones then
         local name = ns.Stones:SoulstoneHolderName()
         if name then GameTooltip:AddLine(L.Format("On %s", name), 1, 1, 1) end
+    end
+    local action = owner and rawget(owner, "action")
+    if action and action.words then
+        GameTooltip:AddLine(action.words, 0.4, 0.9, 0.4, true)
     end
     GameTooltip:AddLine(L["Drag to move it. Right-click to put it back."], 0.5, 0.5, 0.5, true)
     GameTooltip:Show()
@@ -509,6 +685,7 @@ function ShardTracker:SetSize(size)
     if self.frame then
         self:ApplyScale()
         self:Place()
+        self:UpdateButtons()
     end
 end
 
@@ -550,6 +727,7 @@ function ShardTracker:SaveSpot()
     end
     ns.db.shardTrackerX, ns.db.shardTrackerY = left * scale, bottom * scale
     self:Place()
+    self:UpdateButtons()
 end
 
 --- Back to its first spot.
@@ -557,6 +735,7 @@ function ShardTracker:Reset(quiet)
     if not ns.db then return end
     ns.db.shardTrackerX, ns.db.shardTrackerY = nil, nil
     self:Place()
+    self:UpdateButtons()
     if not quiet then ns.Print(L["Shard tracker is back in its first spot."]) end
 end
 
@@ -578,15 +757,19 @@ function ShardTracker:Listen(on)
         self.listening = true
         local function Look() ShardTracker:Soon() end
         for _, event in ipairs({ "BAG_UPDATE_DELAYED", "LEARNED_SPELL_IN_TAB", "SPELLS_CHANGED",
-            "GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD" }) do
+            "GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD", "PLAYER_EQUIPMENT_CHANGED" }) do
             ns.RegisterEvent(self, event, Look)
         end
         ns.RegisterEvent(self, "UNIT_AURA", OnAura)
+        ns.RegisterEvent(self, "PLAYER_REGEN_ENABLED", function()
+            if ShardTracker.buttonsWaiting then ShardTracker:UpdateButtons() end
+        end)
     elseif not on and self.listening then
         self.listening = nil
         if ns.UnregisterEvent then
             for _, event in ipairs({ "BAG_UPDATE_DELAYED", "LEARNED_SPELL_IN_TAB", "SPELLS_CHANGED",
-                "GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD", "UNIT_AURA" }) do
+                "GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD", "PLAYER_EQUIPMENT_CHANGED",
+                "UNIT_AURA", "PLAYER_REGEN_ENABLED" }) do
                 ns.UnregisterEvent(self, event)
             end
         end

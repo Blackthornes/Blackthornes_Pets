@@ -334,6 +334,22 @@ Transparent setting, so the tracker has none. `Stones.SOULSTONES`
 (Classic's item IDs) not yet checked against Forever's tables. Tested in
 `tools/test_shardtracker.lua`. Not yet seen in game.
 
+Clickable stones and Firestones (the owner said build it from a mockup,
+2026-11-11): a Firestone slot sits between Healthstone and Soulstone once
+Create Firestone is learned (`Stones.FIRESTONES`, `FIRE_SPELLS`,
+`HeldFirestone`; the item IDs are Classic's, not yet checked against
+Forever's tables), and the red gems on the ends are gone. Each stone's
+slot has a secure button on UIParent laid over it by screen position
+(`ShardTracker:ButtonFor`, `UpdateButtons`, `ActionFor`), never a child
+of the plaque, so the plaque still drags in a fight. With one in the bags
+a click uses a Healthstone, puts a Soulstone on a friendly target or you,
+or holds a Firestone in the off hand (`/equip`); with none it casts the
+best rank known (`Stones.BestKnown`, `SpellName`). Attributes change only
+out of combat; in a fight `buttonsWaiting` holds them for
+`PLAYER_REGEN_ENABLED`, and a button whose slot moved goes see-through.
+Shards stay a count. Tested in `tools/test_shardtracker.lua`. Not yet
+seen in game.
+
 ## The Pet XP bar
 
 A player asked for a pet XP bar you can size, the owner said build it

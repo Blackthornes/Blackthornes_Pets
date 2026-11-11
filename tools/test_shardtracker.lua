@@ -82,6 +82,58 @@ Tracker:ShowTooltip(Tracker.frame.slots[3])
 local tip = table.concat(GameTooltip._lines, " | ")
 suite.check("the hover says who has it", tip:find("On Ana Brightwood", 1, true) ~= nil, tip)
 
+-- Firestone once Create Firestone is learned, between Healthstone and Soulstone.
+known[17951] = true
+slots = Tracker:Slots()
+suite.check("Firestone joins once learned", Keys(slots) == "shards,health,fire,soul", Keys(slots))
+suite.check("no Firestone is empty", slots[3].count == 0 and slots[3].empty and not slots[3].held)
+
+-- No red gems on the ends.
+local source = io.open(lfs_cwd .. "/UI/ShardTracker.lua"):read("*a")
+suite.check("no red gems", source:find("CloseGem", 1, true) == nil)
+
+-- What a click does.
+_G.GetSpellInfo = function(id) return "Spell " .. id end
+_G.C_Spell = nil
+local function Act(key) return Tracker:ActionFor({ key = key }) end
+suite.check("shards are a count only", Act("shards") == nil)
+local act = Act("health")
+suite.check("a Healthstone in the bags is used", act.type == "item" and act.item == "item:5512", act.item)
+counts[5512] = 0
+act = Act("health")
+suite.check("no Healthstone makes one", act.type == "spell" and act.spell == "Spell 6202", tostring(act.spell))
+suite.check("and says so", act.words == "Click to make one.")
+known[11729] = true
+act = Act("health")
+suite.check("with the best rank known", act.spell == "Spell 11729", tostring(act.spell))
+act = Act("soul")
+suite.check("a Soulstone goes on your target or you", act.type == "macro"
+    and act.macrotext:find("[@target,help,nodead][@player]", 1, true) ~= nil, act.macrotext)
+act = Act("fire")
+suite.check("no Firestone makes one", act.type == "spell" and act.spell == "Spell 17951", tostring(act.spell))
+counts[13699] = 1
+act = Act("fire")
+suite.check("a Firestone in the bags is held", act.type == "macro" and act.macrotext:find("^/equip ") ~= nil, act.macrotext)
+_G.GetInventoryItemID = function(_, slot) return slot == 17 and 13699 or nil end
+act = Act("fire")
+suite.check("holding your only one does nothing", act.type == nil and act.words == "You are holding one.")
+_G.GetInventoryItemID = nil
+counts[5512] = 1
+
+-- The buttons: set out of combat, waiting in a fight.
+Tracker:Refresh()
+local button = Tracker.frame.buttons[2]
+suite.check("a Healthstone button is made", button ~= nil and button:GetAttribute("type") == "item")
+suite.check("no button for shards", Tracker.frame.buttons[1] == nil)
+_G.InCombatLockdown = function() return true end
+counts[5512] = 0
+Tracker:Refresh()
+suite.check("in a fight it waits", Tracker.buttonsWaiting == true and button:GetAttribute("type") == "item")
+_G.InCombatLockdown = function() return false end
+Tracker:UpdateButtons()
+suite.check("after the fight it catches up", not Tracker.buttonsWaiting and button:GetAttribute("type") == "spell")
+counts[5512] = 1
+
 -- Not a warlock: nothing.
 _G.UnitClass = function() return "Hunter", "HUNTER" end
 suite.check("a hunter sees nothing", Tracker:Slots() == nil and Tracker:Refresh() == false)
