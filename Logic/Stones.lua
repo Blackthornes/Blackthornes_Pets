@@ -23,6 +23,13 @@ Stones.SOULSTONES = { 5232, 16892, 16893, 16895, 16896 }
 Stones.HEALTH_SPELLS = { 6201, 6202, 5699, 11729, 11730 }
 -- Create Soulstone, every rank.
 Stones.SOUL_SPELLS = { 693, 20752, 20755, 20756, 20757 }
+-- Classic's Firestones, every rank (Lesser to Major), counted by the Shard
+-- Tracker. Not yet checked against Forever's item table.
+Stones.FIRESTONES = { 1254, 13699, 13700, 13701 }
+-- Create Firestone, every rank (in the Forever client's tables).
+Stones.FIRE_SPELLS = { 6366, 17951, 17952, 17953 }
+-- The off hand, where a Firestone is held.
+Stones.OFF_HAND = 17
 -- Soulstone Resurrection, the buff, every rank.
 Stones.SOUL_BUFFS = {
     [20707] = true, [20762] = true, [20763] = true, [20764] = true, [20765] = true,
@@ -92,6 +99,61 @@ function Stones:HealthstoneCount() return self.CountOf(self.HEALTHSTONES) end
 
 --- Soulstones in the bags, every rank together.
 function Stones:SoulstoneCount() return self.CountOf(self.SOULSTONES) end
+
+--- Firestones in the bags and the one held, every rank together.
+function Stones:FirestoneCount() return self.CountOf(self.FIRESTONES) end
+
+--- The Firestone held in the off hand, its item ID, or nil.
+function Stones:HeldFirestone()
+    if type(_G.GetInventoryItemID) ~= "function" then return nil end
+    local ok, id = pcall(_G.GetInventoryItemID, "player", self.OFF_HAND)
+    id = ok and Plain(id) or nil
+    for _, stone in ipairs(self.FIRESTONES) do
+        if id == stone then return id end
+    end
+    return nil
+end
+
+--- The best of these items carried, its item ID, or nil. Lists run from
+--- the lowest rank up, so the last one carried is the best. `except` is
+--- left out (a Firestone already held).
+function Stones.BestOf(items, except)
+    local fn = (C_Item and C_Item.GetItemCount) or _G.GetItemCount
+    if type(fn) ~= "function" then return nil end
+    for i = #items, 1, -1 do
+        local id = items[i]
+        local ok, count = pcall(fn, id)
+        count = ok and Plain(count) or nil
+        if type(count) == "number" then
+            if id == except then count = count - 1 end
+            if count > 0 then return id end
+        end
+    end
+    return nil
+end
+
+--- The highest rank of these spells the warlock knows, its ID, or nil.
+function Stones.BestKnown(spells)
+    for i = #spells, 1, -1 do
+        if Stones.Knows({ spells[i] }) then return spells[i] end
+    end
+    return nil
+end
+
+--- A spell's name from the client, or nil.
+function Stones.SpellName(id)
+    if C_Spell and type(C_Spell.GetSpellName) == "function" then
+        local ok, name = pcall(C_Spell.GetSpellName, id)
+        name = ok and Plain(name) or nil
+        if type(name) == "string" and name ~= "" then return name end
+    end
+    if type(_G.GetSpellInfo) == "function" then
+        local ok, name = pcall(_G.GetSpellInfo, id)
+        name = ok and Plain(name) or nil
+        if type(name) == "string" and name ~= "" then return name end
+    end
+    return nil
+end
 
 -- One buff on a unit, as a plain table, or nil.
 local function AuraAt(unit, index)
