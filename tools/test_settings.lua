@@ -222,12 +222,15 @@ local realPrint = ns.Print
 ns.Print = function(...) printed[#printed + 1] = table.concat({ ... }, " ") end
 controls.resetPositions:GetScript("OnClick")(controls.resetPositions)
 ns.Print = realPrint
-suite.check("Set Default says so in chat", printed[1] == "UI windows set to defaults.", printed[1])
+suite.check("Set Default says so in chat", printed[1] == "Every window is back in its first spot.", printed[1])
 
 -- Position.
 ns.db.settingsX = 400
 SettingsUI:ResetPositions()
 suite.check("putting it back forgets where it was dragged", ns.db.settingsX == nil)
+ns.db.settingsX = 400
+ns.commands.windows.fn("reset")
+suite.check("/bpet windows reset puts it back too", ns.db.settingsX == nil)
 
 -- A client with neither options API still loads.
 local ns2 = env.Load()
