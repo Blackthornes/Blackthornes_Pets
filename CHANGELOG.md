@@ -4,6 +4,16 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.8.0
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Clickable stones for warlocks.** Click a slot on the Shard Tracker to use a Healthstone, put a Soulstone on your target or yourself, or hold a Firestone. With none in your bags, a click makes the best one you know. The Shard Tracker is under WARLOCK on the Pet page of Settings.
+- **Firestone slot.** The Shard Tracker has a slot for your Firestone once you learn to make one.
+- **Cleaner look.** The red gems on the ends of the Shard Tracker are gone.
+- **Deutsch.** The new words are in Deutsch, and in Simplified Chinese, French, Spanish and Russian.
+
+
 ## 1.7.3
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
