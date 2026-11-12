@@ -577,6 +577,125 @@ function Food:FeedMacro(stack)
 end
 
 --------------------------------------------------------------------------------
+-- Still eating (the owner said build it, 2026-11-12): Feed Pet puts "Feed
+-- Pet Effect" on the pet for about 20 seconds while the food's happiness
+-- comes in, and a second feed in that time takes the food and starts the
+-- effect over, so nothing more comes of it. While it is on, every feed button
+-- holds and shows how long is left. When the client won't say, nothing holds.
+--------------------------------------------------------------------------------
+
+-- Feed Pet Effect's spell ID, and how long it lasts when the aura gives no end.
+Food.FEED_EFFECT = 1539
+Food.EAT_SECONDS = 20
+
+--- The effect's name as this client spells it, or nil.
+function Food:EffectName()
+    local fn = C_Spell and C_Spell.GetSpellName
+    if type(fn) ~= "function" then return nil end
+    local ok, name = pcall(fn, self.FEED_EFFECT)
+    name = ok and Plain(name)
+    if type(name) == "string" and name ~= "" then return name end
+    return nil
+end
+
+--- Whether an aura's spell ID and name are Feed Pet Effect's.
+local function IsEffect(spellID, name, effectName)
+    if spellID == Food.FEED_EFFECT then return true end
+    return effectName ~= nil and name == effectName
+end
+
+--- The pet's Feed Pet Effect: found, and when it ends (a GetTime() value)
+--- or nil when the aura gives none. Read in a pcall: a secret value in an
+--- instance raises when compared, and then nothing is found.
+function Food:ReadEffect()
+    local effectName = self:EffectName()
+    local ok, found, ends = pcall(function()
+        local byIndex = C_UnitAuras and C_UnitAuras.GetAuraDataByIndex
+        if type(byIndex) == "function" then
+            for i = 1, 40 do
+                local aura = byIndex("pet", i, "HELPFUL")
+                if not aura then break end
+                if IsEffect(aura.spellId, aura.name, effectName) then
+                    local expires = tonumber(aura.expirationTime)
+                    return true, (expires and expires > 0) and expires or nil
+                end
+            end
+            return false
+        end
+        if type(UnitBuff) == "function" then
+            for i = 1, 40 do
+                local name, _, _, _, _, expires, _, _, _, spellID = UnitBuff("pet", i)
+                if not name then break end
+                if IsEffect(spellID, name, effectName) then
+                    expires = tonumber(expires)
+                    return true, (expires and expires > 0) and expires or nil
+                end
+            end
+        end
+        return false
+    end)
+    if not (ok and found) then return false, nil end
+    return true, ends
+end
+
+local function Now()
+    if type(GetTime) == "function" then
+        local ok, now = pcall(GetTime)
+        if ok and type(now) == "number" then return now end
+    end
+    return 0
+end
+
+--- Whole seconds left on the pet's Feed Pet Effect, at least 1, or nil when
+--- the pet is not eating (or the client won't say). An aura with no end is
+--- counted from when it was first seen.
+function Food:Eating()
+    local found, ends = self:ReadEffect()
+    if not found then
+        self.eatSeen = nil
+        return nil
+    end
+    local now = Now()
+    if not ends then
+        self.eatSeen = self.eatSeen or now
+        ends = self.eatSeen + self.EAT_SECONDS
+    end
+    return math.max(1, math.ceil(ends - now))
+end
+
+--- After the pet's auras moved: when eating starts or stops, the buttons
+--- are set again; while it lasts a one second ticker changes only their words.
+function Food:EatingChanged()
+    local left = self:Eating()
+    local was = self.eatingNow
+    self.eatingNow = left ~= nil
+    if self.eatingNow ~= (was == true) then self:Update() end
+    if left then self:WatchEating() end
+end
+
+function Food:WatchEating()
+    if self.eatTicker or not (C_Timer and C_Timer.NewTicker) then return end
+    self.eatTicker = C_Timer.NewTicker(1, function()
+        local left = Food:Eating()
+        if left then
+            if ns.FeedButton and ns.FeedButton.ShowLeft then ns.FeedButton:ShowLeft(left) end
+            if ns.UI and ns.UI.ShowEatingLeft then pcall(ns.UI.ShowEatingLeft, ns.UI, left) end
+            return
+        end
+        Food:StopWatchingEating()
+        Food.eatingNow = false
+        Food:Update()
+    end)
+end
+
+function Food:StopWatchingEating()
+    if self.eatTicker then
+        pcall(self.eatTicker.Cancel, self.eatTicker)
+        self.eatTicker = nil
+    end
+end
+
+--------------------------------------------------------------------------------
 -- /bpet food: what the helper sees in each bag slot, and why it did or did not
 -- count it. Reads only.
 --------------------------------------------------------------------------------
@@ -727,6 +846,15 @@ function Food:OnEnable()
     end)
     -- Leaving combat: the Feed button can only be pointed at new food then.
     ns.RegisterEvent(self, "PLAYER_REGEN_ENABLED", function() Food:Update() end)
+    -- Feed Pet Effect going on or coming off the pet.
+    local function Auras(_, _, unit)
+        if unit == nil or unit == "pet" then Food:EatingChanged() end
+    end
+    if ns.RegisterPetEvent then
+        ns.RegisterPetEvent(self, "UNIT_AURA", Auras)
+    else
+        ns.RegisterEvent(self, "UNIT_AURA", Auras)
+    end
     -- Logging in or a /reload: wait for the bags again.
     ns.RegisterEvent(self, "PLAYER_ENTERING_WORLD", function(_, _, isLogin, isReload)
         Food:BagsChanged()

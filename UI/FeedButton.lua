@@ -68,6 +68,13 @@ function FeedButton:Build()
         local stack = FeedButton.stack
         if not (stack and GameTooltip) then return end
         GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        if FeedButton.eating then
+            GameTooltip:AddLine(L.Format("%s is eating", FeedButton.petName or L["Your pet"]))
+            GameTooltip:AddLine(L["Your pet is still eating. Feeding now would waste food."], 0.7, 0.7, 0.7, true)
+            GameTooltip:AddLine(L["Drag to move it. Right-click to put it back."], 0.5, 0.5, 0.5, true)
+            GameTooltip:Show()
+            return
+        end
         GameTooltip:AddLine(L.Format("Feed %s", ns.Food.ShownName(stack)))
         GameTooltip:AddLine(L.Format("%s is %s.", FeedButton.petName or L["Your pet"],
             FeedButton.mood or L["hungry"]), 0.7, 0.7, 0.7)
@@ -169,13 +176,18 @@ function FeedButton:Update(status, stacks, beforeCombat)
         and stack and self:Hungry(status)
 
     if wanted then
+        -- While the pet is still eating the button stays, holds and counts
+        -- down: a second feed now would only take the food.
+        local left = ns.Food.Eating and ns.Food:Eating()
         button:SetAttribute("type", "macro")
-        button:SetAttribute("macrotext", ns.Food:FeedMacro(stack))
+        button:SetAttribute("macrotext", not left and ns.Food:FeedMacro(stack) or nil)
         self:Place()
         button:Show()
         self.stack = stack
         self.petName = status.name
+        self.eating = left ~= nil
         self:Dress(status, stack, stacks)
+        if left then self:ShowLeft(left) end
         local info = ns.PetStatus.HAPPINESS[status.happiness]
         self.mood = info and info.name:lower()
     else
@@ -184,7 +196,18 @@ function FeedButton:Update(status, stacks, beforeCombat)
         button:ClearAllPoints()
         button:SetAttribute("macrotext", nil)
         self.stack = nil
+        self.eating = nil
     end
+end
+
+--- While the pet eats: "NAME is eating" over "Ready in 14s", no glow.
+--- Out of a fight only, since new words can resize the button.
+function FeedButton:ShowLeft(left)
+    local button = self.button
+    if not (button and self.eating and button:IsShown()) or InCombat() then return end
+    local pet = type(self.petName) == "string" and self.petName ~= "" and self.petName or L["Your pet"]
+    button:SetLines(L.Format("%s is eating", pet), L.Format("Ready in %ds", left))
+    button:SetGlowing(false)
 end
 
 --- The icon of an item, by its ID, or nil.

@@ -226,6 +226,15 @@ function Probe:Run()
     Line("loyalty", Read("C_PetInfo.GetPetLoyalty"))
     Line("food types", Read("C_PetInfo.GetPetFoodTypes"))
     Line("training points", Read("C_PetInfo.GetPetTrainingPoints"))
+    -- The feed hold (2026-11-12): Feed Pet Effect (1539) on the pet after a
+    -- feed. Feed the pet, then run the probe within 20 seconds.
+    Line("feed effect name", Read("C_Spell.GetSpellName", 1539))
+    Line("feed effect on pet", ns.Food and ns.Food.ReadEffect and (function()
+        local found, ends = ns.Food:ReadEffect()
+        if not found then return "no" end
+        return ends and ("yes, ends at " .. tostring(ends)) or "yes, no end given"
+    end)() or "no Food module")
+    Line("aura calls", Read("C_UnitAuras.GetAuraDataByIndex", "pet", 1, "HELPFUL"))
 
     -- Which way the taming tooltip can tell a known skill. 17254 is the spell
     -- a hunter learns for Bite (Rank 1), 7370 for Charge (Rank 1). The craft

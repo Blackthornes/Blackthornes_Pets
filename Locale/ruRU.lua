@@ -228,6 +228,10 @@ L["open the Pet Compendium: every beast you can tame"] =
 -- The Feed buttons
 L["Feed"] = "Покормить"
 L["Feed %s"] = "Покормить: %s"
+L["%s is eating"] = "%s ест"
+L["Ready in %ds"] = "Готово через %d с"
+L["Eating (%ds)"] = "Ест (%d с)"
+L["Your pet is still eating. Feeding now would waste food."] = "Твой питомец ещё ест. Если покормить сейчас, еда пропадёт зря."
 L["%s x%d"] = "%s x%d"
 L["%s is %s."] = "%s: %s."
 L["hungry"] = "голоден"

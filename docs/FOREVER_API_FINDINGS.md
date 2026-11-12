@@ -192,3 +192,13 @@ client can close these through `PLAYER_INTERACTION_MANAGER_FRAME_HIDE`
 (its argument an `Enum.PlayerInteractionType`: MailInfo 17, Merchant 5,
 Trainer 7, Auctioneer 21) without the old close event, so that event
 undocks too. Every event is registered inside a pcall.
+
+## Feed Pet Effect (2026-11-12, not yet seen in game)
+
+The feed hold reads the pet's buffs for Feed Pet Effect, Classic's spell
+1539 (about 20 seconds after a feed), by spell ID or the client's name for
+it (`C_Spell.GetSpellName(1539)`), through `C_UnitAuras.GetAuraDataByIndex
+("pet", i, "HELPFUL")`, else `UnitBuff`, all in a pcall. Not yet checked on
+Forever: feed the pet and run `/bpet probe` within 20 seconds; the "feed
+effect name", "feed effect on pet" and "aura calls" lines say what the
+client gives. A buff that can't be read never holds feeding.

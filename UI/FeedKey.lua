@@ -178,7 +178,10 @@ function FeedKey:Macro(status, stacks)
             -- the other cases, and feeding stops at [combat] below.
             lines[#lines + 1] = ("/cast [@pet,exists,nodead,combat] %s"):format(mend)
         end
-        local stack = not self:Why(status, stacks) and stacks[1]
+        -- Nothing to feed while the pet is still eating: it would only
+        -- take the food.
+        local eating = ns.Food.Eating and ns.Food:Eating()
+        local stack = not eating and not self:Why(status, stacks) and stacks[1]
         if stack then
             -- The feed macro stops first with no pet, a dead one or a fight.
             lines[#lines + 1] = ns.Food:FeedMacro(stack)
