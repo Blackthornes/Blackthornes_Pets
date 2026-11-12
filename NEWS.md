@@ -23,6 +23,13 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.8.0
+
+- The Shard Tracker is clickable now. Use your Healthstone, Soulstone or Firestone right from it.
+- New Firestone slot for warlocks.
+- A cleaner look for the Shard Tracker.
+
+
 ## 1.7.3
 
 Fixes and changes:
