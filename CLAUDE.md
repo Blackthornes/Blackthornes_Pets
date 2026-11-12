@@ -618,6 +618,25 @@ left, right-click is normal size. Saved in percent, account wide, never
 renamed: `windowScale`, `compendiumScale`, `settingsScale` (the three tabs
 now share `windowScale`). A new window gets one too.
 
+## Still eating (the feed hold)
+
+A player asked, the owner said build it from a mockup with the words he
+approved (2026-11-12): feeding again while the pet still has Feed Pet
+Effect wastes the food. While that buff is on the pet (`Food.FEED_EFFECT`,
+1539; `Food:ReadEffect`, `Food:Eating`, whole seconds left, an aura with no
+end counted `EAT_SECONDS` (20) from when it was seen), the small Feed
+button stays up and holds ("NAME is eating", "Ready in 14s";
+`FeedButton:ShowLeft`), the Pet care key feeds nothing (`FeedKey:Macro`)
+and the window's Feed button reads "Eating (14s)" (`UI:ShowEatingLeft`);
+each one's hover says "Your pet is still eating. Feeding now would waste
+food." `UNIT_AURA` for the pet calls `Food:EatingChanged`, which sets the
+buttons again only when eating starts or stops; a one second ticker runs
+only while the buff is up and changes only words, never in combat
+(`WatchEating`, `StopWatchingEating`). Always on, no setting, nothing
+saved. A buff the client won't let us read holds nothing. `/bpet probe`
+has feed effect lines. Tested in `tools/test_feedhold.lua`. Not yet seen
+in game.
+
 ## The gold plaque
 
 Buttons that sit out on the screen on their own wear the gold plaque (the

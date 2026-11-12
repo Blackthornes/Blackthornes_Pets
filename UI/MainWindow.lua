@@ -1071,6 +1071,15 @@ function UI:BuildFeedButton()
     -- brings a toplevel window to the front.
     button:SetFrameStrata("FULLSCREEN_DIALOG")
     button:RegisterForClicks("AnyUp", "AnyDown")
+    button:HookScript("OnEnter", function(owner)
+        if not (UI.feedEating and GameTooltip) then return end
+        GameTooltip:SetOwner(owner, "ANCHOR_TOP")
+        GameTooltip:AddLine(L["Your pet is still eating. Feeding now would waste food."], 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    button:HookScript("OnLeave", function()
+        if UI.feedEating and GameTooltip then GameTooltip:Hide() end
+    end)
     button:Hide()
     self.feedButton = button
 
@@ -1118,11 +1127,18 @@ function UI:PlaceFeedButton(stack, beforeCombat)
 
     local folded = ns.FoldWindow and ns.FoldWindow:IsFolded(self.frame)
     if stack and self.frame and self.frame:IsShown() and not UI.Covered() and not folded then
+        -- While the pet is still eating it holds: "Eating (14s)".
+        local left = ns.Food.Eating and ns.Food:Eating()
         button:SetAttribute("type", "macro")
-        button:SetAttribute("macrotext", ns.Food:FeedMacro(stack))
+        button:SetAttribute("macrotext", not left and ns.Food:FeedMacro(stack) or nil)
+        self.feedEating = left ~= nil
         -- Plain on the gold face: a rarity colour would not read on it.
         -- The food card above names it in its colour.
-        button:SetText(L.Format("Feed %s", stack.name))
+        if left then
+            button:SetText(L.Format("Eating (%ds)", left))
+        else
+            button:SetText(L.Format("Feed %s", stack.name))
+        end
         button:ClearAllPoints()
         -- At the foot of the food card, where the food is.
         button:SetPoint("BOTTOMRIGHT", self.foodCard or self.frame, "BOTTOMRIGHT", -8, 8)
@@ -1134,8 +1150,16 @@ function UI:PlaceFeedButton(stack, beforeCombat)
         button:ClearAllPoints()
         button:SetAttribute("macrotext", nil)
         self.feedStack = nil
+        self.feedEating = nil
     end
     self:PlaceVersion()
+end
+
+--- The ticker's countdown while the pet eats: only the words change.
+function UI:ShowEatingLeft(left)
+    local button = self.feedButton
+    if not (button and self.feedEating and button:IsShown()) or InCombat() then return end
+    button:SetText(L.Format("Eating (%ds)", left))
 end
 
 --- The version stays in the corner, under the cards. The Feed button sits
