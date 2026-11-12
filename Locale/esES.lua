@@ -589,3 +589,9 @@ L["Pet XP bar: on."] = "Barra de EXP de mascota: activada."
 L["Pet XP bar: off."] = "Barra de EXP de mascota: desactivada."
 L["Pet XP bar is back in its first spot."] = "La barra de EXP de mascota volvió a su primer lugar."
 L["show your pet's XP on screen (on, off, reset)"] = "muestra la experiencia de tu mascota en pantalla (on, off, reset)"
+
+-- Mute All Sounds (2026-11-12)
+L["Mute All Sounds:"] = "Silenciar todos los sonidos:"
+L["turn every Blackthornes sound off or back on (on/off)"] = "apaga o vuelve a encender todos los sonidos de Blackthornes (on/off)"
+L["All Blackthornes sounds are off. /bpet mute off turns them back on."] = "Todos los sonidos de Blackthornes están apagados. /bpet mute off los vuelve a encender."
+L["Blackthornes sounds are back on."] = "Los sonidos de Blackthornes vuelven a estar encendidos."

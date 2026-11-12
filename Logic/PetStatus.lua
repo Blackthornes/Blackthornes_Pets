@@ -332,7 +332,7 @@ function PetStatus:Alert(message)
             shown = pcall(errors.AddMessage, errors, message, 1, 0.82, 0.35)
         end
     end
-    if type(PlaySound) == "function" and type(SOUNDKIT) == "table" and SOUNDKIT.RAID_WARNING then
+    if type(PlaySound) == "function" and not (ns.Muted and ns.Muted()) and type(SOUNDKIT) == "table" and SOUNDKIT.RAID_WARNING then
         pcall(PlaySound, SOUNDKIT.RAID_WARNING)
     end
     return shown
