@@ -5,6 +5,11 @@
 local _, ns = ...
 
 ns.WHATS_NEW = {
+    { version = "1.10.0", lines = {
+        "Windows now remember where you drag them, so they come back in the same spot.",
+        "A new button on the General page puts every window back where it started.",
+        "The Feed button waits while your pet is still eating, and counts down.",
+    } },
     { version = "1.9.0", lines = {
         "A new box mutes every sound from all the Blackthornes addons at once. It starts off.",
     } },
@@ -12,8 +17,5 @@ ns.WHATS_NEW = {
         "The Shard Tracker is clickable now. Use your Healthstone, Soulstone or Firestone right from it.",
         "New Firestone slot for warlocks.",
         "A cleaner look for the Shard Tracker.",
-    } },
-    { version = "1.7.0", lines = {
-        "Hunters can show a bar for their pet's XP. It shows how long to the next level and XP an hour. You can size it and move it. It is in Settings, on the Pet page, under Pet XP Bar.",
     } },
 }
