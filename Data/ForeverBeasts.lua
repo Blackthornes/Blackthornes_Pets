@@ -39,7 +39,7 @@ ForeverBeasts.SEEN = {
     ["Carrion Horror"] = { zone = "Desolace", x = 53.7, y = 61.4, min = 35, max = 37 },
     ["Clattering Crawler"] = { zone = "Ashenvale", x = 10.4, y = 32.2, min = 19, max = 20 },
     ["Clattering Scorpid"] = { zone = "Durotar", x = 52, y = 76.2, min = 5, max = 6 },
-    ["Cloud Serpent"] = { zone = "Thousand Needles", x = 39.4, y = 37.4, min = 25, max = 25 },
+    ["Cloud Serpent"] = { zone = "Thousand Needles", x = 39.4, y = 37.4, min = 25, max = 26 },
     ["Corrupted Bloodtalon Scythemaw"] = { zone = "Durotar", x = 42.2, y = 19.6, min = 10, max = 11 },
     ["Corrupted Mottled Boar"] = { zone = "Durotar", x = 42.7, y = 21.7, min = 10, max = 11 },
     ["Corrupted Scorpid"] = { zone = "Durotar", x = 36.7, y = 24.9, min = 10, max = 10 },
