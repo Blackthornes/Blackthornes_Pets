@@ -23,6 +23,12 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.10.0
+
+- Windows now remember where you drag them, so they come back in the same spot.
+- A new button on the General page puts every window back where it started.
+- The Feed button waits while your pet is still eating, and counts down.
+
 ## 1.9.0
 
 - A new box mutes every sound from all the Blackthornes addons at once. It starts off.
