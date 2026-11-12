@@ -589,3 +589,9 @@ L["Pet XP bar: on."] = "Begleiter-EP-Leiste: an."
 L["Pet XP bar: off."] = "Begleiter-EP-Leiste: aus."
 L["Pet XP bar is back in its first spot."] = "Die Begleiter-EP-Leiste ist wieder an ihrem ersten Platz."
 L["show your pet's XP on screen (on, off, reset)"] = "zeigt die EP deines Begleiters auf dem Bildschirm (on, off, reset)"
+
+-- Mute All Sounds (2026-11-12)
+L["Mute All Sounds:"] = "Alle Sounds stumm:"
+L["turn every Blackthornes sound off or back on (on/off)"] = "alle Blackthornes-Sounds aus- oder wieder einschalten (on/off)"
+L["All Blackthornes sounds are off. /bpet mute off turns them back on."] = "Alle Blackthornes-Sounds sind aus. Mit /bpet mute off schaltest du sie wieder ein."
+L["Blackthornes sounds are back on."] = "Blackthornes-Sounds sind wieder an."
