@@ -48,6 +48,7 @@ Sections there:
 - The sister note
 - One look across the addons (the house kit)
 - Standing rules in full
+- Shelves, dock places and the All Addons page
 
 ## Standing rules (short; full wording in Docs/claude-notes.md, "Standing rules in full")
 
@@ -96,8 +97,8 @@ before leaning on one.
 - **Window spots.** Windows remember where they were dragged:
   `oneWindowDockSpots[place]` and `windowSpots[key]` (never rename),
   `SharedWindow.KeepSpot(frame, key)`, `windows reset` runs
-  `SharedWindow.ResetAllSpots`. SharedWindow.lua and WhatsNew.lua are
-  FILE_VERSION 7.
+  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 8 (shelves,
+  dock places, All Addons gear) and WhatsNew.lua FILE_VERSION 7.
 
 ## Big files (read these in pieces)
 
