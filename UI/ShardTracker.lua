@@ -710,7 +710,15 @@ function ShardTracker:Place()
     if x then
         frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", x / scale, y / scale)
     else
-        frame:SetPoint("TOP", UIParent, "TOP", 0, self.FIRST_Y / scale)
+        -- Never dragged: the next free place on the shared top shelf.
+        local sw = ns.SharedWindow
+        local placed = sw and sw.ShelfPlace and sw.ShelfPlace(frame, "shards.pets", {
+            free = function() return ShardTracker:Spot() == nil end,
+            place = function() ShardTracker:Place() end,
+        })
+        if not placed then
+            frame:SetPoint("TOP", UIParent, "TOP", 0, self.FIRST_Y / scale)
+        end
     end
 end
 
