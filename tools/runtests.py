@@ -11,6 +11,12 @@ test is a new file and nothing else.
 It also found two suites that were passing and being skipped -- test_persist
 and test_serialize were never added to the list.
 
+A passing suite prints nothing: only failures (with the last lines the suite
+printed) and the count are shown, so a clean run is one line. Pass --verbose
+to see every line, or name suites to run only those:
+
+    python tools/runtests.py food petxpbar
+
 A suite fails by raising, which is what the assert and error calls in each file
 do. All of them run regardless, so one failure does not hide the rest.
 """
@@ -20,6 +26,9 @@ import os
 import sys
 
 from lupa import lua51 as luamod
+
+# Lines of a failing suite's own output shown above its error.
+TAIL = 15
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -34,19 +43,42 @@ def main() -> int:
     lua.execute("package.path = [[%s/?.lua;]] .. package.path" % ROOT.replace("\\", "/"))
     lua.execute("lfs_cwd = [[%s]]" % ROOT.replace("\\", "/"))
 
+    args = sys.argv[1:]
+    verbose = "--verbose" in args
+    wanted = [arg for arg in args if not arg.startswith("--")]
+
     scripts = test_files()
+    if wanted:
+        # "food", "test_food" and "test_food.lua" all name the same suite.
+        names = {"test_%s.lua" % w.replace("test_", "").replace(".lua", "") for w in wanted}
+        scripts = [path for path in scripts if os.path.basename(path) in names]
     if not scripts:
         print("no test files found in tools/", file=sys.stderr)
         return 1
 
     failed = []
 
+    # What a suite prints is kept, and shown only when it fails.
+    printed = []
+
+    def keep(*parts):
+        line = "\t".join(str(part) for part in parts)
+        if verbose:
+            print(line)
+        else:
+            printed.append(line)
+
+    lua.globals().print = keep
+
     for path in scripts:
         name = os.path.basename(path)
+        del printed[:]
         try:
             lua.execute("dofile([[%s]])" % path.replace("\\", "/"))
         except Exception as error:          # a Lua error, surfaced as LuaError
             failed.append(name)
+            for line in printed[-TAIL:]:
+                print(line, file=sys.stderr)
             print("\nFAIL -- %s\n%s" % (name, error), file=sys.stderr)
 
     print("\n%d suite(s) run, %d failure(s)" % (len(scripts), len(failed)))

@@ -220,14 +220,30 @@ from 2026-11-03 and only grow. Find more with `find . -name '*.lua' | xargs wc -
 - Generated files (`Data/`) are written by their `tools/` script. Never edit
   them by hand, and never open them to see what they hold.
 
-Data tables (generated, grep only): `Data/Compendium.lua` 585 lines, 85 KB.
+Data tables (generated, grep only): `Data/Compendium.lua` 585 lines, 85 KB; `Data/ForeverBeasts.lua` 40 KB; `Data/PetTraining.lua`, `Data/BeastSkills.lua`, `Data/ForeverPetFood.lua` about 20 KB each.
+
+Locale (grep one key, never read): `Locale/ruRU.lua` 603 lines, 43 KB; `deDE`, `frFR`, `esES`, `zhCN` are each about 603 lines, 32 to 35 KB.
+
+Notes (grep a heading, never read whole): `Docs/claude-notes.md` 902 lines, 56 KB; `CHANGELOG.md` 536 lines, 25 KB.
 
 Code:
 - `UI/Widgets.lua` 1630 lines, 62 KB: shared widgets.
-- `UI/MainWindow.lua` 1591 lines, 62 KB: the Pet tab.
-- `UI/CompendiumWindow.lua` 933 lines, 37 KB: the Compendium tab.
+- `UI/MainWindow.lua` 1630 lines, 63 KB: the Pet tab.
+- `UI/WhatsNew.lua` 1245 lines, 48 KB and `UI/SharedWindow.lua` 1082 lines, 43 KB: shared.
+- `UI/CompendiumWindow.lua` 970 lines, 39 KB: the Compendium tab.
+- `UI/Settings.lua` 911 lines, 39 KB: Settings pages.
 
-Over 800 lines, same rule: `UI/WhatsNew.lua`, `UI/SharedWindow.lua`, `UI/SettingsPages.lua`, `Logic/Travel.lua`.
+Over 800 lines, same rule: `UI/SettingsPages.lua`, `UI/ShardTracker.lua`, `Logic/Travel.lua`, `Logic/Food.lua`.
+
+## Running the tests (keep the output small)
+
+- `python tools/runtests.py` prints one line when everything passes, and a
+  failing suite's last lines and error when one fails. `--verbose` prints
+  every line (212 of them): do not use it in a thread.
+- One suite while you work: `python tools/runtests.py food petxpbar`. The
+  whole run once before the PR.
+- `python tools/syntaxcheck.py` lists only failures; `--verbose` lists every file.
+- Pipe anything else long through `tail -20`.
 
 The same file lives in several addons: `UI/SharedWindow.lua`, `UI/WhatsNew.lua`, `UI/SettingsPages.lua`, `Logic/Travel.lua`. A fix to one belongs in all.
 

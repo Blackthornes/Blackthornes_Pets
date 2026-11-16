@@ -145,7 +145,7 @@ not in it does not load, and WoW says nothing about it.
 ```bash
 python tools/syntaxcheck.py   # parse every Lua file with a real 5.1 parser
 python tools/lintcalls.py     # find calls to methods, and constants, never defined
-python tools/runtests.py      # run the logic tests outside WoW
+python tools/runtests.py      # run the logic tests outside WoW (--verbose for every line)
 ```
 
 `tools/` requires `lupa` (`python -m pip install --user lupa`).

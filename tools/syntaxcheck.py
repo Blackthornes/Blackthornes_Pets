@@ -1,7 +1,10 @@
-"""Syntax-check every Lua file in the addon, and check the TOC lists real ones.
+r"""Syntax-check every Lua file in the addon, and check the TOC lists real ones.
 
 WoW silently disables an addon whose first TOC file fails to compile, with no
 error and no hint, so this runs before every deploy.
+
+Only failures and the count are printed, so a clean run is two lines; pass
+--verbose to list every file.
 
 The TOC check is here for the same reason. A TOC line naming a file that does
 not exist is not an error in the game either: the file is simply never loaded,
@@ -68,6 +71,7 @@ def check_toc() -> int:
 
 
 def main() -> int:
+    verbose = "--verbose" in sys.argv[1:]
     lua = luamod.LuaRuntime(unpack_returned_tuples=True)
     compile_chunk = lua.eval(
         "function(source, name)"
@@ -102,7 +106,8 @@ def main() -> int:
         relative = os.path.relpath(path, ROOT)
 
         if ok:
-            print("  OK    %s" % relative)
+            if verbose:
+                print("  OK    %s" % relative)
         else:
             failures += 1
             print("  FAIL  %s: %s" % (relative, err))
