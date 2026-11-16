@@ -14,6 +14,9 @@ local env = dofile(lfs_cwd .. "/tools/testenv.lua")
 local suite = env.NewSuite("beastarrow")
 
 local ns = env.Load()
+-- These checks follow Mother Fang's Classic spot, so a Forever sighting in
+-- the shipped data must not move her.
+if ns.ForeverBeasts and ns.ForeverBeasts.SEEN then ns.ForeverBeasts.SEEN["Mother Fang"] = nil end
 local Arrow, ArrowUI, C, UI = ns.BeastArrow, ns.BeastArrowUI, ns.Compendium, ns.CompendiumUI
 
 local clock = 100
