@@ -235,6 +235,8 @@ Code:
 
 Over 800 lines, same rule: `UI/SettingsPages.lua`, `UI/ShardTracker.lua`, `Logic/Travel.lua`, `Logic/Food.lua`.
 
+The same file lives in several addons: `UI/SharedWindow.lua`, `UI/WhatsNew.lua`, `UI/SettingsPages.lua`, `Logic/Travel.lua`. A fix to one belongs in all.
+
 ## Running the tests (keep the output small)
 
 - `python tools/runtests.py` prints one line when everything passes, and a
@@ -244,8 +246,6 @@ Over 800 lines, same rule: `UI/SettingsPages.lua`, `UI/ShardTracker.lua`, `Logic
   whole run once before the PR.
 - `python tools/syntaxcheck.py` lists only failures; `--verbose` lists every file.
 - Pipe anything else long through `tail -20`.
-
-The same file lives in several addons: `UI/SharedWindow.lua`, `UI/WhatsNew.lua`, `UI/SettingsPages.lua`, `Logic/Travel.lua`. A fix to one belongs in all.
 
 ## Window spots
 
