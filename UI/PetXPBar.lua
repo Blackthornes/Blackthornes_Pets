@@ -667,7 +667,15 @@ function Bar:Place()
     if x then
         frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", x, y)
     else
-        frame:SetPoint("TOP", UIParent, "TOP", 0, self.FIRST_Y)
+        -- Never dragged: the next free place on the shared top shelf.
+        local sw = ns.SharedWindow
+        local placed = sw and sw.ShelfPlace and sw.ShelfPlace(frame, "xpbar.pets", {
+            free = function() return Bar:Spot() == nil end,
+            place = function() Bar:Place() end,
+        })
+        if not placed then
+            frame:SetPoint("TOP", UIParent, "TOP", 0, self.FIRST_Y)
+        end
     end
 end
 

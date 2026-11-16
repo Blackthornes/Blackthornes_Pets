@@ -385,9 +385,7 @@ L["Window Style:"] = "Estilo de ventana:"
 L["Sister Addons:"] = "Addons hermanos:"
 L["Says once in chat which Blackthornes addons you don't have."] = "Dice una vez en el chat qué addons de Blackthornes no tienes."
 L["What's New:"] = "Novedades:"
-L["What's New After Updates:"] = "Novedades tras actualizar:"
 L["Opens What's New the first time you play after an update."] = "Abre Novedades la primera vez que juegas tras una actualización."
-L["What's New Motion:"] = "Animación de Novedades:"
 L["Window position, text size and What's New"] = "Posición de la ventana, tamaño del texto y Novedades"
 
 -- About (UI/About.lua) and the note in What's New
@@ -522,7 +520,6 @@ L["Click to pick an addon"] = "Haz clic para elegir un addon"
 L["Combine Addon Buttons:"] = "Unir botones de addons:"
 L["One Window:"] = "Una ventana:"
 L["Your pet, its food and skills"] = "Tu mascota, su comida y sus habilidades"
-L["ADDONS"] = "ADDONS"
 L["ARROW"] = "FLECHA"
 L["PET"] = "MASCOTA"
 L["Window Size:"] = "Tamaño de la ventana:"
@@ -603,3 +600,10 @@ L["Puts every Blackthornes window back where it started. Your settings and data 
 L["Every window is back in its first spot."] = "Cada ventana ha vuelto a su primer sitio."
 L["put every Blackthornes window back where it started (reset)"] = "devolver cada ventana de Blackthornes a su sitio de inicio (reset)"
 L["Type /bpet windows reset to put every window back in its first spot."] = "Escribe /bpet windows reset para devolver cada ventana a su primer sitio."
+
+-- The settings every Blackthornes addon shares (2026-11-16).
+L["All Addons"] = "Todos los addons"
+L["ALL BLACKTHORNES ADDONS"] = "TODOS LOS ADDONS BLACKTHORNES"
+L["WHAT'S NEW"] = "NOVEDADES"
+L["After Updates:"] = "Tras actualizar:"
+L["Show With Motion"] = "Mostrar con movimiento"
