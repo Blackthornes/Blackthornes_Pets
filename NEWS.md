@@ -23,6 +23,16 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.11.0
+
+- The Feed button and Pet XP bar can sit on the game's pet frame.
+- The Pet page shows only what fits your class.
+- Settings has an All Addons page for what every addon shares.
+- The window can dock in more places and you can resize it by hand.
+Fixes and changes:
+- Tamed beasts show as tamed in the Compendium.
+- Long meter names and headings no longer run into each other.
+
 ## 1.10.0
 
 - Windows now remember where you drag them, so they come back in the same spot.

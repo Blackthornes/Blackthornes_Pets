@@ -4,6 +4,17 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.11.0
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Pet Frame places.** New Button Place: and Bar Place: choices on the Pet page of Settings put the Feed button and the Pet XP bar on the game's pet frame. Each is On Pet Frame or Free, and starts on Free.
+- **Pet page by class.** The Pet page shows your own class. Hunters see Feeding, Pet XP Bar and Taming, warlocks see the Warlock section, and everyone else sees it all. Bar Width, Bar Height, Show Words and Level-Up Cheer show once Pet XP Bar is ticked, and Tracker Size once Shard Tracker is. Window Spots now puts the Pet XP bar and Shard Tracker back too.
+- **All Addons page.** The settings every Blackthornes addon shares (Window Style, Text Size, Effects, Mute All Sounds, Combine Addon Buttons, One Window, Window Spots, Sister Addons and What's New) now sit on one All Addons page, behind the gear on the one window's rail. The two What's New boxes became one After Updates: drop-down. Nothing was renamed and your choices carry over.
+- **One window docks in more places.** It sits on the free side of the game's window, shrinks only a little when there is no room, and lets you resize it by hand with the grip. Each addon keeps its own height when you switch between them.
+- **Shared shelves.** Small pieces you never dragged, such as arrows, bars and cards, line up on a top or right shelf instead of starting on one spot.
+- **Fixes.** A beast you tamed says so in the Compendium even when it was also seen on Forever. Meter names on the Pet tab stay clear of their bars, and Compendium headings stay clear of each other.
+
 ## 1.10.0
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
