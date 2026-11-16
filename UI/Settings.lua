@@ -429,8 +429,27 @@ function SettingsUI:BuildPages()
     controls.quickFeed = Widgets.CreateCheckbox(quickFeedRow, L["Show"], function(checked)
         ns.db.quickFeed = checked
         if ns.Food then ns.Food:Update() end
+        SettingsUI:LayPet()
     end, true)
     controls.quickFeed:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    -- On the game's pet frame, or free to drag: 1 or 2 on the choice.
+    local PLACES = { L["On Pet Frame"], L["Free"] }
+    local function PlaceChoice(row, onChange)
+        local choice = Widgets.CreateChoice(row, {
+            min = 1, max = 2, step = 1, value = 2,
+            format = function(value) return PLACES[value] end,
+            onChange = function(value) onChange(value == 1) end,
+        })
+        ns.SettingsPages.FitStepper(choice, PLACES)
+        choice:SetPoint("TOPLEFT", CONTROL_X, -2)
+        return choice
+    end
+
+    local feedPlaceRow = pages:Row("pet", 1, L["Button Place:"], nil)
+    controls.feedButtonPlace = PlaceChoice(feedPlaceRow, function(onFrame)
+        ns.FeedButton:SetPlace(onFrame)
+    end)
 
     -- The Pet XP bar (UI/PetXPBar.lua): a hunter's pet's XP on screen,
     -- Farmer's XP bar look. Off unless ticked.
@@ -479,6 +498,11 @@ function SettingsUI:BuildPages()
         ns.PetXPBar:SetCheer(checked)
     end, true)
     controls.petXPBarCheer:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local xpPlaceRow = pages:Row("pet", 1, L["Bar Place:"], nil)
+    controls.petXPBarPlace = PlaceChoice(xpPlaceRow, function(onFrame)
+        ns.PetXPBar:SetPlace(onFrame)
+    end)
 
     local tamingSection = pages:Section("pet", 2, L["TAMING"])
 
@@ -546,7 +570,9 @@ function SettingsUI:BuildPages()
         xpSection, xpBarRow, tamingSection, tamingRow }) do
         self.petRules[item] = { class = "HUNTER" }
     end
-    for _, item in ipairs({ xpWidthRow, xpHeightRow, xpWordsRow, xpCheerRow }) do
+    self.petRules[feedPlaceRow] = { class = "HUNTER",
+        when = function() return ns.db ~= nil and ns.db.quickFeed ~= false end }
+    for _, item in ipairs({ xpWidthRow, xpHeightRow, xpWordsRow, xpCheerRow, xpPlaceRow }) do
         self.petRules[item] = { class = "HUNTER", when = BarOn }
     end
     for _, item in ipairs({ warlockSection, shardsRow, stonesRow, trackerRow }) do
@@ -749,6 +775,8 @@ function SettingsUI:Refresh()
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
     controls.neverFeedBuffFood:SetChecked(ns.db.neverFeedBuffFood == true)
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
+    controls.feedButtonPlace:SetValue(ns.FeedButton:OnPetFrame() and 1 or 2, true)
+    controls.petXPBarPlace:SetValue(ns.PetXPBar:OnPetFrame() and 1 or 2, true)
     controls.soulShards:SetChecked(ns.db.soulShards == true)
     controls.stoneReminder:SetChecked(ns.db.stoneReminder == true)
     controls.shardTracker:SetChecked(ns.db.shardTracker == true)

@@ -259,8 +259,8 @@ do
         not Shown(controls.soulShards) and not Shown(controls.shardTracker) and not Shown(controls.shardTrackerSize))
     suite.check("the bar's size rows wait for the bar",
         not Shown(controls.petXPBarWidth) and not Shown(controls.petXPBarCheer))
-    -- FEEDING and its four, PET XP BAR and its switch; TAMING and its one.
-    suite.check("the columns hold only what shows", left == 7 and right == 2, left .. "/" .. right)
+    -- FEEDING, its four and Button Place, PET XP BAR and its switch; TAMING and its one.
+    suite.check("the columns hold only what shows", left == 8 and right == 2, left .. "/" .. right)
 
     controls.petXPBar:SetChecked(false)
     controls.petXPBar:GetScript("OnClick")(controls.petXPBar)
@@ -271,6 +271,22 @@ do
     ns.db.petXPBar = false
     SettingsUI:LayPet()
     suite.check("a hidden row keeps its value", ns.PetXPBar:Width() == width)
+
+    suite.check("Bar Place waits for the bar too", not Shown(controls.petXPBarPlace))
+    suite.check("both places start on Free",
+        controls.petXPBarPlace:GetValue() == 2 and controls.feedButtonPlace:GetValue() == 2)
+    controls.petXPBarPlace:SetValue(1)
+    controls.feedButtonPlace:SetValue(1)
+    suite.check("On Pet Frame is kept for each",
+        ns.db.petXPBarPlace == "frame" and ns.charDB.feedButtonPlace == "frame")
+    controls.petXPBarPlace:SetValue(2)
+    controls.feedButtonPlace:SetValue(2)
+    suite.check("and Free clears it", ns.db.petXPBarPlace == nil and ns.charDB.feedButtonPlace == nil)
+    ns.db.quickFeed = false
+    SettingsUI:LayPet()
+    suite.check("Button Place waits for the Feed button", not Shown(controls.feedButtonPlace))
+    ns.db.quickFeed = true
+    SettingsUI:LayPet()
 
     left, right = Count("Warlock")
     suite.check("a warlock sees the warlock rows in the left column",
@@ -290,10 +306,10 @@ do
 
     ns.db.petXPBar = true
     left, right = Count("Mage")
-    suite.check("another class sees every setting", left == 11 and right == 7, left .. "/" .. right)
+    suite.check("another class sees every setting", left == 13 and right == 7, left .. "/" .. right)
     _G.UnitClass = nil
     left, right = Count(nil)
-    suite.check("so does a class the client won't read", left == 11 and right == 7, left .. "/" .. right)
+    suite.check("so does a class the client won't read", left == 13 and right == 7, left .. "/" .. right)
     ns.db.petXPBar, ns.db.shardTracker = false, false
     _G.UnitClass = function() return "Hunter", "HUNTER" end
     SettingsUI:LayPet()

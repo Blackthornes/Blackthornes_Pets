@@ -119,6 +119,39 @@ point, relativeTo, relativePoint, x, y = unpack(button._point)
 suite.check("above the tracker again", x == 950 and y == 704,
     table.concat({ tostring(x), tostring(y) }, " "))
 
+-- On Pet Frame.
+do
+    local petFrame = { shown = true }
+    function petFrame:IsVisible() return self.shown end
+    function petFrame:GetEffectiveScale() return 1 end
+    function petFrame:GetRect() return 40, 600, 120, 50 end
+    local scaled = rawget(UIParent, "GetEffectiveScale")
+    UIParent.GetEffectiveScale = function() return 1 end
+    _G.PetFrame = petFrame
+
+    suite.check("Free unless picked", not ns.FeedButton:OnPetFrame())
+    ns.FeedButton:SetPlace(true)
+    point, relativeTo, relativePoint, x, y = unpack(button._point)
+    suite.check("On Pet Frame is kept for this character", ns.charDB.feedButtonPlace == "frame")
+    suite.check("it sits just right of the pet frame", point == "BOTTOMLEFT" and x > 160 and x < 170 and y == 600,
+        table.concat({ tostring(x), tostring(y) }, " "))
+    local moved = false
+    button.StartMoving = function() moved = true end
+    button:GetScript("OnDragStart")(button)
+    suite.check("and can't be dragged off it", not moved)
+    petFrame.shown = false
+    Refresh()
+    point, relativeTo, relativePoint, x, y = unpack(button._point)
+    suite.check("with no pet frame it goes where Free puts it", x == 950 and y == 704,
+        table.concat({ tostring(x), tostring(y) }, " "))
+    petFrame.shown = true
+    ns.FeedButton:SetPlace(false)
+    point, relativeTo, relativePoint, x, y = unpack(button._point)
+    suite.check("Free puts it back", ns.charDB.feedButtonPlace == nil and x == 950 and y == 704)
+    _G.PetFrame = nil
+    UIParent.GetEffectiveScale = scaled
+end
+
 _G.C_Container, _G.C_Item, _G.C_PetInfo, _G.ObjectiveTrackerFrame = nil, nil, nil, nil
 _G.UnitExists, _G.UnitName, _G.UnitLevel = nil, nil, nil
 
