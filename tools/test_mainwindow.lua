@@ -150,4 +150,11 @@ suite.check("a secret name reads as your pet",
 _G.UnitExists, _G.UnitName, _G.UnitCreatureFamily, _G.UnitLevel = nil, nil, nil, nil
 _G.GetPetExperience, _G.C_PetInfo = nil, nil
 
+-- The bars start past the longest meter name.
+suite.check("short meter names keep the usual start", UI.MeterStart({ "Experience", "Loyalty" }) == 108,
+    UI.MeterStart({ "Experience", "Loyalty" }))
+local long = ("x"):rep(30)
+suite.check("a long meter name pushes the bars along",
+    UI.MeterStart({ "Experience", long }) >= ns.Theme.TextWidth("small", long) + 16)
+
 suite.done()

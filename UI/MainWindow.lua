@@ -39,7 +39,10 @@ local GAP = 10
 local HERO_HEIGHT = 76
 local PORTRAIT = 46
 local METER_HEIGHT = 24
-local METER_X = 108
+-- Where the bars start: the least, and wider when a meter's name needs it
+-- (set in BuildStatus, once the words can be measured).
+local METER_LEAST = 108
+local METER_X = METER_LEAST
 local METER_WIDTH = 190
 local CARD_HEAD = 24
 local CARD_ROW = 22
@@ -436,6 +439,16 @@ local function LayRows(card, rows, specs, values, y, width)
     return y
 end
 
+--- Where the bars start, past the longest meter name: a long name in
+--- another language, or at a larger text size, once ran under its bar.
+function UI.MeterStart(labels)
+    local widest = 0
+    for _, text in ipairs(labels) do
+        widest = math.max(widest, Theme.TextWidth("small", text))
+    end
+    return math.max(METER_LEAST, 4 + widest + 12)
+end
+
 function UI:BuildStatus()
     local frame = self.frame
     self.rows = {}
@@ -519,6 +532,7 @@ function UI:BuildStatus()
     -- The three bars: experience, happiness and loyalty, a label on the
     -- left and the words on the right.
     self.meters = {}
+    METER_X = UI.MeterStart({ L["Experience"], L["Happiness"], L["Loyalty"] })
     local function Meter(key, labelText)
         local meter = CreateFrame("Frame", nil, body)
         meter:SetHeight(METER_HEIGHT)

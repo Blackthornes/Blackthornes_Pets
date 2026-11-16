@@ -384,4 +384,33 @@ ns.CompendiumUI:Hide()
 ns.db.tamedBeasts = nil
 _G.UnitGUID, _G.UnitAttackSpeed, _G.InCombatLockdown = nil, nil, nil
 
+-- Headings keep room for their words and the sort arrow, and the list stays
+-- as wide as it was.
+do
+    local columns = {
+        { key = "name", label = "Beast", x = 10, width = 186 },
+        { key = "family", label = "Family", x = 200, width = 88 },
+        { key = "level", label = "Niveau", x = 292, width = 48 },
+        { key = "speed", label = "Velocidad", x = 344, width = 46 },
+        { key = "zone", label = "Where", x = 394, width = 180 },
+        { key = "skills", label = "Teaches", x = 578, width = 188 },
+    }
+    ns.CompendiumUI.FitColumns(columns, function(text) return #text * 8 end)
+    local overlap, fits = nil, true
+    for index, column in ipairs(columns) do
+        local need = #column.label * 8 + (column.key ~= "skills" and 16 or 0)
+        if column.width < need then fits = false end
+        local nextColumn = columns[index + 1]
+        if nextColumn and column.x + column.width > nextColumn.x then overlap = column.key end
+    end
+    suite.check("every heading fits its column with its sort arrow", fits)
+    suite.check("no column runs into the next", overlap == nil, overlap)
+    suite.check("the list is no wider than before",
+        columns[6].x + columns[6].width == 578 + 188, columns[6].x + columns[6].width)
+    local same = { { key = "name", label = "Beast", x = 10, width = 186 },
+        { key = "skills", label = "Teaches", x = 200, width = 188 } }
+    ns.CompendiumUI.FitColumns(same, function(text) return #text * 6 end)
+    suite.check("columns with room are left alone", same[1].width == 186 and same[2].x == 200)
+end
+
 suite.done()
