@@ -45,6 +45,13 @@ local COLUMNS = {
     { key = "skills", label = L["Teaches"], x = 578, width = 188 },
 }
 
+-- Room a heading keeps for its sort arrow, and the space between columns.
+local ARROW_ROOM = 16
+local COLUMN_GAP = 4
+-- The columns that give room up, in turn, and the least each keeps.
+local GIVERS = { "skills", "zone", "name" }
+local GIVER_LEAST = 120
+
 -- A pet's usual swing time; quicker is green, slower amber.
 local USUAL_SPEED = 2.0
 
@@ -293,11 +300,45 @@ function CompendiumUI:BuildBar()
     self.barBottom = top - 18 - BAR_GAP
 end
 
+--- Give each column room for its heading and sort arrow: "VELOCIDAD" and
+--- its arrow ran into the next heading in a column sized for "SPEED". The
+--- room comes out of the wide columns, so the list stays as wide as it was.
+--- `measure(text)` is how wide a heading draws.
+function CompendiumUI.FitColumns(columns, measure)
+    local grown = 0
+    for _, column in ipairs(columns) do
+        local need = measure(column.label:upper()) + (column.key ~= "skills" and ARROW_ROOM or 0)
+        if need > column.width then
+            grown = grown + need - column.width
+            column.width = need
+        end
+    end
+    for _, key in ipairs(GIVERS) do
+        for _, column in ipairs(columns) do
+            if column.key == key and grown > 0 and column.width > GIVER_LEAST then
+                local give = math.min(grown, column.width - GIVER_LEAST)
+                column.width = column.width - give
+                grown = grown - give
+            end
+        end
+    end
+    local x = columns[1].x
+    for _, column in ipairs(columns) do
+        column.x = x
+        x = x + column.width + COLUMN_GAP
+    end
+    return columns
+end
+
 --- The headings, which sort the list: a click sorts by that column, a
 --- second click turns it round, a third goes back to sorting by beast.
 function CompendiumUI:BuildHeadings()
     local frame = self.frame
     self.headings = {}
+    if not self.columnsFitted then
+        self.columnsFitted = true
+        CompendiumUI.FitColumns(COLUMNS, function(text) return Theme.TextWidth("tiny", text) end)
+    end
     for _, column in ipairs(COLUMNS) do
         local heading = CreateFrame("Button", nil, frame)
         heading:SetSize(column.width, 18)
