@@ -27,6 +27,8 @@ Bar.WORDS_FROM = 12
 Bar.LINE = 16
 Bar.SETTLE = 0.2
 Bar.FIRST_Y = -210
+-- Between the game's pet frame and the bar under it.
+Bar.FRAME_GAP = 2
 Bar.CHEER_HOLD = 3
 Bar.CARD_WIDTH = 280
 Bar.CARD_ROW = 34
@@ -285,7 +287,9 @@ function Bar:Build()
     bar.text = text
 
     frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", function(f) f:StartMoving() end)
+    frame:SetScript("OnDragStart", function(f)
+        if not Bar:OnPetFrame() then f:StartMoving() end
+    end)
     frame:SetScript("OnDragStop", function(f)
         f:StopMovingOrSizing()
         if f.SetUserPlaced then pcall(f.SetUserPlaced, f, false) end
@@ -591,6 +595,9 @@ function Bar:Refresh()
         self:Layout()
         self:Place()
         frame:Show()
+    elseif self:OnPetFrame() then
+        -- Keep up with a pet frame that moved.
+        self:Place()
     end
     self:Paint(read)
     if leveled then self:Cheer(read, took) end
@@ -620,9 +627,41 @@ function Bar:Spot()
     return nil
 end
 
+--- "Bar Place:" On Pet Frame (`petXPBarPlace = "frame"`) or Free, as it
+--- always was.
+function Bar:OnPetFrame()
+    return ns.db ~= nil and ns.db.petXPBarPlace == "frame"
+end
+
+function Bar:SetPlace(onFrame)
+    if not ns.db then return end
+    ns.db.petXPBarPlace = onFrame and "frame" or nil
+    self.framePlace = nil
+    self:Place()
+end
+
+--- On Pet Frame: just under the game's pet frame, left edges in line, by
+--- screen position (the frame itself is only read). Placed again only when
+--- the pet frame has moved. False with no pet frame to read.
+function Bar:PlaceOnPetFrame()
+    local frame = self.frame
+    if not (frame and ns.PetFrameRect) then return false end
+    local left, bottom = ns.PetFrameRect()
+    if not left then return false end
+    local key = ("%d:%d"):format(left, bottom)
+    if key ~= self.framePlace then
+        self.framePlace = key
+        frame:ClearAllPoints()
+        frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, bottom - self.FRAME_GAP)
+    end
+    return true
+end
+
 function Bar:Place()
     local frame = self.frame
     if not frame then return end
+    if self:OnPetFrame() and self:PlaceOnPetFrame() then return end
+    self.framePlace = nil
     frame:ClearAllPoints()
     local x, y = self:Spot()
     if x then

@@ -173,6 +173,42 @@ suite.check("reset says so", env.ChatText():find("back in its first spot", 1, tr
 local point = Bar.frame._point
 suite.check("back at the top", point and point[1] == "TOP", point and point[1])
 
+-- On Pet Frame.
+do
+    local petFrame = { shown = true, rect = { 40, 600, 120, 50 } }
+    function petFrame:IsVisible() return self.shown end
+    function petFrame:GetEffectiveScale() return 1 end
+    function petFrame:GetRect() return self.rect[1], self.rect[2], self.rect[3], self.rect[4] end
+    local scaled = rawget(UIParent, "GetEffectiveScale")
+    UIParent.GetEffectiveScale = function() return 1 end
+    _G.PetFrame = petFrame
+
+    suite.check("Free unless picked", not Bar:OnPetFrame())
+    Bar:SetPlace(true)
+    point = Bar.frame._point
+    suite.check("On Pet Frame is kept", ns.db.petXPBarPlace == "frame")
+    suite.check("it sits just under the pet frame, left edges in line",
+        point[1] == "TOPLEFT" and point[4] == 40 and point[5] == 600 - Bar.FRAME_GAP, point[4])
+    local moved = false
+    Bar.frame.StartMoving = function() moved = true end
+    Bar.frame:GetScript("OnDragStart")(Bar.frame)
+    suite.check("and can't be dragged off it", not moved)
+    petFrame.rect = { 80, 500, 120, 50 }
+    Bar:Refresh()
+    point = Bar.frame._point
+    suite.check("it follows a pet frame that moved", point[4] == 80 and point[5] == 500 - Bar.FRAME_GAP)
+    petFrame.shown = false
+    Bar:Place()
+    suite.check("with no pet frame it goes where Free puts it", Bar.frame._point[1] == "TOP")
+    petFrame.shown = true
+    Bar:SetPlace(false)
+    suite.check("Free puts it back", ns.db.petXPBarPlace == nil and Bar.frame._point[1] == "TOP")
+    Bar.frame:GetScript("OnDragStart")(Bar.frame)
+    suite.check("and it drags again", moved)
+    _G.PetFrame = nil
+    UIParent.GetEffectiveScale = scaled
+end
+
 -- /bpet xpbar
 ns.commands.xpbar.fn("off")
 suite.check("xpbar off", ns.db.petXPBar == false and not Bar.frame:IsShown())

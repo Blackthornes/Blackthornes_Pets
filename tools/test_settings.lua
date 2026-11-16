@@ -232,6 +232,89 @@ ns.db.settingsX = 400
 ns.commands.windows.fn("reset")
 suite.check("/bpet windows reset puts it back too", ns.db.settingsX == nil)
 
+-- Window Spots is the one button for the bar and the tracker too.
+ns.db.petXPBarX, ns.db.petXPBarY = 10, 20
+ns.db.shardTrackerX, ns.db.shardTrackerY = 30, 40
+SettingsUI:ResetPositions()
+suite.check("it puts the Pet XP bar back", ns.db.petXPBarX == nil and ns.db.petXPBarY == nil)
+suite.check("and the Shard Tracker", ns.db.shardTrackerX == nil and ns.db.shardTrackerY == nil)
+suite.check("the place rows of their own are gone",
+    controls.petXPBarReset == nil and controls.shardTrackerReset == nil)
+
+-- The Pet page: your own class, and a switch's rows once it is ticked.
+do
+    local function Count(class)
+        _G.UnitClass = function() return class, class and class:upper() or nil end
+        SettingsUI:LayPet()
+        local page = SettingsUI.pages.pages.pet
+        return #page.items[1], #page.items[2], page
+    end
+    local function Shown(control) return control:GetParent():IsShown() end
+
+    ns.db.petXPBar, ns.db.shardTracker = false, false
+    local left, right = Count("Hunter")
+    suite.check("a hunter sees the hunter rows",
+        Shown(controls.feedWarning) and Shown(controls.petXPBar) and Shown(controls.tamingTooltip))
+    suite.check("and no warlock rows",
+        not Shown(controls.soulShards) and not Shown(controls.shardTracker) and not Shown(controls.shardTrackerSize))
+    suite.check("the bar's size rows wait for the bar",
+        not Shown(controls.petXPBarWidth) and not Shown(controls.petXPBarCheer))
+    -- FEEDING, its four and Button Place, PET XP BAR and its switch; TAMING and its one.
+    suite.check("the columns hold only what shows", left == 8 and right == 2, left .. "/" .. right)
+
+    controls.petXPBar:SetChecked(false)
+    controls.petXPBar:GetScript("OnClick")(controls.petXPBar)
+    suite.check("ticking the bar brings its rows",
+        ns.db.petXPBar == true and Shown(controls.petXPBarWidth) and Shown(controls.petXPBarHeight)
+        and Shown(controls.petXPBarWords) and Shown(controls.petXPBarCheer))
+    local width = ns.PetXPBar:Width()
+    ns.db.petXPBar = false
+    SettingsUI:LayPet()
+    suite.check("a hidden row keeps its value", ns.PetXPBar:Width() == width)
+
+    suite.check("Bar Place waits for the bar too", not Shown(controls.petXPBarPlace))
+    suite.check("both places start on Free",
+        controls.petXPBarPlace:GetValue() == 2 and controls.feedButtonPlace:GetValue() == 2)
+    controls.petXPBarPlace:SetValue(1)
+    controls.feedButtonPlace:SetValue(1)
+    suite.check("On Pet Frame is kept for each",
+        ns.db.petXPBarPlace == "frame" and ns.charDB.feedButtonPlace == "frame")
+    controls.petXPBarPlace:SetValue(2)
+    controls.feedButtonPlace:SetValue(2)
+    suite.check("and Free clears it", ns.db.petXPBarPlace == nil and ns.charDB.feedButtonPlace == nil)
+    ns.db.quickFeed = false
+    SettingsUI:LayPet()
+    suite.check("Button Place waits for the Feed button", not Shown(controls.feedButtonPlace))
+    ns.db.quickFeed = true
+    SettingsUI:LayPet()
+
+    left, right = Count("Warlock")
+    suite.check("a warlock sees the warlock rows in the left column",
+        Shown(controls.soulShards) and Shown(controls.stoneReminder) and Shown(controls.shardTracker)
+        and left == 4 and right == 0, left .. "/" .. right)
+    suite.check("and no hunter rows", not Shown(controls.feedWarning) and not Shown(controls.petXPBar))
+    suite.check("the tracker's size waits for the tracker", not Shown(controls.shardTrackerSize))
+    ns.db.shardTracker = true
+    left = Count("Warlock")
+    suite.check("and shows once it is on", Shown(controls.shardTrackerSize) and left == 5, left)
+
+    local found = false
+    for _, entry in ipairs(SettingsUI.pages.searchables) do
+        if entry.frame == controls.feedWarning:GetParent() then found = true end
+    end
+    suite.check("the search leaves out what a warlock can't see", not found)
+
+    ns.db.petXPBar = true
+    left, right = Count("Mage")
+    suite.check("another class sees every setting", left == 13 and right == 7, left .. "/" .. right)
+    _G.UnitClass = nil
+    left, right = Count(nil)
+    suite.check("so does a class the client won't read", left == 13 and right == 7, left .. "/" .. right)
+    ns.db.petXPBar, ns.db.shardTracker = false, false
+    _G.UnitClass = function() return "Hunter", "HUNTER" end
+    SettingsUI:LayPet()
+end
+
 -- A client with neither options API still loads.
 local ns2 = env.Load()
 _G.UnitClass = function() return "Hunter", "HUNTER" end

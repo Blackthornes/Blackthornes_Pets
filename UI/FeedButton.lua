@@ -50,7 +50,7 @@ function FeedButton:Build()
     button:SetClampedToScreen(true)
     button:RegisterForDrag("LeftButton")
     button:SetScript("OnDragStart", function(self)
-        if InCombat() then return end
+        if InCombat() or FeedButton:OnPetFrame() then return end
         self:StartMoving()
     end)
     button:SetScript("OnDragStop", function(self)
@@ -98,12 +98,53 @@ local function Tracker()
     return tracker
 end
 
+--- Where the game's pet frame sits on screen, in UIParent's units: left,
+--- bottom, width, height. Nil while it is hidden or the client won't say.
+--- Read only: the frame is never anchored to, moved, shown or hidden.
+function ns.PetFrameRect()
+    local frame = rawget(_G, "PetFrame")
+    if type(frame) ~= "table" then return nil end
+    local ok, left, bottom, width, height = pcall(function()
+        if not frame:IsVisible() then return nil end
+        local scale = frame:GetEffectiveScale() / UIParent:GetEffectiveScale()
+        local x, y, w, h = frame:GetRect()
+        return x * scale, y * scale, w * scale, h * scale
+    end)
+    if ok and type(left) == "number" and type(bottom) == "number"
+        and type(width) == "number" and type(height) == "number" then
+        return left, bottom, width, height
+    end
+    return nil
+end
+
+--- "Button Place:" On Pet Frame (`feedButtonPlace = "frame"`, beside the
+--- spot it goes with, per character) or Free, as it always was.
+function FeedButton:OnPetFrame()
+    return ns.charDB ~= nil and ns.charDB.feedButtonPlace == "frame"
+end
+
+function FeedButton:SetPlace(onFrame)
+    if not ns.charDB then return end
+    ns.charDB.feedButtonPlace = onFrame and "frame" or nil
+    if self.button and self.button:IsShown() and not InCombat() then self:Place() end
+end
+
 --- Put the button just above the tracker's top left corner. It is placed by
 --- screen position rather than anchored to the tracker, so the tracker stays
 --- free to move itself in combat.
 function FeedButton:Place()
     local button = self.button
     button:ClearAllPoints()
+
+    -- On Pet Frame: just right of the game's pet frame, by screen position
+    -- like the rest. With no pet frame to read it goes where Free puts it.
+    if self:OnPetFrame() then
+        local left, bottom, width = ns.PetFrameRect()
+        if left then
+            button:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left + width + GAP, bottom)
+            return
+        end
+    end
 
     local spot = self:Spot()
     if spot then

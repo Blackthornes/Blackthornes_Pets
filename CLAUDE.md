@@ -47,6 +47,8 @@ Sections there:
 - The About page and the note
 - The sister note
 - One look across the addons (the house kit)
+- The Pet page shows your class
+- On Pet Frame (the Feed button and the Pet XP bar)
 - Standing rules in full
 - Shelves, dock places and the All Addons page
 

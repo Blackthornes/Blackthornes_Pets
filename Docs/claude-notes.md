@@ -900,6 +900,46 @@ rows are one line with sort arrows and a right-click menu, an empty list
 offers Show All, and its footer is the count. Settings' page is "PET" and
 the shared General page has Window Size; pet warnings use the shared note.
 
+## The Pet page shows your class
+
+The owner said build it (2026-11-15) from the mockup
+(`previews/pets-ui-cleanup/04-settings.png`). On the Pet page of Settings a
+hunter sees FEEDING, PET XP BAR and TAMING, a warlock sees WARLOCK (in the
+left column), and any other class, or one the client won't read, sees
+everything (`SettingsUI.PetClass`). A switch's size rows show once it is
+ticked: Bar Width, Bar Height, Show Words and Level-Up Cheer with "Pet XP
+Bar:", Tracker Size with "Shard Tracker:" (`SettingsUI.petRules`,
+`PetShows`). `SettingsUI:LayPet` hides the rest, closes the rows up and
+gives the shared pages (`UI/SettingsPages.lua`, unchanged) only what shows,
+so its heights, scroll and search stay right; it runs at build, on Refresh
+and when either switch is ticked. Nothing saved changes and a hidden
+setting keeps its value. "Bar Place:" and "Tracker Place:" Set Default are
+gone: "Window Spots:" on General (`SettingsUI:ResetPositions`) now puts the
+Pet XP bar and the Shard Tracker back too, and a right-click on either
+still resets just that one. Tested in `tools/test_settings.lua`.
+
+## On Pet Frame (the Feed button and the Pet XP bar)
+
+The owner said build it and approved the words (2026-11-15), from the
+mockup (`previews/pets-ui-cleanup/02-pet-frame.png`). Two choices on the
+Pet page, each "On Pet Frame" or "Free", both Free unless picked:
+"Button Place:" under "Feed Button:" (shown while the button is on) and
+"Bar Place:" under "Pet XP Bar:" (shown while the bar is ticked). Saved as
+`feedButtonPlace = "frame"` in the character save (beside
+`feedButtonSpot`) and `petXPBarPlace = "frame"` in the account save
+(beside `petXPBarX`); nil is Free; never rename either. On Pet Frame the
+button sits just right of the game's pet frame and the bar just under it,
+left edges in line, at the bar's own width and height. Both are placed by
+screen position from `ns.PetFrameRect()` (`UI/FeedButton.lua`): `PetFrame`
+is only read, inside a pcall, never anchored to, moved, shown or hidden.
+The button is placed out of a fight only, as before; the bar is placed
+again on its own refresh when the pet frame has moved
+(`Bar:PlaceOnPetFrame`, keyed, no timer). Neither drags while on the
+frame, and a saved Free spot is kept for going back. With no pet frame to
+read, each goes where Free puts it. Whether Forever's pet frame is
+`PetFrame` is not yet seen in game. Tested in `tools/test_feedbutton.lua`,
+`tools/test_petxpbar.lua` and `tools/test_settings.lua`.
+
 ## Standing rules in full
 
 The short forms are in CLAUDE.md. These are the same rules, word for word,
