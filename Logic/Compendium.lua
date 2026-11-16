@@ -62,6 +62,9 @@ end
 -- which the map pin and the arrow cannot use.
 local instanceZones = {}
 
+-- Which reason to show when a beast has more than one.
+local WHY_RANK = { seen = 1, found = 2, tamed = 3, mine = 4 }
+
 --- Lay a Forever spot over an entry, keeping what Classic said beside it.
 --- A spot inside a dungeon or raid keeps Classic's place: beasts seen in
 --- The Wailing Caverns also live in the cave outside it, in The Barrens,
@@ -95,7 +98,9 @@ local function Overlay(entry, spot, why)
         if entry.classicSpeed == nil and not entry.speedSeen then entry.classicSpeed = entry.speed end
         entry.speed, entry.speedSeen = spot.speed, true
     end
-    entry.forever = entry.forever or why
+    -- The strongest reason wins: your own tame, then a shipped tame, then a
+    -- find, then a sighting.
+    if (WHY_RANK[why] or 0) > (WHY_RANK[entry.forever] or 0) then entry.forever = why end
 end
 
 --- A tamed beast's family: by its ID when Classic has that family, since
