@@ -384,9 +384,7 @@ L["Window Style:"] = "窗口样式："
 L["Sister Addons:"] = "姊妹插件："
 L["Says once in chat which Blackthornes addons you don't have."] = "在聊天框说一次你还没有哪些 Blackthornes 插件。"
 L["What's New:"] = "更新内容："
-L["What's New After Updates:"] = "更新后显示更新内容："
 L["Opens What's New the first time you play after an update."] = "更新后第一次玩时打开更新内容。"
-L["What's New Motion:"] = "更新内容动画："
 L["Window position, text size and What's New"] = "窗口位置、文字大小和更新内容"
 
 -- About (UI/About.lua) and the note in What's New
@@ -521,7 +519,6 @@ L["Click to pick an addon"] = "点击选择插件"
 L["Combine Addon Buttons:"] = "合并插件按钮："
 L["One Window:"] = "单一窗口："
 L["Your pet, its food and skills"] = "你的宠物、食物和技能"
-L["ADDONS"] = "插件"
 L["ARROW"] = "箭头"
 L["PET"] = "宠物"
 L["Window Size:"] = "窗口大小："
@@ -600,3 +597,10 @@ L["Puts every Blackthornes window back where it started. Your settings and data 
 L["Every window is back in its first spot."] = "每个窗口都回到了最初的位置。"
 L["put every Blackthornes window back where it started (reset)"] = "把每个 Blackthornes 窗口放回最初的位置（reset）"
 L["Type /bpet windows reset to put every window back in its first spot."] = "输入 /bpet windows reset，把每个窗口放回最初的位置。"
+
+-- The settings every Blackthornes addon shares (2026-11-16).
+L["All Addons"] = "全部插件"
+L["ALL BLACKTHORNES ADDONS"] = "所有 BLACKTHORNES 插件"
+L["WHAT'S NEW"] = "更新内容"
+L["After Updates:"] = "更新后："
+L["Show With Motion"] = "带动画显示"

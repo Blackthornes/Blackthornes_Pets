@@ -179,6 +179,8 @@ function MinimapButton:JoinShared()
             key = "pets", order = 4, name = "Pets", icon = ICON,
             open = function() MinimapButton:Open() end,
             settings = function() if ns.SettingsUI then ns.SettingsUI:Toggle() end end,
+            -- The settings every Blackthornes addon shares (the rail's gear).
+            allAddons = function() if ns.SettingsUI then ns.SettingsUI:ShowAllAddons() end end,
             db = function() return ns.db end,
             -- The Pet, Compendium and Settings tabs show in it (UI/PetsTabs.lua).
             host = ns.PetsTabs and ns.PetsTabs.host or nil,
