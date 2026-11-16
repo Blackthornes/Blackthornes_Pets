@@ -61,6 +61,10 @@ function SettingsUI:ResetPositions()
         self:RestorePosition()
         if tabs and tabs.Settle and self.frame and self.frame:IsShown() then tabs:Settle(self.frame) end
     end
+    -- The Pet XP bar and the Shard Tracker too: this is their one button
+    -- now ("Bar Place:" and "Tracker Place:" were rows of their own).
+    if ns.PetXPBar and ns.PetXPBar.Reset then ns.PetXPBar:Reset(true) end
+    if ns.ShardTracker and ns.ShardTracker.Reset then ns.ShardTracker:Reset(true) end
     if ns.BeastArrowUI and ns.BeastArrowUI.frame then
         ns.BeastArrowUI:ResetPosition()
     else
@@ -191,6 +195,7 @@ function SettingsUI:Build()
         local need = page.need or { frame:GetWidth(), frame:GetHeight() }
         if ns.PetsTabs then ns.PetsTabs:Need("settings", need[1], need[2]) end
     end
+    self:LayPet()
     pages:Fit()
 
     local footer = Theme.CreateLabel(frame, "tiny", "dim")
@@ -295,12 +300,87 @@ function SettingsUI.WindowStyleControl(row, x)
     return stepper
 end
 
+--- The class whose settings the Pet page shows: the hunter's or the
+--- warlock's own, and nil (every setting) for anyone else or a class the
+--- client won't read.
+function SettingsUI.PetClass()
+    if type(UnitClass) ~= "function" then return nil end
+    local ok, _, token = pcall(UnitClass, "player")
+    if ok and (token == "HUNTER" or token == "WARLOCK") then return token end
+    return nil
+end
+
+--- Whether something on the Pet page shows for `class` (nil for all).
+function SettingsUI:PetShows(item, class)
+    local rule = self.petRules and self.petRules[item]
+    if not rule then return true end
+    if class and rule.class and rule.class ~= class then return false end
+    if rule.when and not rule.when() then return false end
+    return true
+end
+
+--- Lay the Pet page out with only what shows: the rest is hidden and the
+--- rows under it close up. A class with nothing in the left column has its
+--- settings there. The search finds only what is showing. Nothing saved
+--- changes; a hidden setting keeps its value.
+function SettingsUI:LayPet()
+    local pages = self.pages
+    local page = pages and pages.pages and pages.pages.pet
+    if not (page and self.petRules) then return end
+    -- Everything placed on the page, as it was built.
+    if not self.petAll then
+        self.petAll = { items = { page.items[1], page.items[2] }, searchables = pages.searchables }
+    end
+    local class = SettingsUI.PetClass()
+
+    local columns = { {}, {} }
+    for column, list in ipairs(self.petAll.items) do
+        for _, entry in ipairs(list) do
+            local shows = self:PetShows(entry.frame, class)
+            entry.frame:SetShown(shows)
+            if shows then columns[column][#columns[column] + 1] = entry end
+        end
+    end
+    if #columns[1] == 0 then columns[1], columns[2] = columns[2], columns[1] end
+
+    for column, list in ipairs(columns) do
+        local laid, last = {}, nil
+        for _, entry in ipairs(list) do
+            -- The order in a column never changes, so what was built first
+            -- there is first whenever it shows, and needs no gap of its own.
+            local gap = last and entry.gap or 0
+            entry.frame:ClearAllPoints()
+            if last then
+                entry.frame:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, gap)
+            else
+                entry.frame:SetPoint("TOPLEFT", page.content, "TOPLEFT", pages.columnX[column], 0)
+            end
+            laid[#laid + 1] = { frame = entry.frame, gap = gap }
+            last = entry.frame
+        end
+        page.items[column] = laid
+        page.last[column] = last
+    end
+
+    local found = {}
+    for _, entry in ipairs(self.petAll.searchables) do
+        if entry.page ~= "pet" or self:PetShows(entry.frame, class) then
+            found[#found + 1] = entry
+        else
+            entry.glow:Hide()
+        end
+    end
+    pages.searchables = found
+
+    if pages.fitted then pages:Fit() end
+end
+
 function SettingsUI:BuildPages()
     local controls = self.controls
     local pages = self.pages
 
     -- Hunter pet: feeding on the left, taming on the right.
-    pages:Section("pet", 1, L["FEEDING"])
+    local feedingSection = pages:Section("pet", 1, L["FEEDING"])
 
     -- The warning and its "only when unhappy" share a row: the second tick
     -- only matters while the first is on. The saved keys are unchanged.
@@ -354,11 +434,12 @@ function SettingsUI:BuildPages()
 
     -- The Pet XP bar (UI/PetXPBar.lua): a hunter's pet's XP on screen,
     -- Farmer's XP bar look. Off unless ticked.
-    pages:Section("pet", 1, L["PET XP BAR"])
+    local xpSection = pages:Section("pet", 1, L["PET XP BAR"])
 
     local xpBarRow = pages:Row("pet", 1, L["Pet XP Bar:"], nil)
     controls.petXPBar = Widgets.CreateCheckbox(xpBarRow, L["On"], function(checked)
         ns.PetXPBar:Set(checked)
+        SettingsUI:LayPet()
     end, false)
     controls.petXPBar:SetPoint("TOPLEFT", CONTROL_X, -2)
 
@@ -399,13 +480,7 @@ function SettingsUI:BuildPages()
     end, true)
     controls.petXPBarCheer:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local xpPlaceRow = pages:Row("pet", 1, L["Bar Place:"], nil)
-    controls.petXPBarReset = Widgets.CreateButton(xpPlaceRow, L["Set Default"], function()
-        ns.PetXPBar:Reset()
-    end, { width = 110, height = 20 })
-    controls.petXPBarReset:SetPoint("TOPLEFT", CONTROL_X, 0)
-
-    pages:Section("pet", 2, L["TAMING"])
+    local tamingSection = pages:Section("pet", 2, L["TAMING"])
 
     local tamingRow = pages:Row("pet", 2, L["Taming Skills:"],
         L["A beast's tooltip shows what it teaches. Green you know, red you don't."])
@@ -426,7 +501,7 @@ function SettingsUI:BuildPages()
     ns.SettingsPages.FitStepper(controls.tamingTooltip, TooltipShift.NAMES)
     controls.tamingTooltip:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    pages:Section("pet", 2, L["WARLOCK"])
+    local warlockSection = pages:Section("pet", 2, L["WARLOCK"])
 
     local shardsRow = pages:Row("pet", 2, L["Soul Shards:"],
         L.Format("Shows your soul shards on the Pet tab and warns you at %d or fewer.", ns.SoulShards.LOW))
@@ -449,6 +524,7 @@ function SettingsUI:BuildPages()
     local trackerRow = pages:Row("pet", 2, L["Shard Tracker:"], nil)
     controls.shardTracker = Widgets.CreateCheckbox(trackerRow, L["On"], function(checked)
         ns.ShardTracker:Set(checked)
+        SettingsUI:LayPet()
     end, false)
     controls.shardTracker:SetPoint("TOPLEFT", CONTROL_X, -2)
 
@@ -461,11 +537,22 @@ function SettingsUI:BuildPages()
     ns.SettingsPages.FitStepper(controls.shardTrackerSize, { "75%", "100%", "125%" })
     controls.shardTrackerSize:SetPoint("TOPLEFT", CONTROL_X, -2)
 
-    local trackerPlaceRow = pages:Row("pet", 2, L["Tracker Place:"], nil)
-    controls.shardTrackerReset = Widgets.CreateButton(trackerPlaceRow, L["Set Default"], function()
-        ns.ShardTracker:Reset()
-    end, { width = 110, height = 20 })
-    controls.shardTrackerReset:SetPoint("TOPLEFT", CONTROL_X, 0)
+    -- Who sees what on the Pet page (SettingsUI.LayPet): each class its own
+    -- settings, and a switch's size rows only once it is ticked.
+    local function BarOn() return ns.db ~= nil and ns.db.petXPBar == true end
+    local function TrackerOn() return ns.db ~= nil and ns.db.shardTracker == true end
+    self.petRules = {}
+    for _, item in ipairs({ feedingSection, feedRow, lowFoodRow, buffFoodRow, quickFeedRow,
+        xpSection, xpBarRow, tamingSection, tamingRow }) do
+        self.petRules[item] = { class = "HUNTER" }
+    end
+    for _, item in ipairs({ xpWidthRow, xpHeightRow, xpWordsRow, xpCheerRow }) do
+        self.petRules[item] = { class = "HUNTER", when = BarOn }
+    end
+    for _, item in ipairs({ warlockSection, shardsRow, stonesRow, trackerRow }) do
+        self.petRules[item] = { class = "WARLOCK" }
+    end
+    self.petRules[trackerSizeRow] = { class = "WARLOCK", when = TrackerOn }
 
     -- The compendium on the left, the arrow that leads to its beasts on
     -- the right.
@@ -656,6 +743,7 @@ function SettingsUI:Refresh()
     if not (self.frame and self.frame:IsShown() and ns.db) then return end
 
     local controls = self.controls
+    self:LayPet()
     controls.feedWarning:SetChecked(ns.db.feedWarning ~= false)
     controls.feedWarnOnlyUnhappy:SetChecked(ns.db.feedWarnOnlyUnhappy == true)
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)

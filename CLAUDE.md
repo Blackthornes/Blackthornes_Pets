@@ -47,6 +47,7 @@ Sections there:
 - The About page and the note
 - The sister note
 - One look across the addons (the house kit)
+- The Pet page shows your class
 - Standing rules in full
 
 ## Standing rules (short; full wording in Docs/claude-notes.md, "Standing rules in full")
