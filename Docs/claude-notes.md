@@ -918,6 +918,28 @@ gone: "Window Spots:" on General (`SettingsUI:ResetPositions`) now puts the
 Pet XP bar and the Shard Tracker back too, and a right-click on either
 still resets just that one. Tested in `tools/test_settings.lua`.
 
+## On Pet Frame (the Feed button and the Pet XP bar)
+
+The owner said build it and approved the words (2026-11-15), from the
+mockup (`previews/pets-ui-cleanup/02-pet-frame.png`). Two choices on the
+Pet page, each "On Pet Frame" or "Free", both Free unless picked:
+"Button Place:" under "Feed Button:" (shown while the button is on) and
+"Bar Place:" under "Pet XP Bar:" (shown while the bar is ticked). Saved as
+`feedButtonPlace = "frame"` in the character save (beside
+`feedButtonSpot`) and `petXPBarPlace = "frame"` in the account save
+(beside `petXPBarX`); nil is Free; never rename either. On Pet Frame the
+button sits just right of the game's pet frame and the bar just under it,
+left edges in line, at the bar's own width and height. Both are placed by
+screen position from `ns.PetFrameRect()` (`UI/FeedButton.lua`): `PetFrame`
+is only read, inside a pcall, never anchored to, moved, shown or hidden.
+The button is placed out of a fight only, as before; the bar is placed
+again on its own refresh when the pet frame has moved
+(`Bar:PlaceOnPetFrame`, keyed, no timer). Neither drags while on the
+frame, and a saved Free spot is kept for going back. With no pet frame to
+read, each goes where Free puts it. Whether Forever's pet frame is
+`PetFrame` is not yet seen in game. Tested in `tools/test_feedbutton.lua`,
+`tools/test_petxpbar.lua` and `tools/test_settings.lua`.
+
 ## Standing rules in full
 
 The short forms are in CLAUDE.md. These are the same rules, word for word,
