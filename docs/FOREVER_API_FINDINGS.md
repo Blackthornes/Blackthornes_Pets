@@ -179,7 +179,7 @@ an ID will do:
   name into the data's for the beast arrow (`BeastArrow:Here`) and a
   tame's home (`TameRecord:Where`).
 
-## The one window's docking (not yet seen in game)
+## The one window's docking
 
 `UI/SharedWindow.lua` (2026-10-30) docks the one window beside the game's
 own windows by screen position only; it never moves, hides or writes a
