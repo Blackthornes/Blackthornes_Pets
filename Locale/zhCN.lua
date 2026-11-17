@@ -385,7 +385,8 @@ L["Sister Addons:"] = "姊妹插件："
 L["Says once in chat which Blackthornes addons you don't have."] = "在聊天框说一次你还没有哪些 Blackthornes 插件。"
 L["What's New:"] = "更新内容："
 L["Opens What's New the first time you play after an update."] = "更新后第一次玩时打开更新内容。"
-L["Window position, text size and What's New"] = "窗口位置、文字大小和更新内容"
+L["Window size and the Pets window"] = "窗口大小和 Pets 窗口"
+L["ALL ADDONS"] = "全部插件"
 
 -- About (UI/About.lua) and the note in What's New
 -- ======================================================================
