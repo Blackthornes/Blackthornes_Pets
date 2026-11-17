@@ -114,6 +114,12 @@ suite.check("the page picked is gold", generalPart.label._color[1] == ns.Theme.c
 SettingsUI:Hide()
 SettingsUI:Show()
 suite.check("it opens again on the page left", pages.shown == "general")
+-- One layout for all five (the owner said build it, 2026-11-17): own
+-- pages first, then the shared ones; General reads Windows.
+local pageWords = {}
+for _, def in ipairs(pages.defs) do pageWords[#pageWords + 1] = def.text end
+suite.check("the pages run own first, then the shared ones",
+    table.concat(pageWords, ", ") == "PET, COMPENDIUM, WINDOWS, ALL ADDONS, ABOUT", table.concat(pageWords, ", "))
 
 -- What a setting does is a tooltip until Show descriptions is ticked.
 local feedRow
