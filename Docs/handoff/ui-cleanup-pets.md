@@ -17,7 +17,7 @@ Mockups are in the project files under `previews/pets-ui-cleanup/`.
   the next heading. Columns now measure their heading and arrow, and the
   wide columns give up the room (`CompendiumUI.FitColumns`), so the list is
   no wider.
-- **Test tools filled the thread.** `runtests.py` printed 212 lines and
+- **Test tools filled the session.** `runtests.py` printed 212 lines and
   `syntaxcheck.py` 120 on every clean run. Both now print failures and the
   count only; `--verbose` shows all, and `runtests.py food` runs one suite.
 - **CLAUDE.md's big-files list** now names the locale files, the other data
@@ -37,8 +37,7 @@ Mockups are in the project files under `previews/pets-ui-cleanup/`.
 
 - `UI/TravelMap.lua` (shared with the other addons) keeps an OnUpdate
   running every frame with no trip set. It only counts to half a second,
-  but it could rest until a trip starts. A fix belongs in every copy, so it
-  goes through the coordinator.
+  but it could rest until a trip starts. A fix belongs in every copy.
 - A Compendium row is 34 high, two lines. A beast with five or more skills
   could wrap its Teaches cell to a third line and touch the row below. Not
   seen in the shipped data; worth a test over the data before changing the

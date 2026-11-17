@@ -2,7 +2,7 @@
 
 Run from the repository root:
 
-    python tools/petfood_ids.py <pfQuest folder or db/enUS/items.lua>
+    python tools/petfood_ids.py <spawn database folder or db/enUS/items.lua>
 
 Data/PetFood.lua is typed by hand, one food a line. A food added by its
 English name alone,
@@ -14,10 +14,10 @@ is rewritten with its item ID in front,
         { 117, "Tough Jerky" },
 
 so the food helper matches it by ID and works on a client in any language.
-The ID comes from pfQuest's English item names (github.com/shagu/pfQuest,
+The ID comes from the spawn database's English item names (its
 db/enUS/items.lua), and only when exactly one item has that name. A food
-already carrying an ID is checked against pfQuest and reported if they
-disagree; nothing else in the file is touched. A name pfQuest does not have
+already carrying an ID is checked against the spawn database and reported if they
+disagree; nothing else in the file is touched. A name the spawn database does not have
 is left as it is and listed, and the addon keeps matching it by name.
 
 Options:
@@ -90,7 +90,7 @@ def main(argv):
         why = "several items: %s" % found if found else "no item by that name"
         print("no ID for %s (%s)" % (name, why))
     for name, item_id, found in wrong:
-        print("%s has ID %d, pfQuest says %s" % (name, item_id, found))
+        print("%s has ID %d, the spawn database says %s" % (name, item_id, found))
     if "--check" in argv:
         return 1 if (missing or wrong or out != lines) else 0
     if out != lines:

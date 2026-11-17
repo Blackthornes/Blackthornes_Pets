@@ -5,7 +5,7 @@ trainer teaches, and where the pet trainers stand.
 Run from the repository root:
 
     python tools/make_pet_training.py <tables folder> --build <build> \\
-        <world_full_14_june_2021.sql> <pfQuest>
+        <world.sql> <spawn database>
 
   <tables folder>   the Forever client's game tables as CSV (SkillLineAbility,
                     SpellName, Spell, SpellLevels, SpellEffect,
@@ -13,12 +13,12 @@ Run from the repository root:
                     Training lists, each rank's pet level and which pet
                     families can learn it come from here, so Forever's own
                     skills are in too. Never commit the tables.
-  <...sql>          the vmangos world database, the same one Data/BeastSkills.lua
+  <...sql>          the Classic world database, the same one Data/BeastSkills.lua
                     and Data/Compendium.lua were made from: the training point
                     cost of each pet spell (skill_line_ability), which ranks the
                     pet trainers teach (npc_trainer_template) and who the pet
                     trainers are (creature_template).
-  <pfQuest>         its db/ folder: where each pet trainer stands.
+  <spawn database>         its db/ folder: where each pet trainer stands.
 
 Never edit the output by hand: rerun the tool.
 """
@@ -31,7 +31,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from make_compendium import tables, load_pfquest, spots_of, central, lua_string, num  # noqa: E402
+from make_compendium import tables, load_spawn_db, spots_of, central, lua_string, num  # noqa: E402
 
 BEAST_TRAINING = 261     # the hunter's Beast Training skill line
 PET_GENERAL = 270        # pet spells every family can learn
@@ -54,7 +54,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("tables")
     p.add_argument("dump")
-    p.add_argument("pfquest")
+    p.add_argument("spawn_db")
     p.add_argument("--build", required=True)
     args = p.parse_args()
     folder = Path(args.tables)
@@ -150,7 +150,7 @@ def main():
     for r in read_csv(folder, "FactionTemplate"):
         group = int(r["FactionGroup"] or 0)
         sides[int(r["ID"])] = "A" if group & 2 else "H" if group & 4 else None
-    pfq = load_pfquest(Path(args.pfquest))
+    pfq = load_spawn_db(Path(args.spawn_db))
     units, zone_names = pfq["units"]["data"], pfq["zones"]["enUS"]
     trainers = []
     for entry, t in sorted(pet_trainers.items()):
