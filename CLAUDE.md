@@ -144,7 +144,7 @@ The same file lives in several addons: `UI/SharedWindow.lua`, `UI/WhatsNew.lua`,
 
 - `python tools/runtests.py` prints one line when everything passes, and a
   failing suite's last lines and error when one fails. `--verbose` prints
-  every line (212 of them): do not use it in a thread.
+  every line (212 of them): do not use it in a session.
 - One suite while you work: `python tools/runtests.py food petxpbar`. The
   whole run once before the PR.
 - `python tools/syntaxcheck.py` lists only failures; `--verbose` lists every file.

@@ -108,7 +108,7 @@ arrow` and a Settings row turn it on. Taming the beast it follows puts it
 away (`BeastArrow:Tamed`, from `TameRecord:Capture`, by NPC ID or name;
 the owner, 2026-10-11): `arrowBeast` is cleared and chat says "tamed X,
 arrow put away." A fix to the dial belongs in all
-three addons. Not yet seen in game; `/bpet arrow check` reports what it
+three addons. `/bpet arrow check` reports what it
 reads.
 
 The dial lies back like a compass on the ground (the owner picked it
@@ -165,8 +165,8 @@ never rename it) and `/bpet arrow route [on|off]`. `Logic/Travel.lua`,
 one belongs in all; Farmer's `CLAUDE.md` has the details); Pets' side is
 `ns.TravelHost` at the end of `Logic/BeastArrow.lua` and
 `BeastArrow:TripState`, and TomTom gets the next stop
-(`TomTomLink.Point`). Tested in `tools/test_travel.lua`. Not yet seen in
-game.
+(`TomTomLink.Point`). Tested in `tools/test_travel.lua`.
+
 
 Show on Map (a German player found nothing at the Crossroads; the owner
 said do all six fixes, 2026-10-29, in every addon): Forever turns the
@@ -335,8 +335,8 @@ or holds a Firestone in the off hand (`/equip`); with none it casts the
 best rank known (`Stones.BestKnown`, `SpellName`). Attributes change only
 out of combat; in a fight `buttonsWaiting` holds them for
 `PLAYER_REGEN_ENABLED`, and a button whose slot moved goes see-through.
-Shards stay a count. Tested in `tools/test_shardtracker.lua`. Not yet
-seen in game.
+Shards stay a count. Tested in `tools/test_shardtracker.lua`.
+
 
 ## The Pet XP bar
 
@@ -670,8 +670,8 @@ buttons again only when eating starts or stops; a one second ticker runs
 only while the buff is up and changes only words, never in combat
 (`WatchEating`, `StopWatchingEating`). Always on, no setting, nothing
 saved. A buff the client won't let us read holds nothing. `/bpet probe`
-has feed effect lines. Tested in `tools/test_feedhold.lua`. Not yet seen
-in game.
+has feed effect lines. Tested in `tools/test_feedhold.lua`.
+
 
 ## The gold plaque
 
@@ -1133,13 +1133,13 @@ same.
 
 Every release of this addon starts with a fold-in of fresh data from the
 live game (the owner, 2026-11-07), even when nothing else about the data
-changed: the release thread stages the owner's account save and the game's
+changed: the release stages the owner's account save and the game's
 English caches, read only, from his live Forever folder (the path is in the
 project's release steps), runs the tools below, runs the tests and commits
 the data in the release PR as "Refresh shipped data". Never announced (no
 CHANGELOG, NEWS, What's New or post), never the save or caches committed,
 nothing else copied out of them. A release whose only change is new data
-does not ship on its own. If his PC can't be reached, the thread asks him
+does not ship on its own. If his PC can't be reached, the release asks him
 once (Try again or Skip it); it never skips without saying. If the game
 patched since the client tables were last pulled, those are refreshed
 first.
@@ -1207,7 +1207,7 @@ landed in `UI/SharedWindow.lua` (FILE_VERSION 8, the same file in all five;
   two boxes. Same saved keys, nothing renamed, no saved choice changed.
   Window Size stays on General: it is per addon. The page hides from the
   switch while One Window is on (the gear reaches it). Farmer's page is
-  left to the Farmer settings thread.
+  left to the Farmer settings work.
 - **SettingsPages** (Farmer, Equipment, Pets, Butler): the page switch
   wraps to a second line, and `opts.barCap` caps `BarWidth` (Farmer
   passes 724). `Page:SetHidden(key, hidden)` hides a page from the switch.
@@ -1263,4 +1263,4 @@ TSM Sold a Day). The same in every addon; keep them the same.
   owner said fix it, and a bad size in a save now reads as 100
   (`UI/SharedWindow.lua` FILE_VERSION 12, in all five).
 - **Three tries, then ask.** A check still failing after three rounds stops
-  the thread. Never skip, loosen or rerun a test to get green.
+  the work. Never skip, loosen or rerun a test to get green.
