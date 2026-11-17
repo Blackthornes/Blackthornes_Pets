@@ -37,8 +37,7 @@ Mockups are in the project files under `previews/pets-ui-cleanup/`.
 
 - `UI/TravelMap.lua` (shared with the other addons) keeps an OnUpdate
   running every frame with no trip set. It only counts to half a second,
-  but it could rest until a trip starts. A fix belongs in every copy, so it
-  goes through the coordinator.
+  but it could rest until a trip starts. A fix belongs in every copy.
 - A Compendium row is 34 high, two lines. A beast with five or more skills
   could wrap its Teaches cell to a third line and touch the row below. Not
   seen in the shipped data; worth a test over the data before changing the

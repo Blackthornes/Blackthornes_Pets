@@ -1,12 +1,8 @@
 # Notes for Claude
 
-Read this before working in this repo. The owner runs one Claude project per
-addon: this one (**Blackthornes_Pets**), **Blackthornes_Equipment**
-(`Blackthornes/Blackthornes_Equipment`), **Blackthornes_Tradeskills**
-(`Blackthornes/Blackthornes_Tradeskills`) and **Blackthornes_Farmer**
-(`Blackthornes/Blackthornes_Farmer`). The projects cannot read each other's
-memory, so what one needs to know about another lives in the repos, in this
-file and in theirs. Keep them current: when a change here leans on something
+Read this before working in this repo. It is one of five Blackthornes addons
+(Farmer, Tradeskills, Equipment, Pets, Butler), each in its own repo. What one
+needs to know about another lives in the repos, in this file and in theirs. Keep them current: when a change here leans on something
 new in another addon, or a standing rule from the owner applies to all of them,
 add it to each file.
 
@@ -117,7 +113,7 @@ before leaning on one.
 
 ## Big files (read these in pieces)
 
-Reading a huge file whole fills the context and the thread dies. Sizes are
+Reading a huge file whole runs the session out of room. Sizes are
 from 2026-11-03 and only grow. Find more with `find . -name '*.lua' | xargs wc -lc | sort -n`.
 
 - Never read a file below whole. Use `grep -n` to find the spot, then read

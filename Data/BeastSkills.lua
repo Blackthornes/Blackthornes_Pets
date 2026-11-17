@@ -1,7 +1,7 @@
 -- Blackthornes Pets -- Data/BeastSkills.lua
 -- Which pet skills taming a beast teaches a hunter, by the beast's creature id.
 --
--- Generated from Classic 1.12 data, not typed by hand: the vmangos world
+-- Generated from Classic 1.12 data, not typed by hand: the Classic world
 -- database (14 June 2021), whose pet_spell_data table is the client's
 -- CreatureSpellData.dbc (rows up to build 5875, patch 1.12.1) and whose
 -- creature_template gives each tameable beast its list. A beast that is not

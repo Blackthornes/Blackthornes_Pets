@@ -12,7 +12,7 @@
 -- Each food is { item ID, "English name" }: the ID is what is matched, so
 -- the list works on a client in any language, and the name keeps a line
 -- easy to check against the game's tooltip. tools/petfood_ids.py fills in
--- the ID for a food added by name alone ("Name",) from pfQuest's item
+-- the ID for a food added by name alone ("Name",) from the spawn database's item
 -- names; a food it cannot find stays a name, matched by the English name
 -- as before.
 
