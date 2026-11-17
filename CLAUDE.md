@@ -112,7 +112,7 @@ before leaning on one.
 - **Window spots.** Windows remember where they were dragged:
   `oneWindowDockSpots[place]` and `windowSpots[key]` (never rename),
   `SharedWindow.KeepSpot(frame, key)`, `windows reset` runs
-  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 12 (no placing mid-drag, shelves,
+  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 13 (Butler at the vendor, no placing mid-drag, shelves,
   dock places, All Addons gear) and WhatsNew.lua FILE_VERSION 7.
 
 ## Big files (read these in pieces)
