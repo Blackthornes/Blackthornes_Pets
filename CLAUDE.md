@@ -20,6 +20,7 @@ CLAUDE.md is kept short on purpose (a 130 to 170 KB one ran every session out of
 
 Sections there:
 
+- Checking a change
 - What this addon is for
 - How this repo was set up
 - What Butler calls here
@@ -51,6 +52,18 @@ Sections there:
 - On Pet Frame (the Feed button and the Pet XP bar)
 - Standing rules in full
 - Shelves, dock places and the All Addons page
+
+## Checking a change
+
+Before every PR, follow `.claude/skills/verify/SKILL.md`: a bug fix starts
+with a test that fails the way the game failed; act the steps out in the
+fake game; run `python tools/check_house_rules.py` (player words and dark
+glass, lines this change adds) and `python tools/checklist_for_change.py`
+(the items in `Docs/change-checklist.md` this change touches). Every PR
+body ends with `Checked:` and `Not checked:` lines. After three failed
+rounds, stop and ask the owner. A miss a diff could have shown gets a
+checklist item in the fix's PR. Details under "Checking a change" in
+`Docs/claude-notes.md`.
 
 ## Standing rules (short; full wording in Docs/claude-notes.md, "Standing rules in full")
 
