@@ -4,6 +4,15 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.12.0
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Blackthornes button for addon bars.** If you already use an addon bar, Blackthornes now puts one button on it. Left-click opens the menu and right-click opens the All Addons page of Settings.
+- **Settings pages in one order.** Every Blackthornes addon now lists its Settings pages the same way. General reads Windows.
+- **Butler at a vendor.** At a vendor the one window opens on Butler, then goes back to the addon you had open when you leave.
+- Various bug fixes for Pets.
+
 ## 1.11.1
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
