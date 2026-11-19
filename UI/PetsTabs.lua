@@ -483,7 +483,29 @@ end
 PetsTabs.host = {
     enter = function(area) PetsTabs:Enter(area) end,
     leave = function() PetsTabs:Leave() end,
+    -- For the swap gem (SharedWindow.AddSwap): the tab up now, open on a
+    -- tab wherever Pets now belongs, and close its own windows.
+    tab = function() return (PetsTabs:Current()) end,
+    show = function(key) PetsTabs:SwapShow(key) end,
+    hide = function() PetsTabs:SwapHide() end,
 }
+
+--- Open on `key` (nil: the Pet tab), in the one window when it is on,
+--- else in Pets' own window.
+function PetsTabs:SwapShow(key)
+    key = key or "pet"
+    if self:Route(key) then return end
+    self:Open(key)
+end
+
+--- Close Pets' own windows.
+function PetsTabs:SwapHide()
+    if self.area then return end
+    for _, tab in ipairs(PetsTabs.Tabs()) do
+        local window = Owner(tab.key)
+        if Shown(FrameOf(window)) and window.Hide then pcall(window.Hide, window) end
+    end
+end
 
 --- A tab is asked to open. With "One Window:" ticked and Pets not in it
 --- yet, the one window opens on Pets instead, on that tab. True when it
