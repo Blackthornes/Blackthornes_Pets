@@ -23,6 +23,11 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.12.1
+
+Fixes and changes:
+- The Spellstone shows on the Shard Tracker bar next to Firestone, and clicking Firestone uses the one in your bags.
+
 ## 1.12.0
 
 - Blackthornes now has one button on your addon bar.
