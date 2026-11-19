@@ -28,6 +28,12 @@ Stones.SOUL_SPELLS = { 693, 20752, 20755, 20756, 20757 }
 Stones.FIRESTONES = { 1254, 13699, 13700, 13701 }
 -- Create Firestone, every rank (in the Forever client's tables).
 Stones.FIRE_SPELLS = { 6366, 17951, 17952, 17953 }
+-- Spellstones, every rank (Spellstone to Major). Forever's 5522 is seen in
+-- the owner's saved item table (level 36, used from the bags: it puts
+-- Shadow on your weapon); the higher ranks keep Classic's IDs.
+Stones.SPELLSTONES = { 5522, 13602, 13603 }
+-- Create Spellstone, every rank (in the Forever client's tables).
+Stones.SPELL_SPELLS = { 2362, 17727, 17728 }
 -- The off hand, where a Firestone is held.
 Stones.OFF_HAND = 17
 -- Soulstone Resurrection, the buff, every rank.
@@ -102,6 +108,22 @@ function Stones:SoulstoneCount() return self.CountOf(self.SOULSTONES) end
 
 --- Firestones in the bags and the one held, every rank together.
 function Stones:FirestoneCount() return self.CountOf(self.FIRESTONES) end
+
+--- Spellstones in the bags, every rank together.
+function Stones:SpellstoneCount() return self.CountOf(self.SPELLSTONES) end
+
+--- Can this stone be held in the off hand? Classic's Firestone and
+--- Spellstone are; Forever's are used from the bags instead (seen
+--- 2026-11-19: both are INVTYPE_NON_EQUIP_IGNORE there). True when the
+--- client won't say, as before.
+function Stones.CanHold(id)
+    local fn = C_Item and C_Item.GetItemInfoInstant or _G.GetItemInfoInstant
+    if type(fn) ~= "function" then return true end
+    local ok, _, _, _, equipLoc = pcall(fn, id)
+    equipLoc = ok and Plain(equipLoc) or nil
+    if type(equipLoc) ~= "string" or equipLoc == "" then return true end
+    return equipLoc == "INVTYPE_HOLDABLE"
+end
 
 --- The Firestone held in the off hand, its item ID, or nil.
 function Stones:HeldFirestone()
