@@ -1,7 +1,7 @@
 -- Blackthornes Pets -- UI/ShardTracker.lua
 -- The Shard Tracker (the owner said build it, 2026-11-06, from a mockup):
 -- a small gold plaque on the screen with a warlock's soul shards and, once
--- each is learned, Healthstones, Firestones and Soulstones. Nothing shows
+-- each is learned, Healthstones, Firestones, Spellstones and Soulstones. Nothing shows
 -- until Drain Soul is known, since shards mean nothing before it.
 --
 -- The plaque itself is our own frame on UIParent with nothing the game
@@ -11,7 +11,8 @@
 --
 -- The stones can be clicked (the owner said build it, 2026-11-11): with
 -- one in the bags a click uses it (a Healthstone), puts it on your target
--- or you (a Soulstone) or holds it in your off hand (a Firestone); with
+-- or you (a Soulstone), holds it in your off hand (a Firestone or
+-- Spellstone in Classic) or uses it (Forever's, which go on your weapon); with
 -- none it casts the best rank of the spell that makes one. Soul Shards
 -- stay a count. Casting needs the game's secure buttons, so each stone has
 -- one on UIParent laid over its slot by screen position, never a child of
@@ -56,6 +57,8 @@ ShardTracker.KINDS = {
     { key = "health", title = L["Healthstone"], item = 5512, fallback = 135230 },
     { key = "fire", title = L["Firestone"], item = 1254,
         fallback = [[Interface\Icons\INV_Ammo_FireTar]] },
+    { key = "spell", title = L["Spellstone"], item = 5522,
+        fallback = [[Interface\Icons\INV_Misc_Gem_Sapphire_01]] },
     { key = "soul", title = L["Soulstone"], item = 5232, fallback = 136210 },
 }
 
@@ -138,6 +141,10 @@ function ShardTracker:Slots()
         local count = Stones:FirestoneCount()
         slots[#slots + 1] = { key = "fire", count = count, empty = count == 0,
             held = Stones:HeldFirestone() ~= nil }
+    end
+    if Stones and Stones.Knows(Stones.SPELL_SPELLS) then
+        local count = Stones:SpellstoneCount()
+        slots[#slots + 1] = { key = "spell", count = count, empty = count == 0 }
     end
     if Stones and Stones.Knows(Stones.SOUL_SPELLS) then
         local count = Stones:SoulstoneCount()
@@ -511,6 +518,15 @@ function ShardTracker:ActionFor(data)
         return { type = "spell", spell = Stones.SpellName(id) or id,
             words = L["Click to make one."] }
     end
+    -- Held in the off hand where the game lets it be (Classic), else used
+    -- from the bags (Forever's Firestone and Spellstone).
+    local function UseOrHold(best)
+        if Stones.CanHold(best) then
+            return { type = "macro", macrotext = "/equip " .. ItemText(best),
+                words = L["Click to hold it in your off hand."] }
+        end
+        return { type = "item", item = "item:" .. best, words = L["Click to use it."] }
+    end
     if data.key == "health" then
         local best = Stones.BestOf(Stones.HEALTHSTONES)
         if best then
@@ -528,12 +544,13 @@ function ShardTracker:ActionFor(data)
     elseif data.key == "fire" then
         local held = Stones:HeldFirestone()
         local best = Stones.BestOf(Stones.FIRESTONES, held)
-        if best then
-            return { type = "macro", macrotext = "/equip " .. ItemText(best),
-                words = L["Click to hold it in your off hand."] }
-        end
+        if best then return UseOrHold(best) end
         if held then return { words = L["You are holding one."] } end
         return Make(Stones.FIRE_SPELLS)
+    elseif data.key == "spell" then
+        local best = Stones.BestOf(Stones.SPELLSTONES)
+        if best then return UseOrHold(best) end
+        return Make(Stones.SPELL_SPELLS)
     end
     return nil
 end
