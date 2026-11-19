@@ -48,6 +48,7 @@ Sections there:
 - On Pet Frame (the Feed button and the Pet XP bar)
 - Standing rules in full
 - Shelves, dock places and the All Addons page
+- The swap gem (One Window toggle, 2026-11-19)
 
 ## Checking a change
 
@@ -108,7 +109,7 @@ before leaning on one.
 - **Window spots.** Windows remember where they were dragged:
   `oneWindowDockSpots[place]` and `windowSpots[key]` (never rename),
   `SharedWindow.KeepSpot(frame, key)`, `windows reset` runs
-  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 13 (Butler at the vendor, no placing mid-drag, shelves,
+  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 14 (the swap gem, Butler at the vendor, no placing mid-drag, shelves,
   dock places, All Addons gear) and WhatsNew.lua FILE_VERSION 7.
 
 ## Big files (read these in pieces)
