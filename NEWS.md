@@ -23,6 +23,10 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.14.0
+
+- Pets keeps a number of pet food in your bags. Butler can mail the extra to your bank alt. Turn it on in Settings, Pet page, Feeding.
+
 ## 1.13.1
 
 Fixes and changes:
