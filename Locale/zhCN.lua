@@ -364,6 +364,9 @@ L["Warns you in chat when you have fewer than %d food your pet will eat."] =
 L["Never Feed Buff Food:"] = "不喂增益食物："
 L["Food that gives a buff is always fed last. Tick this to never feed it."] =
     "带增益效果的食物总是最后才喂。勾选这里就永远不喂。"
+L["Food to Keep:"] = "保留食物："
+L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."] =
+    "保留这么多份宠物会吃的食物。Butler 会把多出的寄给你的银行角色。"
 L["Feed Button:"] = "喂食按钮："
 L["A Feed button above your quests while your pet is hungry."] =
     "宠物饿了时，在任务列表上方显示一个喂食按钮。"

@@ -214,6 +214,16 @@ error. Otherwise:
   not eat, buff food with "Never feed buff food" ticked, or bags not all
   read).
 
+- `keepAll`, `keep`, `extra` (Food to Keep, the owner said build it from
+  a mockup, 2026-11-20): only while "Food to Keep:" (Settings, Pet page,
+  FEEDING; `keepFood`, off unless ticked, and `keepFoodCount`, 40, 5 to
+  200; never rename either) is ticked and the bags are all read, and only
+  for carried food the pet is fed. `keepAll` is the number kept; it is
+  shared out best first (`Food.KeepPlan`, the food fed first is kept), so
+  `keep` is how many of this item stay and `extra` how many Butler may
+  mail to its bank alt. Buff food left out by Never Feed Buff Food has
+  neither. Butler never sells or deletes food for it.
+
 Butler asks once per bag item, a hundred in one frame, so the pet and the
 food (`Food:Latest`, itself kept between bag events) are read once and kept
 until `Food:BagsChanged` or the clock moves on (`Butler:Reading`); no timer.

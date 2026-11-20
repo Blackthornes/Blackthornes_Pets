@@ -10,6 +10,9 @@
 -- or the clock moves on, and the bags themselves come from Food:Latest,
 -- which keeps its own scan between bag events. Butler's Logic/Sisters.lua
 -- makes the call; if it changes, change that file too.
+--
+-- With Food to Keep ticked, `keepAll` is the number kept, `keep` how many
+-- of this item stay and `extra` how many Butler may mail to its bank alt.
 
 local _, ns = ...
 
@@ -69,8 +72,11 @@ function Butler:Reading()
                 carried[stack.itemID] = (carried[stack.itemID] or 0) + stack.count
             end
         end
+        -- Food to Keep: how many of each item stay, from a complete read only.
+        local keep = ns.Food:KeepCount()
+        local plan = (keep and not stacks.incomplete) and ns.Food.KeepPlan(stacks, keep) or nil
         reading = {
-            status = status, eats = eats, carried = carried,
+            status = status, eats = eats, carried = carried, keep = keep, plan = plan,
             -- Counts are known only from a complete read of the bags.
             complete = not stacks.incomplete,
             hours = Butler.Hours(stacks),
@@ -107,16 +113,26 @@ local function Answer(reading, itemID)
         and not (buff and ns.db and ns.db.neverFeedBuffFood == true) then
         count = 0
     end
+    -- Food to Keep: how many of this item stay (`keep`), and the rest
+    -- (`extra`), only for carried food the pet is fed and only when ticked.
+    local kept, extra
+    if eats and reading.plan and count and count > 0 then
+        kept = reading.plan[itemID] or 0
+        extra = math.max(count - kept, 0)
+    end
     return {
         eats = eats,
         buff = buff,
         hours = reading.hours,
         count = count,
+        keep = kept,
+        extra = extra,
+        keepAll = reading.keep,
     }
 end
 
 --- What Butler should know about an item for the character's pet: a table
---- { eats, buff, hours, count }, or nil when there is no hunter pet that
+--- { eats, buff, hours, count, keep, extra, keepAll }, or nil when there is no hunter pet that
 --- eats, or the item is not pet food. Never raises.
 function Butler:Advise(itemID)
     local ok, advice = pcall(function()
@@ -130,7 +146,8 @@ function Butler:Advise(itemID)
         end
         if not answer then return nil end
         -- A copy, so Butler cannot change what is kept.
-        return { eats = answer.eats, buff = answer.buff, hours = answer.hours, count = answer.count }
+        return { eats = answer.eats, buff = answer.buff, hours = answer.hours, count = answer.count,
+            keep = answer.keep, extra = answer.extra, keepAll = answer.keepAll }
     end)
     if ok then return advice end
     return nil
