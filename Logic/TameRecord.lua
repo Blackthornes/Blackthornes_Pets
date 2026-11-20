@@ -145,7 +145,7 @@ end
 local function PetNpcID()
     local guid = Call(_G.UnitGUID, "pet")
     if type(guid) ~= "string" then return nil end
-    local kind, npc = guid:match("^(%a+)%-%d+%-%d+%-%d+%-%d+%-(%d+)%-")
+    local kind, npc = guid:match("^(%a+)%-[^%-]+%-[^%-]+%-[^%-]+%-[^%-]+%-(%d+)%-")
     if kind == "Pet" or kind == "Creature" then return tonumber(npc) end
     return nil
 end

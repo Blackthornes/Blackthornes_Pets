@@ -36,6 +36,10 @@ suite.check("reads the creature id from a creature's GUID",
 suite.check("a pet's GUID is not a beast to tame",
     Taming:NpcID("Pet-0-4378-1-17-3099-01004C3A2B") == nil)
 suite.check("a player is not either", Taming:NpcID("Player-4378-0A1B2C3D") == nil)
+-- Forever 1.60.1 scrambles the realm, server and spawn parts of a
+-- creature's GUID (2026-11-20): the creature id is still read.
+suite.check("a scrambled creature GUID still gives its id",
+    Taming:NpcID("Creature-0-x9F3A-B7-C1D2-3099-Z0Q8W1") == 3099)
 suite.check("nothing is nothing", Taming:NpcID(nil) == nil)
 _G.issecretvalue = function(value) return value == "SECRET" end
 suite.check("a secret GUID is left alone", Taming:NpcID("SECRET") == nil)
