@@ -4,6 +4,14 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.13.1
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Trip line.** The trip line and stop dots now draw on the world map.
+- **Pet XP bar.** The Pet XP bar no longer mixes up two pets with the same name.
+- **Soulstone reminder.** The Soulstone reminder stays quiet when buffs can't be read.
+
 ## 1.13.0
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
