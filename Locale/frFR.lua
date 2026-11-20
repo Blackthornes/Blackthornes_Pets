@@ -365,6 +365,9 @@ L["Warns you in chat when you have fewer than %d food your pet will eat."] =
 L["Never Feed Buff Food:"] = "Jamais de nourriture à bonus :"
 L["Food that gives a buff is always fed last. Tick this to never feed it."] =
     "La nourriture qui donne un bonus est toujours donnée en dernier. Coche ici pour ne jamais la donner."
+L["Food to Keep:"] = "Nourriture à garder :"
+L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."] =
+    "Garde ce nombre de nourriture que mange ton familier. Butler envoie le reste à ton perso banque."
 L["Feed Button:"] = "Bouton Nourrir :"
 L["A Feed button above your quests while your pet is hungry."] =
     "Un bouton Nourrir au-dessus de tes quêtes quand ton familier a faim."

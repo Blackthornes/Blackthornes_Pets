@@ -100,6 +100,43 @@ local kept = Butler:Advise(3220)
 suite.check("buff food never fed has no count", kept and kept.buff and kept.count == nil)
 ns.db.neverFeedBuffFood = false
 
+-- Food to Keep: off by default, so nothing is extra.
+clock = clock + 5
+local plain = Butler:Advise(2287)
+suite.check("Food to Keep is off by default", ns.db.keepFood == false
+    and plain.keep == nil and plain.extra == nil and plain.keepAll == nil)
+
+-- Ticked, keeping 12: the food fed first is kept (10 jerky, then 2 of the
+-- 4 haunches); the rest is extra, buff food last.
+ns.Food:SetKeep(true)
+ns.Food:SetKeepCount(12)
+
+local j, h, s = Butler:Advise(117), Butler:Advise(2287), Butler:Advise(3220)
+suite.check("food fed first is all kept", j.keep == 10 and j.extra == 0 and j.keepAll == 12, j.keep, j.extra)
+suite.check("past the number is extra", h.keep == 2 and h.extra == 2, h.keep, h.extra)
+suite.check("buff food is extra first", s.keep == 0 and s.extra == 2, s.keep, s.extra)
+suite.check("food it won't eat has no keep", Butler:Advise(4536).extra == nil)
+
+-- Never feed buff food: buff food stays out of it.
+ns.db.neverFeedBuffFood = true
+clock = clock + 5
+local never = Butler:Advise(3220)
+suite.check("buff food never fed is not extra", never.extra == nil and never.keep == nil)
+ns.db.neverFeedBuffFood = false
+
+-- The number is kept within its range.
+ns.Food:SetKeepCount(1)
+suite.check("never below the lowest", ns.db.keepFoodCount == ns.Food.KEEP_MIN)
+ns.Food:SetKeepCount(100000)
+suite.check("never above the highest", ns.db.keepFoodCount == ns.Food.KEEP_MAX)
+local all = Butler:Advise(2287)
+suite.check("keeping more than carried keeps it all", all.keep == 4 and all.extra == 0)
+
+ns.Food:SetKeep(false)
+ns.db.keepFoodCount = 40
+clock = clock + 5
+suite.check("unticked, nothing is extra", Butler:Advise(2287).extra == nil)
+
 -- What Butler gets is a copy.
 Butler:Advise(117).count = 999
 suite.check("the kept answer cannot be changed", Butler:Advise(117).count == 10)

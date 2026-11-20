@@ -365,6 +365,9 @@ L["Warns you in chat when you have fewer than %d food your pet will eat."] =
 L["Never Feed Buff Food:"] = "Не давать еду с бонусом:"
 L["Food that gives a buff is always fed last. Tick this to never feed it."] =
     "Еда с бонусом всегда даётся последней. Поставь галочку, чтобы не давать её совсем."
+L["Food to Keep:"] = "Сколько еды хранить:"
+L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."] =
+    "Хранит столько еды, сколько ест твой питомец. Butler отправит остальное твоему банковскому персонажу."
 L["Feed Button:"] = "Кнопка кормления:"
 L["A Feed button above your quests while your pet is hungry."] =
     "Кнопка «Покормить» над заданиями, пока питомец голоден."

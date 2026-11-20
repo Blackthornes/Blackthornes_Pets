@@ -491,6 +491,50 @@ function Food:Scan(status)
     return stacks
 end
 
+-- Food to Keep (the owner, 2026-11-20): how many pieces of food stay in
+-- the bags when it is ticked. Butler mails the rest to its bank alt.
+Food.KEEP_DEFAULT, Food.KEEP_MIN, Food.KEEP_MAX, Food.KEEP_STEP = 40, 5, 200, 5
+
+--- The number of food to keep, or nil while Food to Keep is off.
+function Food:KeepCount()
+    if not (ns.db and ns.db.keepFood == true) then return nil end
+    local count = tonumber(ns.db.keepFoodCount) or Food.KEEP_DEFAULT
+    count = math.floor(count)
+    if count < Food.KEEP_MIN then count = Food.KEEP_MIN end
+    if count > Food.KEEP_MAX then count = Food.KEEP_MAX end
+    return count
+end
+
+--- Ticks Food to Keep on or off.
+function Food:SetKeep(on)
+    if not ns.db then return end
+    ns.db.keepFood = on and true or false
+    if ns.Butler then ns.Butler.kept = nil end
+end
+
+--- Sets how many food to keep (kept between KEEP_MIN and KEEP_MAX).
+function Food:SetKeepCount(count)
+    if not ns.db then return end
+    count = math.floor(tonumber(count) or Food.KEEP_DEFAULT)
+    ns.db.keepFoodCount = math.max(Food.KEEP_MIN, math.min(Food.KEEP_MAX, count))
+    if ns.Butler then ns.Butler.kept = nil end
+end
+
+--- Shares `keep` out over the stacks, best first, so the food the pet is
+--- fed first is the food kept: { [itemID] = how many of it are kept }.
+--- Every item in the stacks has an entry, 0 when none of it is kept.
+function Food.KeepPlan(stacks, keep)
+    local plan, left = {}, keep or 0
+    for _, stack in ipairs(stacks) do
+        if stack.itemID then
+            local take = math.min(stack.count or 0, math.max(left, 0))
+            plan[stack.itemID] = (plan[stack.itemID] or 0) + take
+            left = left - take
+        end
+    end
+    return plan
+end
+
 --- How many pieces of food the pet will eat, all stacks together.
 function Food:Count(stacks)
     local total = 0

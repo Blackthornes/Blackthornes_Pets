@@ -337,6 +337,12 @@ local DEFAULTS = {
     -- The warning when the bags hold little food the pet will eat.
     lowFoodWarning = true,
 
+    -- Food to Keep: how many pieces of food the pet eats stay in the bags;
+    -- Butler mails the rest to its bank alt (Logic/Food.lua, Food:KeepPlan).
+    -- Off unless ticked. Never rename either key.
+    keepFood = false,
+    keepFoodCount = 40,
+
     -- A warlock's soul shards on the Pet tab, and a warning at 2 or fewer
     -- (Logic/SoulShards.lua). Off unless ticked.
     soulShards = false,
