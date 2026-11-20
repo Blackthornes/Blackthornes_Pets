@@ -118,7 +118,6 @@ Lines: Feed|eating
 Check: The Feed buttons stay held while the pet is still eating. Try feeding
   in game: the fake game cannot show the eating buff's timing.
 Why: Still eating (2026-11) needed a game check after tests passed.
-  list stretched every Butler tab off the bottom of the screen (2026-11-18).
 
 ## Two values from one call
 Lines: local \w+, \w+ = [^,]+ and [\w.:]+\(
