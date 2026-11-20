@@ -367,6 +367,12 @@ Pet page ("Pet XP Bar:", "Bar Width:" 200 to 600, "Bar Height:" 6 to
 `petXPBarWords`, `petXPBarCheer` (nil reads as on), `petXPBarX`,
 `petXPBarY`. Tested in `tools/test_petxpbar.lua`.
 
+Two pets with one name are two pets (2026-11-20): sessions are still kept
+by name, but `PetXP:Session` starts one afresh when the read is another
+pet (`npcID` from the pet's GUID differs, or the level is lower or more
+than one higher than the last seen). A stable swap used to count as a gain
+and a level-up cheer. Tested in `tools/test_petxpbar.lua`.
+
 ## Healthstone and Soulstone reminder
 
 The owner said yes (2026-10-24): once a fight ends, a warlock who can make
@@ -379,6 +385,13 @@ the Pet page (`stoneReminder`, account wide, never rename it) and `/bpet
 stones [on|off]`. `Logic/Stones.lua` knows Classic's Healthstone items,
 Create Healthstone and Create Soulstone ranks and the Soulstone buffs by
 ID, reads all in a pcall, and saves nothing. Tested in
+`tools/test_stones.lua`.
+
+Buffs that can't be read are "not sure", never "no" (2026-11-20): where
+the game raises on a buff read or hides a buff's spell (a dungeon),
+`Stones:HasSoulstone` and `Stones:SoulstoneOnSomeone` answer nil unless a
+Soulstone was seen, and `Stones:Check` says nothing and leaves `soulTold`
+alone. It used to say "Your Soulstone isn't on anyone." there. Tested in
 `tools/test_stones.lua`.
 
 ## The one window

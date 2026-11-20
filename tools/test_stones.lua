@@ -63,6 +63,36 @@ Stones:Set(true)
 known = { [5699] = true }
 suite.check("an unreadable bag says nothing", Stones:Check() == 0)
 
+-- Buffs the game won't let us read are not a missing Soulstone: nothing is
+-- said until they can be read again.
+healthstones = 1
+known = { [5699] = true, [693] = true }
+_G.C_Item.GetItemCount = function(id) return id == 5509 and healthstones or 0 end
+Stones:Set(true)
+warned = {}
+suite.check("buffs that raise say nothing", Stones:Check() == 0 and #warned == 0, table.concat(warned, " | "))
+suite.check("and nobody knows if it is on someone", Stones:SoulstoneOnSomeone() == nil)
+local hidden = setmetatable({}, { __tostring = function() error("secret value") end })
+_G.issecretvalue = function(value) return value == hidden end
+_G.C_UnitAuras.GetAuraDataByIndex = function(unit, index)
+    if index == 1 then return { spellId = hidden, sourceUnit = hidden } end
+end
+suite.check("buffs with hidden spells say nothing", Stones:Check() == 0 and #warned == 0,
+    table.concat(warned, " | "))
+_G.C_UnitAuras.GetAuraDataByIndex = function(unit, index)
+    if unit == "player" and index == 1 then return { spellId = hidden, sourceUnit = hidden } end
+    if unit == "party1" and index == 1 then return { spellId = 20762, sourceUnit = "player" } end
+end
+suite.check("one seen among hidden ones still counts", Stones:SoulstoneOnSomeone() == true)
+_G.issecretvalue = nil
+_G.C_UnitAuras.GetAuraDataByIndex = function(unit, index)
+    local list = buffs[unit] or {}
+    return list[index]
+end
+buffs = {}
+suite.check("readable again and gone, one note", Stones:Check() == 1
+    and warned[1] == "Your Soulstone isn't on anyone.", table.concat(warned, " | "))
+
 -- The command.
 ns.commands.stones.fn("off")
 suite.check("/bpet stones off", ns.db.stoneReminder == false)

@@ -37,6 +37,15 @@ local function Now()
     return (type(GetTime) == "function" and GetTime()) or 0
 end
 
+-- The creature the pet is, from its GUID, or nil when the game won't say.
+local function NpcID()
+    local guid = Call(_G.UnitGUID, "pet")
+    if type(guid) ~= "string" then return nil end
+    local kind, npc = guid:match("^(%a+)%-%d+%-%d+%-%d+%-%d+%-(%d+)%-")
+    if kind == "Pet" or kind == "Creature" then return tonumber(npc) end
+    return nil
+end
+
 --- The pet's XP now, or nil when there is no hunter pet that earns any.
 --- { name, level, xp, max, playerLevel, capped }
 function PetXP:Read()
@@ -51,7 +60,7 @@ function PetXP:Read()
     local level = Num(Call(UnitLevel, "pet")) or 0
     local playerLevel = Num(Call(UnitLevel, "player")) or level
     return {
-        name = name, level = level, xp = xp, max = max,
+        name = name, level = level, xp = xp, max = max, npcID = NpcID(),
         playerLevel = playerLevel,
         capped = playerLevel > 0 and level >= playerLevel,
     }
@@ -67,19 +76,29 @@ local function KeyOf(read)
     return read.name or "?"
 end
 
---- The session for this pet, made when first seen.
+-- Is this read another pet than the session's? Two pets can share a name.
+-- A different creature settles it; so does a level that is lower, or more
+-- than one higher, than the last one seen.
+local function AnotherPet(s, read)
+    if s.npcID and read.npcID and s.npcID ~= read.npcID then return true end
+    return read.level < s.lastLevel or read.level > s.lastLevel + 1
+end
+
+--- The session for this pet, made when first seen, and made afresh when
+--- another pet of the same name is out.
 function PetXP:Session(read)
     local key = KeyOf(read)
     local s = self.sessions[key]
-    if not s then
+    if not s or AnotherPet(s, read) then
         s = {
             started = Now(), startFraction = read.xp / read.max,
             startLevel = read.level, gained = 0, kills = 0, lastGain = nil,
             lastXP = read.xp, lastLevel = read.level, lastMax = read.max,
-            levelStarted = nil,
+            levelStarted = nil, npcID = read.npcID,
         }
         self.sessions[key] = s
     end
+    s.npcID = s.npcID or read.npcID
     return s
 end
 
