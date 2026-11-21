@@ -340,7 +340,7 @@ function ShardTracker:Paint(slot, data, index)
         textR, textG, textB = unpack(self.RED)
         slot.edge:SetColorTexture(self.RED[1], self.RED[2], self.RED[3], 0.9)
     elseif data.empty then
-        textR, textG, textB = 0.55, 0.57, 0.61
+        textR, textG, textB = ns.Theme.Unpack("muted")
         textAlpha = 0.6
         slot.edge:SetColorTexture(ns.Theme.Unpack("border", 0.6))
     else
