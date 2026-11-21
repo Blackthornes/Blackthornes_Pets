@@ -730,10 +730,10 @@ end
 local function SkillHeading(card, left, right)
     local head = CreateFrame("Frame", nil, card)
     head:SetHeight(SKILL_HEAD)
-    local name = Theme.CreateLabel(head, "tiny", "muted")
+    local name = Theme.CreateLabel(head, "tiny", "heading")
     name:SetPoint("LEFT", 12, -1)
     name:SetText(left)
-    local value = Theme.CreateLabel(head, "tiny", "muted", "RIGHT")
+    local value = Theme.CreateLabel(head, "tiny", "heading", "RIGHT")
     value:SetPoint("RIGHT", -10, -1)
     value:SetText(right)
     head.left, head.right = name, value

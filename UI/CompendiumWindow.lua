@@ -343,7 +343,7 @@ function CompendiumUI:BuildHeadings()
         local heading = CreateFrame("Button", nil, frame)
         heading:SetSize(column.width, 18)
         heading:SetPoint("TOPLEFT", PADDING + column.x, self.barBottom)
-        local label = Theme.CreateLabel(heading, "tiny", "muted")
+        local label = Theme.CreateLabel(heading, "tiny", "heading")
         label:SetPoint("LEFT", 0, 0)
         label:SetText(column.label:upper())
         heading.label = label
@@ -742,7 +742,7 @@ function CompendiumUI:PaintHeadings()
     local sort = o.sort or "name"
     for _, heading in ipairs(self.headings or {}) do
         local on = heading.sortKey == sort
-        heading.label:SetTextColor(Theme.Unpack(on and "accent" or "muted"))
+        heading.label:SetTextColor(Theme.Unpack(on and "text" or "heading"))
         if heading.arrow then
             heading.arrow:SetShown(on)
             if o.descending then heading.arrow:SetTexCoord(0, 1, 1, 0) else heading.arrow:SetTexCoord(0, 1, 0, 1) end
