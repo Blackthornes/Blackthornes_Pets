@@ -1323,3 +1323,17 @@ arrows, bars, trackers, the Zone Board and similar pieces get none.
 ## Scrambled GUIDs (Forever 1.60.1)
 
 Forever 1.60.1 (a hotfix, announced 2026-11-20) makes GetRealmName, GetRealmID and the C_BattleNet realm fields hand back "" or 0, and scrambles the realm, server and spawn parts of Creature, Vehicle, Pet and GameObject GUIDs (player GUIDs are not named). Every reader of a mob, vendor or trainer ID from a GUID takes any text in parts 2 to 5 (`[^%-]+`), never `%d+`; a new one must too. Readers here: `Taming:NpcID`, `PetXP`'s and `TameRecord`'s `NpcID`. Tested in `tools/test_taming.lua`.
+
+## Item rows answer the game's clicks
+
+The owner said build it (2026-11-21, from the UI pass mockup 5): every item
+row answers the clicks the game's bags do. `Widgets.ItemClick(itemID, link)`
+in `UI/Widgets.lua` (the same helper in all five addons): Shift-click
+(`IsModifiedClick("CHATLINK")`) puts the link in the chat box only while one
+is open (`Widgets.ChatBoxOpen`); Ctrl-click (`DRESSUP`) tries gear on. The
+game's `HandleModifiedItemClick` does the work where it is there, else
+`ChatEdit_InsertLink` / `DressUpItemLink`, all in pcall. `Widgets.ItemLink`
+and `Widgets.ItemTooltip(owner, id, link)` go with it. Here: the Pet tab's
+food line (`UI.foodLine`, `UI.foodItemID`), with the game's tooltip on hover.
+The Shard Tracker's stones are secure use buttons and are left alone.
+Tested in `tools/test_itemclicks.lua`.
