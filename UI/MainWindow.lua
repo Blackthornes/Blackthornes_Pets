@@ -626,6 +626,19 @@ function UI:BuildStatus()
     foodSub:SetPoint("RIGHT", line, "RIGHT", -8, 0)
     self.foodIcon, self.foodCount, self.foodName = icon, count, foodName
     self.rows.food = { value = foodSub }
+    self.foodLine = line
+
+    -- The food is an item like any in your bags: the game's own tooltip
+    -- under the mouse, Shift-click links it in chat, Ctrl-click tries it on.
+    line:EnableMouse(true)
+    line:SetScript("OnEnter", function(owner)
+        local itemID = UI.foodItemID
+        if itemID and Widgets.ItemTooltip(owner, itemID) then GameTooltip:Show() end
+    end)
+    line:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+    line:SetScript("OnMouseUp", function(_, button)
+        if button == "LeftButton" and UI.foodItemID then Widgets.ItemClick(UI.foodItemID) end
+    end)
 
     -- How long the food lasts, as a gold bar and the words under it.
     local lasts = CreateFrame("Frame", nil, food)
@@ -1377,6 +1390,7 @@ function UI:ShowFood(status, top)
     local stacks = ns.Food:Latest(status)
     local best = stacks[1]
     local total = ns.Food:Count(stacks)
+    self.foodItemID = best and tonumber(best.itemID) or nil
     self.foodIcon:SetShown(best ~= nil)
     if best then
         local icon = ItemIcon(best.itemID)
