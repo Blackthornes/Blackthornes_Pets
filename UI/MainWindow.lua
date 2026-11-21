@@ -1619,6 +1619,12 @@ function UI:Hide()
     if self.frame then self.frame:Hide() end
 end
 
+-- The window's key, under Options, Keybindings, AddOns (Bindings.xml).
+-- No key is set for the player. It does what /bpet on its own does, so
+-- with the one window on it opens or closes this addon's tab.
+_G.BINDING_HEADER_BLACKTHORNESPETS = "Blackthornes Pets"
+_G.BINDING_NAME_BLACKTHORNESPETS_TOGGLE = L["Open or close the window"]
+
 function UI:Toggle()
     if self.frame and self.frame:IsShown() then
         self:Hide()
