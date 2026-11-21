@@ -2,6 +2,9 @@
      Names are set in UI/FeedKey.lua. The client loads this file by itself;
      it is not listed in the TOC. -->
 <Bindings>
-    <Binding name="CLICK BlackthornesPetsFeedKey:LeftButton" header="BLACKTHORNESPETS" category="ADDONS"/>
+    <Binding name="BLACKTHORNESPETS_TOGGLE" header="BLACKTHORNESPETS" category="ADDONS">
+        if BlackthornesPets and BlackthornesPets.UI then BlackthornesPets.UI:Toggle() end
+    </Binding>
+    <Binding name="CLICK BlackthornesPetsFeedKey:LeftButton" category="ADDONS"/>
     <Binding name="CLICK BlackthornesPetsDismissKey:LeftButton" category="ADDONS"/>
 </Bindings>
