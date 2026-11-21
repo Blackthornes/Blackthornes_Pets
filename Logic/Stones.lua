@@ -28,6 +28,12 @@ Stones.SOUL_SPELLS = { 693, 20752, 20755, 20756, 20757 }
 Stones.FIRESTONES = { 1254, 13699, 13700, 13701 }
 -- Create Firestone, every rank (in the Forever client's tables).
 Stones.FIRE_SPELLS = { 6366, 17951, 17952, 17953 }
+-- Spellstones, every rank (Spellstone to Major). Forever's 5522 is seen in
+-- the owner's saved item table (level 36, used from the bags: it puts
+-- Shadow on your weapon); the higher ranks keep Classic's IDs.
+Stones.SPELLSTONES = { 5522, 13602, 13603 }
+-- Create Spellstone, every rank (in the Forever client's tables).
+Stones.SPELL_SPELLS = { 2362, 17727, 17728 }
 -- The off hand, where a Firestone is held.
 Stones.OFF_HAND = 17
 -- Soulstone Resurrection, the buff, every rank.
@@ -103,6 +109,22 @@ function Stones:SoulstoneCount() return self.CountOf(self.SOULSTONES) end
 --- Firestones in the bags and the one held, every rank together.
 function Stones:FirestoneCount() return self.CountOf(self.FIRESTONES) end
 
+--- Spellstones in the bags, every rank together.
+function Stones:SpellstoneCount() return self.CountOf(self.SPELLSTONES) end
+
+--- Can this stone be held in the off hand? Classic's Firestone and
+--- Spellstone are; Forever's are used from the bags instead (seen
+--- 2026-11-19: both are INVTYPE_NON_EQUIP_IGNORE there). True when the
+--- client won't say, as before.
+function Stones.CanHold(id)
+    local fn = C_Item and C_Item.GetItemInfoInstant or _G.GetItemInfoInstant
+    if type(fn) ~= "function" then return true end
+    local ok, _, _, _, equipLoc = pcall(fn, id)
+    equipLoc = ok and Plain(equipLoc) or nil
+    if type(equipLoc) ~= "string" or equipLoc == "" then return true end
+    return equipLoc == "INVTYPE_HOLDABLE"
+end
+
 --- The Firestone held in the off hand, its item ID, or nil.
 function Stones:HeldFirestone()
     if type(_G.GetInventoryItemID) ~= "function" then return nil end
@@ -155,32 +177,45 @@ function Stones.SpellName(id)
     return nil
 end
 
--- One buff on a unit, as a plain table, or nil.
+-- One buff on a unit, as a plain table, or nil past the last one. The
+-- second return is true when the game would not let the buffs be read (a
+-- call that raised, as in a dungeon): then nil is not "no more buffs".
 local function AuraAt(unit, index)
     if C_UnitAuras and type(C_UnitAuras.GetAuraDataByIndex) == "function" then
         local ok, aura = pcall(C_UnitAuras.GetAuraDataByIndex, unit, index, "HELPFUL")
-        if not ok or type(aura) ~= "table" then return nil end
+        if not ok then return nil, true end
+        if type(aura) ~= "table" then return nil end
         local okId, id = pcall(function() return Plain(aura.spellId) end)
         local okFrom, from = pcall(function() return Plain(aura.sourceUnit) end)
         return { spellId = okId and id or nil, source = okFrom and from or nil }
     end
     if type(_G.UnitBuff) == "function" then
         local ok, name, _, _, _, _, _, source, _, _, id = pcall(_G.UnitBuff, unit, index)
-        if not ok or Plain(name) == nil then return nil end
+        if not ok then return nil, true end
+        if Plain(name) == nil then return nil end
         return { spellId = Plain(id), source = Plain(source) }
     end
     return nil
 end
 
--- Does this unit carry the warlock's own Soulstone?
+-- Does this unit carry the warlock's own Soulstone? True, false, or nil
+-- when a buff could not be read and none seen was the Soulstone: not sure,
+-- which is not "no".
 function Stones:HasSoulstone(unit)
+    local unsure = false
     for index = 1, self.MOST_AURAS do
-        local aura = AuraAt(unit, index)
-        if not aura then return false end
-        if self.SOUL_BUFFS[aura.spellId] and (aura.source == nil or aura.source == "player") then
+        local aura, hidden = AuraAt(unit, index)
+        if not aura then
+            if hidden then return nil end
+            break
+        end
+        if aura.spellId == nil then
+            unsure = true
+        elseif self.SOUL_BUFFS[aura.spellId] and (aura.source == nil or aura.source == "player") then
             return true
         end
     end
+    if unsure then return nil end
     return false
 end
 
@@ -207,9 +242,17 @@ function Stones:SoulstoneHolder()
     return nil
 end
 
---- Is the Soulstone on anyone?
+--- Is the Soulstone on anyone? True, false, or nil when it was seen on
+--- nobody and someone's buffs could not be read.
 function Stones:SoulstoneOnSomeone()
-    return self:SoulstoneHolder() ~= nil
+    local unsure = false
+    for _, unit in ipairs(self.Units()) do
+        local has = self:HasSoulstone(unit)
+        if has then return true end
+        if has == nil then unsure = true end
+    end
+    if unsure then return nil end
+    return false
 end
 
 --- The whole name of whoever carries the Soulstone, or nil.
@@ -258,8 +301,11 @@ function Stones:Check()
         end
     end
     if self.Knows(self.SOUL_SPELLS) then
-        if self:SoulstoneOnSomeone() then
+        local onSomeone = self:SoulstoneOnSomeone()
+        if onSomeone then
             self.soulTold = nil
+        elseif onSomeone == nil then
+            -- The buffs can't be read here. Say nothing until they can.
         elseif not self.soulTold then
             self.soulTold = true
             Tell(L["Your Soulstone isn't on anyone."])

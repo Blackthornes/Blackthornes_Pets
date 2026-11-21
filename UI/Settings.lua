@@ -140,6 +140,9 @@ function SettingsUI:Build()
             if not folded then SettingsUI:Refresh() end
         end })
     end
+    -- And left of it, the swap gem: it joins every Blackthornes addon into
+    -- the one window (UI/SharedWindow.lua).
+    if ns.SharedWindow and ns.SharedWindow.AddSwap then ns.SharedWindow.AddSwap(frame, "pets") end
 
     frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
     frame:SetScript("OnDragStop", function(self)
@@ -430,6 +433,28 @@ function SettingsUI:BuildPages()
     end, false)
     controls.neverFeedBuffFood:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    -- Food to Keep: the tick and its number share a row; Butler mails the
+    -- rest to its bank alt (Logic/Food.lua, Logic/Butler.lua).
+    local keepFoodRow = pages:Row("pet", 1, L["Food to Keep:"],
+        L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."])
+
+    controls.keepFood = Widgets.CreateCheckbox(keepFoodRow, L["On"], function(checked)
+        ns.Food:SetKeep(checked)
+    end, false)
+    controls.keepFood:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    controls.keepFoodCount = Widgets.CreateStepper(keepFoodRow, {
+        min = ns.Food.KEEP_MIN, max = ns.Food.KEEP_MAX,
+        step = ns.Food.KEEP_STEP, value = ns.Food.KEEP_DEFAULT,
+        onChange = function(value) ns.Food:SetKeepCount(value) end,
+    })
+    if CONTROL_X + controls.keepFood:GetWidth() + gap + controls.keepFoodCount:GetWidth() <= COLUMN_WIDTH then
+        controls.keepFoodCount:SetPoint("LEFT", controls.keepFood, "RIGHT", gap, 0)
+    else
+        controls.keepFoodCount:SetPoint("TOPLEFT", CONTROL_X, -24)
+        GrowRow(keepFoodRow, 22)
+    end
+
     local quickFeedRow = pages:Row("pet", 1, L["Feed Button:"],
         L["A Feed button above your quests while your pet is hungry."])
 
@@ -573,7 +598,7 @@ function SettingsUI:BuildPages()
     local function BarOn() return ns.db ~= nil and ns.db.petXPBar == true end
     local function TrackerOn() return ns.db ~= nil and ns.db.shardTracker == true end
     self.petRules = {}
-    for _, item in ipairs({ feedingSection, feedRow, lowFoodRow, buffFoodRow, quickFeedRow,
+    for _, item in ipairs({ feedingSection, feedRow, lowFoodRow, buffFoodRow, keepFoodRow, quickFeedRow,
         xpSection, xpBarRow, tamingSection, tamingRow }) do
         self.petRules[item] = { class = "HUNTER" }
     end
@@ -779,6 +804,8 @@ function SettingsUI:Refresh()
     controls.feedWarnOnlyUnhappy:SetChecked(ns.db.feedWarnOnlyUnhappy == true)
     controls.lowFoodWarning:SetChecked(ns.db.lowFoodWarning ~= false)
     controls.neverFeedBuffFood:SetChecked(ns.db.neverFeedBuffFood == true)
+    controls.keepFood:SetChecked(ns.db.keepFood == true)
+    controls.keepFoodCount:SetValue(tonumber(ns.db.keepFoodCount) or ns.Food.KEEP_DEFAULT, true)
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
     controls.feedButtonPlace:SetValue(ns.FeedButton:OnPetFrame() and 1 or 2, true)
     controls.petXPBarPlace:SetValue(ns.PetXPBar:OnPetFrame() and 1 or 2, true)

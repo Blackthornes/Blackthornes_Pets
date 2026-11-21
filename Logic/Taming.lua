@@ -59,7 +59,7 @@ function Taming:NpcID(guid)
     guid = Plain(guid)
     if type(guid) ~= "string" then return nil end
     local ok, id = pcall(function()
-        local kind, npc = guid:match("^(%a+)%-%d+%-%d+%-%d+%-%d+%-(%d+)%-")
+        local kind, npc = guid:match("^(%a+)%-[^%-]+%-[^%-]+%-[^%-]+%-[^%-]+%-(%d+)%-")
         if kind == "Creature" then return tonumber(npc) end
         return nil
     end)

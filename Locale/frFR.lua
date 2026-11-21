@@ -365,6 +365,9 @@ L["Warns you in chat when you have fewer than %d food your pet will eat."] =
 L["Never Feed Buff Food:"] = "Jamais de nourriture à bonus :"
 L["Food that gives a buff is always fed last. Tick this to never feed it."] =
     "La nourriture qui donne un bonus est toujours donnée en dernier. Coche ici pour ne jamais la donner."
+L["Food to Keep:"] = "Nourriture à garder :"
+L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."] =
+    "Garde ce nombre de nourriture que mange ton familier. Butler envoie le reste à ton perso banque."
 L["Feed Button:"] = "Bouton Nourrir :"
 L["A Feed button above your quests while your pet is hungry."] =
     "Un bouton Nourrir au-dessus de tes quêtes quand ton familier a faim."
@@ -493,6 +496,12 @@ L["from your Beast Training"] = "de ton Dressage des bêtes"
 -- The fold gem beside a window's close gem (2026-10-24)
 L["Collapse this window"] = "Replier cette fenêtre"
 L["Expand this window"] = "Déplier cette fenêtre"
+L["Split Into Own Windows"] = "Séparer en fenêtres"
+L["Gives each addon its own window again."] = "Redonne à chaque addon sa propre fenêtre."
+L["You can join them back with this same button."] = "Tu peux les réunir avec ce même bouton."
+L["Join Into One Window"] = "Réunir en une fenêtre"
+L["Puts every Blackthornes addon in one window, with a button for each down the side."] = "Met tous les addons Blackthornes dans une seule fenêtre, avec un bouton pour chacun sur le côté."
+L["You can split them again with this same button."] = "Tu peux les séparer à nouveau avec ce même bouton."
 -- Soul shards (2026-10-24)
 L["1 soul shard"] = "1 fragment d'âme"
 L["%d soul shards"] = "%d fragments d'âme"
@@ -537,6 +546,7 @@ L["Soul Shards"] = "Fragments d'âme"
 L["Healthstone"] = "Pierre de soins"
 L["Soulstone"] = "Pierre d'âme"
 L["Firestone"] = "Pierre de feu"
+L["Spellstone"] = "Pierre de sort"
 L["Click to make one."] = "Clique pour en créer une."
 L["Click to use it."] = "Clique pour l'utiliser."
 L["Click to hold it in your off hand."] = "Clique pour la tenir en main gauche."

@@ -88,6 +88,17 @@ slots = Tracker:Slots()
 suite.check("Firestone joins once learned", Keys(slots) == "shards,health,fire,soul", Keys(slots))
 suite.check("no Firestone is empty", slots[3].count == 0 and slots[3].empty and not slots[3].held)
 
+-- Spellstone once Create Spellstone is learned, after the Firestone (the
+-- owner's warlock had one and no slot for it, 2026-11-19).
+known[2362] = true
+slots = Tracker:Slots()
+suite.check("Spellstone joins once learned", Keys(slots) == "shards,health,fire,spell,soul", Keys(slots))
+suite.check("no Spellstone is empty", slots[4].count == 0 and slots[4].empty)
+counts[5522] = 1
+slots = Tracker:Slots()
+suite.check("one Spellstone counts", slots[4].count == 1 and not slots[4].empty)
+counts[5522] = 0
+
 -- No red gems on the ends.
 local source = io.open(lfs_cwd .. "/UI/ShardTracker.lua"):read("*a")
 suite.check("no red gems", source:find("CloseGem", 1, true) == nil)
@@ -118,6 +129,28 @@ _G.GetInventoryItemID = function(_, slot) return slot == 17 and 13699 or nil end
 act = Act("fire")
 suite.check("holding your only one does nothing", act.type == nil and act.words == "You are holding one.")
 _G.GetInventoryItemID = nil
+-- Forever's Firestone and Spellstone are used from the bags, not held.
+local equipLoc = {}
+_G.C_Item.GetItemInfoInstant = function(id) return id, nil, nil, equipLoc[id] or "INVTYPE_HOLDABLE" end
+equipLoc[13699] = "INVTYPE_NON_EQUIP_IGNORE"
+act = Act("fire")
+suite.check("a Firestone that can't be held is used", act.type == "item" and act.item == "item:13699", tostring(act.item))
+counts[13699] = 0
+act = Act("spell")
+suite.check("no Spellstone makes one", act.type == "spell" and act.spell == "Spell 2362", tostring(act.spell))
+known[17727] = true
+act = Act("spell")
+suite.check("with the best rank known", act.spell == "Spell 17727", tostring(act.spell))
+counts[5522] = 1
+equipLoc[5522] = "INVTYPE_NON_EQUIP_IGNORE"
+act = Act("spell")
+suite.check("a Spellstone in the bags is used", act.type == "item" and act.item == "item:5522"
+    and act.words == "Click to use it.", tostring(act.item))
+equipLoc[5522] = nil
+act = Act("spell")
+suite.check("a Spellstone that can be held is held", act.type == "macro" and act.macrotext:find("^/equip ") ~= nil, tostring(act.macrotext))
+_G.C_Item.GetItemInfoInstant = nil
+counts[5522] = 0
 counts[5512] = 1
 
 -- The buttons: set out of combat, waiting in a fight.

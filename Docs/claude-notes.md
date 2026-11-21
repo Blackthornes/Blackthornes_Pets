@@ -214,6 +214,16 @@ error. Otherwise:
   not eat, buff food with "Never feed buff food" ticked, or bags not all
   read).
 
+- `keepAll`, `keep`, `extra` (Food to Keep, the owner said build it from
+  a mockup, 2026-11-20): only while "Food to Keep:" (Settings, Pet page,
+  FEEDING; `keepFood`, off unless ticked, and `keepFoodCount`, 40, 5 to
+  200; never rename either) is ticked and the bags are all read, and only
+  for carried food the pet is fed. `keepAll` is the number kept; it is
+  shared out best first (`Food.KeepPlan`, the food fed first is kept), so
+  `keep` is how many of this item stay and `extra` how many Butler may
+  mail to its bank alt. Buff food left out by Never Feed Buff Food has
+  neither. Butler never sells or deletes food for it.
+
 Butler asks once per bag item, a hundred in one frame, so the pet and the
 food (`Food:Latest`, itself kept between bag events) are read once and kept
 until `Food:BagsChanged` or the clock moves on (`Butler:Reading`); no timer.
@@ -367,6 +377,12 @@ Pet page ("Pet XP Bar:", "Bar Width:" 200 to 600, "Bar Height:" 6 to
 `petXPBarWords`, `petXPBarCheer` (nil reads as on), `petXPBarX`,
 `petXPBarY`. Tested in `tools/test_petxpbar.lua`.
 
+Two pets with one name are two pets (2026-11-20): sessions are still kept
+by name, but `PetXP:Session` starts one afresh when the read is another
+pet (`npcID` from the pet's GUID differs, or the level is lower or more
+than one higher than the last seen). A stable swap used to count as a gain
+and a level-up cheer. Tested in `tools/test_petxpbar.lua`.
+
 ## Healthstone and Soulstone reminder
 
 The owner said yes (2026-10-24): once a fight ends, a warlock who can make
@@ -379,6 +395,13 @@ the Pet page (`stoneReminder`, account wide, never rename it) and `/bpet
 stones [on|off]`. `Logic/Stones.lua` knows Classic's Healthstone items,
 Create Healthstone and Create Soulstone ranks and the Soulstone buffs by
 ID, reads all in a pcall, and saves nothing. Tested in
+`tools/test_stones.lua`.
+
+Buffs that can't be read are "not sure", never "no" (2026-11-20): where
+the game raises on a buff read or hides a buff's spell (a dungeon),
+`Stones:HasSoulstone` and `Stones:SoulstoneOnSomeone` answer nil unless a
+Soulstone was seen, and `Stones:Check` says nothing and leaves `soulTold`
+alone. It used to say "Your Soulstone isn't on anyone." there. Tested in
 `tools/test_stones.lua`.
 
 ## The one window
@@ -1265,6 +1288,41 @@ TSM Sold a Day). The same in every addon; keep them the same.
 - **Three tries, then ask.** A check still failing after three rounds stops
   the work. Never skip, loosen or rerun a test to get green.
 
+## The swap gem (One Window toggle, 2026-11-19)
+
+The owner asked for a toggle on each window to swap between the one window
+and each addon's own windows, and said build it from the mockup
+(2026-11-19). A gold gem sits left of the fold gem on every real
+Blackthornes window, so the gems run swap, fold, close. On the one window it
+shows two panes and splits ("Split Into Own Windows"); on an own window it
+shows one pane with a rail line and joins ("Join Into One Window"). Floating
+arrows, bars, trackers, the Zone Board and similar pieces get none.
+
+- `UI/SharedWindow.lua` (FILE_VERSION 14, the same in all five):
+  `SharedWindow.AddSwap(frame, key)` puts the gem on a dressed window's
+  trim (so it hides with the trim inside the one window); `key` nil is the
+  one window. `SharedWindow.Swap(key, join)` is its click. Split: the
+  addon showing is asked its tab, `SetOn(false)` closes the one window,
+  then the addon opens on its own on that tab. Join: every addon closes its
+  own windows, `SetOn(true)`, then the clicked addon opens in the one
+  window on the same tab. In a fight nothing moves; it runs at
+  PLAYER_REGEN_ENABLED (`hub.swapAfterFight`).
+- Same `oneWindow` / `oneWindowAt` keys, no new setting or key. The "One
+  Window:" box reads `On()` as Settings refreshes, so it follows.
+- Each host gives three optional calls beside `enter` and `leave`:
+  `tab()`, `show(tab)` (opens in the one window or its own as the choice
+  now stands, through its Route) and `hide()`. Without them a split falls
+  back to `open` and a join to `SharedWindow.Open(key)`, so an older
+  copy still works.
+- Here: the Pet, Compendium and Settings windows (`PetsTabs` in `UI/PetsTabs.lua`) carry the join gem.
+- Words: the six tooltip strings in every locale (deDE from the mockup).
+- Tested in `tools/test_swapgem.lua` (the same in all five) and
+  `tools/test_swapwindows.lua` (this addon's windows in the fake game).
+  Not yet seen in game.
+
+## Scrambled GUIDs (Forever 1.60.1)
+
+Forever 1.60.1 (a hotfix, announced 2026-11-20) makes GetRealmName, GetRealmID and the C_BattleNet realm fields hand back "" or 0, and scrambles the realm, server and spawn parts of Creature, Vehicle, Pet and GameObject GUIDs (player GUIDs are not named). Every reader of a mob, vendor or trainer ID from a GUID takes any text in parts 2 to 5 (`[^%-]+`), never `%d+`; a new one must too. Readers here: `Taming:NpcID`, `PetXP`'s and `TameRecord`'s `NpcID`. Tested in `tools/test_taming.lua`.
 ## Warm glass (2026-11-21)
 
 The owner said build it from the UI pass mockup (ui-pass-1-warm-glass): the

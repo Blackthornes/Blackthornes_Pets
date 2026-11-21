@@ -4,6 +4,38 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.14.1
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Mob drops.** Kills go to the right mob again.
+
+## 1.14.0
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Food to Keep.** Settings, Pet page, Feeding: tick Food to Keep and pick how many pet food to hold on to. It starts off. Butler mails the extra to your bank alt.
+
+## 1.13.1
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Trip line.** The trip line and stop dots now draw on the world map.
+- **Pet XP bar.** The Pet XP bar no longer mixes up two pets with the same name.
+- **Soulstone reminder.** The Soulstone reminder stays quiet when buffs can't be read.
+
+## 1.13.0
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **One Window switch.** Every Blackthornes window has a gold gem on its title bar. It swaps between the one window and each addon's own windows.
+
+## 1.12.1
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Shard Tracker.** The Spellstone now shows on the bar next to Firestone. Clicking Firestone uses the one in your bags.
+
 ## 1.12.0
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.

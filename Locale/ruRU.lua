@@ -365,6 +365,9 @@ L["Warns you in chat when you have fewer than %d food your pet will eat."] =
 L["Never Feed Buff Food:"] = "Не давать еду с бонусом:"
 L["Food that gives a buff is always fed last. Tick this to never feed it."] =
     "Еда с бонусом всегда даётся последней. Поставь галочку, чтобы не давать её совсем."
+L["Food to Keep:"] = "Сколько еды хранить:"
+L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."] =
+    "Хранит столько еды, сколько ест твой питомец. Butler отправит остальное твоему банковскому персонажу."
 L["Feed Button:"] = "Кнопка кормления:"
 L["A Feed button above your quests while your pet is hungry."] =
     "Кнопка «Покормить» над заданиями, пока питомец голоден."
@@ -493,6 +496,12 @@ L["from your Beast Training"] = "из твоей дрессировки"
 -- The fold gem beside a window's close gem (2026-10-24)
 L["Collapse this window"] = "Свернуть это окно"
 L["Expand this window"] = "Развернуть это окно"
+L["Split Into Own Windows"] = "Разделить на отдельные окна"
+L["Gives each addon its own window again."] = "Снова даёт каждому аддону своё окно."
+L["You can join them back with this same button."] = "Этой же кнопкой ты можешь снова их объединить."
+L["Join Into One Window"] = "Объединить в одно окно"
+L["Puts every Blackthornes addon in one window, with a button for each down the side."] = "Собирает все аддоны Blackthornes в одно окно, с кнопкой для каждого сбоку."
+L["You can split them again with this same button."] = "Этой же кнопкой ты можешь снова их разделить."
 -- Soul shards (2026-10-24)
 L["1 soul shard"] = "Осколки души: 1"
 L["%d soul shards"] = "Осколки души: %d"
@@ -537,6 +546,7 @@ L["Soul Shards"] = "Осколки души"
 L["Healthstone"] = "Камень здоровья"
 L["Soulstone"] = "Камень души"
 L["Firestone"] = "Камень огня"
+L["Spellstone"] = "Камень чар"
 L["Click to make one."] = "Нажми, чтобы создать."
 L["Click to use it."] = "Нажми, чтобы использовать."
 L["Click to hold it in your off hand."] = "Нажми, чтобы взять в левую руку."

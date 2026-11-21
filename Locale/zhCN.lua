@@ -364,6 +364,9 @@ L["Warns you in chat when you have fewer than %d food your pet will eat."] =
 L["Never Feed Buff Food:"] = "不喂增益食物："
 L["Food that gives a buff is always fed last. Tick this to never feed it."] =
     "带增益效果的食物总是最后才喂。勾选这里就永远不喂。"
+L["Food to Keep:"] = "保留食物："
+L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."] =
+    "保留这么多份宠物会吃的食物。Butler 会把多出的寄给你的银行角色。"
 L["Feed Button:"] = "喂食按钮："
 L["A Feed button above your quests while your pet is hungry."] =
     "宠物饿了时，在任务列表上方显示一个喂食按钮。"
@@ -492,6 +495,12 @@ L["from your Beast Training"] = "来自你的野兽训练"
 -- The fold gem beside a window's close gem (2026-10-24)
 L["Collapse this window"] = "收起这个窗口"
 L["Expand this window"] = "展开这个窗口"
+L["Split Into Own Windows"] = "拆分为独立窗口"
+L["Gives each addon its own window again."] = "让每个插件重新拥有自己的窗口。"
+L["You can join them back with this same button."] = "用同一个按钮可以把它们重新合并。"
+L["Join Into One Window"] = "合并为一个窗口"
+L["Puts every Blackthornes addon in one window, with a button for each down the side."] = "把所有 Blackthornes 插件放进一个窗口，侧边每个插件都有一个按钮。"
+L["You can split them again with this same button."] = "用同一个按钮可以再次把它们拆开。"
 -- Soul shards (2026-10-24)
 L["1 soul shard"] = "1 个灵魂碎片"
 L["%d soul shards"] = "%d 个灵魂碎片"
@@ -536,6 +545,7 @@ L["Soul Shards"] = "灵魂碎片"
 L["Healthstone"] = "治疗石"
 L["Soulstone"] = "灵魂石"
 L["Firestone"] = "火焰石"
+L["Spellstone"] = "法术石"
 L["Click to make one."] = "点击制造一个。"
 L["Click to use it."] = "点击使用。"
 L["Click to hold it in your off hand."] = "点击装备到副手。"

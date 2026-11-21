@@ -23,6 +23,31 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.14.1
+
+Fixes and changes:
+- Kills go to the right mob again.
+
+## 1.14.0
+
+- Pets keeps a number of pet food in your bags. Butler can mail the extra to your bank alt. Turn it on in Settings, Pet page, Feeding.
+
+## 1.13.1
+
+Fixes and changes:
+- The trip line and stop dots now draw on the world map.
+- The Pet XP bar no longer mixes up two pets with the same name.
+- The Soulstone reminder stays quiet when buffs can't be read.
+
+## 1.13.0
+
+- Every window has a gold gem on its title bar. Click it to switch between the one window and separate windows.
+
+## 1.12.1
+
+Fixes and changes:
+- The Spellstone shows on the Shard Tracker bar next to Firestone, and clicking Firestone uses the one in your bags.
+
 ## 1.12.0
 
 - Blackthornes now has one button on your addon bar.

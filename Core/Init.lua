@@ -28,7 +28,7 @@ end
 -- section changes this line too, and tools/check_release.py refuses a tag it
 -- does not match. Played straight from the repository there is no packager
 -- to fill in the TOC's version, so this is the one shown.
-ns.RELEASED_VERSION = "1.12.0"
+ns.RELEASED_VERSION = "1.14.1"
 
 -- The TOC carries @project-version@, which the release packager rewrites to
 -- the tag it is building, "v0.2.0" say. Running straight from the repository
@@ -336,6 +336,12 @@ local DEFAULTS = {
 
     -- The warning when the bags hold little food the pet will eat.
     lowFoodWarning = true,
+
+    -- Food to Keep: how many pieces of food the pet eats stay in the bags;
+    -- Butler mails the rest to its bank alt (Logic/Food.lua, Food:KeepPlan).
+    -- Off unless ticked. Never rename either key.
+    keepFood = false,
+    keepFoodCount = 40,
 
     -- A warlock's soul shards on the Pet tab, and a warning at 2 or fewer
     -- (Logic/SoulShards.lua). Off unless ticked.

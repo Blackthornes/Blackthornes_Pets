@@ -365,6 +365,9 @@ L["Warns you in chat when you have fewer than %d food your pet will eat."] =
 L["Never Feed Buff Food:"] = "Nie Buff-Essen füttern:"
 L["Food that gives a buff is always fed last. Tick this to never feed it."] =
     "Essen mit einem Buff wird immer zuletzt verfüttert. Setz den Haken, damit es nie verfüttert wird."
+L["Food to Keep:"] = "Futter behalten:"
+L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."] =
+    "Behält so viele Stücke Futter, die dein Begleiter frisst. Butler schickt den Rest an deinen Bank-Twink."
 L["Feed Button:"] = "Füttern-Knopf:"
 L["A Feed button above your quests while your pet is hungry."] =
     "Ein Füttern-Knopf über deinen Quests, solange dein Begleiter Hunger hat."
@@ -493,6 +496,12 @@ L["from your Beast Training"] = "aus deiner Tierausbildung"
 -- The fold gem beside a window's close gem (2026-10-24)
 L["Collapse this window"] = "Dieses Fenster einklappen"
 L["Expand this window"] = "Dieses Fenster aufklappen"
+L["Split Into Own Windows"] = "In eigene Fenster teilen"
+L["Gives each addon its own window again."] = "Gibt jedem Addon wieder sein eigenes Fenster."
+L["You can join them back with this same button."] = "Mit diesem Knopf kannst du sie wieder verbinden."
+L["Join Into One Window"] = "Zu einem Fenster verbinden"
+L["Puts every Blackthornes addon in one window, with a button for each down the side."] = "Legt alle Blackthornes-Addons in ein Fenster, mit einem Knopf für jedes an der Seite."
+L["You can split them again with this same button."] = "Mit diesem Knopf kannst du sie wieder teilen."
 -- Soul shards (2026-10-24)
 L["1 soul shard"] = "1 Seelensplitter"
 L["%d soul shards"] = "%d Seelensplitter"
@@ -537,6 +546,7 @@ L["Soul Shards"] = "Seelensplitter"
 L["Healthstone"] = "Gesundheitsstein"
 L["Soulstone"] = "Seelenstein"
 L["Firestone"] = "Feuerstein"
+L["Spellstone"] = "Zauberstein"
 L["Click to make one."] = "Klicke, um einen herzustellen."
 L["Click to use it."] = "Klicke, um ihn zu benutzen."
 L["Click to hold it in your off hand."] = "Klicke, um ihn in die Nebenhand zu nehmen."

@@ -365,6 +365,9 @@ L["Warns you in chat when you have fewer than %d food your pet will eat."] =
 L["Never Feed Buff Food:"] = "No dar comida con beneficio:"
 L["Food that gives a buff is always fed last. Tick this to never feed it."] =
     "La comida que da un beneficio siempre se da al final. Marca esto para no darla nunca."
+L["Food to Keep:"] = "Comida a guardar:"
+L["Keeps this many pieces of food your pet eats. Butler mails the rest to your bank alt."] =
+    "Guarda esta cantidad de comida que come tu mascota. Butler envía el resto a tu personaje banco."
 L["Feed Button:"] = "Botón Alimentar:"
 L["A Feed button above your quests while your pet is hungry."] =
     "Un botón Alimentar encima de tus misiones cuando tu mascota tiene hambre."
@@ -493,6 +496,12 @@ L["from your Beast Training"] = "de tu Adiestramiento de bestias"
 -- The fold gem beside a window's close gem (2026-10-24)
 L["Collapse this window"] = "Plegar esta ventana"
 L["Expand this window"] = "Desplegar esta ventana"
+L["Split Into Own Windows"] = "Separar en ventanas propias"
+L["Gives each addon its own window again."] = "Devuelve a cada addon su propia ventana."
+L["You can join them back with this same button."] = "Con este mismo botón puedes volver a unirlas."
+L["Join Into One Window"] = "Unir en una ventana"
+L["Puts every Blackthornes addon in one window, with a button for each down the side."] = "Pone todos los addons de Blackthornes en una ventana, con un botón para cada uno en el lateral."
+L["You can split them again with this same button."] = "Con este mismo botón puedes volver a separarlas."
 -- Soul shards (2026-10-24)
 L["1 soul shard"] = "1 fragmento de alma"
 L["%d soul shards"] = "%d fragmentos de alma"
@@ -537,6 +546,7 @@ L["Soul Shards"] = "Fragmentos de alma"
 L["Healthstone"] = "Piedra de salud"
 L["Soulstone"] = "Piedra de alma"
 L["Firestone"] = "Piedra de fuego"
+L["Spellstone"] = "Piedra de hechizo"
 L["Click to make one."] = "Haz clic para crear una."
 L["Click to use it."] = "Haz clic para usarla."
 L["Click to hold it in your off hand."] = "Haz clic para llevarla en la mano izquierda."

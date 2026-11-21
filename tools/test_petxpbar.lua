@@ -221,6 +221,49 @@ suite.check("no word flips it", ns.db.petXPBar == false)
 suite.check("numbers", Bar.Number(1350) == "1,350" and Bar.Number(12) == "12"
     and Bar.Number(1234567) == "1,234,567")
 
+-- Two pets with one name are two pets: swapping at the stable is no gain
+-- and no level-up, whatever their levels.
+do
+    local guidWas = rawget(_G, "UnitGUID")
+    local npc = 1201
+    _G.UnitGUID = function(unit)
+        if unit == "pet" then return "Pet-0-4372-0-21-" .. npc .. "-0A00B1C2D3" end
+        return "Player-4372-00ABCDEF"
+    end
+    PetXP:Clear()
+    Bar:Set(true)
+    Bar:SetCheer(true)
+    local cheers = 0
+    local cheerWas = Bar.Cheer
+    Bar.Cheer = function() cheers = cheers + 1 end
+    pet.name, pet.level, pet.xp, pet.max = "Cat", 30, 100, 5000
+    Bar:Refresh()
+    npc = 1713
+    pet.level, pet.xp, pet.max = 35, 200, 7000
+    Bar:Refresh()
+    local swapped = PetXP:Session(PetXP:Read())
+    suite.check("another pet of the same name gains nothing", swapped.gained == 0 and swapped.kills == 0,
+        swapped.gained)
+    suite.check("and no cheer for it", cheers == 0, cheers)
+    suite.check("its session starts where it stands", swapped.startLevel == 35 and swapped.lastXP == 200)
+    -- The same creature kind too, told by a level that did not go up by one.
+    pet.level, pet.xp, pet.max = 32, 50, 6000
+    local gain, leveled = PetXP:Update(PetXP:Read())
+    suite.check("a lower level is another pet", gain == 0 and leveled == false, gain)
+    pet.level, pet.xp, pet.max = 40, 10, 9000
+    gain, leveled = PetXP:Update(PetXP:Read())
+    suite.check("so is a jump of many levels", gain == 0 and leveled == false, gain)
+    -- A real level still counts, with a GUID or without.
+    pet.xp = 8900
+    PetXP:Update(PetXP:Read())
+    _G.UnitGUID = function() error("hidden") end
+    pet.level, pet.xp, pet.max = 41, 30, 9500
+    gain, leveled = PetXP:Update(PetXP:Read())
+    suite.check("a real level still counts", gain == 130 and leveled == true, gain)
+    Bar.Cheer = cheerWas
+    _G.UnitGUID = guidWas
+end
+
 -- Put the client back for the suites after this one.
 Bar:Set(false)
 PetXP:Clear()
