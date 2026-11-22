@@ -4,6 +4,14 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.15.0
+
+For WoW: Forever (interface 16001). A full restart is needed after updating.
+
+- **Warm look.** Panels and rows are warm brown-black, with yellow column headings.
+- **Window key.** Key Bindings has a new "Open or close the window" line for Pets.
+- **Food line.** The food line links in chat and shows the item's tooltip.
+
 ## 1.14.1
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
