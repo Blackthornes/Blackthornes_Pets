@@ -114,9 +114,9 @@ before leaning on one.
   `tools/forever_beasts.py --harvest <Blackthornes_Farmer/Data/Data_Harvested.lua> <Blackthornes_Pets.lua>`.
   Committed as "Refresh shipped data", never announced, never the save.
 - **Window spots.** Windows remember where they were dragged:
-  `oneWindowDockSpots[place]` and `windowSpots[key]` (never rename),
+  `oneWindowDockSpots[place]`, `windowSpots[key]` and `foldedWindows[key]` (never rename),
   `SharedWindow.KeepSpot(frame, key)`, `windows reset` runs
-  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 14 (the swap gem, Butler at the vendor, no placing mid-drag, shelves,
+  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 15 (the round button, the swap gem, Butler at the vendor, no placing mid-drag, shelves,
   dock places, All Addons gear) and WhatsNew.lua FILE_VERSION 7.
 
 ## Big files (read these in pieces)
