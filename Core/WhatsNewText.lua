@@ -5,6 +5,9 @@
 local _, ns = ...
 
 ns.WHATS_NEW = {
+    { version = "1.16.0", lines = {
+        "Windows fold into a round button with the Pets badge.",
+    } },
     { version = "1.15.0", lines = {
         "Panels and rows have a warm brown-black look.",
         "The food line links in chat and shows the item's tooltip.",
@@ -12,8 +15,5 @@ ns.WHATS_NEW = {
     } },
     { version = "1.14.0", lines = {
         "Pets keeps a number of pet food in your bags. Butler can mail the extra to your bank alt. Turn it on in Settings, Pet page, Feeding.",
-    } },
-    { version = "1.13.0", lines = {
-        "Every window has a gold gem on its title bar. Click it to switch between the one window and separate windows.",
     } },
 }
