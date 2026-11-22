@@ -124,7 +124,7 @@ function CompendiumUI:Build()
     -- The fold gem beside the close gem folds the window down to its plate
     -- (UI/FoldWindow.lua, a player asked, 2026-10-24).
     if ns.FoldWindow then
-        ns.FoldWindow:Add(frame, { onToggle = function(folded)
+        ns.FoldWindow:Add(frame, { key = "Compendium", onToggle = function(folded)
             if not folded then CompendiumUI:Refresh() end
         end })
     end
@@ -975,3 +975,8 @@ ns.RegisterCommand("compendium", L["open the Pet Compendium: every beast you can
     CompendiumUI:Toggle()
 end)
 ns.commands.beasts = ns.commands.compendium
+
+-- Kept folded through a /reload, its round button opens it (UI/FoldWindow.lua).
+if ns.FoldWindow and ns.FoldWindow.Opener then
+    ns.FoldWindow:Opener("Compendium", { open = function() CompendiumUI:Show() end })
+end

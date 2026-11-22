@@ -136,6 +136,7 @@ function UI:Build()
     -- the window stays open.
     if ns.FoldWindow then
         ns.FoldWindow:Add(frame, {
+            key = "Main",
             canFold = function()
                 local fighting = InCombatLockdown and InCombatLockdown()
                 return not (fighting and UI.feedButton and UI.feedButton:IsShown())
@@ -1650,3 +1651,8 @@ end
 ns.RegisterCommand("window", L["open the pets window (so does /bpet on its own)"], function()
     UI:Toggle()
 end)
+
+-- Kept folded through a /reload, its round button opens it (UI/FoldWindow.lua).
+if ns.FoldWindow and ns.FoldWindow.Opener then
+    ns.FoldWindow:Opener("Main", { open = function() UI:Show() end })
+end
