@@ -90,6 +90,9 @@ before leaning on one.
   `border` line under each, `glassHover` and a gold edge under the mouse,
   `glassActive` for the picked row. Gradients fade through
   `Theme.LightGradient` or are hidden, never SetAlpha alone.
+- **No red gems on a rim's ends** (the owner, 2026-11-22): never put red
+  circles on the left and right of a window, plaque or pop-up, in any
+  addon. The red close gem (the X) and the corner gems stay.
 - **Clear to post.** Nothing is published or uploaded without the owner's
   go-ahead. He tags releases himself.
 - **Keep his data safe.** Never commit saved variables, tokens or anything
