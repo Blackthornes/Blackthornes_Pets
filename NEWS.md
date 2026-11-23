@@ -23,6 +23,11 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.16.1
+
+Fixes and changes:
+- Various bug fixes.
+
 ## 1.16.0
 
 - Windows fold into a round button with the Pets badge.
