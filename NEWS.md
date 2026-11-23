@@ -26,9 +26,7 @@ tool prints a note for a shipped line that reads like an advert.
 ## 1.16.1
 
 Fixes and changes:
-- The arrow works less while you stand still.
-- The gold plaque has no red gems on its sides.
-
+- Various bug fixes.
 
 ## 1.16.0
 

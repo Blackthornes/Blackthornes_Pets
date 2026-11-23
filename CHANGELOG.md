@@ -8,9 +8,7 @@ the top; a release is refused if its version has no section here.
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
 
-- **Arrow.** It reads your position less often while you stand still and face the same way.
-- **Gold plaque.** The red round gems on its left and right are gone.
-
+- Various bug fixes for Pets.
 
 ## 1.16.0
 
