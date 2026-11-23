@@ -4,6 +4,14 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.16.1
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Arrow.** It reads your position less often while you stand still and face the same way.
+- **Gold plaque.** The red round gems on its left and right are gone.
+
+
 ## 1.16.0
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
