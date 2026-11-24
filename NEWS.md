@@ -23,6 +23,13 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.17.0
+
+- The Pet tab shows the pet's bars beside its name, and skills in two columns with icons.
+- New skills show in gold.
+- A faint paw shows when no pet is out.
+- The Compendium has icons for families and skills.
+
 ## 1.16.1
 
 Fixes and changes:

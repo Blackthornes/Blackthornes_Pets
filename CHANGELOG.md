@@ -4,6 +4,13 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.17.0
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Pet tab.** The pet's three bars sit beside its name. Skills fill two columns, each with an icon. New skills show in gold. A faint paw shows when no pet is out.
+- **Compendium.** Pet families and skills have icons.
+
 ## 1.16.1
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
