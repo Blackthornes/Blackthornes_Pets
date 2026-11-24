@@ -646,5 +646,7 @@ ns.TravelHost = {
     Changed = function() BeastArrow:Changed() end,
     Refresh = function() if ns.BeastArrowUI and ns.BeastArrowUI.Refresh then ns.BeastArrowUI:Refresh() end end,
     State = function() return ns.BeastArrowUI and ns.BeastArrowUI.state end,
+    -- The step box (UI/TravelCard.lua) hangs under the dial.
+    Dial = function() return ns.BeastArrowUI end,
     Print = function(text) ns.Print(text) end,
 }
