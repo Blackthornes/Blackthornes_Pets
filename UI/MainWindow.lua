@@ -6,7 +6,7 @@
 -- the settings window (same header, palette and row heights) so the two read
 -- as one set, and like Equipment's gear window, which is the same shape.
 
-local _, ns = ...
+local ADDON, ns = ...
 local L = ns.L
 
 local UI = ns.NewModule("UI")
@@ -187,8 +187,18 @@ function UI:Build()
     frame:HookScript("OnHide", function() if ns.PetsTabs then ns.PetsTabs:Closed(frame) end end)
     self:BuildHeader()
 
-    local empty = Theme.CreateLabel(frame, "normal", "muted")
-    empty:SetPoint("CENTER", 0, 0)
+    -- With no pet out: a faint gold paw (the house emblem, our own art) and
+    -- the words under it, so the window is not a bare dark sheet.
+    local paw = frame:CreateTexture(nil, "ARTWORK")
+    paw:SetSize(96, 96)
+    paw:SetPoint("CENTER", 0, 18)
+    paw:SetTexture(([[Interface\AddOns\%s\Media\Frame\Emblem]]):format(ADDON))
+    paw:SetVertexColor(Theme.Unpack("accent", 0.14))
+    paw:Hide()
+    self.emptyPaw = paw
+
+    local empty = Theme.CreateLabel(frame, "normal", "muted", "CENTER")
+    empty:SetPoint("TOP", paw, "BOTTOM", 0, -6)
     empty:SetText(L["No pet out."])
     self.emptyLabel = empty
 
@@ -1551,6 +1561,7 @@ end
 function UI:ShowStatus(status)
     self.body:SetShown(status.exists == true)
     self.emptyLabel:SetShown(not status.exists)
+    self.emptyPaw:SetShown(not status.exists)
     self.rows.pet.value:SetShown(status.exists == true)
     if not status.exists then
         self:PlaceFeedButton(nil)

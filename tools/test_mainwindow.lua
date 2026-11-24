@@ -14,6 +14,8 @@ suite.check("the header says hunter", UI.subtitle:GetText() == "Hunter", UI.subt
 suite.check("with no pet out it says so",
     UI.emptyLabel:GetText() == "No pet out." and UI.emptyLabel:IsShown())
 suite.check("and shows no pet card", not UI.body:IsShown())
+suite.check("a faint paw sits over the words", UI.emptyPaw:IsShown()
+    and UI.emptyLabel._point[2] == UI.emptyPaw and UI.emptyLabel._point[3] == "BOTTOM")
 
 _G.UnitClass = function() return "Warlock", "WARLOCK" end
 UI:Refresh()
@@ -63,6 +65,7 @@ _G.C_PetInfo = {
 UI:Refresh()
 local rows = UI.rows
 suite.check("the empty line goes", not UI.emptyLabel:IsShown())
+suite.check("and the paw with it", not UI.emptyPaw:IsShown())
 suite.check("the top card names the pet", UI.nameLabel:GetText() == "Boar", UI.nameLabel:GetText())
 suite.check("and its level under the name, the family being its name",
     rows.pet.value:GetText() == "Level 8", rows.pet.value:GetText())
