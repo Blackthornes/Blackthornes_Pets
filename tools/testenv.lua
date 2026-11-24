@@ -35,6 +35,8 @@ local function Stub(fields)
     function frame:SetWidth(value) self._width = value end
     function frame:GetWidth() return self._width or 500 end
     function frame:SetSize(width, height) self._width, self._height = width, height end
+    function frame:SetTexture(texture) self._texture = texture end
+    function frame:GetTexture() return rawget(self, "_texture") end
 
     function frame:SetText(value) self._text = tostring(value or "") end
     function frame:SetTextColor(r, g, b) self._color = { r, g, b } end

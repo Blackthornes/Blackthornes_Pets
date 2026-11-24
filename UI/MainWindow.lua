@@ -270,6 +270,13 @@ end
 -- The pet card's pieces
 --------------------------------------------------------------------------------
 
+--- Words without their colour codes, for measuring.
+local function Bare(text)
+    if type(text) ~= "string" then return "" end
+    return (text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))
+end
+UI.Bare = Bare
+
 --- A frame filled with a palette colour, with a fine border.
 local function Glass(parent, key, borderAlpha)
     local frame = CreateFrame("Frame", nil, parent)
@@ -747,6 +754,15 @@ end
 
 local SKILL_HEAD = 20
 local SKILL_ROW = 22
+-- A skill's own icon at the start of its line, and where its name starts
+-- with and without one.
+local SKILL_ICON = 16
+local SKILL_TEXT = 12
+local SKILL_TEXT_ICON = SKILL_TEXT + SKILL_ICON + 8
+-- The least the left column (what the pet knows) takes of the card, and the
+-- most, as a share of it.
+local SKILL_LEFT_LEAST = 220
+local SKILL_LEFT_SHARE = 0.45
 local SKILL_FOOT = 34
 local CHIP_ROW = 30
 local CHIP_HEIGHT = 20
@@ -806,10 +822,22 @@ local function CreateSkillRow(card)
     edge:Hide()
     row.value = Theme.CreateLabel(row, "small", "text", "RIGHT")
     row.value:SetPoint("RIGHT", -10, 0)
+    -- The skill's own icon from the game, in a fine metal frame. With no
+    -- icon to show, the name starts where the icon would.
+    local slot = CreateFrame("Frame", nil, row)
+    slot:SetSize(SKILL_ICON, SKILL_ICON)
+    slot:SetPoint("LEFT", SKILL_TEXT, 0)
+    Theme.Fill(slot, "well")
+    Theme.Border(slot, "metal")
+    row.icon = slot:CreateTexture(nil, "ARTWORK")
+    row.icon:SetPoint("TOPLEFT", 1, -1)
+    row.icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    if row.icon.SetTexCoord then row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+    row.iconSlot = slot
+    -- A name too long for its line wraps, and the line grows (ShowSkills).
     row.label = Theme.CreateLabel(row, "normal", "text")
-    row.label:SetPoint("LEFT", 12, 0)
-    row.label:SetPoint("RIGHT", row.value, "LEFT", -10, 0)
-    row.label:SetWordWrap(false)
+    row.label:SetPoint("LEFT", SKILL_TEXT, 0)
+    row.label:SetWordWrap(true)
 
     row:SetScript("OnEnter", function(self)
         self.background:SetColorTexture(Theme.Unpack("glassHover"))
@@ -896,6 +924,12 @@ function UI:BuildSkills()
     local way = Widgets.CreateButton(foot, L["Show the Way"], function() UI:ShowTheWayToTrainer() end,
         { primary = true, width = 100, height = 22 })
     way:SetPoint("RIGHT", -8, 0)
+    -- A fine line between the two columns.
+    local divide = card:CreateTexture(nil, "ARTWORK")
+    divide:SetWidth(1)
+    divide:SetColorTexture(Theme.Unpack("border", 0.6))
+    divide:Hide()
+    self.skillDivide = divide
     local trainer = Theme.CreateLabel(foot, "small", "muted")
     trainer:SetPoint("LEFT", 12, 0)
     trainer:SetPoint("RIGHT", way, "LEFT", -10, 0)
@@ -933,7 +967,8 @@ function UI.DemonSkillLines(plan, section)
                 value = L.Format("Level %d", skill.level)
             end
         end
-        out[#out + 1] = { label = label, value = value, muted = section == "later" }
+        out[#out + 1] = { label = label, value = value, muted = section == "later",
+            icon = ns.PetSkills and ns.PetSkills.Icon(skill.name, skill.rank) }
     end
     return out
 end
@@ -960,7 +995,7 @@ function UI.SkillLines(plan, section)
             value = skill.level and L.Format("Pet level %d", skill.level) or L["Tame a beast that knows it"]
         end
         out[#out + 1] = { label = label, value = value or "", beast = UI.IsBeastSkill(skill.name) and skill.name or nil,
-            muted = section == "later" }
+            muted = section == "later", icon = ns.PetSkills.Icon(skill.name, skill.rank) }
     end
     return out
 end
@@ -983,39 +1018,67 @@ function UI:ShowSkills(plan, trainer, top)
     self.skillHeads.known.left:SetText(demon and L["YOUR DEMON KNOWS"] or L["YOUR PET KNOWS"])
     self.skillHeads.learn.left:SetText(demon and L["CAN BUY NOW"] or L["CAN LEARN NOW"])
 
-    local y, used = -(CARD_HEAD + 1), 0
+    local y = -(CARD_HEAD + 1)
     y = self:ShowDemonChips(demon and plan or nil, y)
+
+    local lines = {}
     for _, section in ipairs({ "known", "learn", "later" }) do
-        local head = self.skillHeads[section]
-        local lines = plan and UI.SkillLines(plan, section) or {}
-        head:SetShown(#lines > 0)
-        if #lines > 0 then
-            head:ClearAllPoints()
-            head:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
-            head:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y)
-            y = y - SKILL_HEAD
-            for index, line in ipairs(lines) do
-                used = used + 1
-                local row = self.skillRows[used]
-                if not row then
-                    row = CreateSkillRow(card)
-                    self.skillRows[used] = row
+        lines[section] = plan and UI.SkillLines(plan, section) or {}
+    end
+
+    -- Two columns (the owner said build it from a mockup, 2026-11-24): what
+    -- the pet knows on the left, what it can learn now and later on the
+    -- right. With only one side to show, it takes the whole card.
+    local inner = self.fullWidth - 2
+    local hasLeft = #lines.known > 0
+    local hasRight = #lines.learn + #lines.later > 0
+    local two = hasLeft and hasRight
+    local leftWidth = two and UI.SkillsLeftWidth(lines.known, inner) or inner
+    self.skillColumns = two and { leftWidth, inner - leftWidth - 1 } or { inner }
+
+    local used = 0
+    local function Lay(sections, x, width, from)
+        local at = from
+        for _, section in ipairs(sections) do
+            local head = self.skillHeads[section]
+            local list = lines[section]
+            if #list > 0 then
+                head:ClearAllPoints()
+                head:SetPoint("TOPLEFT", card, "TOPLEFT", x, at)
+                head:SetWidth(width)
+                head:Show()
+                at = at - SKILL_HEAD
+                for index, line in ipairs(list) do
+                    used = used + 1
+                    local row = self.skillRows[used]
+                    if not row then
+                        row = CreateSkillRow(card)
+                        self.skillRows[used] = row
+                    end
+                    at = at - self:FillSkillRow(row, line, index, x, at, width)
                 end
-                row.glassKey = index % 2 == 1 and "glass" or "glassAlt"
-                row.background:SetColorTexture(Theme.Unpack(row.glassKey))
-                row.label:SetText(line.label)
-                row.value:SetText(line.value)
-                row.value:SetTextColor(Theme.Unpack(line.muted and "muted" or "text"))
-                row.beast = line.beast
-                row:ClearAllPoints()
-                row:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
-                row:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y)
-                row:Show()
-                y = y - SKILL_ROW
             end
         end
+        return at
+    end
+
+    for _, section in ipairs({ "known", "learn", "later" }) do self.skillHeads[section]:Hide() end
+    local leftEnd = hasLeft and Lay({ "known" }, 1, leftWidth, y) or y
+    local rightEnd = y
+    if hasRight then
+        rightEnd = Lay({ "learn", "later" }, two and (1 + leftWidth + 1) or 1,
+            two and (inner - leftWidth - 1) or inner, y)
     end
     for i = used + 1, #self.skillRows do self.skillRows[i]:Hide() end
+
+    local divide = self.skillDivide
+    divide:SetShown(two)
+    if two then
+        divide:ClearAllPoints()
+        divide:SetPoint("TOPLEFT", card, "TOPLEFT", 1 + leftWidth, y)
+        divide:SetHeight(math.max(y - math.min(leftEnd, rightEnd), 1))
+    end
+    y = math.min(leftEnd, rightEnd)
 
     self.skillTrainerPlace = trainer
     self.skillFoot:SetShown(trainer ~= nil)
@@ -1028,6 +1091,51 @@ function UI:ShowSkills(plan, trainer, top)
         y = y - 2 - SKILL_FOOT
     end
     return -y + 2
+end
+
+--- How wide the left column is: wide enough for its longest line, no less
+--- than SKILL_LEFT_LEAST and no more than its share of the card.
+function UI.SkillsLeftWidth(lines, inner)
+    local widest = 0
+    for _, line in ipairs(lines) do
+        widest = math.max(widest, Theme.TextWidth("normal", Bare(line.label))
+            + Theme.TextWidth("small", Bare(line.value)))
+    end
+    local needed = SKILL_TEXT_ICON + math.ceil(widest) + 10 + 10 + 8
+    return math.min(math.max(SKILL_LEFT_LEAST, needed), math.floor(inner * SKILL_LEFT_SHARE))
+end
+
+--- Fill one skill line and place it at (x, y) in the card, `width` wide.
+--- A name too long for the line wraps and the line grows. Returns how tall
+--- the line is.
+function UI:FillSkillRow(row, line, index, x, y, width)
+    row.glassKey = index % 2 == 1 and "glass" or "glassAlt"
+    row.background:SetColorTexture(Theme.Unpack(row.glassKey))
+    row.value:SetText(line.value)
+    row.value:SetTextColor(Theme.Unpack(line.muted and "muted" or "text"))
+    row.beast = line.beast
+
+    local icon = line.icon
+    row.iconSlot:SetShown(icon ~= nil)
+    if icon then row.icon:SetTexture(icon) end
+    local textLeft = icon and SKILL_TEXT_ICON or SKILL_TEXT
+
+    local room = width - textLeft - 10 - math.ceil(Theme.TextWidth("small", Bare(line.value))) - 10
+    row.label:ClearAllPoints()
+    row.label:SetPoint("LEFT", row, "LEFT", textLeft, 0)
+    row.label:SetWidth(math.max(room, 60))
+    row.label:SetText(line.label)
+
+    local height = SKILL_ROW
+    local ok, textHeight = pcall(row.label.GetStringHeight, row.label)
+    if ok and type(textHeight) == "number" and textHeight + 8 > height then
+        height = math.ceil(textHeight + 8)
+    end
+    row:ClearAllPoints()
+    row:SetPoint("TOPLEFT", self.skillsCard, "TOPLEFT", x, y)
+    row:SetSize(width, height)
+    row:Show()
+    return height
 end
 
 --- What a dim chip says for a demon still to come, and its hover.
@@ -1382,7 +1490,7 @@ function UI:ShowMeters(status)
     for _, key in ipairs(keys) do
         if values[key] then
             count = count + 1
-            widest = math.max(widest, Theme.TextWidth("normal", (values[key]:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))))
+            widest = math.max(widest, Theme.TextWidth("normal", Bare(values[key])))
         end
     end
 
