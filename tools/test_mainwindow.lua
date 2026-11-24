@@ -66,7 +66,7 @@ suite.check("the empty line goes", not UI.emptyLabel:IsShown())
 suite.check("the top card names the pet", UI.nameLabel:GetText() == "Boar", UI.nameLabel:GetText())
 suite.check("and its level under the name, the family being its name",
     rows.pet.value:GetText() == "Level 8", rows.pet.value:GetText())
-suite.check("the level badge on its face", UI.levelLabel:GetText() == "8")
+suite.check("so the level badge on its face rests", UI.levelLabel:GetText() == "8" and not UI.levelBadge:IsShown())
 suite.check("the mood chip says unhappy", UI.moodChip.label:GetText() == "Unhappy")
 suite.check("happiness says unhappy and the damage",
     rows.happiness.value:GetText():find("Unhappy (75% damage)", 1, true), rows.happiness.value:GetText())
@@ -98,10 +98,34 @@ suite.check("beside the fight card", UI.fightCard._point[1] == "BOTTOMRIGHT"
 suite.check("the mood chip sits under the level line",
     UI.moodChip._point[2] == rows.pet.value and UI.moodChip._point[3] == "BOTTOMLEFT", UI.moodChip._point[3])
 
--- The meters stack under the top card, the cards under them.
-local metersEnd = -(76 + 10) - 3 * 24
+-- The three bars sit in the top card, right of the name, centred as one
+-- block, and the cards start right under the card.
+local blockTop = -(88 - 3 * 24) / 2
+suite.check("the experience bar is the first, in the top card",
+    UI.meters.experience._point[2] == UI.hero and UI.meters.experience._point[5] == blockTop,
+    UI.meters.experience._point[5])
 suite.check("the loyalty bar is the third",
-    UI.meters.loyalty._point[5] == metersEnd + 24, UI.meters.loyalty._point[5])
+    UI.meters.loyalty._point[2] == UI.hero and UI.meters.loyalty._point[5] == blockTop - 48,
+    UI.meters.loyalty._point[5])
+suite.check("past the name and chips", UI.meters.experience._point[4] >= 12 + 64 + 14 + 200,
+    UI.meters.experience._point[4])
+suite.check("with a fine line between", UI.heroSplit:IsShown())
+suite.check("the name stops before the bars",
+    UI.nameLabel._point[1] == "RIGHT" and UI.nameLabel._point[3] == "LEFT"
+        and UI.nameLabel._point[4] < UI.meters.experience._point[4], UI.nameLabel._point[4])
+suite.check("the bar is its usual width", UI.meterBarWidth == 150, UI.meterBarWidth)
+suite.check("the cards start right under the top card", UI.foodCard._point[1] == "TOPLEFT"
+    and UI.foodCard._point[5] == -(88 + 10), UI.foodCard._point[5])
+
+-- Long words beside a bar take room from the bar, never below its least.
+local wasHappy = ns.PetStatus.HappinessText
+ns.PetStatus.HappinessText = function() return ("Very happy indeed "):rep(4) end
+UI:Refresh()
+suite.check("a bar gives up room to long words", UI.meterBarWidth < 150 and UI.meterBarWidth >= 110,
+    UI.meterBarWidth)
+ns.PetStatus.HappinessText = wasHappy
+UI:Refresh()
+suite.check("and takes it back", UI.meterBarWidth == 150, UI.meterBarWidth)
 
 -- A value that wraps onto two lines pushes the next row down past it.
 _G.UnitHealthMax = function() return 300 end
@@ -127,8 +151,11 @@ _G.C_PetInfo = { GetPetHappiness = function() return nil end,
     GetPetTrainingPoints = function() return 0, 0 end }
 UI:Refresh()
 suite.check("a demon is named", UI.nameLabel:GetText() == "Grel'zok", UI.nameLabel:GetText())
-suite.check("with its family and level under",
-    rows.pet.value:GetText() == "Imp, level 8", rows.pet.value:GetText())
+suite.check("with its family under, the level on the badge",
+    rows.pet.value:GetText() == "Imp" and UI.levelBadge:IsShown() and UI.levelLabel:GetText() == "8",
+    rows.pet.value:GetText())
+suite.check("a demon has no bars, so no line and the name has the card",
+    not UI.heroSplit:IsShown() and UI.nameLabel._point[3] == "RIGHT")
 suite.check("a demon has no food card", not UI.foodCard:IsShown())
 suite.check("so its fight card is the whole width", UI.fightCard._point[1] == "BOTTOMRIGHT"
     and UI.fightCard._width ~= UI.cardWidth)
@@ -144,17 +171,17 @@ getmetatable(secret).__tostring = function(self) return self end
 _G.UnitName = function() return secret end
 UI:Refresh()
 suite.check("a secret name reads as your pet",
-    UI.nameLabel:GetText() == "Your pet" and rows.pet.value:GetText() == "Imp, level 8",
+    UI.nameLabel:GetText() == "Your pet" and rows.pet.value:GetText() == "Imp",
     UI.nameLabel:GetText())
 
 _G.UnitExists, _G.UnitName, _G.UnitCreatureFamily, _G.UnitLevel = nil, nil, nil, nil
 _G.GetPetExperience, _G.C_PetInfo = nil, nil
 
 -- The bars start past the longest meter name.
-suite.check("short meter names keep the usual start", UI.MeterStart({ "Experience", "Loyalty" }) == 108,
+suite.check("short meter names keep the usual start", UI.MeterStart({ "Experience", "Loyalty" }) == 80,
     UI.MeterStart({ "Experience", "Loyalty" }))
 local long = ("x"):rep(30)
 suite.check("a long meter name pushes the bars along",
-    UI.MeterStart({ "Experience", long }) >= ns.Theme.TextWidth("small", long) + 16)
+    UI.MeterStart({ "Experience", long }) >= ns.Theme.TextWidth("small", long) + 12)
 
 suite.done()

@@ -34,16 +34,29 @@ local HEIGHT = 452
 -- fights. A warlock's demon has no food card, so its fight card is the
 -- whole width.
 local GAP = 10
--- Tall enough for the name, the family and level line and the chips under
--- it, each on its own line (the chips once sat over the level line).
-local HERO_HEIGHT = 76
-local PORTRAIT = 46
+-- Tall enough for the name, the family line and the chips under it, each
+-- on its own line (the chips once sat over the level line), and for the
+-- three bars beside them.
+local HERO_HEIGHT = 88
+local PORTRAIT = 64
 local METER_HEIGHT = 24
--- Where the bars start: the least, and wider when a meter's name needs it
--- (set in BuildStatus, once the words can be measured).
-local METER_LEAST = 108
+-- The bars sit in the top card, right of the name (the owner said build it
+-- from a mockup, 2026-11-24; they once took three rows of their own under
+-- it, mostly empty). Where a bar starts in its line: the least, and wider
+-- when a meter's name needs it (set in BuildStatus, once the words can be
+-- measured).
+local METER_LEAST = 80
 local METER_X = METER_LEAST
-local METER_WIDTH = 190
+-- A bar is this wide, and gives up room down to METER_NARROW when the words
+-- beside it need more.
+local METER_WIDTH = 150
+local METER_NARROW = 110
+-- Where the name starts in the top card, and the least and most room the
+-- name and chips take before the bars.
+local HERO_TEXT = 12 + PORTRAIT + 14
+local HERO_LEFT_LEAST = 200
+local HERO_LEFT_MOST = 300
+local HERO_SPLIT = 16
 local CARD_HEAD = 24
 local CARD_ROW = 22
 local BAND_HEIGHT = 46
@@ -450,7 +463,7 @@ function UI.MeterStart(labels)
     for _, text in ipairs(labels) do
         widest = math.max(widest, Theme.TextWidth("small", text))
     end
-    return math.max(METER_LEAST, 4 + widest + 12)
+    return math.max(METER_LEAST, widest + 12)
 end
 
 function UI:BuildStatus()
@@ -504,13 +517,13 @@ function UI:BuildStatus()
     self.levelBadge, self.levelLabel = badge, level
 
     local name = Theme.CreateLabel(hero, "title", "accentHi")
-    name:SetPoint("TOPLEFT", hero, "TOPLEFT", 12 + PORTRAIT + 14, -11)
+    name:SetPoint("TOPLEFT", hero, "TOPLEFT", HERO_TEXT, -14)
     name:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
     self.nameLabel = name
 
     local sub = Theme.CreateLabel(hero, "small", "muted")
     sub:SetPoint("TOPLEFT", name, "BOTTOMLEFT", 0, -3)
-    sub:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
+    sub:SetPoint("RIGHT", name, "RIGHT", 0, 0)
     self.rows.pet = { value = sub }
 
     self.moodChip = CreateChip(hero)
@@ -534,18 +547,26 @@ function UI:BuildStatus()
     end)
 
     -- The three bars: experience, happiness and loyalty, a label on the
-    -- left and the words on the right.
+    -- left and the words on the right. They sit in the top card, right of
+    -- the name, past a fine gold line (placed in ShowMeters).
+    local split = hero:CreateTexture(nil, "ARTWORK")
+    split:SetWidth(1)
+    split:SetColorTexture(Theme.Unpack("accent", 0.25))
+    split:Hide()
+    self.heroSplit = split
+
     self.meters = {}
     METER_X = UI.MeterStart({ L["Experience"], L["Happiness"], L["Loyalty"] })
     local function Meter(key, labelText)
-        local meter = CreateFrame("Frame", nil, body)
+        local meter = CreateFrame("Frame", nil, hero)
         meter:SetHeight(METER_HEIGHT)
         meter.label = Theme.CreateLabel(meter, "small", "muted")
-        meter.label:SetPoint("LEFT", 4, 0)
+        meter.label:SetPoint("LEFT", 0, 0)
         meter.label:SetText(labelText)
         meter.value = Theme.CreateLabel(meter, "normal", "text")
         meter.value:SetPoint("LEFT", METER_X + METER_WIDTH + 12, 0)
-        meter.value:SetPoint("RIGHT", meter, "RIGHT", -4, 0)
+        meter.value:SetPoint("RIGHT", meter, "RIGHT", 0, 0)
+        meter.value:SetWordWrap(false)
         self.meters[key] = meter
         self.rows[key] = meter
         return meter
@@ -560,11 +581,9 @@ function UI:BuildStatus()
     -- Happiness: three lights, as many lit as the pet is happy, in its colour.
     local mood = Meter("happiness", L["Happiness"])
     mood.lights = {}
-    local lightWidth = math.floor((METER_WIDTH - 8) / 3)
     for i = 1, 3 do
         local light = CreateFrame("Frame", nil, mood)
-        light:SetSize(lightWidth, 12)
-        light:SetPoint("LEFT", METER_X + (i - 1) * (lightWidth + 4), 0)
+        light:SetHeight(12)
         light.background = Theme.Fill(light, "well")
         Theme.Border(light, "border", 0.9)
         light.shine = Theme.TopSheen(light, 0.12)
@@ -578,7 +597,7 @@ function UI:BuildStatus()
     for i = 1, 6 do
         local gem = loyalty:CreateTexture(nil, "ARTWORK")
         gem:SetSize(10, 10)
-        gem:SetPoint("LEFT", METER_X + 3 + (i - 1) * 20, 0)
+        gem:SetPoint("LEFT", METER_X + 3 + (i - 1) * 18, 0)
         gem:SetColorTexture(Theme.Unpack("border"))
         if gem.SetRotation then pcall(gem.SetRotation, gem, math.pi / 4) end
         loyalty.gems[i] = gem
@@ -1269,18 +1288,19 @@ function UI:ShowHero(status)
     local PetStatus = ns.PetStatus
     self.nameLabel:SetText(status.name or L["Your pet"])
 
+    -- The level is on the gold badge on the pet's face, so the line under
+    -- the name is the family alone. A pet named for its family has no
+    -- family line, so its level goes there and the badge rests.
     local sub
     local family = status.family ~= status.name and status.family or nil
-    if family and status.level then
-        sub = L.Format("%s, level %s", family, status.level)
-    elseif family then
+    if family then
         sub = family
     elseif status.level then
         sub = L.Format("Level %s", status.level)
     end
     self.rows.pet.value:SetText(sub or "")
 
-    self.levelBadge:SetShown(status.level ~= nil)
+    self.levelBadge:SetShown(status.level ~= nil and family ~= nil)
     if status.level then self.levelLabel:SetText(tostring(status.level)) end
 
     if type(SetPortraitTexture) == "function" then
@@ -1325,17 +1345,65 @@ function UI:ShowHero(status)
     end
 end
 
---- The bars under the top card, stacked from `y`, the ones with nothing to
---- say left out. Returns where the last one ended.
-function UI:ShowMeters(status, y)
+--- How wide the name and chips are in the top card: the chips' row, no
+--- less than HERO_LEFT_LEAST and no more than HERO_LEFT_MOST.
+function UI:HeroLeftWidth()
+    local chips = 0
+    for _, chip in ipairs({ self.moodChip, self.trainingChip }) do
+        if chip:IsShown() then
+            chips = chips + (chips > 0 and 6 or 0) + (chip:GetWidth() or 0)
+        end
+    end
+    return math.min(math.max(HERO_LEFT_LEAST, math.ceil(chips)), HERO_LEFT_MOST)
+end
+
+--- The bars in the top card, right of the name, the ones with nothing to
+--- say left out and the rest centred as one block. Returns how many show.
+function UI:ShowMeters(status)
     local PetStatus = ns.PetStatus
     local values = {
         experience = PetStatus:ExperienceText(status),
         happiness = PetStatus:HappinessText(status),
         loyalty = PetStatus:LoyaltyText(status),
     }
+    local keys = { "experience", "happiness", "loyalty" }
 
-    for _, key in ipairs({ "experience", "happiness", "loyalty" }) do
+    local count, widest = 0, 0
+    for _, key in ipairs(keys) do
+        if values[key] then
+            count = count + 1
+            widest = math.max(widest, Theme.TextWidth("normal", (values[key]:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))))
+        end
+    end
+
+    -- With no bars (a demon), the name has the whole card.
+    local hero, name = self.hero, self.nameLabel
+    name:ClearAllPoints()
+    name:SetPoint("TOPLEFT", hero, "TOPLEFT", HERO_TEXT, -14)
+    self.heroSplit:SetShown(count > 0)
+    if count == 0 then
+        name:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
+        for _, key in ipairs(keys) do
+            self.meters[key]:Hide()
+            self.meters[key].value:Hide()
+        end
+        return 0
+    end
+
+    local left = HERO_TEXT + self:HeroLeftWidth()
+    name:SetPoint("RIGHT", hero, "LEFT", left, 0)
+    self.heroSplit:ClearAllPoints()
+    self.heroSplit:SetPoint("TOPLEFT", hero, "TOPLEFT", left + HERO_SPLIT, -10)
+    self.heroSplit:SetPoint("BOTTOMLEFT", hero, "BOTTOMLEFT", left + HERO_SPLIT, 10)
+
+    -- The bar gives up room when the words beside it need more.
+    local start = left + HERO_SPLIT * 2
+    local room = self.fullWidth - start - 12
+    local barWidth = math.min(METER_WIDTH, math.max(METER_NARROW, room - METER_X - 12 - math.ceil(widest)))
+    self.meterBarWidth = barWidth
+
+    local y = -math.floor((HERO_HEIGHT - count * METER_HEIGHT) / 2)
+    for _, key in ipairs(keys) do
         local meter = self.meters[key]
         local text = values[key]
         meter:SetShown(text ~= nil)
@@ -1343,20 +1411,28 @@ function UI:ShowMeters(status, y)
         if text then
             meter.value:SetText(text)
             meter:ClearAllPoints()
-            meter:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, y)
-            meter:SetPoint("TOPRIGHT", self.body, "TOPRIGHT", 0, y)
+            meter:SetPoint("TOPRIGHT", hero, "TOPRIGHT", -12, y)
+            meter:SetPoint("TOPLEFT", hero, "TOPLEFT", start, y)
+            meter.value:ClearAllPoints()
+            meter.value:SetPoint("LEFT", METER_X + barWidth + 12, 0)
+            meter.value:SetPoint("RIGHT", meter, "RIGHT", 0, 0)
             y = y - METER_HEIGHT
         end
     end
 
     if values.experience then
-        self.meters.experience.bar:Set(status.xp / status.xpMax)
+        local bar = self.meters.experience.bar
+        if bar:GetWidth() ~= barWidth then bar:SetBarWidth(barWidth) end
+        bar:Set(status.xp / status.xpMax)
     end
 
     if values.happiness then
         local key = MoodColor(status.happiness)
+        local lightWidth = math.floor((barWidth - 8) / 3)
         for i, light in ipairs(self.meters.happiness.lights) do
             local lit = i <= status.happiness
+            light:SetWidth(lightWidth)
+            light:SetPoint("LEFT", METER_X + (i - 1) * (lightWidth + 4), 0)
             light.background:SetColorTexture(Theme.Unpack(lit and key or "well"))
             Theme.SetHalo(light, lit and 0.3 or 0, key)
             light.shine:SetShown(lit)
@@ -1370,11 +1446,13 @@ function UI:ShowMeters(status, y)
             gem:SetColorTexture(Theme.Unpack(level and i <= level and "accentHi" or "border"))
         end
         -- With no gems to show, the words take their place.
-        self.meters.loyalty.value:ClearAllPoints()
-        self.meters.loyalty.value:SetPoint("LEFT", level and METER_X + METER_WIDTH + 12 or METER_X, 0)
-        self.meters.loyalty.value:SetPoint("RIGHT", self.meters.loyalty, "RIGHT", -4, 0)
+        if not level then
+            self.meters.loyalty.value:ClearAllPoints()
+            self.meters.loyalty.value:SetPoint("LEFT", METER_X, 0)
+            self.meters.loyalty.value:SetPoint("RIGHT", self.meters.loyalty, "RIGHT", 0, 0)
+        end
     end
-    return y
+    return count
 end
 
 --- The food card: the food it eats next, how long the bags will keep it
@@ -1480,8 +1558,8 @@ function UI:ShowStatus(status)
     end
 
     self:ShowHero(status)
-    local y = self:ShowMeters(status, -(HERO_HEIGHT + GAP))
-    if y < -(HERO_HEIGHT + GAP) then y = y - GAP + 4 end
+    self:ShowMeters(status)
+    local y = -(HERO_HEIGHT + GAP)
 
     local stats = ns.PetStatus:ReadStats()
     local stacks, foodEnd, fightEnd
