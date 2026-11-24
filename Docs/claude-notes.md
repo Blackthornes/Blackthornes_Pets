@@ -1491,3 +1491,21 @@ in the project files). Five changes, no new player words, nothing saved.
 `/bpet probe` prints "skill icon" and "family icons" for a check in game.
 Tested in `tools/test_mainwindow.lua`, `tools/test_skillscard.lua`,
 `tools/test_compendiumrows.lua` and `tools/test_taming.lua`.
+
+## Restore Defaults (Pets Settings: Set Default)
+
+The owner said build it, 2026-11-23 (a player asked how to reset settings),
+in all five addons, from `Docs/mockups/restore-defaults.html` in the project
+files. A row on the ALL ADDONS page under Window Locations (renamed from
+Window Spots the same day): "Pets Settings:" with Set Default. The first
+click turns the words red and says Confirm; a second within
+`SettingsUI.CONFIRM_WAIT` (4 s) runs `SettingsUI:RestoreDefaults()`: every
+key in `SettingsUI.SETTING_KEYS` back to `ns.DEFAULTS` (else nil), every key
+in `CHAR_SETTING_KEYS` back to `ns.CHAR_DEFAULTS` for the character playing,
+then `settingsRestored` is set and the interface reloads;
+`SettingsUI:SayRestored()` at login says "Every Pets setting is back to how
+it started." once. Never touched: saved data, window spots and the ALL
+ADDONS choices (text size, window style, effects, mute, combined buttons,
+One Window, sister note). `tools/test_restoredefaults.lua` clicks every
+Settings control twice and fails if one writes a key that is in neither
+list nor its kept list: a new setting must join the list.
