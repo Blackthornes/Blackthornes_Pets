@@ -1450,3 +1450,44 @@ Farmer's `UI/Arrow.lua`, Equipment's `UI/QuestArrow.lua`, Pets'
 `UI/BeastArrow.lua` and Tradeskills' `UI/WayArrow.lua`; a fix to one
 belongs in all four. Strings cost nothing here: Lua 5.1 keeps one copy of
 each, so text that comes out the same each tick makes no garbage.
+
+## The look upgrade (2026-11-24)
+
+The owner said build it from a mockup (`Docs/mockups/pets-visual-upgrade.html`
+in the project files). Five changes, no new player words, nothing saved.
+
+- **Bars beside the pet.** Experience, Happiness and Loyalty sit in the top
+  card, right of the name, past a fine gold line (`UI:ShowMeters`,
+  `heroSplit`). The name and chips take 200 to 300 (`UI:HeroLeftWidth`),
+  and a bar gives up room, 150 down to 110, when the words beside it are
+  long (`meterBarWidth`). A demon has no bars, so its name has the card.
+  The level is on the badge on the pet's face, so the line under the name
+  is the family alone; a pet named for its family has "Level N" there and
+  no badge.
+- **Skills in two columns, with icons.** What the pet knows on the left
+  (`UI.SkillsLeftWidth`), what it can learn now and later on the right
+  (`UI:ShowSkills`, `FillSkillRow`). One side alone takes the whole card.
+  A name too long for its line wraps and the line grows. A demon's card is
+  the same.
+- **Skill icons** are the game's own, read as it runs:
+  `PetSkills.Icon(name, rank)` finds the spell in the pet trainer's table,
+  what taming teaches, then the demons' books, and `PetSkills.SpellIcon`
+  asks `C_Spell.GetSpellTexture`, else `GetSpellTexture`, in a pcall, once
+  a spell. No answer means no icon, and the name starts at the edge.
+- **Compendium rows.** Each beast wears its family's icon
+  (`CompendiumUI.FamilyIcon`, the game's icons named by path; a family with
+  none, or one the client lacks by `GetFileIDFromPath`, wears Beast
+  Taming's). Each skill it teaches is a tag with its icon
+  (`CompendiumUI:LayTags`), on up to two lines; more than that shows as
+  words, which wrap. Cells sit in the middle of the row.
+- **New skills in gold.** A skill the hunter does not have is gold
+  (`accentHi`), one they have is grey (`muted`), one nothing can say about
+  is plain (`CompendiumUI.SkillColor`). The row's hover and the beast
+  tooltip (`UI/TamingTooltip.lua`, `accent` and `muted`) match. It was red
+  for new and green for known.
+- **A paw when no pet is out.** The house emblem, faint, over "No pet out."
+  (`emptyPaw`).
+
+`/bpet probe` prints "skill icon" and "family icons" for a check in game.
+Tested in `tools/test_mainwindow.lua`, `tools/test_skillscard.lua`,
+`tools/test_compendiumrows.lua` and `tools/test_taming.lua`.

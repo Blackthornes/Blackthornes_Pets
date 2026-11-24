@@ -6,7 +6,7 @@
 -- the settings window (same header, palette and row heights) so the two read
 -- as one set, and like Equipment's gear window, which is the same shape.
 
-local _, ns = ...
+local ADDON, ns = ...
 local L = ns.L
 
 local UI = ns.NewModule("UI")
@@ -34,16 +34,29 @@ local HEIGHT = 452
 -- fights. A warlock's demon has no food card, so its fight card is the
 -- whole width.
 local GAP = 10
--- Tall enough for the name, the family and level line and the chips under
--- it, each on its own line (the chips once sat over the level line).
-local HERO_HEIGHT = 76
-local PORTRAIT = 46
+-- Tall enough for the name, the family line and the chips under it, each
+-- on its own line (the chips once sat over the level line), and for the
+-- three bars beside them.
+local HERO_HEIGHT = 88
+local PORTRAIT = 64
 local METER_HEIGHT = 24
--- Where the bars start: the least, and wider when a meter's name needs it
--- (set in BuildStatus, once the words can be measured).
-local METER_LEAST = 108
+-- The bars sit in the top card, right of the name (the owner said build it
+-- from a mockup, 2026-11-24; they once took three rows of their own under
+-- it, mostly empty). Where a bar starts in its line: the least, and wider
+-- when a meter's name needs it (set in BuildStatus, once the words can be
+-- measured).
+local METER_LEAST = 80
 local METER_X = METER_LEAST
-local METER_WIDTH = 190
+-- A bar is this wide, and gives up room down to METER_NARROW when the words
+-- beside it need more.
+local METER_WIDTH = 150
+local METER_NARROW = 110
+-- Where the name starts in the top card, and the least and most room the
+-- name and chips take before the bars.
+local HERO_TEXT = 12 + PORTRAIT + 14
+local HERO_LEFT_LEAST = 200
+local HERO_LEFT_MOST = 300
+local HERO_SPLIT = 16
 local CARD_HEAD = 24
 local CARD_ROW = 22
 local BAND_HEIGHT = 46
@@ -174,8 +187,18 @@ function UI:Build()
     frame:HookScript("OnHide", function() if ns.PetsTabs then ns.PetsTabs:Closed(frame) end end)
     self:BuildHeader()
 
-    local empty = Theme.CreateLabel(frame, "normal", "muted")
-    empty:SetPoint("CENTER", 0, 0)
+    -- With no pet out: a faint gold paw (the house emblem, our own art) and
+    -- the words under it, so the window is not a bare dark sheet.
+    local paw = frame:CreateTexture(nil, "ARTWORK")
+    paw:SetSize(96, 96)
+    paw:SetPoint("CENTER", 0, 18)
+    paw:SetTexture(([[Interface\AddOns\%s\Media\Frame\Emblem]]):format(ADDON))
+    paw:SetVertexColor(Theme.Unpack("accent", 0.14))
+    paw:Hide()
+    self.emptyPaw = paw
+
+    local empty = Theme.CreateLabel(frame, "normal", "muted", "CENTER")
+    empty:SetPoint("TOP", paw, "BOTTOM", 0, -6)
     empty:SetText(L["No pet out."])
     self.emptyLabel = empty
 
@@ -246,6 +269,13 @@ end
 --------------------------------------------------------------------------------
 -- The pet card's pieces
 --------------------------------------------------------------------------------
+
+--- Words without their colour codes, for measuring.
+local function Bare(text)
+    if type(text) ~= "string" then return "" end
+    return (text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))
+end
+UI.Bare = Bare
 
 --- A frame filled with a palette colour, with a fine border.
 local function Glass(parent, key, borderAlpha)
@@ -450,7 +480,7 @@ function UI.MeterStart(labels)
     for _, text in ipairs(labels) do
         widest = math.max(widest, Theme.TextWidth("small", text))
     end
-    return math.max(METER_LEAST, 4 + widest + 12)
+    return math.max(METER_LEAST, widest + 12)
 end
 
 function UI:BuildStatus()
@@ -504,13 +534,13 @@ function UI:BuildStatus()
     self.levelBadge, self.levelLabel = badge, level
 
     local name = Theme.CreateLabel(hero, "title", "accentHi")
-    name:SetPoint("TOPLEFT", hero, "TOPLEFT", 12 + PORTRAIT + 14, -11)
+    name:SetPoint("TOPLEFT", hero, "TOPLEFT", HERO_TEXT, -14)
     name:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
     self.nameLabel = name
 
     local sub = Theme.CreateLabel(hero, "small", "muted")
     sub:SetPoint("TOPLEFT", name, "BOTTOMLEFT", 0, -3)
-    sub:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
+    sub:SetPoint("RIGHT", name, "RIGHT", 0, 0)
     self.rows.pet = { value = sub }
 
     self.moodChip = CreateChip(hero)
@@ -534,18 +564,26 @@ function UI:BuildStatus()
     end)
 
     -- The three bars: experience, happiness and loyalty, a label on the
-    -- left and the words on the right.
+    -- left and the words on the right. They sit in the top card, right of
+    -- the name, past a fine gold line (placed in ShowMeters).
+    local split = hero:CreateTexture(nil, "ARTWORK")
+    split:SetWidth(1)
+    split:SetColorTexture(Theme.Unpack("accent", 0.25))
+    split:Hide()
+    self.heroSplit = split
+
     self.meters = {}
     METER_X = UI.MeterStart({ L["Experience"], L["Happiness"], L["Loyalty"] })
     local function Meter(key, labelText)
-        local meter = CreateFrame("Frame", nil, body)
+        local meter = CreateFrame("Frame", nil, hero)
         meter:SetHeight(METER_HEIGHT)
         meter.label = Theme.CreateLabel(meter, "small", "muted")
-        meter.label:SetPoint("LEFT", 4, 0)
+        meter.label:SetPoint("LEFT", 0, 0)
         meter.label:SetText(labelText)
         meter.value = Theme.CreateLabel(meter, "normal", "text")
         meter.value:SetPoint("LEFT", METER_X + METER_WIDTH + 12, 0)
-        meter.value:SetPoint("RIGHT", meter, "RIGHT", -4, 0)
+        meter.value:SetPoint("RIGHT", meter, "RIGHT", 0, 0)
+        meter.value:SetWordWrap(false)
         self.meters[key] = meter
         self.rows[key] = meter
         return meter
@@ -560,11 +598,9 @@ function UI:BuildStatus()
     -- Happiness: three lights, as many lit as the pet is happy, in its colour.
     local mood = Meter("happiness", L["Happiness"])
     mood.lights = {}
-    local lightWidth = math.floor((METER_WIDTH - 8) / 3)
     for i = 1, 3 do
         local light = CreateFrame("Frame", nil, mood)
-        light:SetSize(lightWidth, 12)
-        light:SetPoint("LEFT", METER_X + (i - 1) * (lightWidth + 4), 0)
+        light:SetHeight(12)
         light.background = Theme.Fill(light, "well")
         Theme.Border(light, "border", 0.9)
         light.shine = Theme.TopSheen(light, 0.12)
@@ -578,7 +614,7 @@ function UI:BuildStatus()
     for i = 1, 6 do
         local gem = loyalty:CreateTexture(nil, "ARTWORK")
         gem:SetSize(10, 10)
-        gem:SetPoint("LEFT", METER_X + 3 + (i - 1) * 20, 0)
+        gem:SetPoint("LEFT", METER_X + 3 + (i - 1) * 18, 0)
         gem:SetColorTexture(Theme.Unpack("border"))
         if gem.SetRotation then pcall(gem.SetRotation, gem, math.pi / 4) end
         loyalty.gems[i] = gem
@@ -718,6 +754,15 @@ end
 
 local SKILL_HEAD = 20
 local SKILL_ROW = 22
+-- A skill's own icon at the start of its line, and where its name starts
+-- with and without one.
+local SKILL_ICON = 16
+local SKILL_TEXT = 12
+local SKILL_TEXT_ICON = SKILL_TEXT + SKILL_ICON + 8
+-- The least the left column (what the pet knows) takes of the card, and the
+-- most, as a share of it.
+local SKILL_LEFT_LEAST = 220
+local SKILL_LEFT_SHARE = 0.45
 local SKILL_FOOT = 34
 local CHIP_ROW = 30
 local CHIP_HEIGHT = 20
@@ -777,10 +822,22 @@ local function CreateSkillRow(card)
     edge:Hide()
     row.value = Theme.CreateLabel(row, "small", "text", "RIGHT")
     row.value:SetPoint("RIGHT", -10, 0)
+    -- The skill's own icon from the game, in a fine metal frame. With no
+    -- icon to show, the name starts where the icon would.
+    local slot = CreateFrame("Frame", nil, row)
+    slot:SetSize(SKILL_ICON, SKILL_ICON)
+    slot:SetPoint("LEFT", SKILL_TEXT, 0)
+    Theme.Fill(slot, "well")
+    Theme.Border(slot, "metal")
+    row.icon = slot:CreateTexture(nil, "ARTWORK")
+    row.icon:SetPoint("TOPLEFT", 1, -1)
+    row.icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    if row.icon.SetTexCoord then row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+    row.iconSlot = slot
+    -- A name too long for its line wraps, and the line grows (ShowSkills).
     row.label = Theme.CreateLabel(row, "normal", "text")
-    row.label:SetPoint("LEFT", 12, 0)
-    row.label:SetPoint("RIGHT", row.value, "LEFT", -10, 0)
-    row.label:SetWordWrap(false)
+    row.label:SetPoint("LEFT", SKILL_TEXT, 0)
+    row.label:SetWordWrap(true)
 
     row:SetScript("OnEnter", function(self)
         self.background:SetColorTexture(Theme.Unpack("glassHover"))
@@ -867,6 +924,12 @@ function UI:BuildSkills()
     local way = Widgets.CreateButton(foot, L["Show the Way"], function() UI:ShowTheWayToTrainer() end,
         { primary = true, width = 100, height = 22 })
     way:SetPoint("RIGHT", -8, 0)
+    -- A fine line between the two columns.
+    local divide = card:CreateTexture(nil, "ARTWORK")
+    divide:SetWidth(1)
+    divide:SetColorTexture(Theme.Unpack("border", 0.6))
+    divide:Hide()
+    self.skillDivide = divide
     local trainer = Theme.CreateLabel(foot, "small", "muted")
     trainer:SetPoint("LEFT", 12, 0)
     trainer:SetPoint("RIGHT", way, "LEFT", -10, 0)
@@ -904,7 +967,8 @@ function UI.DemonSkillLines(plan, section)
                 value = L.Format("Level %d", skill.level)
             end
         end
-        out[#out + 1] = { label = label, value = value, muted = section == "later" }
+        out[#out + 1] = { label = label, value = value, muted = section == "later",
+            icon = ns.PetSkills and ns.PetSkills.Icon(skill.name, skill.rank) }
     end
     return out
 end
@@ -931,7 +995,7 @@ function UI.SkillLines(plan, section)
             value = skill.level and L.Format("Pet level %d", skill.level) or L["Tame a beast that knows it"]
         end
         out[#out + 1] = { label = label, value = value or "", beast = UI.IsBeastSkill(skill.name) and skill.name or nil,
-            muted = section == "later" }
+            muted = section == "later", icon = ns.PetSkills.Icon(skill.name, skill.rank) }
     end
     return out
 end
@@ -954,39 +1018,67 @@ function UI:ShowSkills(plan, trainer, top)
     self.skillHeads.known.left:SetText(demon and L["YOUR DEMON KNOWS"] or L["YOUR PET KNOWS"])
     self.skillHeads.learn.left:SetText(demon and L["CAN BUY NOW"] or L["CAN LEARN NOW"])
 
-    local y, used = -(CARD_HEAD + 1), 0
+    local y = -(CARD_HEAD + 1)
     y = self:ShowDemonChips(demon and plan or nil, y)
+
+    local lines = {}
     for _, section in ipairs({ "known", "learn", "later" }) do
-        local head = self.skillHeads[section]
-        local lines = plan and UI.SkillLines(plan, section) or {}
-        head:SetShown(#lines > 0)
-        if #lines > 0 then
-            head:ClearAllPoints()
-            head:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
-            head:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y)
-            y = y - SKILL_HEAD
-            for index, line in ipairs(lines) do
-                used = used + 1
-                local row = self.skillRows[used]
-                if not row then
-                    row = CreateSkillRow(card)
-                    self.skillRows[used] = row
+        lines[section] = plan and UI.SkillLines(plan, section) or {}
+    end
+
+    -- Two columns (the owner said build it from a mockup, 2026-11-24): what
+    -- the pet knows on the left, what it can learn now and later on the
+    -- right. With only one side to show, it takes the whole card.
+    local inner = self.fullWidth - 2
+    local hasLeft = #lines.known > 0
+    local hasRight = #lines.learn + #lines.later > 0
+    local two = hasLeft and hasRight
+    local leftWidth = two and UI.SkillsLeftWidth(lines.known, inner) or inner
+    self.skillColumns = two and { leftWidth, inner - leftWidth - 1 } or { inner }
+
+    local used = 0
+    local function Lay(sections, x, width, from)
+        local at = from
+        for _, section in ipairs(sections) do
+            local head = self.skillHeads[section]
+            local list = lines[section]
+            if #list > 0 then
+                head:ClearAllPoints()
+                head:SetPoint("TOPLEFT", card, "TOPLEFT", x, at)
+                head:SetWidth(width)
+                head:Show()
+                at = at - SKILL_HEAD
+                for index, line in ipairs(list) do
+                    used = used + 1
+                    local row = self.skillRows[used]
+                    if not row then
+                        row = CreateSkillRow(card)
+                        self.skillRows[used] = row
+                    end
+                    at = at - self:FillSkillRow(row, line, index, x, at, width)
                 end
-                row.glassKey = index % 2 == 1 and "glass" or "glassAlt"
-                row.background:SetColorTexture(Theme.Unpack(row.glassKey))
-                row.label:SetText(line.label)
-                row.value:SetText(line.value)
-                row.value:SetTextColor(Theme.Unpack(line.muted and "muted" or "text"))
-                row.beast = line.beast
-                row:ClearAllPoints()
-                row:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
-                row:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y)
-                row:Show()
-                y = y - SKILL_ROW
             end
         end
+        return at
+    end
+
+    for _, section in ipairs({ "known", "learn", "later" }) do self.skillHeads[section]:Hide() end
+    local leftEnd = hasLeft and Lay({ "known" }, 1, leftWidth, y) or y
+    local rightEnd = y
+    if hasRight then
+        rightEnd = Lay({ "learn", "later" }, two and (1 + leftWidth + 1) or 1,
+            two and (inner - leftWidth - 1) or inner, y)
     end
     for i = used + 1, #self.skillRows do self.skillRows[i]:Hide() end
+
+    local divide = self.skillDivide
+    divide:SetShown(two)
+    if two then
+        divide:ClearAllPoints()
+        divide:SetPoint("TOPLEFT", card, "TOPLEFT", 1 + leftWidth, y)
+        divide:SetHeight(math.max(y - math.min(leftEnd, rightEnd), 1))
+    end
+    y = math.min(leftEnd, rightEnd)
 
     self.skillTrainerPlace = trainer
     self.skillFoot:SetShown(trainer ~= nil)
@@ -999,6 +1091,51 @@ function UI:ShowSkills(plan, trainer, top)
         y = y - 2 - SKILL_FOOT
     end
     return -y + 2
+end
+
+--- How wide the left column is: wide enough for its longest line, no less
+--- than SKILL_LEFT_LEAST and no more than its share of the card.
+function UI.SkillsLeftWidth(lines, inner)
+    local widest = 0
+    for _, line in ipairs(lines) do
+        widest = math.max(widest, Theme.TextWidth("normal", Bare(line.label))
+            + Theme.TextWidth("small", Bare(line.value)))
+    end
+    local needed = SKILL_TEXT_ICON + math.ceil(widest) + 10 + 10 + 8
+    return math.min(math.max(SKILL_LEFT_LEAST, needed), math.floor(inner * SKILL_LEFT_SHARE))
+end
+
+--- Fill one skill line and place it at (x, y) in the card, `width` wide.
+--- A name too long for the line wraps and the line grows. Returns how tall
+--- the line is.
+function UI:FillSkillRow(row, line, index, x, y, width)
+    row.glassKey = index % 2 == 1 and "glass" or "glassAlt"
+    row.background:SetColorTexture(Theme.Unpack(row.glassKey))
+    row.value:SetText(line.value)
+    row.value:SetTextColor(Theme.Unpack(line.muted and "muted" or "text"))
+    row.beast = line.beast
+
+    local icon = line.icon
+    row.iconSlot:SetShown(icon ~= nil)
+    if icon then row.icon:SetTexture(icon) end
+    local textLeft = icon and SKILL_TEXT_ICON or SKILL_TEXT
+
+    local room = width - textLeft - 10 - math.ceil(Theme.TextWidth("small", Bare(line.value))) - 10
+    row.label:ClearAllPoints()
+    row.label:SetPoint("LEFT", row, "LEFT", textLeft, 0)
+    row.label:SetWidth(math.max(room, 60))
+    row.label:SetText(line.label)
+
+    local height = SKILL_ROW
+    local ok, textHeight = pcall(row.label.GetStringHeight, row.label)
+    if ok and type(textHeight) == "number" and textHeight + 8 > height then
+        height = math.ceil(textHeight + 8)
+    end
+    row:ClearAllPoints()
+    row:SetPoint("TOPLEFT", self.skillsCard, "TOPLEFT", x, y)
+    row:SetSize(width, height)
+    row:Show()
+    return height
 end
 
 --- What a dim chip says for a demon still to come, and its hover.
@@ -1269,18 +1406,19 @@ function UI:ShowHero(status)
     local PetStatus = ns.PetStatus
     self.nameLabel:SetText(status.name or L["Your pet"])
 
+    -- The level is on the gold badge on the pet's face, so the line under
+    -- the name is the family alone. A pet named for its family has no
+    -- family line, so its level goes there and the badge rests.
     local sub
     local family = status.family ~= status.name and status.family or nil
-    if family and status.level then
-        sub = L.Format("%s, level %s", family, status.level)
-    elseif family then
+    if family then
         sub = family
     elseif status.level then
         sub = L.Format("Level %s", status.level)
     end
     self.rows.pet.value:SetText(sub or "")
 
-    self.levelBadge:SetShown(status.level ~= nil)
+    self.levelBadge:SetShown(status.level ~= nil and family ~= nil)
     if status.level then self.levelLabel:SetText(tostring(status.level)) end
 
     if type(SetPortraitTexture) == "function" then
@@ -1325,17 +1463,65 @@ function UI:ShowHero(status)
     end
 end
 
---- The bars under the top card, stacked from `y`, the ones with nothing to
---- say left out. Returns where the last one ended.
-function UI:ShowMeters(status, y)
+--- How wide the name and chips are in the top card: the chips' row, no
+--- less than HERO_LEFT_LEAST and no more than HERO_LEFT_MOST.
+function UI:HeroLeftWidth()
+    local chips = 0
+    for _, chip in ipairs({ self.moodChip, self.trainingChip }) do
+        if chip:IsShown() then
+            chips = chips + (chips > 0 and 6 or 0) + (chip:GetWidth() or 0)
+        end
+    end
+    return math.min(math.max(HERO_LEFT_LEAST, math.ceil(chips)), HERO_LEFT_MOST)
+end
+
+--- The bars in the top card, right of the name, the ones with nothing to
+--- say left out and the rest centred as one block. Returns how many show.
+function UI:ShowMeters(status)
     local PetStatus = ns.PetStatus
     local values = {
         experience = PetStatus:ExperienceText(status),
         happiness = PetStatus:HappinessText(status),
         loyalty = PetStatus:LoyaltyText(status),
     }
+    local keys = { "experience", "happiness", "loyalty" }
 
-    for _, key in ipairs({ "experience", "happiness", "loyalty" }) do
+    local count, widest = 0, 0
+    for _, key in ipairs(keys) do
+        if values[key] then
+            count = count + 1
+            widest = math.max(widest, Theme.TextWidth("normal", Bare(values[key])))
+        end
+    end
+
+    -- With no bars (a demon), the name has the whole card.
+    local hero, name = self.hero, self.nameLabel
+    name:ClearAllPoints()
+    name:SetPoint("TOPLEFT", hero, "TOPLEFT", HERO_TEXT, -14)
+    self.heroSplit:SetShown(count > 0)
+    if count == 0 then
+        name:SetPoint("RIGHT", hero, "RIGHT", -12, 0)
+        for _, key in ipairs(keys) do
+            self.meters[key]:Hide()
+            self.meters[key].value:Hide()
+        end
+        return 0
+    end
+
+    local left = HERO_TEXT + self:HeroLeftWidth()
+    name:SetPoint("RIGHT", hero, "LEFT", left, 0)
+    self.heroSplit:ClearAllPoints()
+    self.heroSplit:SetPoint("TOPLEFT", hero, "TOPLEFT", left + HERO_SPLIT, -10)
+    self.heroSplit:SetPoint("BOTTOMLEFT", hero, "BOTTOMLEFT", left + HERO_SPLIT, 10)
+
+    -- The bar gives up room when the words beside it need more.
+    local start = left + HERO_SPLIT * 2
+    local room = self.fullWidth - start - 12
+    local barWidth = math.min(METER_WIDTH, math.max(METER_NARROW, room - METER_X - 12 - math.ceil(widest)))
+    self.meterBarWidth = barWidth
+
+    local y = -math.floor((HERO_HEIGHT - count * METER_HEIGHT) / 2)
+    for _, key in ipairs(keys) do
         local meter = self.meters[key]
         local text = values[key]
         meter:SetShown(text ~= nil)
@@ -1343,20 +1529,28 @@ function UI:ShowMeters(status, y)
         if text then
             meter.value:SetText(text)
             meter:ClearAllPoints()
-            meter:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, y)
-            meter:SetPoint("TOPRIGHT", self.body, "TOPRIGHT", 0, y)
+            meter:SetPoint("TOPRIGHT", hero, "TOPRIGHT", -12, y)
+            meter:SetPoint("TOPLEFT", hero, "TOPLEFT", start, y)
+            meter.value:ClearAllPoints()
+            meter.value:SetPoint("LEFT", METER_X + barWidth + 12, 0)
+            meter.value:SetPoint("RIGHT", meter, "RIGHT", 0, 0)
             y = y - METER_HEIGHT
         end
     end
 
     if values.experience then
-        self.meters.experience.bar:Set(status.xp / status.xpMax)
+        local bar = self.meters.experience.bar
+        if bar:GetWidth() ~= barWidth then bar:SetBarWidth(barWidth) end
+        bar:Set(status.xp / status.xpMax)
     end
 
     if values.happiness then
         local key = MoodColor(status.happiness)
+        local lightWidth = math.floor((barWidth - 8) / 3)
         for i, light in ipairs(self.meters.happiness.lights) do
             local lit = i <= status.happiness
+            light:SetWidth(lightWidth)
+            light:SetPoint("LEFT", METER_X + (i - 1) * (lightWidth + 4), 0)
             light.background:SetColorTexture(Theme.Unpack(lit and key or "well"))
             Theme.SetHalo(light, lit and 0.3 or 0, key)
             light.shine:SetShown(lit)
@@ -1370,11 +1564,13 @@ function UI:ShowMeters(status, y)
             gem:SetColorTexture(Theme.Unpack(level and i <= level and "accentHi" or "border"))
         end
         -- With no gems to show, the words take their place.
-        self.meters.loyalty.value:ClearAllPoints()
-        self.meters.loyalty.value:SetPoint("LEFT", level and METER_X + METER_WIDTH + 12 or METER_X, 0)
-        self.meters.loyalty.value:SetPoint("RIGHT", self.meters.loyalty, "RIGHT", -4, 0)
+        if not level then
+            self.meters.loyalty.value:ClearAllPoints()
+            self.meters.loyalty.value:SetPoint("LEFT", METER_X, 0)
+            self.meters.loyalty.value:SetPoint("RIGHT", self.meters.loyalty, "RIGHT", 0, 0)
+        end
     end
-    return y
+    return count
 end
 
 --- The food card: the food it eats next, how long the bags will keep it
@@ -1473,6 +1669,7 @@ end
 function UI:ShowStatus(status)
     self.body:SetShown(status.exists == true)
     self.emptyLabel:SetShown(not status.exists)
+    self.emptyPaw:SetShown(not status.exists)
     self.rows.pet.value:SetShown(status.exists == true)
     if not status.exists then
         self:PlaceFeedButton(nil)
@@ -1480,8 +1677,8 @@ function UI:ShowStatus(status)
     end
 
     self:ShowHero(status)
-    local y = self:ShowMeters(status, -(HERO_HEIGHT + GAP))
-    if y < -(HERO_HEIGHT + GAP) then y = y - GAP + 4 end
+    self:ShowMeters(status)
+    local y = -(HERO_HEIGHT + GAP)
 
     local stats = ns.PetStatus:ReadStats()
     local stacks, foodEnd, fightEnd

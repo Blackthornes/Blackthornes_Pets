@@ -129,13 +129,13 @@ suite.check("found a beast that teaches Charge (Rank 2)", charge2 ~= nil)
 suite.check("the lines go on a hunter's tooltip", Hover(charge2) == "added")
 local text = table.concat(tip._lines, "\n")
 suite.check("under a heading", text:find("Taming teaches", 1, true), text)
-suite.check("a skill not known is red and says so",
-    text:find("|c" .. ns.COLORS.bad .. "   Charge (Rank 2)|r || |c" .. ns.COLORS.bad .. "Not known|r", 1, true), text)
+suite.check("a skill not known is gold and says so",
+    text:find("|c" .. ns.COLORS.accent .. "   Charge (Rank 2)|r || |c" .. ns.COLORS.accent .. "Not known|r", 1, true), text)
 
 suite.check("a beast teaching Charge (Rank 1) is added", Hover(3099) == "added")
 text = table.concat(tip._lines, "\n")
-suite.check("a known skill is green and says so",
-    text:find("|c" .. ns.COLORS.good .. "   Charge (Rank 1)|r || |c" .. ns.COLORS.good .. "Known|r", 1, true), text)
+suite.check("a known skill is grey and says so",
+    text:find("|c" .. ns.COLORS.muted .. "   Charge (Rank 1)|r || |c" .. ns.COLORS.muted .. "Known|r", 1, true), text)
 suite.check("no hint while the client can tell", not text:find("Beast Training", 1, true), text)
 
 suite.check("two skills get a line each", Hover(pairNpc) == "added" and #tip._lines == 3, #tip._lines)

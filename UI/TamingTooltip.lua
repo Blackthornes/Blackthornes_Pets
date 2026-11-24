@@ -1,6 +1,6 @@
 -- Blackthornes Pets -- UI/TamingTooltip.lua
 -- On a tameable beast's tooltip, for a hunter: the pet skills taming it would
--- teach, green when the hunter already knows the skill and red when not.
+-- teach, gold when the skill is new to the hunter and grey when they have it.
 --
 -- Hooked the way Equipment's UI/Tooltip.lua and Tradeskills' item tooltip
 -- are. Their measurement on Forever is that retail's TooltipDataProcessor is
@@ -74,9 +74,9 @@ function TamingTooltip:Lines(npcID)
         local known = Taming:Knows(skill)
         local line = { left = "   " .. Taming.Label(skill) }
         if known == true then
-            line.color, line.right = "good", L["Known"]
+            line.color, line.right = "muted", L["Known"]
         elseif known == false then
-            line.color, line.right = "bad", L["Not known"]
+            line.color, line.right = "accent", L["Not known"]
         else
             line.color, unsure = "text", true
         end

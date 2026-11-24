@@ -88,6 +88,76 @@ function PetSkills.FamilyCan(skill, family)
     return false
 end
 
+--------------------------------------------------------------------------------
+-- A skill's icon
+--
+-- The game's own icon for a pet or demon skill, read from the client as it
+-- runs (nothing of the game's art ships with the addon). The spell comes
+-- from our data by the skill's English name and rank: the pet trainer's
+-- table, what taming teaches, then the demons' books. Every rank of a skill
+-- wears one icon, so a rank the data lacks takes another rank's.
+--------------------------------------------------------------------------------
+
+local skillSpells
+local iconOf = {}
+
+local function SkillSpells()
+    if skillSpells then return skillSpells end
+    skillSpells = {}
+    local function Note(name, rank, spell)
+        if type(name) ~= "string" or type(spell) ~= "number" then return end
+        local ranks = skillSpells[name]
+        if not ranks then
+            ranks = {}
+            skillSpells[name] = ranks
+        end
+        if type(rank) == "number" and not ranks[rank] then ranks[rank] = spell end
+        ranks.any = ranks.any or spell
+    end
+    for name, skill in pairs(ns.PetTrainingData and ns.PetTrainingData.SKILLS or {}) do
+        for rank, row in pairs(skill) do
+            if type(rank) == "number" and type(row) == "table" then Note(name, rank, row.spell) end
+        end
+    end
+    for spell, skill in pairs(ns.BeastSkills and ns.BeastSkills.SKILLS or {}) do
+        Note(skill.name, skill.rank, spell)
+    end
+    for _, demon in pairs(ns.DemonBooksData and ns.DemonBooksData.DEMONS or {}) do
+        for name, ranks in pairs(demon.skills or {}) do
+            for rank, row in pairs(ranks) do
+                if type(row) == "table" then Note(name, rank, row.spell) end
+            end
+        end
+    end
+    return skillSpells
+end
+
+--- The client's icon for a spell (a file number or a path), or nil when it
+--- will not say. Asked once a spell: an answer is kept for the session.
+function PetSkills.SpellIcon(spell)
+    if type(spell) ~= "number" then return nil end
+    local kept = iconOf[spell]
+    if kept ~= nil then return kept or nil end
+    local function Ask(get)
+        if type(get) ~= "function" then return nil end
+        local ok, value = pcall(get, spell)
+        value = ok and Plain(value) or nil
+        if type(value) == "number" or (type(value) == "string" and value ~= "") then return value end
+        return nil
+    end
+    local icon = Ask(type(_G.C_Spell) == "table" and _G.C_Spell.GetSpellTexture or nil)
+        or Ask(_G.GetSpellTexture)
+    iconOf[spell] = icon or false
+    return icon
+end
+
+--- The icon for a skill by its English name and rank, or nil.
+function PetSkills.Icon(name, rank)
+    local ranks = type(name) == "string" and SkillSpells()[name]
+    if not ranks then return nil end
+    return PetSkills.SpellIcon(ranks[rank] or ranks.any)
+end
+
 --- A spell as { name, rank } in the data's English, or nil.
 local function SkillOf(spellID, name, subtext)
     local data = Data()

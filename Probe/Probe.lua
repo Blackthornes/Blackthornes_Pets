@@ -247,6 +247,12 @@ function Probe:Run()
     Line("pet dead", Read("UnitIsDead", "pet"))
     Line("craft window", Read("GetCraftDisplaySkillLine") .. "; " .. Read("GetNumCrafts")
         .. "; first " .. Read("GetCraftInfo", 1))
+    -- Skill and family icons (2026-11-24): the icon of Bite (Rank 1), the
+    -- pet's spell 17253, and whether the client has the wolf and core hound
+    -- family icons.
+    Line("skill icon", Read("C_Spell.GetSpellTexture", 17253) .. "; " .. Read("GetSpellTexture", 17253))
+    Line("family icons", Read("GetFileIDFromPath", [[Interface\Icons\Ability_Hunter_Pet_Wolf]])
+        .. "; " .. Read("GetFileIDFromPath", [[Interface\Icons\Ability_Hunter_Pet_CoreHound]]))
 end
 
 ns.RegisterHiddenCommand("probe", function()
