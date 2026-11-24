@@ -5,6 +5,9 @@
 local _, ns = ...
 
 ns.WHATS_NEW = {
+    { version = "1.18.0", lines = {
+        "The All Addons page in Settings has a Set Default button. Click Confirm and this addon's settings go back to how they started.",
+    } },
     { version = "1.17.0", lines = {
         "The Pet tab shows the pet's bars beside its name, and skills in two columns with icons.",
         "New skills show in gold.",
@@ -13,10 +16,5 @@ ns.WHATS_NEW = {
     } },
     { version = "1.16.0", lines = {
         "Windows fold into a round button with the Pets badge.",
-    } },
-    { version = "1.15.0", lines = {
-        "Panels and rows have a warm brown-black look.",
-        "The food line links in chat and shows the item's tooltip.",
-        "Pets has its own key in Key Bindings.",
     } },
 }
