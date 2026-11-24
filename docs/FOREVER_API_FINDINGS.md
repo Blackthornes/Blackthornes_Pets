@@ -202,3 +202,14 @@ it (`C_Spell.GetSpellName(1539)`), through `C_UnitAuras.GetAuraDataByIndex
 Forever: feed the pet and run `/bpet probe` within 20 seconds; the "feed
 effect name", "feed effect on pet" and "aura calls" lines say what the
 client gives. A buff that can't be read never holds feeding.
+
+## Skill and family icons (2026-11-24)
+
+The skills card and the Compendium's tags read a skill's icon with
+`C_Spell.GetSpellTexture(spell)`, else `GetSpellTexture(spell)`, in a pcall
+(`PetSkills.SpellIcon`). With neither, or no answer, the line draws with no
+icon. The Compendium names the game's family icons by path
+(`Interface\Icons\Ability_Hunter_Pet_Wolf` and the like) and asks
+`GetFileIDFromPath` whether the client has each; one it lacks, or a family
+with no icon here (Fox), wears Beast Taming's. Not yet checked on Forever:
+`/bpet probe` prints "skill icon" and "family icons".

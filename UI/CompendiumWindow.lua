@@ -36,12 +36,12 @@ local GRIP_WIDTH = 16
 
 -- The list's columns: where each starts in a row, and how wide it is.
 local COLUMNS = {
-    { key = "name", label = L["Beast"], sortTip = L["Sort by beast"], x = 10, width = 186 },
-    { key = "family", label = L["Family"], sortTip = L["Sort by family"], x = 200, width = 88 },
+    { key = "name", label = L["Beast"], sortTip = L["Sort by beast"], x = 10, width = 206 },
+    { key = "family", label = L["Family"], sortTip = L["Sort by family"], x = 220, width = 78 },
     { key = "level", label = L["Level"], sortTip = L["Sort by level"], x = 292, width = 48 },
     { key = "speed", label = L["Speed"], sortTip = L["Sort by speed"], x = 344, width = 46,
       tip = L["Seconds between its attacks. Lower is faster."] },
-    { key = "zone", label = L["Where"], sortTip = L["Sort by where"], x = 394, width = 180 },
+    { key = "zone", label = L["Where"], sortTip = L["Sort by where"], x = 394, width = 170 },
     { key = "skills", label = L["Teaches"], x = 578, width = 188 },
 }
 
@@ -57,6 +57,59 @@ local USUAL_SPEED = 2.0
 
 -- The colour a beast's name takes for its rank.
 local RANK_COLOR = { rare = "rare", rareelite = "rare", elite = "warn" }
+
+-- Each beast wears its family's icon at the start of its row (the owner
+-- said build it from a mockup, 2026-11-24). These are the game's own icons,
+-- named here and drawn by the client; none ships with the addon. A family
+-- with none here wears the Beast Taming icon.
+local ICONS = [[Interface\Icons\]]
+local FAMILY_ICON = {
+    ["Bat"] = "Ability_Hunter_Pet_Bat",
+    ["Bear"] = "Ability_Hunter_Pet_Bear",
+    ["Boar"] = "Ability_Hunter_Pet_Boar",
+    ["Carrion Bird"] = "Ability_Hunter_Pet_Vulture",
+    ["Cat"] = "Ability_Hunter_Pet_Cat",
+    ["Core Hound"] = "Ability_Hunter_Pet_CoreHound",
+    ["Crab"] = "Ability_Hunter_Pet_Crab",
+    ["Crocolisk"] = "Ability_Hunter_Pet_Crocolisk",
+    ["Gorilla"] = "Ability_Hunter_Pet_Gorilla",
+    ["Hyena"] = "Ability_Hunter_Pet_Hyena",
+    ["Owl"] = "Ability_Hunter_Pet_Owl",
+    ["Raptor"] = "Ability_Hunter_Pet_Raptor",
+    ["Scorpid"] = "Ability_Hunter_Pet_Scorpid",
+    ["Spider"] = "Ability_Hunter_Pet_Spider",
+    ["Tallstrider"] = "Ability_Hunter_Pet_TallStrider",
+    ["Turtle"] = "Ability_Hunter_Pet_Turtle",
+    ["Wind Serpent"] = "Ability_Hunter_Pet_WindSerpent",
+    ["Wolf"] = "Ability_Hunter_Pet_Wolf",
+}
+local ANY_FAMILY_ICON = "Ability_Hunter_BeastTaming"
+local FAMILY_ICON_SIZE = 22
+-- How far the beast's name starts past its family icon.
+local NAME_INDENT = FAMILY_ICON_SIZE + 8
+
+-- A skill a beast teaches is a small tag: its icon and its name and rank.
+local TAG_HEIGHT = 15
+local TAG_ICON = 11
+local TAG_GAP = 4
+local TAG_LINES = 2
+
+--- The icon for a beast's family (by its English name), as a path. Where
+--- the client can say whether it has a file, a family whose icon it lacks
+--- wears Beast Taming's. Asked once a family.
+local familyIcons = {}
+function CompendiumUI.FamilyIcon(family)
+    local key = family or false
+    local kept = familyIcons[key]
+    if kept then return kept end
+    local path = ICONS .. (FAMILY_ICON[family] or ANY_FAMILY_ICON)
+    if FAMILY_ICON[family] and type(_G.GetFileIDFromPath) == "function" then
+        local ok, id = pcall(_G.GetFileIDFromPath, path)
+        if ok and not id then path = ICONS .. ANY_FAMILY_ICON end
+    end
+    familyIcons[key] = path
+    return path
+end
 
 local function Hex(key)
     local r, g, b = Theme.Unpack(key)
@@ -457,13 +510,109 @@ function CompendiumUI:OnTabSize(_, height)
     if self.frame:IsShown() then self:Draw() end
 end
 
-local function Cell(row, column, size, color)
+--- A cell's words sit in the middle of the row, one line or two, level
+--- with the family icon. `indent` starts them further in (the beast's name,
+--- past its icon).
+local function Cell(row, column, size, color, indent)
     local label = Theme.CreateLabel(row, size, color)
-    label:SetPoint("TOPLEFT", column.x, -4)
-    label:SetWidth(column.width)
+    label:SetPoint("LEFT", row, "LEFT", column.x + (indent or 0), 0)
+    label:SetSize(column.width - (indent or 0), ROW_HEIGHT - 4)
     label:SetWordWrap(true)
-    label:SetJustifyV("TOP")
+    label:SetJustifyV("MIDDLE")
     return label
+end
+
+--- A skill tag: dark glass with a fine edge, the skill's icon and its name
+--- and rank. Gold for a skill the hunter does not have yet, grey for one
+--- they do, plain when nothing can say.
+local function CreateTag(row)
+    local tag = CreateFrame("Frame", nil, row)
+    tag:SetHeight(TAG_HEIGHT)
+    tag.background = Theme.Fill(tag, "well", 0.5)
+    Theme.Border(tag, "border", 0.8)
+    tag.icon = tag:CreateTexture(nil, "ARTWORK")
+    tag.icon:SetSize(TAG_ICON, TAG_ICON)
+    tag.icon:SetPoint("LEFT", tag, "LEFT", 2, 0)
+    if tag.icon.SetTexCoord then tag.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+    tag.label = Theme.CreateLabel(tag, "tiny", "text")
+    tag.label:SetWordWrap(false)
+    return tag
+end
+
+-- How wide a tag's words are, kept: the list redraws as it scrolls.
+local tagWidths = {}
+local function TagTextWidth(text)
+    local width = tagWidths[text]
+    if not width then
+        width = math.ceil(Theme.TextWidth("tiny", text))
+        tagWidths[text] = width
+    end
+    return width
+end
+
+--- The colour key for a skill: "accentHi" when it is new to the hunter,
+--- "muted" when they have it, "text" when nothing can say.
+function CompendiumUI.SkillColor(skill)
+    local known = ns.Taming:Knows(skill)
+    if known == true then return "muted", true end
+    if known == false then return "accentHi", false end
+    return "text", nil
+end
+
+--- Lay a row's skill tags out in the Teaches column, left to right, on up
+--- to TAG_LINES lines. Returns false when they do not fit, and the row
+--- shows them as words instead.
+function CompendiumUI:LayTags(row, skills)
+    local column = COLUMNS[6]
+    local tags = rawget(row, "tags")
+    if not tags then
+        tags = {}
+        row.tags = tags
+    end
+    local places, x, line = {}, 0, 1
+    for i, skill in ipairs(skills) do
+        local text = ("%s %d"):format(skill.name, skill.rank)
+        local icon = ns.PetSkills and ns.PetSkills.Icon(skill.name, skill.rank)
+        local width = (icon and (2 + TAG_ICON + 4) or 6) + TagTextWidth(text) + 6
+        if x > 0 and x + width > column.width then
+            x, line = 0, line + 1
+        end
+        if line > TAG_LINES then
+            for _, tag in ipairs(tags) do tag:Hide() end
+            return false
+        end
+        places[i] = { x = x, line = line, width = width, text = text, icon = icon }
+        x = x + width + TAG_GAP
+    end
+
+    local top = line == 1 and -math.floor((ROW_HEIGHT - TAG_HEIGHT) / 2) or -1
+    for i, place in ipairs(places) do
+        local tag = tags[i]
+        if not tag then
+            tag = CreateTag(row)
+            tags[i] = tag
+        end
+        local key = CompendiumUI.SkillColor(skills[i])
+        tag.colorKey = key
+        tag.label:SetText(place.text)
+        tag.label:SetTextColor(Theme.Unpack(key))
+        Theme.SetBorderColor(tag, key == "accentHi" and "accent" or "border", 0.8)
+        tag.background:SetColorTexture(Theme.Unpack(key == "accentHi" and "accent" or "well", key == "accentHi" and 0.12 or 0.5))
+        tag.icon:SetShown(place.icon ~= nil)
+        if place.icon then
+            tag.icon:SetTexture(place.icon)
+            if tag.icon.SetDesaturated then tag.icon:SetDesaturated(key == "muted") end
+        end
+        tag.label:ClearAllPoints()
+        tag.label:SetPoint("LEFT", tag, "LEFT", place.icon and (2 + TAG_ICON + 4) or 6, 0)
+        tag:SetWidth(place.width)
+        tag:ClearAllPoints()
+        tag:SetPoint("TOPLEFT", row, "TOPLEFT", column.x + place.x,
+            top - (place.line - 1) * (TAG_HEIGHT + 2))
+        tag:Show()
+    end
+    for i = #places + 1, #tags do tags[i]:Hide() end
+    return true
 end
 
 function CompendiumUI:BuildRow(index)
@@ -496,7 +645,17 @@ function CompendiumUI:BuildRow(index)
     Theme.SetGradientAlpha(row.wash, "HORIZONTAL", "accent", 0.10, 0)
     row.wash:Hide()
 
-    row.name = Cell(row, COLUMNS[1], "small", "text")
+    -- The family's icon in a fine metal frame, the beast's name past it.
+    local slot = CreateFrame("Frame", nil, row)
+    slot:SetSize(FAMILY_ICON_SIZE, FAMILY_ICON_SIZE)
+    slot:SetPoint("LEFT", row, "LEFT", COLUMNS[1].x, 0)
+    Theme.Fill(slot, "well")
+    Theme.Border(slot, "metal")
+    row.familyIcon = slot:CreateTexture(nil, "ARTWORK")
+    row.familyIcon:SetPoint("TOPLEFT", 1, -1)
+    row.familyIcon:SetPoint("BOTTOMRIGHT", -1, 1)
+    if row.familyIcon.SetTexCoord then row.familyIcon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+    row.name = Cell(row, COLUMNS[1], "small", "text", NAME_INDENT)
     row.family = Cell(row, COLUMNS[2], "small", "text")
     row.level = Cell(row, COLUMNS[3], "small", "text")
     row.speed = Cell(row, COLUMNS[4], "small", "text")
@@ -542,18 +701,14 @@ end
 
 local Compendium = function() return ns.Compendium end
 
---- Each skill coloured: green when the hunter knows it, red when not, plain
---- when nothing can say.
+--- Each skill coloured, for a row whose tags do not fit: gold when it is
+--- new to the hunter, grey when they have it, plain when nothing can say.
 function CompendiumUI.SkillText(skills)
     local parts = {}
     for i, skill in ipairs(skills) do
         local text = ("%s %d"):format(skill.name, skill.rank)
-        local known = ns.Taming:Knows(skill)
-        if known == true then
-            text = Colored("good", text)
-        elseif known == false then
-            text = Colored("loss", text)
-        end
+        local key = CompendiumUI.SkillColor(skill)
+        if key ~= "text" then text = Colored(key, text) end
         parts[i] = text
     end
     return table.concat(parts, ", ")
@@ -603,8 +758,21 @@ function CompendiumUI:FillRow(row, entry, level)
     row.level:SetText(levelText)
     row.speed:SetText(self:SpeedCell(entry))
     row.zone:SetText(self:ZoneText(entry))
+    -- The family's icon is set only when the family changes: the list
+    -- redraws as it scrolls.
+    if rawget(row, "familyShown") ~= (entry.family or false) then
+        row.familyShown = entry.family or false
+        row.familyIcon:SetTexture(CompendiumUI.FamilyIcon(entry.family))
+    end
     local skills = Compendium():Skills(entry)
-    row.skills:SetText(#skills > 0 and self.SkillText(skills) or Colored("dim", L["Nothing"]))
+    if #skills == 0 then
+        self:LayTags(row, skills)
+        row.skills:SetText(Colored("dim", L["Nothing"]))
+    elseif self:LayTags(row, skills) then
+        row.skills:SetText("")
+    else
+        row.skills:SetText(self.SkillText(skills))
+    end
     row:Show()
 end
 
@@ -698,7 +866,7 @@ function CompendiumUI:ShowTooltip(row)
         GameTooltip:AddLine(L["Taming it teaches"], Theme.Unpack("accent"))
         for _, skill in ipairs(skills) do
             local known = ns.Taming:Knows(skill)
-            local key = known == true and "good" or known == false and "loss" or "text"
+            local key = CompendiumUI.SkillColor(skill)
             local tail = known == true and ("  " .. L["(known)"]) or known == false and ("  " .. L["(not known)"]) or ""
             GameTooltip:AddLine("  " .. ns.Taming.Label(skill) .. tail, Theme.Unpack(key))
         end
