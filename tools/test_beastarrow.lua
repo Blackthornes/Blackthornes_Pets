@@ -138,8 +138,9 @@ facing = 0
 
 ArrowUI:Refresh()
 suite.check("the dial shows", ArrowUI.frame and ArrowUI.frame:IsShown())
-suite.check("the plate names the beast", ArrowUI.title:GetText() == "Mother Fang  10", ArrowUI.title:GetText())
-suite.check("the arrow is up", ArrowUI.arrow:IsShown())
+suite.check("the top line names the beast", ArrowUI.title:GetText() == "Mother Fang  10", ArrowUI.title:GetText())
+suite.check("the chevron is up", ArrowUI.chevron:IsShown() and not ArrowUI.dot:IsShown())
+suite.check("a slim pill, no plate", ArrowUI.plate == nil and ArrowUI.frame:GetHeight() <= 30)
 
 --------------------------------------------------------------------------------
 -- TomTom: its arrow instead of the dial, when it is installed
