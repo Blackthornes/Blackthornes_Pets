@@ -51,6 +51,7 @@ Sections there:
 - The swap gem (One Window toggle, 2026-11-19)
 - The look upgrade (2026-11-24)
 - The Skills Grid (2026-11-26)
+- The Beast Sheet (2026-11-26)
 
 ## Checking a change
 

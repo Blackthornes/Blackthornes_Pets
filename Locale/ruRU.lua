@@ -217,8 +217,6 @@ L["Taming it teaches nothing new."] = "Если приручить его, ни�
 L["Taming it teaches"] = "Если приручить, научит"
 L["(known)"] = "(знаешь)"
 L["(not known)"] = "(не знаешь)"
-L["Click to pin it on your map."] = "Щёлкни, чтобы отметить его на карте."
-L["No place to pin yet."] = "Пока нечего отметить."
 L["No beast matches. Untick a box or clear the search."] =
     "Ни один зверь не подходит. Сними галочку или очисти поиск."
 L["%d beasts"] = "Зверей: %d"
@@ -639,3 +637,11 @@ L["pet trainer"] = "учитель питомцев"
 L["Rank %d: %s, %s"] = "Ранг %d: %s, %s"
 L["Rank %d: %s"] = "Ранг %d: %s"
 L["Rank %d at level %d"] = "Ранг %d на %d-м уровне"
+
+-- The Beast Sheet (2026-11-26)
+L["Click to see more."] = "Щёлкни, чтобы узнать больше."
+L["Faster than %s (%s)"] = "Быстрее, чем %s (%s)"
+L["Slower than %s (%s)"] = "Медленнее, чем %s (%s)"
+L["You can tame it now"] = "Можно приручить сейчас"
+L["You can tame it at level %d"] = "Можно приручить с %d-го уровня"
+L["New for you"] = "Новое для тебя"
