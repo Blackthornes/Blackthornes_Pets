@@ -217,8 +217,6 @@ L["Taming it teaches nothing new."] = "L'apprivoiser n'apprend rien de nouveau."
 L["Taming it teaches"] = "L'apprivoiser apprend"
 L["(known)"] = "(connue)"
 L["(not known)"] = "(pas connue)"
-L["Click to pin it on your map."] = "Clique pour la marquer sur ta carte."
-L["No place to pin yet."] = "Pas encore d'endroit à marquer."
 L["No beast matches. Untick a box or clear the search."] =
     "Aucune bête ne correspond. Décoche une case ou vide la recherche."
 L["%d beasts"] = "%d bêtes"
@@ -639,6 +637,14 @@ L["pet trainer"] = "maître des familiers"
 L["Rank %d: %s, %s"] = "Rang %d : %s, %s"
 L["Rank %d: %s"] = "Rang %d : %s"
 L["Rank %d at level %d"] = "Rang %d au niveau %d"
+
+-- The Beast Sheet (2026-11-26)
+L["Click to see more."] = "Clique pour en voir plus."
+L["Faster than %s (%s)"] = "Plus rapide que %s (%s)"
+L["Slower than %s (%s)"] = "Plus lente que %s (%s)"
+L["You can tame it now"] = "Tu peux la dresser maintenant"
+L["You can tame it at level %d"] = "Tu peux la dresser au niveau %d"
+L["New for you"] = "Nouveau pour toi"
 
 -- The Next Step line (Logic/NextStep.lua)
 L["NEXT"] = "ENSUITE"

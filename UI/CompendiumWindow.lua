@@ -52,6 +52,17 @@ local COLUMN_GAP = 4
 local GIVERS = { "skills", "zone", "name" }
 local GIVER_LEAST = 120
 
+-- The Beast Sheet beside the list (the owner said build it from a mockup,
+-- 2026-11-26): how wide it is, the gap before it, and the columns the list
+-- keeps while it is open. Family and Where move onto the sheet.
+local SHEET_WIDTH = 286
+local SHEET_GAP = 10
+local SHEET_PAD = 12
+local SHEET_MAP = 100
+local SHEET_LINE = 22
+local SHEET_ICON = 40
+local NARROW_KEYS = { name = true, level = true, speed = true, skills = true }
+
 -- A pet's usual swing time; quicker is green, slower amber.
 local USUAL_SPEED = 2.0
 
@@ -214,6 +225,9 @@ function CompendiumUI:Build()
     self:BuildBar()
     self:BuildHeadings()
     self:BuildList()
+    self:BuildSheet()
+    self.wideColumns = {}
+    for i, column in ipairs(COLUMNS) do self.wideColumns[i] = { x = column.x, width = column.width } end
 
     -- The house footer (the owner, 2026-10-29): the count on the left,
     -- the version small and faint on the right. What a click does is the
@@ -442,7 +456,8 @@ function CompendiumUI:BuildList()
 
     local well = Theme.CreatePanel(frame, "panel", "border")
     well:SetPoint("TOPLEFT", PADDING - 3, self.listTop + 3)
-    well:SetPoint("TOPRIGHT", -(PADDING - 3), self.listTop + 3)
+    self.listRight = self.listRight or PADDING
+    well:SetPoint("TOPRIGHT", -(self.listRight - 3), self.listTop + 3)
     well:SetHeight(self.visible * ROW_HEIGHT + 6)
     if Theme.Recess then Theme.Recess(well) end
     self.well = well
@@ -458,7 +473,7 @@ function CompendiumUI:BuildList()
     self.thumb = thumb
 
     local track = well:CreateTexture(nil, "ARTWORK")
-    track:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PADDING, self.listTop)
+    track:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -self.listRight, self.listTop)
     track:SetSize(self.scrollWidth, self.visible * ROW_HEIGHT)
     track:SetColorTexture(Theme.Unpack("rowAlt"))
     self.track = track
@@ -466,7 +481,7 @@ function CompendiumUI:BuildList()
     -- What the mouse catches: the bar and a little either side, above the
     -- rows. Holding it drags the thumb; a click on the bar jumps there.
     local grip = CreateFrame("Frame", nil, frame)
-    grip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -(PADDING - (GRIP_WIDTH - self.scrollWidth) / 2), self.listTop)
+    grip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -(self.listRight - (GRIP_WIDTH - self.scrollWidth) / 2), self.listTop)
     grip:SetSize(GRIP_WIDTH, self.visible * ROW_HEIGHT)
     grip:SetFrameLevel(frame:GetFrameLevel() + 10)
     grip:EnableMouse(true)
@@ -506,6 +521,7 @@ function CompendiumUI:OnTabSize(_, height)
     self.well:SetHeight(visible * ROW_HEIGHT + 6)
     self.track:SetHeight(visible * ROW_HEIGHT)
     self.grip:SetHeight(visible * ROW_HEIGHT)
+    if self.sheet then self.sheet:SetHeight(visible * ROW_HEIGHT + 6 + 20) end
     self.offset = math.min(self.offset or 0, math.max(0, #(self.lines or {}) - visible))
     if self.frame:IsShown() then self:Draw() end
 end
@@ -619,7 +635,9 @@ function CompendiumUI:BuildRow(index)
     local row = CreateFrame("Button", nil, self.frame)
     row:SetHeight(ROW_HEIGHT)
     row:SetPoint("TOPLEFT", PADDING, self.listTop - (index - 1) * ROW_HEIGHT)
-    row:SetPoint("TOPRIGHT", -(PADDING + (self.scrollWidth or SCROLL_WIDTH) + 2), self.listTop - (index - 1) * ROW_HEIGHT)
+    row:SetPoint("TOPRIGHT", -((self.listRight or PADDING) + (self.scrollWidth or SCROLL_WIDTH) + 2),
+        self.listTop - (index - 1) * ROW_HEIGHT)
+    row.index = index
     -- Dark glass, a shade apart row by row, with a fine line under each.
     row.rest = index % 2 == 0 and "glassAlt" or "glass"
     row.background = Theme.Fill(row, row.rest)
@@ -661,6 +679,10 @@ function CompendiumUI:BuildRow(index)
     row.speed = Cell(row, COLUMNS[4], "small", "text")
     row.zone = Cell(row, COLUMNS[5], "small", "text")
     row.skills = Cell(row, COLUMNS[6], "tiny", "text")
+    row.cells = {
+        { row.name, COLUMNS[1], NAME_INDENT }, { row.family, COLUMNS[2], 0 }, { row.level, COLUMNS[3], 0 },
+        { row.speed, COLUMNS[4], 0 }, { row.zone, COLUMNS[5], 0 }, { row.skills, COLUMNS[6], 0 },
+    }
 
     row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     row:SetScript("OnClick", function(self, button)
@@ -673,8 +695,10 @@ function CompendiumUI:BuildRow(index)
         local shift = type(IsShiftKeyDown) == "function" and select(2, pcall(IsShiftKeyDown))
         if shift then
             CompendiumUI:AimArrow(entry)
+        elseif CompendiumUI.picked == entry then
+            CompendiumUI:CloseSheet()
         else
-            ns.Compendium:Pin(entry)
+            CompendiumUI:OpenSheet(entry)
         end
     end)
     row:SetScript("OnEnter", function(self)
@@ -686,8 +710,7 @@ function CompendiumUI:BuildRow(index)
     end)
     row:SetScript("OnLeave", function(self)
         self.over = false
-        self.background:SetColorTexture(Theme.Unpack(self.rest))
-        self.stripe:Hide()
+        CompendiumUI:PaintRow(self)
         self.wash:Hide()
         GameTooltip:Hide()
     end)
@@ -751,6 +774,7 @@ function CompendiumUI:FillRow(row, entry, level)
         row:Hide()
         return
     end
+    if rawget(row, "over") ~= true then self:PaintRow(row) end
     row.name:SetText(self:NameText(entry))
     row.family:SetText(entry.family or Colored("dim", L["Not known yet"]))
     local levelText = Compendium().LevelText(entry)
@@ -879,13 +903,396 @@ function CompendiumUI:ShowTooltip(row)
     end
 
     GameTooltip:AddLine(" ")
-    -- Any beast with a zone shows on the map (Compendium:Pin): a spot, or
-    -- the middle of its zone.
-    local pinText = entry.zone and L["Click to pin it on your map."] or L["No place to pin yet."]
-    GameTooltip:AddLine(pinText, 0.6, 0.6, 0.6, true)
+    -- A click opens the Beast Sheet beside the list.
+    GameTooltip:AddLine(L["Click to see more."], 0.6, 0.6, 0.6, true)
     if entry.zone then GameTooltip:AddLine(L["Shift-click to point the arrow at it."], 0.6, 0.6, 0.6, true) end
     GameTooltip:AddLine(L["Right-click for more."], 0.6, 0.6, 0.6, true)
     GameTooltip:Show()
+end
+
+--------------------------------------------------------------------------------
+-- The Beast Sheet (the owner said build it from a mockup, 2026-11-26)
+--
+-- A click on a row opens a sheet beside the list with everything about that
+-- beast and how it compares to your pet, as Equipment's Find Upgrades does.
+-- While it is open the list keeps Beast, Level, Speed and Teaches; Family
+-- and Where are on the sheet. A second click on the row, or its red gem,
+-- closes it. Shift-click and the right-click menu are as they were.
+--------------------------------------------------------------------------------
+
+--- A row at rest: dark glass, or gold in the dark with a gold edge down its
+--- left while its beast is on the sheet.
+function CompendiumUI:PaintRow(row)
+    local picked = self.picked ~= nil and rawget(row, "entry") == self.picked
+    row.background:SetColorTexture(Theme.Unpack(picked and "glassActive" or row.rest))
+    row.stripe:SetShown(picked)
+end
+
+--- Lay the columns out: every one, or only those the list keeps beside the
+--- sheet, with Teaches taking what is left.
+function CompendiumUI:LayColumns(narrow)
+    local wide = self.wideColumns
+    if not wide then return end
+    local x = COLUMNS[1].x
+    local listWidth = (self.frame:GetWidth() or WIDTH) - PADDING - self.listRight
+        - (self.scrollWidth or SCROLL_WIDTH) - 2
+    for i, column in ipairs(COLUMNS) do
+        column.shown = not narrow or NARROW_KEYS[column.key] == true
+        column.width = wide[i].width
+        if column.shown then
+            column.x = x
+            if narrow and column.key == "skills" then
+                column.width = math.max(listWidth - x - 6, 100)
+            end
+            x = x + column.width + COLUMN_GAP
+        end
+    end
+    if not narrow then
+        for i, column in ipairs(COLUMNS) do column.x = wide[i].x end
+    end
+    for _, heading in ipairs(self.headings or {}) do
+        local column = heading.column
+        heading:SetShown(column.shown)
+        heading:SetWidth(column.width)
+        heading:ClearAllPoints()
+        heading:SetPoint("TOPLEFT", PADDING + column.x, self.barBottom)
+    end
+    for _, row in ipairs(self.allRows or {}) do
+        for _, cell in ipairs(row.cells) do
+            local label, column, indent = cell[1], cell[2], cell[3]
+            label:SetShown(column.shown)
+            label:ClearAllPoints()
+            label:SetPoint("LEFT", row, "LEFT", column.x + indent, 0)
+            label:SetSize(column.width - indent, ROW_HEIGHT - 4)
+        end
+    end
+end
+
+--- Move the list's right edge: PADDING alone, or past the sheet.
+function CompendiumUI:SetListRight(right)
+    self.listRight = right
+    self.well:SetPoint("TOPRIGHT", -(right - 3), self.listTop + 3)
+    self.track:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -right, self.listTop)
+    self.grip:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -(right - (GRIP_WIDTH - self.scrollWidth) / 2), self.listTop)
+    for _, row in ipairs(self.allRows or {}) do
+        row:SetPoint("TOPRIGHT", -(right + (self.scrollWidth or SCROLL_WIDTH) + 2),
+            self.listTop - (row.index - 1) * ROW_HEIGHT)
+    end
+end
+
+--- A label on the left and its value on the right, with a fine line under.
+local function SheetLine(sheet, label)
+    local line = CreateFrame("Frame", nil, sheet)
+    line:SetHeight(SHEET_LINE)
+    line.label = Theme.CreateLabel(line, "small", "muted")
+    line.label:SetPoint("LEFT", 0, 0)
+    line.label:SetText(label)
+    line.value = Theme.CreateLabel(line, "small", "text", "RIGHT")
+    line.value:SetPoint("RIGHT", 0, 0)
+    line.value:SetPoint("LEFT", line.label, "RIGHT", 8, 0)
+    line.value:SetWordWrap(true)
+    local rule = line:CreateTexture(nil, "BORDER")
+    rule:SetPoint("BOTTOMLEFT")
+    rule:SetPoint("BOTTOMRIGHT")
+    rule:SetHeight(1)
+    rule:SetColorTexture(Theme.Unpack("border", 0.6))
+    return line
+end
+
+function CompendiumUI:BuildSheet()
+    local frame = self.frame
+    local sheet = Theme.CreatePanel(frame, "panel", "border")
+    sheet:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -(PADDING - 3), self.barBottom + 3)
+    sheet:SetWidth(SHEET_WIDTH)
+    sheet:SetHeight(self.visible * ROW_HEIGHT + 6 + 20)
+    sheet:EnableMouse(true)
+    sheet:Hide()
+    self.sheet = sheet
+    local inner = SHEET_WIDTH - SHEET_PAD * 2
+
+    -- The family's icon, the beast's name and what it is.
+    local slot = CreateFrame("Frame", nil, sheet)
+    slot:SetSize(SHEET_ICON, SHEET_ICON)
+    slot:SetPoint("TOPLEFT", SHEET_PAD, -SHEET_PAD)
+    Theme.Fill(slot, "well")
+    Theme.Border(slot, "metal")
+    sheet.icon = slot:CreateTexture(nil, "ARTWORK")
+    sheet.icon:SetPoint("TOPLEFT", 1, -1)
+    sheet.icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    if sheet.icon.SetTexCoord then sheet.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+    sheet.name = Theme.CreateLabel(sheet, "large", "accentHi")
+    sheet.name:SetPoint("TOPLEFT", slot, "TOPRIGHT", 10, -2)
+    sheet.name:SetWidth(inner - SHEET_ICON - 10 - 24)
+    sheet.name:SetWordWrap(true)
+    sheet.kind = Theme.CreateLabel(sheet, "small", "muted")
+    sheet.kind:SetPoint("TOPLEFT", sheet.name, "BOTTOMLEFT", 0, -3)
+    sheet.kind:SetWidth(inner - SHEET_ICON - 10)
+    sheet.kind:SetWordWrap(true)
+
+    -- The red close gem (the X) in its top right corner.
+    local close
+    if ns.Titanforged and ns.Titanforged.CloseGem then
+        close = ns.Titanforged.CloseGem(sheet, function() CompendiumUI:CloseSheet() end)
+        close:SetSize(20, 20)
+    else
+        close = Widgets.CreateButton(sheet, "X", function() CompendiumUI:CloseSheet() end, { width = 20, height = 20 })
+    end
+    close:ClearAllPoints()
+    close:SetPoint("TOPRIGHT", sheet, "TOPRIGHT", -8, -8)
+    sheet.close = close
+
+    -- A small picture of where it lives: the zone's name and one gold dot.
+    local map = CreateFrame("Frame", nil, sheet)
+    map:SetSize(inner, SHEET_MAP)
+    map:SetPoint("TOPLEFT", slot, "BOTTOMLEFT", 0, -12)
+    Theme.Fill(map, "well")
+    Theme.Border(map, "border")
+    local glow = map:CreateTexture(nil, "BORDER")
+    glow:SetPoint("TOPLEFT", 1, -1)
+    glow:SetPoint("BOTTOMRIGHT", -1, 1)
+    glow:SetColorTexture(1, 1, 1, 1)
+    Theme.SetGradientAlpha(glow, "VERTICAL", "accent", 0.04, 0.14)
+    local media = ns.Titanforged and ns.Titanforged.MEDIA or ""
+    map.halo = map:CreateTexture(nil, "ARTWORK")
+    map.halo:SetTexture(media .. "Glow")
+    map.halo:SetSize(26, 26)
+    map.halo:SetVertexColor(Theme.Unpack("accent"))
+    if map.halo.SetBlendMode then map.halo:SetBlendMode("ADD") end
+    map.dot = map:CreateTexture(nil, "OVERLAY")
+    map.dot:SetTexture(media .. "TravelDot")
+    map.dot:SetSize(10, 10)
+    map.dot:SetVertexColor(Theme.Unpack("accentHi"))
+    map.halo:SetPoint("CENTER", map.dot, "CENTER")
+    map.caption = Theme.CreateLabel(map, "small", "muted")
+    map.caption:SetPoint("BOTTOMLEFT", 8, 6)
+    map.caption:SetWidth(inner - 16)
+    map.caption:SetWordWrap(true)
+    sheet.map = map
+
+    sheet.speed = SheetLine(sheet, L["Speed"])
+    sheet.eats = SheetLine(sheet, L["Eats"])
+    sheet.level = SheetLine(sheet, L["Level"])
+
+    sheet.teachHead = Theme.CreateLabel(sheet, "small", "muted")
+    sheet.teachHead:SetText(L["Taming it teaches"])
+    sheet.tags, sheet.news = {}, {}
+    sheet.nothing = Theme.CreateLabel(sheet, "small", "muted")
+    sheet.nothing:SetText(L["Taming it teaches nothing new."])
+    sheet.nothing:SetWidth(inner)
+    sheet.nothing:SetWordWrap(true)
+
+    sheet.way = Widgets.CreateButton(sheet, L["Show the Way"], function()
+        if CompendiumUI.picked and CompendiumUI.picked.zone then CompendiumUI:AimArrow(CompendiumUI.picked) end
+    end, { primary = true, width = 100, height = 24 })
+    sheet.pin = Widgets.CreateButton(sheet, L["Show on Map"], function()
+        if CompendiumUI.picked and CompendiumUI.picked.zone then ns.Compendium:Pin(CompendiumUI.picked) end
+    end, { primary = true, width = 100, height = 24 })
+    sheet.pin:SetPoint("LEFT", sheet.way, "RIGHT", 10, 0)
+end
+
+--- Your pet's name and attack speed, for the sheet to compare against, or
+--- nil with no pet out (or one the game won't read).
+function CompendiumUI.PetSpeed()
+    local function Call(fn, ...)
+        if type(fn) ~= "function" then return nil end
+        local ok, a, b = pcall(fn, ...)
+        if ok then return a, b end
+    end
+    if Call(_G.UnitExists, "pet") ~= true then return nil end
+    local name = Call(_G.UnitName, "pet")
+    local ok, speed = pcall(function()
+        local value = Call(_G.UnitAttackSpeed, "pet")
+        return value + 0
+    end)
+    if not (ok and type(name) == "string" and name ~= "" and type(speed) == "number" and speed > 0) then return nil end
+    return name, speed
+end
+
+--- What the Speed line says: the beast's speed and how it compares to your
+--- pet's.
+function CompendiumUI.SpeedWords(entry, petName, petSpeed)
+    local text = Compendium().SpeedText(entry)
+    if not text then return Colored("dim", "-") end
+    local key = entry.speed < USUAL_SPEED and "good" or entry.speed > USUAL_SPEED and "warn" or nil
+    local shown = key and Colored(key, text) or text
+    if petName and petSpeed then
+        local pet = ("%.1f"):format(petSpeed)
+        if ("%.1f"):format(entry.speed) ~= pet then
+            local words = entry.speed < petSpeed and L.Format("Faster than %s (%s)", petName, pet)
+                or L.Format("Slower than %s (%s)", petName, pet)
+            shown = shown .. " " .. Colored("muted", words)
+        end
+    end
+    return shown
+end
+
+--- What the Level line says, and its colour.
+function CompendiumUI.TameWords(entry, level)
+    local can = Compendium():CanTame(entry, level)
+    if can == true then return L["You can tame it now"], "good" end
+    if can == false then return L.Format("You can tame it at level %d", entry.min), "loss" end
+    local text = Compendium().LevelText(entry)
+    return text ~= "" and text or "-", "text"
+end
+
+--- The diet as players read it: "Meat, Fish".
+function CompendiumUI.DietWords(entry)
+    if not entry.diet then return nil end
+    local words = {}
+    for word in entry.diet:gmatch("[^,]+") do
+        local plain = word:gsub("^%s+", ""):gsub("%s+$", "")
+        words[#words + 1] = ns.PetFood and ns.PetFood.Label(plain) or plain
+    end
+    return table.concat(words, ", ")
+end
+
+--- Open the sheet on a beast. The list narrows beside it.
+function CompendiumUI:OpenSheet(entry)
+    if not (entry and self.sheet) then return end
+    self.picked = entry
+    if not self.sheet:IsShown() then
+        self.sheet:Show()
+        self:SetListRight(PADDING + SHEET_WIDTH + SHEET_GAP)
+        self.empty:ClearAllPoints()
+        self.empty:SetPoint("TOP", self.well, "TOP", 0, -40)
+    end
+    -- Laid out each time: the window may have grown for another tab.
+    self:LayColumns(true)
+    self:FillSheet(entry)
+    if self.frame:IsShown() then self:Draw() end
+end
+
+--- Close the sheet, and the list takes the whole width again.
+function CompendiumUI:CloseSheet()
+    if not self.sheet then return end
+    self.picked = nil
+    if self.sheet:IsShown() then
+        self.sheet:Hide()
+        self:SetListRight(PADDING)
+        self:LayColumns(false)
+        self.empty:ClearAllPoints()
+        self.empty:SetPoint("TOP", self.frame, "TOP", 0, self.listTop - 40)
+    end
+    if self.frame:IsShown() then self:Draw() end
+end
+
+function CompendiumUI:FillSheet(entry)
+    local sheet = self.sheet
+    local C = Compendium()
+    local inner = SHEET_WIDTH - SHEET_PAD * 2
+    sheet.icon:SetTexture(CompendiumUI.FamilyIcon(entry.family))
+    sheet.name:SetText(entry.name or "")
+    sheet.name:SetTextColor(Theme.Unpack(RANK_COLOR[entry.rank] or "accentHi"))
+    local family = entry.family or L["Family not known yet"]
+    local rank = C.RankText(entry)
+    if rank then family = Colored(RANK_COLOR[entry.rank] or "muted", rank) .. " " .. family end
+    local levelText = C.LevelText(entry)
+    sheet.kind:SetText(levelText ~= "" and L.Format("%s, level %s", family, levelText) or family)
+
+    -- The dot sits where the beast lives in its zone, or in the middle when
+    -- only the zone is known.
+    local map = sheet.map
+    local where = entry.zone ~= nil
+    map.dot:SetShown(where)
+    map.halo:SetShown(where)
+    if where then
+        local x = math.max(0.06, math.min(0.94, (tonumber(entry.x) or 50) / 100))
+        local y = math.max(0.08, math.min(0.80, (tonumber(entry.y) or 50) / 100))
+        map.dot:ClearAllPoints()
+        map.dot:SetPoint("CENTER", map, "TOPLEFT", inner * x, -SHEET_MAP * y)
+        map.caption:SetText(C.PlaceText(entry))
+        map.caption:SetTextColor(Theme.Unpack("muted"))
+    else
+        map.caption:SetText(L["Where it lives is not known yet."])
+        map.caption:SetTextColor(Theme.Unpack("dim"))
+    end
+
+    local y = -(SHEET_PAD + SHEET_ICON + 12 + SHEET_MAP + 6)
+    local function Place(line, shown)
+        line:SetShown(shown)
+        if not shown then return end
+        line:ClearAllPoints()
+        line:SetPoint("TOPLEFT", sheet, "TOPLEFT", SHEET_PAD, y)
+        line:SetWidth(inner)
+        local height = SHEET_LINE
+        local ok, textHeight = pcall(line.value.GetStringHeight, line.value)
+        if ok and type(textHeight) == "number" and textHeight + 8 > height then height = math.ceil(textHeight + 8) end
+        line:SetHeight(height)
+        y = y - height
+    end
+    local petName, petSpeed = CompendiumUI.PetSpeed()
+    sheet.speed.value:SetText(CompendiumUI.SpeedWords(entry, petName, petSpeed))
+    Place(sheet.speed, true)
+    local diet = CompendiumUI.DietWords(entry)
+    sheet.eats.value:SetText(diet or "")
+    Place(sheet.eats, diet ~= nil)
+    local tame, key = CompendiumUI.TameWords(entry)
+    sheet.level.value:SetText(tame)
+    sheet.level.value:SetTextColor(Theme.Unpack(key))
+    Place(sheet.level, true)
+
+    -- What taming it teaches: a tag each, "New for you" beside a skill the
+    -- hunter has not got.
+    y = y - 12
+    sheet.teachHead:ClearAllPoints()
+    sheet.teachHead:SetPoint("TOPLEFT", sheet, "TOPLEFT", SHEET_PAD, y)
+    y = y - 18
+    local skills = C:Skills(entry)
+    sheet.nothing:SetShown(#skills == 0)
+    sheet.teachHead:SetShown(#skills > 0)
+    if #skills == 0 then
+        sheet.nothing:ClearAllPoints()
+        sheet.nothing:SetPoint("TOPLEFT", sheet, "TOPLEFT", SHEET_PAD, y + 18)
+        y = y - 2
+    end
+    for i, skill in ipairs(skills) do
+        local tag = sheet.tags[i]
+        if not tag then
+            tag = CreateTag(sheet)
+            tag:SetHeight(20)
+            tag.label:SetFont(Theme.FONT, Theme.sizes.small, "")
+            tag.icon:SetSize(14, 14)
+            sheet.tags[i] = tag
+            sheet.news[i] = Theme.CreateLabel(sheet, "small", "accentHi")
+            sheet.news[i]:SetText(L["New for you"])
+        end
+        local text = ("%s %d"):format(skill.name, skill.rank)
+        local icon = ns.PetSkills and ns.PetSkills.Icon(skill.name, skill.rank)
+        local color = CompendiumUI.SkillColor(skill)
+        tag.label:SetText(text)
+        tag.label:SetTextColor(Theme.Unpack(color))
+        Theme.SetBorderColor(tag, color == "accentHi" and "accent" or "border", 0.8)
+        tag.background:SetColorTexture(Theme.Unpack(color == "accentHi" and "accent" or "well",
+            color == "accentHi" and 0.12 or 0.5))
+        tag.icon:SetShown(icon ~= nil)
+        if icon then tag.icon:SetTexture(icon) end
+        local textLeft = icon and (3 + 14 + 5) or 6
+        tag.label:ClearAllPoints()
+        tag.label:SetPoint("LEFT", tag, "LEFT", textLeft, 0)
+        tag:SetWidth(textLeft + math.ceil(Theme.TextWidth("small", text)) + 8)
+        tag:ClearAllPoints()
+        tag:SetPoint("TOPLEFT", sheet, "TOPLEFT", SHEET_PAD, y)
+        tag:Show()
+        local new = sheet.news[i]
+        new:SetShown(color == "accentHi")
+        new:ClearAllPoints()
+        new:SetPoint("LEFT", tag, "RIGHT", 8, 0)
+        y = y - 24
+    end
+    for i = #skills + 1, #sheet.tags do
+        sheet.tags[i]:Hide()
+        sheet.news[i]:Hide()
+    end
+
+    -- Show the Way and Show on Map, dim for a beast with no place yet.
+    y = y - 10
+    sheet.way:ClearAllPoints()
+    sheet.way:SetPoint("TOPLEFT", sheet, "TOPLEFT", SHEET_PAD, y)
+    for _, button in ipairs({ sheet.way, sheet.pin }) do
+        button:SetAlpha(where and 1 or 0.45)
+        button:EnableMouse(where)
+    end
+    sheet.bottom = y - 24
 end
 
 --------------------------------------------------------------------------------
@@ -996,7 +1403,7 @@ function CompendiumUI:Draw()
         local top = (height - size) * offset / (total - self.visible)
         self.thumbTop, self.thumbSize = top, size
         self.thumb:SetHeight(size)
-        self.thumb:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -PADDING, self.listTop - top)
+        self.thumb:SetPoint("TOPRIGHT", self.frame, "TOPRIGHT", -(self.listRight or PADDING), self.listTop - top)
         self.thumb:Show()
         self.track:Show()
         self.grip:Show()

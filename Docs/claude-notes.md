@@ -1582,6 +1582,25 @@ lists (`PetSkills.GridRow`), so the two never disagree. The choice is
 picked, and joins Restore Defaults' `SETTING_KEYS`. Tested in
 `tools/test_skillsgrid.lua`.
 
+## The Beast Sheet (2026-11-26)
+
+The owner said build it from `Docs/mockups/pets-improve-4-beast-sheet.html`
+in the project files. A left click on a Compendium row opens a sheet beside
+the list (`CompendiumUI:OpenSheet`, the same side sheet idea as Equipment's
+Find Upgrades): the family icon, the name in its rank colour, "Rare Wolf,
+level 12", a small picture with the zone's name and a gold dot where the
+beast lives, then Speed (compared to your pet, read in a pcall:
+`PetSpeed`, `SpeedWords`), Eats (`DietWords`), Level ("You can tame it now"
+or "You can tame it at level 53", `TameWords`), what taming it teaches (a
+tag each, "New for you" beside a new one), and Show the Way and Show on Map
+(resting for a beast with no place). While it is open the list keeps Beast,
+Level, Speed and Teaches (`NARROW_KEYS`, `LayColumns`, `SetListRight`);
+Family and Where are on the sheet. The picked row is `glassActive` with a
+gold left edge (`PaintRow`). Its red gem, or a second click on the row,
+closes it (`CloseSheet`). Shift-click (the arrow) and the right-click menu
+are as they were; a plain click no longer pins the map (Show on Map does).
+Session only, nothing saved. Tested in `tools/test_beastsheet.lua`.
+
 ## The Next Step line (2026-11-26)
 
 The owner said build it from the mockup `Docs/mockups/pets-improve-5-next-step.html`
