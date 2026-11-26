@@ -64,8 +64,10 @@ do
     suite.check("Settings says what the pages need", Tabs.needs.settings and Tabs.needs.settings[2] == need[2])
     -- The test's frames don't follow their anchors, so the area keeps its
     -- old height; the one window around it is what grows.
+    -- Up to the screen's height; past that the pages scroll.
+    local room = ns.SharedWindow.Room(hub.frame) or math.huge
     suite.check("and the one window grows to hold them",
-        hub.frame:GetHeight() - oneBefore >= need[2] - before)
+        hub.frame:GetHeight() - oneBefore >= need[2] - before or hub.frame:GetHeight() >= room)
     SettingsUI.pages:ShowDescriptions(false)
     frame.GetWidth, frame.GetHeight = getW, getH
 end
