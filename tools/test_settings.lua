@@ -265,8 +265,19 @@ do
         not Shown(controls.soulShards) and not Shown(controls.shardTracker) and not Shown(controls.shardTrackerSize))
     suite.check("the bar's size rows wait for the bar",
         not Shown(controls.petXPBarWidth) and not Shown(controls.petXPBarCheer))
-    -- FEEDING, its five and Button Place, PET XP BAR and its switch; TAMING and its one.
-    suite.check("the columns hold only what shows", left == 9 and right == 2, left .. "/" .. right)
+    -- FEEDING, its five, Button Place and Pet Strip, PET XP BAR and its switch; TAMING and its one.
+    suite.check("the columns hold only what shows", left == 10 and right == 2, left .. "/" .. right)
+    suite.check("Strip Place waits for the strip", Shown(controls.petStrip) and not Shown(controls.petStripPlace))
+    controls.petStrip:SetChecked(false)
+    controls.petStrip:GetScript("OnClick")(controls.petStrip)
+    suite.check("ticking the strip brings Strip Place", ns.db.petStrip == true and Shown(controls.petStripPlace))
+    controls.petStripPlace:SetValue(2)
+    suite.check("Free is kept", ns.db.petStripPlace == "free" and not ns.PetStrip:OnPetFrame())
+    controls.petStripPlace:SetValue(1)
+    suite.check("On Pet Frame is the first place, kept as nothing",
+        ns.db.petStripPlace == nil and ns.PetStrip:OnPetFrame())
+    ns.db.petStrip = false
+    SettingsUI:LayPet()
 
     controls.petXPBar:SetChecked(false)
     controls.petXPBar:GetScript("OnClick")(controls.petXPBar)
@@ -312,10 +323,10 @@ do
 
     ns.db.petXPBar = true
     left, right = Count("Mage")
-    suite.check("another class sees every setting", left == 14 and right == 7, left .. "/" .. right)
+    suite.check("another class sees every setting", left == 15 and right == 7, left .. "/" .. right)
     _G.UnitClass = nil
     left, right = Count(nil)
-    suite.check("so does a class the client won't read", left == 14 and right == 7, left .. "/" .. right)
+    suite.check("so does a class the client won't read", left == 15 and right == 7, left .. "/" .. right)
     ns.db.petXPBar, ns.db.shardTracker = false, false
     _G.UnitClass = function() return "Hunter", "HUNTER" end
     SettingsUI:LayPet()

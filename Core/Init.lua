@@ -354,6 +354,7 @@ local DEFAULTS = {
     -- The Shard Tracker on screen (UI/ShardTracker.lua). Off unless ticked.
     shardTracker = false,
     petXPBar = false,
+    petStrip = false,
 
     -- Food that gives a buff (stat food) is always fed last; ticked, it is
     -- never fed at all.

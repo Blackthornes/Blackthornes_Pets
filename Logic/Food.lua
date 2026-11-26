@@ -588,7 +588,8 @@ function Food:CheckLow(status, stacks)
         message = L.Format("Only %d food left that %s will eat.", total, status.name or L["your pet"])
     end
     ns.Warn(message)
-    ns.PetStatus:Alert(message)
+    -- The Pet Strip turns the count red already: no card over it.
+    if not (ns.PetStrip and ns.PetStrip:Showing()) then ns.PetStatus:Alert(message) end
     return true
 end
 
@@ -713,6 +714,11 @@ function Food:EatingChanged()
     local left = self:Eating()
     local was = self.eatingNow
     self.eatingNow = left ~= nil
+    -- A feed just started: the Pet Strip learns how long one lasts.
+    if self.eatingNow and was ~= true and ns.PetStrip then
+        local status = ns.PetStatus:Read()
+        ns.PetStrip:NoteFed(status and status.name)
+    end
     if self.eatingNow ~= (was == true) then self:Update() end
     if left then self:WatchEating() end
 end
@@ -833,6 +839,7 @@ function Food:Update()
     self:RetryIncomplete(stacks)
     if ns.FeedButton then ns.FeedButton:Update(status, stacks) end
     if ns.FeedKey then ns.FeedKey:Update(status, stacks) end
+    if ns.PetStrip then ns.PetStrip:Update(status, stacks) end
     if ns.UI and ns.UI.Refresh then
         pcall(ns.UI.Refresh, ns.UI)
     end

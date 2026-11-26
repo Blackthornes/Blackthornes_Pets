@@ -600,6 +600,15 @@ L["Pet XP bar: on."] = "宠物经验条：开。"
 L["Pet XP bar: off."] = "宠物经验条：关。"
 L["Pet XP bar is back in its first spot."] = "宠物经验条回到了最初的位置。"
 L["show your pet's XP on screen (on, off, reset)"] = "在屏幕上显示你宠物的经验（on, off, reset）"
+-- The Pet Strip
+L["Pet Strip:"] = "宠物状态条："
+L["Strip Place:"] = "状态条位置："
+L["Shows your pet's mood, food and experience in one small strip."] = "在一个小条里显示宠物的心情、食物和经验。"
+L["About %d hours"] = "约%d小时"
+L["Pet Strip is back in its first spot."] = "宠物状态条已回到最初的位置。"
+L["Pet Strip: on."] = "宠物状态条：开。"
+L["Pet Strip: off."] = "宠物状态条：关。"
+L["show your pet's mood, food and experience in one strip (on, off, reset)"] = "在一个条里显示宠物的心情、食物和经验（on, off, reset）"
 
 -- Mute All Sounds (2026-11-12)
 L["Mute All Sounds:"] = "全部静音："
