@@ -628,6 +628,18 @@ L["Pets Settings:"] = "Pets-Einstellungen:"
 L["Puts every Pets setting back to how it started. Your saved data stays. So do your window locations and the choices on this page."] = "Setzt jede Pets-Einstellung auf den Anfang zurück. Deine gespeicherten Daten bleiben. Auch deine Fensterpositionen und die Einstellungen auf dieser Seite bleiben."
 L["Every Pets setting is back to how it started."] = "Alle Pets-Einstellungen sind wieder wie am Anfang."
 
+-- The Skills Grid (2026-11-26)
+L["List"] = "Liste"
+L["Grid"] = "Raster"
+L["Your pet knows it"] = "Dein Begleiter kann es"
+L["You can get it now"] = "Du kannst es jetzt bekommen"
+L["Needs a higher level"] = "Braucht eine höhere Stufe"
+L["Beast Training"] = "Tierausbildung"
+L["pet trainer"] = "Tierausbilder"
+L["Rank %d: %s, %s"] = "Rang %d: %s, %s"
+L["Rank %d: %s"] = "Rang %d: %s"
+L["Rank %d at level %d"] = "Rang %d ab Stufe %d"
+
 -- The Next Step line (Logic/NextStep.lua)
 L["NEXT"] = "NÄCHSTES"
 L["%s is hungry."] = "%s hat Hunger."
