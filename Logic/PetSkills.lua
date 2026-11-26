@@ -58,6 +58,12 @@ local familyByName
 function PetSkills.FamilyID()
     local name, id = Read(_G.UnitCreatureFamily, "pet")
     if type(id) == "number" then return id end
+    return PetSkills.FamilyByName(name)
+end
+
+--- A family's number from its name in the client's language (the stable
+--- gives only the name), or nil.
+function PetSkills.FamilyByName(name)
     if type(name) ~= "string" or name == "" then return nil end
     if not familyByName then
         familyByName = {}

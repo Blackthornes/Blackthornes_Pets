@@ -1,6 +1,6 @@
 -- Blackthornes Pets -- UI/PetsTabs.lua
--- One Pets window with its tabs hanging below it: Pet, Compendium and
--- Settings (a player asked, the owner said build it from a mockup,
+-- One Pets window with its tabs hanging below it: Pet, My Pets (hunters
+-- only), Compendium and Settings (a player asked, the owner said build it from a mockup,
 -- 2026-10-22), as Tradeskills' and Farmer's windows wear theirs.
 --
 -- Each tab is still its own window underneath (UI/MainWindow.lua,
@@ -36,16 +36,20 @@ PetsTabs.SCALE_KEY = "windowScale"
 
 --- The tabs, in order, and the window behind each. Settings is always
 --- last, flush right.
+--- My Pets (UI/MyPetsWindow.lua) shows for hunters only.
 function PetsTabs.Tabs()
-    return {
-        { key = "pet", text = L["Pet"] },
-        { key = "compendium", text = L["Compendium"] },
-        { key = "settings", text = L["Settings"], right = true },
-    }
+    local tabs = { { key = "pet", text = L["Pet"] } }
+    local PetSkills = ns.PetSkills
+    local ok, hunter = pcall(function() return PetSkills and PetSkills.IsHunter() end)
+    if ok and hunter and ns.MyPetsUI then tabs[#tabs + 1] = { key = "mypets", text = L["My Pets"] } end
+    tabs[#tabs + 1] = { key = "compendium", text = L["Compendium"] }
+    tabs[#tabs + 1] = { key = "settings", text = L["Settings"], right = true }
+    return tabs
 end
 
 local function Owner(key)
     if key == "pet" then return ns.UI end
+    if key == "mypets" then return ns.MyPetsUI end
     if key == "compendium" then return ns.CompendiumUI end
     if key == "settings" then return ns.SettingsUI end
     return nil

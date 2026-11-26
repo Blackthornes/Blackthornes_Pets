@@ -213,3 +213,28 @@ icon. The Compendium names the game's family icons by path
 `GetFileIDFromPath` whether the client has each; one it lacks, or a family
 with no icon here (Fox), wears Beast Taming's. Not yet checked on Forever:
 `/bpet probe` prints "skill icon" and "family icons".
+
+## The stable, open (`/bpet stable`, 2026-11-26)
+
+A hunter at a stable master with the stable open, a level 26 Cat
+out and a level 12 Scorpid in the stable:
+
+- `C_StableInfo.IsAtStableMaster()` is `true`.
+- `GetNumActivePets()` 1, `GetNumStablePets()` 1, `GetNumStableSlots()` 1,
+  `GetNextStableSlotCost()` 50000 (5 gold).
+- `GetActivePetList()` and `GetStabledPetList()` each give a list of tables
+  with `name`, `familyName` (no family number), `level`, `experience`,
+  `experienceNeeded`, `happinessLevel`, `loyaltyLevel`, `loyaltyName`,
+  `icon`, `displayID`, `creatureID`, `petNumber`, `slotID` (1 for the pet
+  out, 2 for the first stabled), `type`, `isExotic`, `isFavorite`,
+  `specID`, `specialization` and `petAbilities`.
+- `petAbilities` lists far more spells than a pet of that level knows (every
+  rank of Bite for a level 26 Cat), so it is not what the pet knows. My Pets
+  takes a pet's skills only from the spell book while it is out.
+- `GetStablePetInfo(slot)` answers for slots 1 and 2 with the same tables;
+  slot 0 gives nothing.
+- `GetStablePetFoodTypes(1)` gives `{ "Meat", "Fish" }`.
+- No attack speed in the stable lists; My Pets keeps it from the pet out.
+
+Not yet known: whether the two lists answer away from the stable. My Pets
+asks anyway and only marks a pet gone while `IsAtStableMaster()` is true.

@@ -701,3 +701,17 @@ L["At level %d"] = "С уровня %d"
 L["Tame the beast, use the skill until you learn it, then teach it to your pet."] = "Приручи зверя и используй навык, пока не выучишь. Потом обучи ему питомца."
 L["Call your pet to see what it still has to learn."] = "Призови питомца, чтобы увидеть, что ему ещё учить."
 L["Skills to Find is for hunters' pets."] = "Навыки для поиска нужны питомцам охотников."
+
+-- My Pets (UI/MyPetsWindow.lua)
+
+L["My Pets"] = "Мои питомцы"
+L["Out Now"] = "Сейчас с тобой"
+L["In the Stable"] = "В стойле"
+L["1 skill to find"] = "1 навык для поиска"
+L["%d skills to find"] = "Навыков для поиска: %d"
+L["Show Them"] = "Показать"
+L["Has every skill for its level"] = "Знает все навыки для своего уровня"
+L["%d of 1 stable slot used. Visit a stable master to swap pets."] = "Занято мест в стойле: %d из 1. Чтобы сменить питомца, зайди к смотрителю стойл."
+L["%d of %d stable slots used. Visit a stable master to swap pets."] = "Занято мест в стойле: %d из %d. Чтобы сменить питомца, зайди к смотрителю стойл."
+L["Call it out once to see its skills."] = "Призови его один раз, чтобы увидеть его навыки."
+L["Call your pet or open the stable to see your pets here."] = "Призови питомца или открой стойло, чтобы увидеть здесь своих питомцев."

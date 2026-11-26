@@ -42,6 +42,7 @@ Logic\Taming.lua
 Logic\PetSkills.lua
 Logic\DemonSkills.lua
 Logic\NextStep.lua
+Logic\MyPets.lua
 Logic\SoulShards.lua
 Logic\Stones.lua
 Logic\PetXP.lua
@@ -82,6 +83,7 @@ UI\FeedKey.lua
 UI\TamingTooltip.lua
 UI\SkillsToFind.lua
 UI\CompendiumWindow.lua
+UI\MyPetsWindow.lua
 UI\BeastArrow.lua
 UI\TravelCard.lua
 UI\TravelMap.lua
