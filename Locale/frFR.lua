@@ -601,6 +601,15 @@ L["Pet XP bar: on."] = "Barre d'XP du familier : activée."
 L["Pet XP bar: off."] = "Barre d'XP du familier : désactivée."
 L["Pet XP bar is back in its first spot."] = "La barre d'XP du familier est revenue à sa première place."
 L["show your pet's XP on screen (on, off, reset)"] = "affiche l'XP de ton familier à l'écran (on, off, reset)"
+-- The Pet Strip
+L["Pet Strip:"] = "Bandeau du familier :"
+L["Strip Place:"] = "Place du bandeau :"
+L["Shows your pet's mood, food and experience in one small strip."] = "Montre l'humeur, la nourriture et l'expérience de ton familier dans un petit bandeau."
+L["About %d hours"] = "Environ %d heures"
+L["Pet Strip is back in its first spot."] = "Le bandeau du familier est revenu à sa première place."
+L["Pet Strip: on."] = "Bandeau du familier : activé."
+L["Pet Strip: off."] = "Bandeau du familier : désactivé."
+L["show your pet's mood, food and experience in one strip (on, off, reset)"] = "montre l'humeur, la nourriture et l'expérience de ton familier dans un bandeau (on, off, reset)"
 
 -- Mute All Sounds (2026-11-12)
 L["Mute All Sounds:"] = "Couper tous les sons :"

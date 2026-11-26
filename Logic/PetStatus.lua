@@ -362,7 +362,8 @@ function PetStatus:CheckFeed(status)
     local name = status.name or L["Your pet"]
     local message = L.Format("%s is %s. Feed it.", name, HAPPINESS[level].name:lower())
     ns.Warn(message)
-    PetStatus:Alert(message)
+    -- The Pet Strip shows a hungry pet already: no card over it.
+    if not (ns.PetStrip and ns.PetStrip:Showing()) then PetStatus:Alert(message) end
     return true
 end
 
@@ -378,6 +379,7 @@ function PetStatus:Update()
         ns.Food:CheckLow(status, stacks)
         if ns.FeedButton then ns.FeedButton:Update(status, stacks) end
         if ns.FeedKey then ns.FeedKey:Update(status, stacks) end
+        if ns.PetStrip then ns.PetStrip:Update(status, stacks) end
     end
     if ns.UI and ns.UI.Refresh then
         pcall(ns.UI.Refresh, ns.UI)
