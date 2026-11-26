@@ -71,6 +71,7 @@ function SettingsUI:ResetPositions()
     -- The Pet XP bar and the Shard Tracker too: this is their one button
     -- now ("Bar Place:" and "Tracker Place:" were rows of their own).
     if ns.PetXPBar and ns.PetXPBar.Reset then ns.PetXPBar:Reset(true) end
+    if ns.PetStrip and ns.PetStrip.Reset then ns.PetStrip:Reset(true) end
     if ns.ShardTracker and ns.ShardTracker.Reset then ns.ShardTracker:Reset(true) end
     if ns.BeastArrowUI and ns.BeastArrowUI.frame then
         ns.BeastArrowUI:ResetPosition()
@@ -109,7 +110,7 @@ SettingsUI.SETTING_KEYS = {
     "arrowRoute", "beastArrow", "beastArrowSize", "feedWarnOnlyUnhappy",
     "feedWarning", "keepFood", "keepFoodCount", "lowFoodWarning",
     "neverFeedBuffFood", "petXPBar", "petXPBarCheer", "petXPBarHeight",
-    "petXPBarPlace", "petXPBarWidth", "petXPBarWords", "quickFeed",
+    "petStrip", "petStripPlace", "petXPBarPlace", "petXPBarWidth", "petXPBarWords", "quickFeed",
     "settingsDescriptions", "shardTracker", "shardTrackerScale", "soulShards",
     "stoneReminder", "tamingTooltip", "tooltipShift", "useTomTom", "windowScale",
 }
@@ -580,6 +581,21 @@ function SettingsUI:BuildPages()
         ns.FeedButton:SetPlace(onFrame)
     end)
 
+    -- The Pet Strip (UI/PetStrip.lua): mood, food and experience in one
+    -- small strip. Off unless ticked; On Pet Frame is the first place.
+    local stripRow = pages:Row("pet", 1, L["Pet Strip:"],
+        L["Shows your pet's mood, food and experience in one small strip."])
+    controls.petStrip = Widgets.CreateCheckbox(stripRow, L["On"], function(checked)
+        ns.PetStrip:Set(checked)
+        SettingsUI:LayPet()
+    end, false)
+    controls.petStrip:SetPoint("TOPLEFT", CONTROL_X, -2)
+
+    local stripPlaceRow = pages:Row("pet", 1, L["Strip Place:"], nil)
+    controls.petStripPlace = PlaceChoice(stripPlaceRow, function(onFrame)
+        ns.PetStrip:SetPlace(onFrame)
+    end)
+
     -- The Pet XP bar (UI/PetXPBar.lua): a hunter's pet's XP on screen,
     -- Farmer's XP bar look. Off unless ticked.
     local xpSection = pages:Section("pet", 1, L["PET XP BAR"])
@@ -693,10 +709,11 @@ function SettingsUI:BuildPages()
     -- Who sees what on the Pet page (SettingsUI.LayPet): each class its own
     -- settings, and a switch's size rows only once it is ticked.
     local function BarOn() return ns.db ~= nil and ns.db.petXPBar == true end
+    local function StripOn() return ns.db ~= nil and ns.db.petStrip == true end
     local function TrackerOn() return ns.db ~= nil and ns.db.shardTracker == true end
     self.petRules = {}
     for _, item in ipairs({ feedingSection, feedRow, lowFoodRow, buffFoodRow, keepFoodRow, quickFeedRow,
-        xpSection, xpBarRow, tamingSection, tamingRow }) do
+        stripRow, xpSection, xpBarRow, tamingSection, tamingRow }) do
         self.petRules[item] = { class = "HUNTER" }
     end
     self.petRules[feedPlaceRow] = { class = "HUNTER",
@@ -707,6 +724,7 @@ function SettingsUI:BuildPages()
     for _, item in ipairs({ warlockSection, shardsRow, stonesRow, trackerRow }) do
         self.petRules[item] = { class = "WARLOCK" }
     end
+    self.petRules[stripPlaceRow] = { class = "HUNTER", when = StripOn }
     self.petRules[trackerSizeRow] = { class = "WARLOCK", when = TrackerOn }
 
     -- The compendium on the left, the arrow that leads to its beasts on
@@ -913,6 +931,8 @@ function SettingsUI:Refresh()
     controls.quickFeed:SetChecked(ns.db.quickFeed ~= false)
     controls.feedButtonPlace:SetValue(ns.FeedButton:OnPetFrame() and 1 or 2, true)
     controls.petXPBarPlace:SetValue(ns.PetXPBar:OnPetFrame() and 1 or 2, true)
+    controls.petStrip:SetChecked(ns.db.petStrip == true)
+    controls.petStripPlace:SetValue(ns.PetStrip:OnPetFrame() and 1 or 2, true)
     controls.soulShards:SetChecked(ns.db.soulShards == true)
     controls.stoneReminder:SetChecked(ns.db.stoneReminder == true)
     controls.shardTracker:SetChecked(ns.db.shardTracker == true)

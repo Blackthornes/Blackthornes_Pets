@@ -603,6 +603,15 @@ L["Pet XP bar: on."] = "Barra de EXP de mascota: activada."
 L["Pet XP bar: off."] = "Barra de EXP de mascota: desactivada."
 L["Pet XP bar is back in its first spot."] = "La barra de EXP de mascota volvió a su primer lugar."
 L["show your pet's XP on screen (on, off, reset)"] = "muestra la experiencia de tu mascota en pantalla (on, off, reset)"
+-- The Pet Strip
+L["Pet Strip:"] = "Franja de mascota:"
+L["Strip Place:"] = "Lugar de la franja:"
+L["Shows your pet's mood, food and experience in one small strip."] = "Muestra el ánimo, la comida y la experiencia de tu mascota en una franja pequeña."
+L["About %d hours"] = "Unas %d horas"
+L["Pet Strip is back in its first spot."] = "La franja de mascota vuelve a su primer sitio."
+L["Pet Strip: on."] = "Franja de mascota: activada."
+L["Pet Strip: off."] = "Franja de mascota: desactivada."
+L["show your pet's mood, food and experience in one strip (on, off, reset)"] = "muestra el ánimo, la comida y la experiencia de tu mascota en una franja (on, off, reset)"
 
 -- Mute All Sounds (2026-11-12)
 L["Mute All Sounds:"] = "Silenciar todos los sonidos:"

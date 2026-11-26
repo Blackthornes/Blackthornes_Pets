@@ -1559,3 +1559,45 @@ shadowed. While it shows, each arrow's `ArrowUI.Words` asks
 `TravelCard:Words(state)` and keeps only its name. `travelCardScale` is no
 longer read (left in saves). Tested in `tools/test_stepbox.lua` (the same in
 all five). Not yet seen in game.
+
+## The Pet Strip (2026-11-26)
+
+A player asked on Discord for a pet status line; the owner said build it
+from `Docs/mockups/pets-improve-1-pet-strip.html` in the project files
+(his yes covered its words). `UI/PetStrip.lua` (`BlackthornesPetsStrip`):
+one small see-through strip of dark glass with the pet's face and level,
+its name and mood (a dot in the mood's colour), the best food with how
+many are carried and "About 5 hours", and "Level N", the part done and a
+thin bar in `xp` purple. Under the mouse it turns solid with a gold edge,
+grows, and shows Feed and the close gem; a pet below the feed warning's
+line shows Feed glowing without the mouse; food under `Food.LOW_FOOD`
+turns the count red (the name's quality colour gives way). While the strip
+shows, the feed and low food warnings still go to chat but leave out their
+card (`PetStrip:Showing()` in `PetStatus:CheckFeed` and `Food:CheckLow`).
+
+Nothing new is read from the game: `PetStatus:Update` and `Food:Update`
+hand it `(status, stacks)` as they do FeedKey, and each part (name and
+face, mood, food, XP, layout, Feed) is drawn again only when its key
+changed. Feed is a secure action button on UIParent
+(`BlackthornesPetsStripFeed`), laid over the strip's end by screen
+position out of combat only, put away at `PLAYER_REGEN_DISABLED`
+(`Strip.fighting`, since the lock comes a moment later) and back after;
+the strip never anchors it, so the strip drags even in a fight. It holds
+while the pet eats like the other Feed buttons.
+
+"About N hours" is the player's own feeding: each feed start
+(`Food:EatingChanged` calls `PetStrip:NoteFed`) teaches the gap since the
+last feed of the same pet this session, 25 s to 2 h, as a running average
+kept per character in `petFeedGap` (`{ avg, n }`, never rename); it shows
+after `GAP_FEEDS` (3) and times every piece of food the pet will eat.
+
+Off unless ticked: "Pet Strip:" (with its description) and "Strip
+Place:" (On Pet Frame first, then Free) under FEEDING on the Pet page,
+hunters only, and `/bpet strip [on|off|reset]`. Saved account wide, never
+rename: `petStrip`, `petStripPlace` (nil for On Pet Frame, "free"),
+`petStripX`/`petStripY`. On Pet Frame it sits under the game's pet frame
+(only read through `ns.PetFrameRect`), under the Pet XP bar when that is
+On Pet Frame and showing; Free starts on the shared top shelf
+(`strip.pets`), drags, and right-click puts it back. Window Locations
+resets it too. The Feed button above the quests and the Pet XP bar stay
+as they were. Tested in `tools/test_petstrip.lua`. Not yet seen in game.
