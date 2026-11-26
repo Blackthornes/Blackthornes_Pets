@@ -54,6 +54,7 @@ Sections there:
 - The Beast Sheet (2026-11-26)
 - The Next Step line (2026-11-26)
 - The Pet Strip (2026-11-26)
+- Skills to Find (2026-11-26)
 
 ## Checking a change
 

@@ -1670,3 +1670,20 @@ On Pet Frame and showing; Free starts on the shared top shelf
 (`strip.pets`), drags, and right-click puts it back. Window Locations
 resets it too. The Feed button above the quests and the Pet XP bar stay
 as they were. Tested in `tools/test_petstrip.lua`. Not yet seen in game.
+
+## Skills to Find (2026-11-26)
+
+The owner said build it from the mockup `Docs/mockups/pets-improve-3-skills-to-find.html`
+(project files). "All Beasts" and "Skills to Find" switch the Compendium tab
+between its beast list and `UI/SkillsToFind.lua` (`SkillsToFindUI`, the
+switch from `SkillsToFindUI.CreateSwitch`, `CompendiumUI:ShowView(key,
+search)`; session only, nothing saved). The view puts the search, family
+drop-down, boxes, headings and beast rows away (`CompendiumUI:AllBeastsParts`)
+and shows "NAME has X of Y skill ranks for level N." with a gold bar, then
+YOU CAN TAME THESE NOW (each rank, the closest beast, its level, where it
+lives and Show the Way, `CompendiumUI:AimArrow`), LATER ("At level N") and
+DONE, from `PetSkills:CurrentToFind` (see "The Next Step line"). A click on
+a rank opens All Beasts searching for the skill; the wheel scrolls. It draws
+when it opens, when a pet is called and when a spell is learned or a level
+gained, never on a timer. `CompendiumUI:ShowSearch` always opens All Beasts.
+Tested in `tools/test_skillstofind.lua`. Not yet seen in game.

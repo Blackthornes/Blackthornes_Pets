@@ -80,6 +80,7 @@ UI\PetXPBar.lua
 UI\PetStrip.lua
 UI\FeedKey.lua
 UI\TamingTooltip.lua
+UI\SkillsToFind.lua
 UI\CompendiumWindow.lua
 UI\BeastArrow.lua
 UI\TravelCard.lua
