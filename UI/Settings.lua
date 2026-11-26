@@ -109,9 +109,9 @@ SettingsUI.SETTING_KEYS = {
     "arrowRoute", "beastArrow", "beastArrowSize", "feedWarnOnlyUnhappy",
     "feedWarning", "keepFood", "keepFoodCount", "lowFoodWarning",
     "neverFeedBuffFood", "petXPBar", "petXPBarCheer", "petXPBarHeight",
-    "petXPBarPlace", "petXPBarWords", "quickFeed", "settingsDescriptions",
-    "shardTracker", "shardTrackerScale", "soulShards", "stoneReminder",
-    "tamingTooltip", "tooltipShift", "useTomTom", "windowScale",
+    "petXPBarPlace", "petXPBarWidth", "petXPBarWords", "quickFeed",
+    "settingsDescriptions", "shardTracker", "shardTrackerScale", "soulShards",
+    "stoneReminder", "tamingTooltip", "tooltipShift", "useTomTom", "windowScale",
 }
 
 --- The same, for keys saved for one character.
