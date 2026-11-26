@@ -311,9 +311,11 @@ do
         and left == 4 and right == 0, left .. "/" .. right)
     suite.check("and no hunter rows", not Shown(controls.feedWarning) and not Shown(controls.petXPBar))
     suite.check("the tracker's size waits for the tracker", not Shown(controls.shardTrackerSize))
+    suite.check("so does Click to Make Stones", not Shown(controls.shardTrackerClicks))
     ns.db.shardTracker = true
     left = Count("Warlock")
-    suite.check("and shows once it is on", Shown(controls.shardTrackerSize) and left == 5, left)
+    suite.check("and shows once it is on", Shown(controls.shardTrackerSize)
+        and Shown(controls.shardTrackerClicks) and left == 6, left)
 
     local found = false
     for _, entry in ipairs(SettingsUI.pages.searchables) do
@@ -323,10 +325,10 @@ do
 
     ns.db.petXPBar = true
     left, right = Count("Mage")
-    suite.check("another class sees every setting", left == 15 and right == 7, left .. "/" .. right)
+    suite.check("another class sees every setting", left == 15 and right == 8, left .. "/" .. right)
     _G.UnitClass = nil
     left, right = Count(nil)
-    suite.check("so does a class the client won't read", left == 15 and right == 7, left .. "/" .. right)
+    suite.check("so does a class the client won't read", left == 15 and right == 8, left .. "/" .. right)
     ns.db.petXPBar, ns.db.shardTracker = false, false
     _G.UnitClass = function() return "Hunter", "HUNTER" end
     SettingsUI:LayPet()

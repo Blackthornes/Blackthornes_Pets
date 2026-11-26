@@ -24,6 +24,19 @@
 -- out; a slot that appears slides in once. Effects Full moves all of it,
 -- Subtle holds the glow still, Off holds everything still.
 --
+-- The Soulstone's time and holder (the owner said build it, 2026-11-26,
+-- from a mockup): while it is on someone the slot shows the minutes left
+-- (green, orange under LOW_TIME) over "On <whole name>", and the slot grows
+-- to fit the name, never cut. In a dungeon the game hides buffs, so the
+-- time can't show there; the slot keeps its count. A Soulstone in the bags
+-- and on nobody says "Ready". The minutes tick on a timer that redraws
+-- only while a time shows, once a minute.
+--
+-- Click to Make Stones (shardTrackerClicks, never rename it): the secure
+-- buttons sit over the stones only while it is ticked. It starts off for a
+-- new player; a player who had the tracker on before it came keeps
+-- clicking (ClicksStart, once).
+--
 -- Saved, account wide, never rename them: shardTracker (off unless
 -- ticked), shardTrackerScale (75, 100 or 125; nil for 100), shardTrackerX
 -- and shardTrackerY (its bottom left on UIParent, nil for its first spot).
@@ -50,6 +63,12 @@ ShardTracker.FIRST_Y = -150
 ShardTracker.RED = { 0.878, 0.325, 0.247 }
 ShardTracker.VIOLET = { 0.608, 0.361, 1 }
 ShardTracker.GOLD = { 0.97, 0.84, 0.48 }
+ShardTracker.GREEN = { 0.42, 0.85, 0.55 }
+ShardTracker.ORANGE = { 0.95, 0.6, 0.25 }
+-- Under this many seconds the Soulstone's time turns orange.
+ShardTracker.LOW_TIME = 300
+-- The small line under the Soulstone's time.
+ShardTracker.SUB_SIZE = 10
 
 -- Icons the client gives for each, these when it won't say.
 ShardTracker.KINDS = {
@@ -148,8 +167,15 @@ function ShardTracker:Slots()
     end
     if Stones and Stones.Knows(Stones.SOUL_SPELLS) then
         local count = Stones:SoulstoneCount()
-        slots[#slots + 1] = { key = "soul", count = count, empty = count == 0,
-            onSomeone = Stones:SoulstoneOnSomeone() }
+        local onSomeone = Stones:SoulstoneOnSomeone()
+        local data = { key = "soul", count = count, empty = count == 0, onSomeone = onSomeone }
+        if onSomeone then
+            data.left = Stones:SoulstoneLeft()
+            data.holder = Stones:SoulstoneHolderName()
+        elseif onSomeone == false and type(count) == "number" and count > 0 then
+            data.ready = true
+        end
+        slots[#slots + 1] = data
     end
     return slots
 end
@@ -277,6 +303,16 @@ function ShardTracker:MakeSlot(index)
     count:SetShadowOffset(1, -1)
     count:SetShadowColor(0, 0, 0, 1)
 
+    -- The small line under the Soulstone's time: who has it.
+    local sub = slot:CreateFontString(nil, "OVERLAY")
+    pcall(sub.SetFont, sub, (ns.Theme and ns.Theme.FONT) or [[Fonts\FRIZQT__.TTF]], self.SUB_SIZE, "")
+    sub:SetPoint("TOPLEFT", count, "BOTTOMLEFT", 0, -1)
+    sub:SetShadowOffset(1, -1)
+    sub:SetShadowColor(0, 0, 0, 1)
+    sub:SetTextColor(ns.Theme.Unpack("muted"))
+    sub:Hide()
+    slot.sub = sub
+
     -- The gold dot while the Soulstone is on someone.
     local dotGlow = slot:CreateTexture(nil, "OVERLAY", nil, 2)
     dotGlow:SetTexture(GLOW_ART)
@@ -322,6 +358,23 @@ local function CountText(count)
     return tostring(count)
 end
 
+--- Minutes left, rounded up, as the slot shows them ("18 min").
+function ShardTracker.MinutesText(seconds)
+    return L.Format("%d min", math.max(1, math.ceil(seconds / 60)))
+end
+
+-- The width its words need, never cut: the larger of the two reads.
+local function TextWidth(text)
+    local most = 0
+    for _, name in ipairs({ "GetUnboundedStringWidth", "GetStringWidth" }) do
+        local fn = text[name]
+        local ok, width = false, nil
+        if type(fn) == "function" then ok, width = pcall(fn, text) end
+        if ok and type(width) == "number" and width > most then most = width end
+    end
+    return most
+end
+
 --- Paint one slot for what it holds now; animate what changed.
 function ShardTracker:Paint(slot, data, index)
     local kind
@@ -346,9 +399,32 @@ function ShardTracker:Paint(slot, data, index)
     else
         slot.edge:SetColorTexture(ns.Theme.Unpack("border", 0.6))
     end
-    slot.count:SetText(CountText(data.count))
+    local text = CountText(data.count)
+    local subText
+    if data.key == "soul" and data.onSomeone then
+        if data.left then
+            text = self.MinutesText(data.left)
+            textR, textG, textB = unpack(data.left < self.LOW_TIME and self.ORANGE or self.GREEN)
+        end
+        if data.holder then subText = L.Format("On %s", data.holder) end
+    elseif data.ready then
+        text = L["Ready"]
+    end
+    slot.count:SetText(text)
     slot.count:SetTextColor(textR, textG, textB)
     slot.count:SetAlpha(textAlpha)
+    slot.count:ClearAllPoints()
+    if subText then
+        slot.count:SetPoint("BOTTOMLEFT", slot.iconFrame, "RIGHT", 6, -2)
+    else
+        slot.count:SetPoint("LEFT", slot.iconFrame, "RIGHT", 6, 0)
+    end
+    slot.sub:SetText(subText or "")
+    slot.sub:SetShown(subText ~= nil)
+
+    -- Wide enough for its words, never cut: a whole name grows the slot.
+    local words = math.max(TextWidth(slot.count), subText and TextWidth(slot.sub) or 0)
+    slot:SetWidth(math.max(self.SLOT, math.ceil(4 + self.ICON + 4 + 6 + words + 8)))
 
     -- The halo: violet behind the shard, red when shards run low.
     local level = Level()
@@ -429,19 +505,23 @@ function ShardTracker:Refresh()
     end
     local frame = self:Build()
     local RIM, PAD = self.RIM, self.PAD
+    local x = RIM + PAD
     for index, data in ipairs(slots) do
         local slot = frame.slots[index] or self:MakeSlot(index)
-        slot.x = RIM + PAD + (index - 1) * self.SLOT
         local fresh = not rawget(slot, "placed") or rawget(slot, "key") ~= data.key
+        -- A wider slot before it (a holder's name) moves it along.
+        local moved = not fresh and rawget(slot, "x") ~= x
+        slot.x = x
         slot.key = data.key
         self:Paint(slot, data, index)
+        x = x + (slot:GetWidth() or self.SLOT)
         slot:Show()
-        if fresh then
+        if fresh or moved then
             slot.placed = true
             slot:ClearAllPoints()
             slot:SetPoint("LEFT", frame, "LEFT", slot.x, 0)
             -- Slide in only when a slot joins a tracker already showing.
-            if frame:IsShown() and index > 1 then self:SlideIn(slot) end
+            if fresh and frame:IsShown() and index > 1 then self:SlideIn(slot) end
         end
     end
     for index = #slots + 1, #frame.slots do
@@ -449,7 +529,7 @@ function ShardTracker:Refresh()
         frame.slots[index].placed = nil
         frame.slots[index].data = nil
     end
-    frame:SetWidth(#slots * self.SLOT + (RIM + PAD) * 2)
+    frame:SetWidth(x + RIM + PAD)
 
     if not frame:IsShown() then
         self:ApplyScale()
@@ -458,7 +538,25 @@ function ShardTracker:Refresh()
     end
     self:Glow()
     self:UpdateButtons()
+    self:Tick(slots)
     return true
+end
+
+--- While the Soulstone's time shows, look again when its minute turns
+--- over. One timer at a time; none while no time shows.
+function ShardTracker:Tick(slots)
+    local left
+    for _, data in ipairs(slots or {}) do
+        if data.key == "soul" and data.left then left = data.left end
+    end
+    if not left or self.ticking or not (C_Timer and C_Timer.After) then return end
+    local wait = left % 60
+    if wait < 1 then wait = wait + 60 end
+    self.ticking = true
+    C_Timer.After(wait + 0.1, function()
+        ShardTracker.ticking = nil
+        if ShardTracker.frame and ShardTracker.frame:IsShown() then ShardTracker:Refresh() end
+    end)
 end
 
 --- The gold glow round it: breathing on Full, still on Subtle and Off.
@@ -516,7 +614,7 @@ function ShardTracker:ActionFor(data)
         local id = Stones.BestKnown(spells)
         if not id then return { words = nil } end
         return { type = "spell", spell = Stones.SpellName(id) or id,
-            words = L["Click to make one."] }
+            words = L["Click to make one. Uses 1 shard."] }
     end
     -- Held in the off hand where the game lets it be (Classic), else used
     -- from the bags (Forever's Firestone and Spellstone).
@@ -619,9 +717,10 @@ function ShardTracker:UpdateButtons()
     end
     self.buttonsWaiting = nil
     local scale = frame:GetScale() or 1
+    local clicks = self:ClicksOn()
     for index, slot in ipairs(frame.slots) do
         local data = rawget(slot, "data")
-        local action = frame:IsShown() and slot:IsShown() and data and self:ActionFor(data)
+        local action = clicks and frame:IsShown() and slot:IsShown() and data and self:ActionFor(data)
         local button = action and self:ButtonFor(index)
         if button then
             button.index = index
@@ -801,6 +900,26 @@ function ShardTracker:Listen(on)
     end
 end
 
+--- Does a click on a stone make it or use it? Click to Make Stones.
+function ShardTracker:ClicksOn()
+    return ns.db ~= nil and ns.db.shardTrackerClicks == true
+end
+
+--- Once: a player who had the tracker on before Click to Make Stones came
+--- keeps clicking; everyone else starts with it off.
+function ShardTracker:ClicksStart()
+    if ns.db and ns.db.shardTrackerClicks == nil then
+        ns.db.shardTrackerClicks = ns.db.shardTracker == true
+    end
+end
+
+--- Tick or untick Click to Make Stones. In a fight the buttons wait.
+function ShardTracker:SetClicks(on)
+    if not ns.db then return end
+    ns.db.shardTrackerClicks = on and true or false
+    self:UpdateButtons()
+end
+
 --- Turn it on or off, from Settings or /bpet tracker.
 function ShardTracker:Set(on)
     ns.db.shardTracker = on and true or false
@@ -809,6 +928,7 @@ function ShardTracker:Set(on)
 end
 
 function ShardTracker:OnEnable()
+    self:ClicksStart()
     if self:IsOn() then
         self:Listen(true)
         self:Soon()
