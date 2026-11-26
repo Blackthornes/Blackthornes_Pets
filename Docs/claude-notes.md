@@ -1601,6 +1601,34 @@ closes it (`CloseSheet`). Shift-click (the arrow) and the right-click menu
 are as they were; a plain click no longer pins the map (Show on Map does).
 Session only, nothing saved. Tested in `tools/test_beastsheet.lua`.
 
+## The Next Step line (2026-11-26)
+
+The owner said build it from the mockup `Docs/mockups/pets-improve-5-next-step.html`
+(project files). One gold-edged line under the top card on the Pet tab says
+the best next thing to do and has one button for it. `Logic/NextStep.lua`
+picks it (`NextStep.Pick`), the most pressing first: the pet is hungry and
+there is food (Feed, a secure button of its own, `nextFeedButton`, placed
+and put away with the food card's in `PlaceFeedButton`, held while the pet
+eats); fewer than `Food.LOW_FOOD` pieces of food (Okay puts it away for that
+pet until the bags are restocked, this session only); a skill from a pet
+trainer or Beast Training the training points pay for (Show the Way to the
+trainer); a rank to find by taming (Show the Way points the beast arrow
+at it, `CompendiumUI:AimArrow`, else pins it); then "has everything for level N". A warlock gets the
+line for a demon book the gold in the bags pays for. It reads only what the
+tab already read, on its redraw. The window grows by the line's height.
+
+The ranks to find are worked out in `Logic/PetSkills.lua`, shared with the
+Compendium's Skills to Find view: `PetSkills:ToFind(known, level, family,
+hunterLevel, here)` lists ranks no trainer teaches and no free rank, that
+the pet lacks and the hunter has not learned (those go to Beast Training),
+as `now` (a beast you can tame now), `later` and `done`, with `have` of
+`of` ranks for its level. `ClosestBeast` picks one you can tame now, on the
+map, fewest zones away by Guide Me's zone borders (`ZonesAway`,
+`Travel.ZonePath`; another continent counts `PetSkills.FAR`), then the
+lowest level. `CurrentToFind` keeps its answer until the pet, its skills, a
+level, the zone or the Compendium's list change, or a spell is learned.
+Tested in `tools/test_nextstep.lua`. Not yet seen in game.
+
 ## The Pet Strip (2026-11-26)
 
 A player asked on Discord for a pet status line; the owner said build it
