@@ -658,6 +658,21 @@ L["You can tame it now"] = "你现在就能驯服它"
 L["You can tame it at level %d"] = "你在%d级时能驯服它"
 L["New for you"] = "对你来说是新的"
 
+-- Look choices (All Addons page)
+L["Font:"] = "字体："
+L["House##font"] = "默认"
+L["Game##font"] = "游戏"
+L["Clear##font"] = "清晰"
+L["Colors:"] = "颜色："
+L["Warm"] = "暖色"
+L["Darker"] = "更暗"
+L["Fold Gem:"] = "收起样式："
+L["Round Button"] = "圆形按钮"
+L["Small Bar"] = "小条"
+L["House, Game or Clear. Clear is plain and easy to read, and it has Russian letters."] = "默认、游戏或清晰。清晰简洁易读，带有俄文字母。中文客户端上，清晰会显示默认字体。"
+L["Warm is the look today. Darker takes the warm tint out of the glass."] = "暖色是以前的样子。更暗会去掉玻璃的暖色调。"
+L["What a folded window turns into: the round button, or a small bar with its title."] = "折叠后的窗口会变成：圆形按钮，或带标题的小条。"
+
 -- The Next Step line (Logic/NextStep.lua)
 L["NEXT"] = "下一步"
 L["%s is hungry."] = "%s饿了。"

@@ -659,6 +659,21 @@ L["You can tame it now"] = "Можно приручить сейчас"
 L["You can tame it at level %d"] = "Можно приручить с %d-го уровня"
 L["New for you"] = "Новое для тебя"
 
+-- Look choices (All Addons page)
+L["Font:"] = "Шрифт:"
+L["House##font"] = "Фирменный"
+L["Game##font"] = "Игровой"
+L["Clear##font"] = "Чёткий"
+L["Colors:"] = "Цвета:"
+L["Warm"] = "Тёплые"
+L["Darker"] = "Темнее"
+L["Fold Gem:"] = "Сворачивание:"
+L["Round Button"] = "Круглая кнопка"
+L["Small Bar"] = "Маленькая полоска"
+L["House, Game or Clear. Clear is plain and easy to read, and it has Russian letters."] = "Фирменный, Игровой или Чёткий. Чёткий простой и легко читается, и в нём есть русские буквы."
+L["Warm is the look today. Darker takes the warm tint out of the glass."] = "Тёплые: вид как раньше. Темнее убирает тёплый оттенок со стекла."
+L["What a folded window turns into: the round button, or a small bar with its title."] = "Во что сворачивается окно: в круглую кнопку или в маленькую полоску с его названием."
+
 -- The Next Step line (Logic/NextStep.lua)
 L["NEXT"] = "ДАЛЬШЕ"
 L["%s is hungry."] = "%s хочет есть."

@@ -659,6 +659,21 @@ L["You can tame it now"] = "Tu peux la dresser maintenant"
 L["You can tame it at level %d"] = "Tu peux la dresser au niveau %d"
 L["New for you"] = "Nouveau pour toi"
 
+-- Look choices (All Addons page)
+L["Font:"] = "Police :"
+L["House##font"] = "Maison"
+L["Game##font"] = "Jeu"
+L["Clear##font"] = "Nette"
+L["Colors:"] = "Couleurs :"
+L["Warm"] = "Chaudes"
+L["Darker"] = "Plus sombres"
+L["Fold Gem:"] = "Repli :"
+L["Round Button"] = "Bouton rond"
+L["Small Bar"] = "Petite barre"
+L["House, Game or Clear. Clear is plain and easy to read, and it has Russian letters."] = "Maison, Jeu ou Nette. Nette est simple et facile à lire, et elle a les lettres russes."
+L["Warm is the look today. Darker takes the warm tint out of the glass."] = "Chaudes, c'est le look de toujours. Plus sombres retire la teinte chaude du verre."
+L["What a folded window turns into: the round button, or a small bar with its title."] = "Ce que devient une fenêtre repliée : le bouton rond, ou une petite barre avec son titre."
+
 -- The Next Step line (Logic/NextStep.lua)
 L["NEXT"] = "ENSUITE"
 L["%s is hungry."] = "%s a faim."
