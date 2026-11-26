@@ -391,3 +391,197 @@ end
 function PetSkills:Trainer()
     return PetSkills.Nearest(Data().TRAINERS)
 end
+
+--------------------------------------------------------------------------------
+-- Skills to find
+--
+-- A rank no pet trainer teaches is learned by taming a beast that knows it,
+-- using the skill until the hunter learns it, then teaching it to the pet.
+-- The Pet tab's Next Step line and the Compendium's Skills to Find view
+-- (the owner said build both from mockups, 2026-11-26) ask what such ranks
+-- the pet lacks and the closest beast that teaches each one. Worked out when
+-- asked; the beast list is laid out once and kept until the Compendium's
+-- own list is built again (a new tame).
+--------------------------------------------------------------------------------
+
+-- How many zones away a beast on another continent counts as, or one whose
+-- zone the routes do not know.
+PetSkills.FAR = 50
+
+local beastIndex, beastIndexOf
+
+--- Every beast that teaches each rank: { ["Bite#4"] = { entry, ... } }.
+function PetSkills.BeastIndex()
+    local Compendium = ns.Compendium
+    local entries = Compendium and Compendium:All()
+    if beastIndex and beastIndexOf == entries then return beastIndex end
+    beastIndex = {}
+    for _, entry in ipairs(entries or {}) do
+        local ok, skills = pcall(Compendium.Skills, Compendium, entry)
+        for _, skill in ipairs(ok and skills or {}) do
+            local name = ns.Taming:EnglishName(skill.name)
+            local key = tostring(name) .. "#" .. tostring(skill.rank)
+            local list = beastIndex[key]
+            if not list then
+                list = {}
+                beastIndex[key] = list
+            end
+            list[#list + 1] = entry
+        end
+    end
+    beastIndexOf = entries
+    return beastIndex
+end
+
+--- The zone you are in, by the data's English name, or nil.
+function PetSkills.ZoneHere()
+    local zone = Read(_G.GetRealZoneText)
+    if type(zone) ~= "string" or zone == "" then return nil end
+    if ns.Waypoints and ns.Waypoints.DataZone then
+        local ok, english = pcall(ns.Waypoints.DataZone, ns.Waypoints, zone)
+        if ok and type(english) == "string" then zone = english end
+    end
+    return zone
+end
+
+--- How many zones lie between two, walking the zone borders Guide Me uses
+--- (Logic/Travel.lua). FAR for another continent or a zone it does not know.
+function PetSkills.ZonesAway(from, to)
+    if not (from and to) then return PetSkills.FAR end
+    local Travel = ns.Travel
+    local zoneOf = Travel and Travel.Defaults and Travel.Defaults.ZoneOf
+    local a = zoneOf and zoneOf(from) or from
+    local b = zoneOf and zoneOf(to) or to
+    if a == b then return 0 end
+    local path = Travel and Travel.ZonePath and Travel.ZonePath(a, b)
+    if path then return #path - 1 end
+    return PetSkills.FAR
+end
+
+--- The closest beast that teaches a rank, or nil. One the hunter can tame
+--- now comes first, then one on the map (not only inside a dungeon), then
+--- the fewest zones away, then the lowest level. `here` is the zone you are
+--- in, `hunterLevel` your level.
+function PetSkills:ClosestBeast(name, rank, here, hunterLevel)
+    local list = PetSkills.BeastIndex()[name .. "#" .. tostring(rank)]
+    if not list then return nil end
+    local best, bestKey
+    for _, entry in ipairs(list) do
+        local tame = (hunterLevel and entry.min and entry.min > hunterLevel) and 1 or 0
+        local inside = (entry.x and entry.y) and 0 or 1
+        local away = PetSkills.ZonesAway(here, entry.zone)
+        local key = { tame, inside, away, entry.min or 999, entry.name or "" }
+        local better = not bestKey
+        if bestKey then
+            for i = 1, #key do
+                if key[i] ~= bestKey[i] then
+                    better = key[i] < bestKey[i]
+                    break
+                end
+            end
+        end
+        if better then best, bestKey = entry, key end
+    end
+    return best
+end
+
+--- The ranks taming teaches that the pet lacks, for the Skills to Find view
+--- and the Next Step line:
+---   { now = { { name, rank, beast } },          -- a beast you can tame now
+---     later = { { name, rank, level, beast } }, -- a pet or hunter level away
+---     done = { { name, rank } },                -- what the pet has of them
+---     have = N, of = M }                        -- ranks for its level
+--- `have` of `of` counts every rank up to the best for the pet's level: a pet
+--- with Bite 3 where Bite 4 is ready has 3 of 4. A rank the hunter has
+--- already learned is taught from Beast Training (the Skills card), so it is
+--- not one to find.
+function PetSkills:ToFind(known, level, family, hunterLevel, here)
+    local out = { now = {}, later = {}, done = {}, have = 0, of = 0 }
+    level = level or 0
+    hunterLevel = hunterLevel or level
+    for name, skill in pairs(Data().SKILLS) do
+        local have = known[name] or 0
+        if have > 0 or PetSkills.FamilyCan(skill, family) then
+            local best, nextRank
+            for _, rank in ipairs(Ranks(skill)) do
+                local row = skill[rank]
+                if not row.trainer and not row.free then
+                    if row.level <= level then
+                        best = rank
+                        out.of = out.of + 1
+                        if have >= rank then out.have = out.have + 1 end
+                    elseif not nextRank then
+                        nextRank = rank
+                    end
+                end
+            end
+            if best or nextRank then
+                if have > 0 and best then out.done[#out.done + 1] = { name = name, rank = have } end
+                if best and have < best and not HunterKnows(name, best) then
+                    local beast = self:ClosestBeast(name, best, here, hunterLevel)
+                    if beast and not (beast.min and beast.min > hunterLevel) then
+                        out.now[#out.now + 1] = { name = name, rank = best, beast = beast }
+                    elseif beast then
+                        out.later[#out.later + 1] = { name = name, rank = best, level = beast.min, beast = beast }
+                    end
+                end
+                if nextRank and (have > 0 or best) then
+                    local beast = self:ClosestBeast(name, nextRank, here, nil)
+                    if beast then
+                        local at = math.max(skill[nextRank].level, beast.min or 0)
+                        out.later[#out.later + 1] = { name = name, rank = nextRank, level = at, beast = beast }
+                    end
+                end
+            end
+        end
+    end
+    local function Near(a, b)
+        local za = PetSkills.ZonesAway(here, a.beast.zone)
+        local zb = PetSkills.ZonesAway(here, b.beast.zone)
+        if za ~= zb then return za < zb end
+        if a.name ~= b.name then return a.name < b.name end
+        return a.rank < b.rank
+    end
+    table.sort(out.now, Near)
+    table.sort(out.later, function(a, b)
+        if a.level ~= b.level then return a.level < b.level end
+        if a.name ~= b.name then return a.name < b.name end
+        return a.rank < b.rank
+    end)
+    table.sort(out.done, function(a, b) return a.name < b.name end)
+    return out
+end
+
+--- Skills to find for the pet out now, or nil for a pet that is not a
+--- hunter's. Kept until the pet, its skills, a level, the zone or the beast
+--- list change, since the Pet tab asks on every redraw.
+function PetSkills:CurrentToFind()
+    if not (PetSkills.IsHunter() and Read(_G.UnitExists, "pet")) then return nil end
+    local hunterLevel = Read(_G.UnitLevel, "player")
+    hunterLevel = type(hunterLevel) == "number" and hunterLevel or nil
+    local known, level, family, here = self:Known(), PetSkills.PetLevel(), PetSkills.FamilyID(), PetSkills.ZoneHere()
+    local parts = {}
+    for name, rank in pairs(known) do parts[#parts + 1] = name .. rank end
+    table.sort(parts)
+    local key = table.concat(parts, ",") .. "|" .. tostring(level) .. "|" .. tostring(family) .. "|"
+        .. tostring(hunterLevel) .. "|" .. tostring(here)
+    local kept = self.toFindKept
+    local entries = ns.Compendium and ns.Compendium.entries
+    if kept and kept.key == key and kept.entries == entries and entries then return kept.found end
+    local found = self:ToFind(known, level, family, hunterLevel, here)
+    self.toFindKept = { key = key, entries = ns.Compendium and ns.Compendium.entries, found = found }
+    return found
+end
+
+--- A spell learned (a skill from taming, or Beast Training read again):
+--- the kept list is worked out afresh next time.
+function PetSkills:Forget()
+    self.toFindKept = nil
+end
+
+function PetSkills:OnEnable()
+    -- Either may be unknown to Forever; ns.RegisterEvent shrugs that off.
+    for _, event in ipairs({ "SPELLS_CHANGED", "LEARNED_SPELL_IN_TAB", "CRAFT_UPDATE" }) do
+        ns.RegisterEvent(self, event, self.Forget)
+    end
+end
