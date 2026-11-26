@@ -1,7 +1,7 @@
 -- Blackthornes Pets -- UI/SkillsToFind.lua
 -- Skills to Find, the Compendium tab's second view (the owner said build it
 -- from a mockup, 2026-11-26): a short to-do list of each skill rank the pet
--- out lacks, the closest beast that teaches it and Show the Way, then the
+-- out lacks (or a stabled pet, from My Pets' Show Them, as last seen), the closest beast that teaches it and Show the Way, then the
 -- ranks that come later and what it has. "All Beasts" and "Skills to Find"
 -- switch between the two at the top left of the Compendium.
 --
@@ -304,8 +304,16 @@ end
 function SkillsToFindUI:Refresh()
     if not (self.panel and self.panel:IsShown()) then return end
     local PetSkills = ns.PetSkills
-    local found = PetSkills and PetSkills:CurrentToFind()
-    local status = ns.PetStatus and ns.PetStatus:Read() or {}
+    local found, status, level
+    -- A stabled pet picked on My Pets (Show Them), as it was last seen.
+    local pet = self.pet
+    if pet and ns.MyPets then
+        found = ns.MyPets:ToFind(pet)
+        status, level = { name = pet.name }, pet.level
+    else
+        found = PetSkills and PetSkills:CurrentToFind()
+        status = ns.PetStatus and ns.PetStatus:Read() or {}
+    end
     self.found = found
     if not found then
         self.lines = {}
@@ -317,7 +325,7 @@ function SkillsToFindUI:Refresh()
         self:Draw()
         return
     end
-    local level = PetSkills.PetLevel() or status.level
+    level = level or PetSkills.PetLevel() or status.level
     self.summary:SetText(SkillsToFindUI.SummaryText(status.name, found, level))
     self.bar:SetShown((found.of or 0) > 0)
     if (found.of or 0) > 0 then

@@ -1460,10 +1460,13 @@ function CompendiumUI:AllBeastsParts()
 end
 
 --- Switch between All Beasts and Skills to Find. `search`, with All Beasts,
---- searches for it (a skill clicked in the Skills to Find list).
-function CompendiumUI:ShowView(key, search)
+--- searches for it (a skill clicked in the Skills to Find list). `pet`,
+--- with Skills to Find, is a stabled pet from My Pets to show it for; nil
+--- is the pet out.
+function CompendiumUI:ShowView(key, search, pet)
     -- The Beast Sheet belongs to the beast list.
     if key == "find" and self.CloseSheet then self:CloseSheet() end
+    if key == "find" and ns.SkillsToFindUI then ns.SkillsToFindUI.pet = pet end
     self.view = key == "find" and "find" or "all"
     if self.viewSwitch then self.viewSwitch:Pick(self.view) end
     if search then

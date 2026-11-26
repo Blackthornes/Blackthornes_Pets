@@ -701,3 +701,17 @@ L["At level %d"] = "Al nivel %d"
 L["Tame the beast, use the skill until you learn it, then teach it to your pet."] = "Domestica la bestia, usa la habilidad hasta aprenderla y luego enséñasela a tu mascota."
 L["Call your pet to see what it still has to learn."] = "Llama a tu mascota para ver lo que le falta por aprender."
 L["Skills to Find is for hunters' pets."] = "Habilidades por encontrar es para las mascotas de cazador."
+
+-- My Pets (UI/MyPetsWindow.lua)
+
+L["My Pets"] = "Mis mascotas"
+L["Out Now"] = "Fuera ahora"
+L["In the Stable"] = "En el establo"
+L["1 skill to find"] = "1 habilidad por encontrar"
+L["%d skills to find"] = "%d habilidades por encontrar"
+L["Show Them"] = "Verlas"
+L["Has every skill for its level"] = "Tiene todas las habilidades de su nivel"
+L["%d of 1 stable slot used. Visit a stable master to swap pets."] = "%d de 1 espacio del establo usado. Ve a un maestro de establos para cambiar de mascota."
+L["%d of %d stable slots used. Visit a stable master to swap pets."] = "%d de %d espacios del establo usados. Ve a un maestro de establos para cambiar de mascota."
+L["Call it out once to see its skills."] = "Llámala una vez para ver sus habilidades."
+L["Call your pet or open the stable to see your pets here."] = "Llama a tu mascota o abre el establo para ver tus mascotas aquí."

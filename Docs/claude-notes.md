@@ -1732,3 +1732,34 @@ a rank opens All Beasts searching for the skill; the wheel scrolls. It draws
 when it opens, when a pet is called and when a spell is learned or a level
 gained, never on a timer. `CompendiumUI:ShowSearch` always opens All Beasts.
 Tested in `tools/test_skillstofind.lua`. Not yet seen in game.
+
+## My Pets (2026-11-26)
+
+The owner said build it from the mockup `Docs/mockups/pets-improve-2-my-pets.html`
+(project files), once `/bpet stable` showed the stable lists work (see "The
+stable, open" in `docs/FOREVER_API_FINDINGS.md`). A tab between Pet and
+Compendium, for hunters only (`PetsTabs.Tabs`, key `mypets`,
+`UI/MyPetsWindow.lua`, `MyPetsUI`). A card for each pet, three across (the
+wheel scrolls a row at a time past two rows): icon and level, name and
+family, Out Now (green, `glassActive` with a gold left edge) or In the
+Stable, Loyalty, Eats and Speed (each only when known), the skills it knows
+as chips (two rows at most), and "N skills to find" with Show Them, "Has
+every skill for its level", or "Call it out once to see its skills." for a
+pet never out since this shipped. Under the cards: "N of M stable slots
+used. Visit a stable master to swap pets." once the stable was opened.
+
+`Logic/MyPets.lua` keeps each pet as last seen in `myPets[guid]` (account
+save, one record per character GUID, never rename): `pets[key]` with `name`,
+`family`, `familyID`, `level`, `loyalty`, `icon`, `slot`, `active`, `foods`,
+`speed`, `known` (`{ [skill] = rank }`), `seen`, `gone`. Keys are `n` plus
+the game's pet number, or `p:name:family` for a pet seen out before the
+stable, renamed once the stable gives its number. Read on `PET_STABLE_SHOW`
+and `PET_STABLE_UPDATE` (`MyPets:ReadStable`) and, half a second after
+`UNIT_PET`, `UNIT_LEVEL`, `PET_UI_UPDATE`, `SPELLS_CHANGED` or entering the
+world, for the pet out (`MyPets:ReadOut`), and as the tab opens. A pet the
+open stable no longer lists is marked `gone` (hidden, kept). No GUID, no
+write. `MyPets:ToFind(pet)` runs `PetSkills:ToFind` on the saved skills
+(`PetSkills.FamilyByName` for the stable's family name). Show Them opens
+Skills to Find for that pet (`CompendiumUI:ShowView("find", nil, pet)`,
+`SkillsToFindUI.pet`); the switch goes back to the pet out. No new setting.
+Tested in `tools/test_mypets.lua`. Not yet seen in game.

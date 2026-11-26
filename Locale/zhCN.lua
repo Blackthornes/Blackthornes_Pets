@@ -700,3 +700,17 @@ L["At level %d"] = "%d级时"
 L["Tame the beast, use the skill until you learn it, then teach it to your pet."] = "驯服这只野兽，使用技能直到学会，然后教给你的宠物。"
 L["Call your pet to see what it still has to learn."] = "召唤你的宠物，看看它还要学什么。"
 L["Skills to Find is for hunters' pets."] = "要找的技能只适用于猎人的宠物。"
+
+-- My Pets (UI/MyPetsWindow.lua)
+
+L["My Pets"] = "我的宠物"
+L["Out Now"] = "正在身边"
+L["In the Stable"] = "在兽栏中"
+L["1 skill to find"] = "还有 1 个技能可找"
+L["%d skills to find"] = "还有 %d 个技能可找"
+L["Show Them"] = "显示"
+L["Has every skill for its level"] = "已学会该等级的全部技能"
+L["%d of 1 stable slot used. Visit a stable master to swap pets."] = "已用 %d / 1 个兽栏位。去找兽栏管理员来更换宠物。"
+L["%d of %d stable slots used. Visit a stable master to swap pets."] = "已用 %d / %d 个兽栏位。去找兽栏管理员来更换宠物。"
+L["Call it out once to see its skills."] = "召唤它一次即可看到它的技能。"
+L["Call your pet or open the stable to see your pets here."] = "召唤你的宠物或打开兽栏，就能在这里看到你的宠物。"
