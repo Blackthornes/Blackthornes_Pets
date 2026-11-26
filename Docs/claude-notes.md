@@ -366,6 +366,25 @@ out of combat; in a fight `buttonsWaiting` holds them for
 `PLAYER_REGEN_ENABLED`, and a button whose slot moved goes see-through.
 Shards stay a count. Tested in `tools/test_shardtracker.lua`.
 
+Soulstone time and Click to Make Stones (the owner said build it from a
+mockup, 2026-11-26, `pets-improve-6-warlock-stones`): while the Soulstone
+is on someone its slot shows the minutes left (`MinutesText`, green, orange
+under `LOW_TIME` 300 s) over "On <whole name>", read from the buff's
+`expirationTime` (`Stones:SoulstoneLeft`; `HasSoulstone` and
+`SoulstoneHolder` now also return the end time). The slot grows to fit the
+name, never cut, and the slots after it move along. A dungeon hides buffs,
+so there the time can't show and the slot keeps its count. On nobody with
+one in the bags it says "Ready". `ShardTracker:Tick` sets one timer for
+the next minute only while a time shows. The stone buttons now sit over
+the slots only while "Click to Make Stones:" is ticked (Pet page, under
+Tracker Size, shown once the tracker is on; `shardTrackerClicks`, account
+wide, never rename it, in `SETTING_KEYS`, not in `ns.DEFAULTS` so nil means
+"not yet set"). `ShardTracker:ClicksStart` sets it once at login: on for a
+player whose tracker was on before (they clicked stones since 2026-11-11),
+off for everyone else. The hover's make line is "Click to make one. Uses 1
+shard." `expirationTime` on Forever not yet seen in game. Tested in
+`tools/test_shardtracker.lua` and `tools/test_settings.lua`.
+
 
 ## The Pet XP bar
 

@@ -110,7 +110,7 @@ SettingsUI.SETTING_KEYS = {
     "feedWarning", "keepFood", "keepFoodCount", "lowFoodWarning",
     "neverFeedBuffFood", "petXPBar", "petXPBarCheer", "petXPBarHeight",
     "petXPBarPlace", "petXPBarWidth", "petXPBarWords", "quickFeed",
-    "settingsDescriptions", "shardTracker", "shardTrackerScale", "soulShards",
+    "settingsDescriptions", "shardTracker", "shardTrackerClicks", "shardTrackerScale", "soulShards",
     "stoneReminder", "tamingTooltip", "tooltipShift", "useTomTom", "windowScale",
 }
 
@@ -690,6 +690,13 @@ function SettingsUI:BuildPages()
     ns.SettingsPages.FitStepper(controls.shardTrackerSize, { "75%", "100%", "125%" })
     controls.shardTrackerSize:SetPoint("TOPLEFT", CONTROL_X, -2)
 
+    local trackerClicksRow = pages:Row("pet", 2, L["Click to Make Stones:"],
+        L["Click a stone on the Shard Tracker to make it or use it."])
+    controls.shardTrackerClicks = Widgets.CreateCheckbox(trackerClicksRow, L["On"], function(checked)
+        ns.ShardTracker:SetClicks(checked)
+    end, false)
+    controls.shardTrackerClicks:SetPoint("TOPLEFT", CONTROL_X, -2)
+
     -- Who sees what on the Pet page (SettingsUI.LayPet): each class its own
     -- settings, and a switch's size rows only once it is ticked.
     local function BarOn() return ns.db ~= nil and ns.db.petXPBar == true end
@@ -708,6 +715,7 @@ function SettingsUI:BuildPages()
         self.petRules[item] = { class = "WARLOCK" }
     end
     self.petRules[trackerSizeRow] = { class = "WARLOCK", when = TrackerOn }
+    self.petRules[trackerClicksRow] = { class = "WARLOCK", when = TrackerOn }
 
     -- The compendium on the left, the arrow that leads to its beasts on
     -- the right.
@@ -917,6 +925,7 @@ function SettingsUI:Refresh()
     controls.stoneReminder:SetChecked(ns.db.stoneReminder == true)
     controls.shardTracker:SetChecked(ns.db.shardTracker == true)
     controls.shardTrackerSize:SetValue(ns.ShardTracker:Size(), true)
+    controls.shardTrackerClicks:SetChecked(ns.ShardTracker:ClicksOn())
     controls.petXPBar:SetChecked(ns.db.petXPBar == true)
     controls.petXPBarWidth:SetValue(ns.PetXPBar:Width(), true)
     controls.petXPBarHeight:SetValue(ns.PetXPBar:Height(), true)
