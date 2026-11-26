@@ -41,6 +41,7 @@ Logic\Butler.lua
 Logic\Taming.lua
 Logic\PetSkills.lua
 Logic\DemonSkills.lua
+Logic\NextStep.lua
 Logic\SoulShards.lua
 Logic\Stones.lua
 Logic\PetXP.lua
