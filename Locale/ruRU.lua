@@ -217,8 +217,6 @@ L["Taming it teaches nothing new."] = "Если приручить его, ни�
 L["Taming it teaches"] = "Если приручить, научит"
 L["(known)"] = "(знаешь)"
 L["(not known)"] = "(не знаешь)"
-L["Click to pin it on your map."] = "Щёлкни, чтобы отметить его на карте."
-L["No place to pin yet."] = "Пока нечего отметить."
 L["No beast matches. Untick a box or clear the search."] =
     "Ни один зверь не подходит. Сними галочку или очисти поиск."
 L["%d beasts"] = "Зверей: %d"
@@ -631,3 +629,23 @@ L["Open or close the window"] = "Открыть или закрыть окно"
 L["Pets Settings:"] = "Настройки Pets:"
 L["Puts every Pets setting back to how it started. Your saved data stays. So do your window locations and the choices on this page."] = "Возвращает каждую настройку Pets к началу. Твои сохранённые данные остаются. Положение окон и выбор на этой странице тоже остаются."
 L["Every Pets setting is back to how it started."] = "Все настройки Pets снова как в начале."
+
+-- The Skills Grid (2026-11-26)
+L["List"] = "Список"
+L["Grid"] = "Сетка"
+L["Your pet knows it"] = "Питомец это умеет"
+L["You can get it now"] = "Можно получить сейчас"
+L["Needs a higher level"] = "Нужен уровень выше"
+L["Beast Training"] = "Дрессировка"
+L["pet trainer"] = "учитель питомцев"
+L["Rank %d: %s, %s"] = "Ранг %d: %s, %s"
+L["Rank %d: %s"] = "Ранг %d: %s"
+L["Rank %d at level %d"] = "Ранг %d на %d-м уровне"
+
+-- The Beast Sheet (2026-11-26)
+L["Click to see more."] = "Щёлкни, чтобы узнать больше."
+L["Faster than %s (%s)"] = "Быстрее, чем %s (%s)"
+L["Slower than %s (%s)"] = "Медленнее, чем %s (%s)"
+L["You can tame it now"] = "Можно приручить сейчас"
+L["You can tame it at level %d"] = "Можно приручить с %d-го уровня"
+L["New for you"] = "Новое для тебя"

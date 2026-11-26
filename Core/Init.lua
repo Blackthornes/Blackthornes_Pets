@@ -383,6 +383,10 @@ local DEFAULTS = {
     -- game's own frames, buttons and tick boxes, asked 2026-10-10). Read at
     -- login, so a change waits for /reload. See UI/BlizzardLook.lua.
     windowStyle = "titanforged",
+
+    -- The Skills card for a hunter's pet: "list" or "grid" (the Skills
+    -- Grid, 2026-11-26). Never rename it.
+    skillsView = "list",
 }
 
 -- Per character, because pets are: a hunter's stable and a warlock's demons

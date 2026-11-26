@@ -903,9 +903,12 @@ end
 
 function UI:BuildSkills()
     local card = Glass(self.body, "glassAlt")
-    CardHeading(card, L["SKILLS"])
+    local heading = CardHeading(card, L["SKILLS"])
     card:Hide()
     self.skillsCard = card
+    self:BuildSkillsSwitch(heading)
+    self.gridRows = {}
+    self:BuildGridKey(card)
     self.skillHeads = {
         known = SkillHeading(card, L["YOUR PET KNOWS"], L["RANK"]),
         learn = SkillHeading(card, L["CAN LEARN NOW"], L["COST"]),
@@ -1021,9 +1024,15 @@ function UI:ShowSkills(plan, trainer, top)
     local y = -(CARD_HEAD + 1)
     y = self:ShowDemonChips(demon and plan or nil, y)
 
+    -- The List / Grid switch shows for a hunter's pet with skills to grid.
+    local canGrid = not demon and plan and plan.grid and #plan.grid > 0
+    self.skillsSwitch:SetShown(canGrid and true or false)
+    local grid = canGrid and UI.SkillsView() == "grid"
+    self:PaintSkillsSwitch()
+
     local lines = {}
     for _, section in ipairs({ "known", "learn", "later" }) do
-        lines[section] = plan and UI.SkillLines(plan, section) or {}
+        lines[section] = (plan and not grid) and UI.SkillLines(plan, section) or {}
     end
 
     -- Two columns (the owner said build it from a mockup, 2026-11-24): what
@@ -1079,6 +1088,7 @@ function UI:ShowSkills(plan, trainer, top)
         divide:SetHeight(math.max(y - math.min(leftEnd, rightEnd), 1))
     end
     y = math.min(leftEnd, rightEnd)
+    y = self:ShowGrid(grid and plan.grid or nil, y)
 
     self.skillTrainerPlace = trainer
     self.skillFoot:SetShown(trainer ~= nil)
@@ -1136,6 +1146,345 @@ function UI:FillSkillRow(row, line, index, x, y, width)
     row:SetSize(width, height)
     row:Show()
     return height
+end
+
+--------------------------------------------------------------------------------
+-- The Skills Grid (a player asked, the owner said build it from a mockup,
+-- 2026-11-26): each skill one line, each rank one box. Gold the pet knows,
+-- a bright gold edge it can get now, dim for later. The same facts as the
+-- list (PetSkills.GridRow). List or Grid is kept in skillsView.
+--------------------------------------------------------------------------------
+
+local GRID_ROW = 24
+local GRID_BOX = 18
+local GRID_GAP = 3
+local GRID_NAME_LEAST = 150
+local GRID_KEY = 26
+local SWITCH_WIDTH = 52
+local SWITCH_HEIGHT = 18
+
+--- "list" or "grid": how the Skills card shows a hunter's pet.
+function UI.SkillsView()
+    return ns.db and ns.db.skillsView == "grid" and "grid" or "list"
+end
+
+--- A click on List or Grid: kept, and the card drawn again.
+function UI:SetSkillsView(view)
+    if ns.db then ns.db.skillsView = view == "grid" and "grid" or "list" end
+    self:PaintSkillsSwitch()
+    if self.Refresh then self:Refresh() end
+end
+
+--- List and Grid side by side at the right of the card's heading.
+function UI:BuildSkillsSwitch(heading)
+    local switch = CreateFrame("Frame", nil, heading)
+    switch:SetSize(SWITCH_WIDTH * 2, SWITCH_HEIGHT)
+    switch:SetPoint("RIGHT", heading, "RIGHT", -4, 0)
+    Theme.Fill(switch, "well")
+    Theme.Border(switch, "borderLit")
+    switch:Hide()
+    switch.buttons = {}
+    for index, view in ipairs({ "list", "grid" }) do
+        local button = CreateFrame("Button", nil, switch)
+        button:SetSize(SWITCH_WIDTH, SWITCH_HEIGHT)
+        button:SetPoint("LEFT", switch, "LEFT", (index - 1) * SWITCH_WIDTH, 0)
+        button.background = Theme.Fill(button, "well")
+        button.label = Theme.CreateLabel(button, "small", "muted")
+        button.label:SetPoint("CENTER", 0, 0)
+        button.label:SetText(view == "list" and L["List"] or L["Grid"])
+        button.view = view
+        button:SetScript("OnEnter", function(self)
+            if UI.SkillsView() ~= self.view then
+                self.background:SetColorTexture(Theme.Unpack("glassHover"))
+                self.label:SetTextColor(Theme.Unpack("accentHi"))
+            end
+        end)
+        button:SetScript("OnLeave", function() UI:PaintSkillsSwitch() end)
+        button:SetScript("OnClick", function(self) UI:SetSkillsView(self.view) end)
+        switch.buttons[view] = button
+    end
+    -- Wide enough for the longer word in any language.
+    local widest = math.max(Theme.TextWidth("small", L["List"]), Theme.TextWidth("small", L["Grid"]))
+    local width = math.max(SWITCH_WIDTH, math.ceil(widest) + 20)
+    switch:SetWidth(width * 2)
+    switch.buttons.list:SetWidth(width)
+    switch.buttons.grid:SetWidth(width)
+    switch.buttons.grid:ClearAllPoints()
+    switch.buttons.grid:SetPoint("LEFT", switch, "LEFT", width, 0)
+    self.skillsSwitch = switch
+end
+
+--- The picked half is solid gold with dark letters; the other is dark.
+function UI:PaintSkillsSwitch()
+    local switch = self.skillsSwitch
+    if not switch then return end
+    local view = UI.SkillsView()
+    for key, button in pairs(switch.buttons) do
+        local picked = key == view
+        button.background:SetColorTexture(Theme.Unpack(picked and "accent" or "well"))
+        button.label:SetTextColor(Theme.Unpack(picked and "ink" or "muted"))
+    end
+end
+
+--- How a box looks for each state: its fill, its edge and its number.
+UI.GRID_LOOK = {
+    known = { fill = "accent", edge = "accentHi", number = "ink" },
+    now = { fill = "glass", edge = "accentHi", number = "accentHi" },
+    later = { fill = "well", edge = "border", number = "dim" },
+}
+
+--- Paint one rank box, or a key's swatch, in a state's look.
+function UI.PaintGridBox(box, state)
+    local look = UI.GRID_LOOK[state] or UI.GRID_LOOK.later
+    box.state = state
+    box.background:SetColorTexture(Theme.Unpack(look.fill))
+    Theme.SetBorderColor(box, look.edge)
+    if box.number then box.number:SetTextColor(Theme.Unpack(look.number)) end
+end
+
+local function CreateGridBox(parent, mouse)
+    local box = CreateFrame(mouse and "Button" or "Frame", nil, parent)
+    box:SetSize(GRID_BOX, GRID_BOX)
+    box.background = Theme.Fill(box, "well")
+    Theme.Border(box, "border")
+    box.number = false
+    return box
+end
+
+--- The words on a box's hover: the skill and rank, then how it stands,
+--- its pet level, its cost and who teaches it.
+function UI.GridBoxLines(row, box)
+    local out = { L.Format("%s Rank %d", row.name, box.rank) }
+    if box.state == "known" then
+        out[#out + 1] = L["Your pet knows it"]
+    elseif box.state == "now" then
+        out[#out + 1] = L["You can get it now"]
+    elseif box.from == "tame" and not box.high then
+        out[#out + 1] = L["Tame a beast that knows it"]
+    else
+        out[#out + 1] = L["Needs a higher level"]
+    end
+    if box.level then out[#out + 1] = L.Format("Pet level %d", box.level) end
+    if box.from ~= "free" then
+        local cost = box.cost and (box.cost == 1 and L.Format("%d point", box.cost) or L.Format("%d points", box.cost))
+        local from = box.from == "hunter" and L["from your Beast Training"]
+            or box.from == "trainer" and L["from a pet trainer"] or nil
+        if cost and from then
+            out[#out + 1] = ("%s %s"):format(cost, from)
+        elseif cost then
+            out[#out + 1] = cost
+        end
+    end
+    return out
+end
+
+--- The words at the right of a grid line: the next rank and how to get it.
+--- Nothing once the pet knows every rank. The second value is true while
+--- the step can be taken now.
+function UI.GridNote(row)
+    local step = row.next
+    if not step then return "", false end
+    if step.cost or step.from then
+        local who = step.from == "hunter" and L["Beast Training"] or L["pet trainer"]
+        if step.cost then
+            local cost = step.cost == 1 and L.Format("%d point", step.cost) or L.Format("%d points", step.cost)
+            return L.Format("Rank %d: %s, %s", step.rank, who, cost), true
+        end
+        return L.Format("Rank %d: %s", step.rank, who), true
+    end
+    if step.level then return L.Format("Rank %d at level %d", step.rank, step.level), false end
+    return L.Format("Rank %d: %s", step.rank, L["Tame a beast that knows it"]), false
+end
+
+local function GridHover(row, on)
+    row.background:SetColorTexture(Theme.Unpack(on and "glassHover" or (row.glassKey or "glass")))
+    row.edge:SetShown(on)
+end
+
+local function CreateGridRow(card)
+    local row = CreateFrame("Button", nil, card)
+    row:SetHeight(GRID_ROW)
+    row.background = Theme.Fill(row, "glass")
+    local line = row:CreateTexture(nil, "BORDER")
+    line:SetPoint("BOTTOMLEFT")
+    line:SetPoint("BOTTOMRIGHT")
+    line:SetHeight(1)
+    line:SetColorTexture(Theme.Unpack("border", 0.6))
+    row.edge = row:CreateTexture(nil, "ARTWORK")
+    row.edge:SetPoint("TOPLEFT")
+    row.edge:SetPoint("BOTTOMLEFT")
+    row.edge:SetWidth(2)
+    row.edge:SetColorTexture(Theme.Unpack("accentHi"))
+    row.edge:Hide()
+    local slot = CreateFrame("Frame", nil, row)
+    slot:SetSize(SKILL_ICON, SKILL_ICON)
+    slot:SetPoint("LEFT", SKILL_TEXT, 0)
+    Theme.Fill(slot, "well")
+    Theme.Border(slot, "metal")
+    row.icon = slot:CreateTexture(nil, "ARTWORK")
+    row.icon:SetPoint("TOPLEFT", 1, -1)
+    row.icon:SetPoint("BOTTOMRIGHT", -1, 1)
+    if row.icon.SetTexCoord then row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+    row.iconSlot = slot
+    row.label = Theme.CreateLabel(row, "normal", "text")
+    row.label:SetPoint("LEFT", SKILL_TEXT_ICON, 0)
+    row.label:SetWordWrap(true)
+    row.note = Theme.CreateLabel(row, "small", "muted", "RIGHT")
+    row.note:SetPoint("RIGHT", -10, 0)
+    row.note:SetWordWrap(true)
+    row.boxes = {}
+
+    row:SetScript("OnEnter", function(self)
+        GridHover(self, true)
+        if self.beast and GameTooltip then
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine(self.beast, Theme.Unpack("accent"))
+            GameTooltip:AddLine(L["Click to see the beasts that teach it."], 0.9, 0.9, 0.9, true)
+            GameTooltip:Show()
+        end
+    end)
+    row:SetScript("OnLeave", function(self)
+        GridHover(self, false)
+        if GameTooltip then GameTooltip:Hide() end
+    end)
+    row:SetScript("OnClick", function(self)
+        if self.beast then UI:ShowBeastsFor(self.beast) end
+    end)
+    return row
+end
+
+--- A rank box on a grid line: its hover tells that rank, and a click does
+--- what a click on the line does.
+local function GridRowBox(row, index)
+    local box = row.boxes[index]
+    if box then return box end
+    box = CreateGridBox(row, true)
+    box.number = Theme.CreateLabel(box, "tiny", "dim")
+    box.number:SetPoint("CENTER", 0, 0)
+    box:SetScript("OnEnter", function(self)
+        GridHover(row, true)
+        if not GameTooltip then return end
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        for i, text in ipairs(UI.GridBoxLines(row.data, self.data)) do
+            if i == 1 then
+                GameTooltip:AddLine(text, Theme.Unpack("accent"))
+            else
+                GameTooltip:AddLine(text, 0.9, 0.9, 0.9, true)
+            end
+        end
+        if row.beast then
+            GameTooltip:AddLine(L["Click to see the beasts that teach it."], 0.6, 0.6, 0.6, true)
+        end
+        GameTooltip:Show()
+    end)
+    box:SetScript("OnLeave", function()
+        GridHover(row, false)
+        if GameTooltip then GameTooltip:Hide() end
+    end)
+    box:SetScript("OnClick", function()
+        if row.beast then UI:ShowBeastsFor(row.beast) end
+    end)
+    row.boxes[index] = box
+    return box
+end
+
+--- The key under the grid: what gold, a bright gold edge and dim mean.
+function UI:BuildGridKey(card)
+    local key = CreateFrame("Frame", nil, card)
+    key:SetHeight(GRID_KEY)
+    key:Hide()
+    key.parts = {}
+    local x = 12
+    for _, entry in ipairs({
+        { "known", L["Your pet knows it"] },
+        { "now", L["You can get it now"] },
+        { "later", L["Needs a higher level"] },
+    }) do
+        local swatch = CreateGridBox(key, false)
+        swatch:SetSize(14, 14)
+        swatch:SetPoint("LEFT", key, "LEFT", x, 0)
+        UI.PaintGridBox(swatch, entry[1])
+        local words = Theme.CreateLabel(key, "small", "muted")
+        words:SetPoint("LEFT", swatch, "RIGHT", 6, 0)
+        words:SetText(entry[2])
+        key.parts[#key.parts + 1] = { swatch = swatch, words = words }
+        x = x + 14 + 6 + math.ceil(Theme.TextWidth("small", entry[2])) + 18
+    end
+    self.gridKey = key
+end
+
+--- Lay the grid out from `y`, or hide it when `rows` is nil. Returns where
+--- the card goes on.
+function UI:ShowGrid(rows, y)
+    local card = self.skillsCard
+    if not rows then
+        for _, row in ipairs(self.gridRows) do row:Hide() end
+        self.gridKey:Hide()
+        return y
+    end
+    local width = self.fullWidth - 2
+    -- Names line up in one column, and the boxes start where the longest
+    -- name ends; the note fills what is left on the right.
+    local widest, most = 0, 0
+    for _, data in ipairs(rows) do
+        widest = math.max(widest, Theme.TextWidth("normal", data.name))
+        most = math.max(most, #data.ranks)
+    end
+    local boxesAt = math.max(GRID_NAME_LEAST, SKILL_TEXT_ICON + math.ceil(widest) + 16)
+    local noteAt = boxesAt + most * (GRID_BOX + GRID_GAP) + 12
+    local noteRoom = math.max(width - noteAt - 10, 80)
+
+    for index, data in ipairs(rows) do
+        local row = self.gridRows[index]
+        if not row then
+            row = CreateGridRow(card)
+            self.gridRows[index] = row
+        end
+        row.data = data
+        row.beast = UI.IsBeastSkill(data.name) and data.name or nil
+        row.glassKey = index % 2 == 1 and "glass" or "glassAlt"
+        row.background:SetColorTexture(Theme.Unpack(row.glassKey))
+        local icon = ns.PetSkills.Icon(data.name, math.max(data.have or 0, 1))
+        row.iconSlot:SetShown(icon ~= nil)
+        if icon then row.icon:SetTexture(icon) end
+        row.label:ClearAllPoints()
+        row.label:SetPoint("LEFT", row, "LEFT", icon and SKILL_TEXT_ICON or SKILL_TEXT, 0)
+        row.label:SetWidth(boxesAt - (icon and SKILL_TEXT_ICON or SKILL_TEXT) - 8)
+        row.label:SetText(data.name)
+        for i, rank in ipairs(data.ranks) do
+            local box = GridRowBox(row, i)
+            box.data = rank
+            box.number:SetText(rank.rank)
+            UI.PaintGridBox(box, rank.state)
+            box:ClearAllPoints()
+            box:SetPoint("LEFT", row, "LEFT", boxesAt + (i - 1) * (GRID_BOX + GRID_GAP), 0)
+            box:Show()
+        end
+        for i = #data.ranks + 1, #row.boxes do row.boxes[i]:Hide() end
+        local note, now = UI.GridNote(data)
+        row.note:SetWidth(noteRoom)
+        row.note:SetText(note)
+        row.note:SetTextColor(Theme.Unpack(now and "text" or "muted"))
+
+        local height = GRID_ROW
+        local ok, textHeight = pcall(row.note.GetStringHeight, row.note)
+        if ok and type(textHeight) == "number" and textHeight + 8 > height then
+            height = math.ceil(textHeight + 8)
+        end
+        row:ClearAllPoints()
+        row:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
+        row:SetSize(width, height)
+        row:Show()
+        y = y - height
+    end
+    for i = #rows + 1, #self.gridRows do self.gridRows[i]:Hide() end
+
+    local key = self.gridKey
+    key:ClearAllPoints()
+    key:SetPoint("TOPLEFT", card, "TOPLEFT", 1, y)
+    key:SetPoint("TOPRIGHT", card, "TOPRIGHT", -1, y)
+    key:Show()
+    return y - GRID_KEY
 end
 
 --- What a dim chip says for a demon still to come, and its hover.
