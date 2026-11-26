@@ -246,7 +246,7 @@ end
 ---     later = { { name, rank, level } or { name, rank, tame = true } } }
 --- Each list in name order, later by when it comes.
 function PetSkills:Plan(known, level, family)
-    local plan = { known = {}, learn = {}, later = {} }
+    local plan = { known = {}, learn = {}, later = {}, grid = {} }
     level = level or 0
     for name, skill in pairs(Data().SKILLS) do
         local have = known[name] or 0
@@ -264,6 +264,7 @@ function PetSkills:Plan(known, level, family)
                 end
             end
             if best then plan.learn[#plan.learn + 1] = best end
+            plan.grid[#plan.grid + 1] = PetSkills.GridRow(name, skill, ranks, have, best, level)
 
             local after = best and best.rank or have
             for _, rank in ipairs(ranks) do
@@ -289,7 +290,56 @@ function PetSkills:Plan(known, level, family)
         return a.name < b.name
     end)
     while #plan.later > PetSkills.LATER_MOST do table.remove(plan.later) end
+    -- The grid: skills for this family first, then those every pet can
+    -- learn, each group in name order.
+    table.sort(plan.grid, function(a, b)
+        if a.all ~= b.all then return not a.all end
+        return a.name < b.name
+    end)
     return plan
+end
+
+--- One skill's line on the Skills Grid (a player asked, the owner said
+--- build it from a mockup, 2026-11-26): every rank as a box, each
+--- { rank, state, level, cost, from, high }, state "known" (the pet has it),
+--- "now" (it can get it now) or "later" (a higher level, or a beast to
+--- tame), and the next step: { rank, cost, from } to learn now,
+--- { rank, level } to wait for, or { rank, tame = true }. Same facts as the
+--- list, so the two never disagree.
+function PetSkills.GridRow(name, skill, ranks, have, best, level)
+    local row = { name = name, all = skill.all == true, have = have, ranks = {} }
+    local top = best and best.rank or have
+    for _, rank in ipairs(ranks) do
+        local data = skill[rank]
+        local state = rank <= have and "known" or (rank <= top and "now" or "later")
+        local from
+        if data.free then
+            from = "free"
+        elseif HunterKnows(name, rank) then
+            from = "hunter"
+        elseif data.trainer then
+            from = "trainer"
+        else
+            from = "tame"
+        end
+        row.ranks[#row.ranks + 1] = { rank = rank, state = state, level = data.level, cost = data.cost, from = from,
+            high = data.level > level }
+    end
+    if best then
+        row.next = { rank = best.rank, cost = best.cost, from = best.from }
+    else
+        for _, box in ipairs(row.ranks) do
+            if box.state == "later" and box.from ~= "free" then
+                if box.level > level then
+                    row.next = { rank = box.rank, level = box.level }
+                else
+                    row.next = { rank = box.rank, tame = true }
+                end
+                break
+            end
+        end
+    end
+    return row
 end
 
 --- The plan for the pet out now, or nil for a pet that is not a hunter's.

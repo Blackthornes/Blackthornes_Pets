@@ -110,7 +110,7 @@ SettingsUI.SETTING_KEYS = {
     "feedWarning", "keepFood", "keepFoodCount", "lowFoodWarning",
     "neverFeedBuffFood", "petXPBar", "petXPBarCheer", "petXPBarHeight",
     "petXPBarPlace", "petXPBarWidth", "petXPBarWords", "quickFeed",
-    "settingsDescriptions", "shardTracker", "shardTrackerScale", "soulShards",
+    "settingsDescriptions", "shardTracker", "shardTrackerScale", "skillsView", "soulShards",
     "stoneReminder", "tamingTooltip", "tooltipShift", "useTomTom", "windowScale",
 }
 
