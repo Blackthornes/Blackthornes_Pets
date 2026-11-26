@@ -66,6 +66,10 @@ local FOOD_LINE = 44
 local FOOT = 30
 -- About how many hours of food fill the bar under it.
 local FOOD_BAR_HOURS = 8
+-- The Next Step line under the top card (the owner said build it from a
+-- mockup, 2026-11-26): two lines, or one when it says there is nothing left.
+local NEXT_HEIGHT = 48
+local NEXT_ONE = 32
 
 -- Loyalty's six levels, by the name C_PetInfo.GetPetLoyalty gives (it
 -- gives no number). The German names are the classic client's; a name in
@@ -152,7 +156,9 @@ function UI:Build()
             key = "Main",
             canFold = function()
                 local fighting = InCombatLockdown and InCombatLockdown()
-                return not (fighting and UI.feedButton and UI.feedButton:IsShown())
+                local feeding = (UI.feedButton and UI.feedButton:IsShown())
+                    or (UI.nextFeedButton and UI.nextFeedButton:IsShown())
+                return not (fighting and feeding)
             end,
             onToggle = function(folded)
                 if folded then UI:PlaceFeedButton(nil) else UI:Refresh() end
@@ -735,7 +741,137 @@ function UI:BuildStatus()
         self.rows[spec.key] = row
     end
 
+    self:BuildNextStep()
     self:BuildSkills()
+end
+
+--------------------------------------------------------------------------------
+-- The Next Step line
+--
+-- One line under the top card with the best next thing to do and one button
+-- for it (Logic/NextStep.lua works out which). Feed is a secure button of
+-- its own, like the food card's, since feeding is protected.
+--------------------------------------------------------------------------------
+
+function UI:BuildNextStep()
+    local line = Glass(self.body, "glass", false)
+    Theme.Border(line, "accent", 0.7)
+    line:SetHeight(NEXT_HEIGHT)
+    line:Hide()
+
+    local tag = Theme.CreateLabel(line, "tiny", "accent")
+    tag:SetPoint("LEFT", 14, 0)
+    tag:SetText(L["NEXT"])
+
+    local button = Widgets.CreateButton(line, L["Show the Way"], function() UI:DoNextStep() end,
+        { primary = true, width = 100, height = 22 })
+    button:SetPoint("RIGHT", -10, 0)
+
+    local textX = 14 + math.max(math.ceil(tag:GetStringWidth() or 0), 30) + 14
+    local text = Theme.CreateLabel(line, "normal", "text")
+    text:SetPoint("TOPLEFT", line, "TOPLEFT", textX, -8)
+    local sub = Theme.CreateLabel(line, "small", "muted")
+    sub:SetPoint("TOPLEFT", text, "BOTTOMLEFT", 0, -3)
+
+    self.nextLine, self.nextTag, self.nextButton = line, tag, button
+    self.nextText, self.nextSub, self.nextTextX = text, sub, textX
+
+    -- Feed: a secure button over the line's own, as the food card's is.
+    local feed = Widgets.CreateButton(UIParent, L["Feed"], nil, {
+        name = "BlackthornesPetsNextFeedButton",
+        template = "SecureActionButtonTemplate",
+        primary = true,
+        width = 90,
+        height = 22,
+    })
+    feed:SetFrameStrata("FULLSCREEN_DIALOG")
+    feed:RegisterForClicks("AnyUp", "AnyDown")
+    feed:Hide()
+    self.nextFeedButton = feed
+end
+
+--- What the line should say now, from what the tab already read.
+function UI:NextStepFor(status, plan, trainer)
+    if not (ns.NextStep and status and status.exists) then return nil end
+    local stacks = status.foods and ns.Food:Latest(status) or {}
+    local find = plan and plan.kind ~= "demon" and ns.PetSkills.CurrentToFind
+        and ns.PetSkills:CurrentToFind() or nil
+    local money
+    if plan and plan.kind == "demon" and type(GetMoney) == "function" then
+        local ok, value = pcall(GetMoney)
+        money = ok and ns.PetStatus.Plain(value) or nil
+        if type(money) ~= "number" then money = nil end
+    end
+    local ok, step = pcall(ns.NextStep.Pick, {
+        status = status, stacks = stacks, plan = plan, trainer = trainer, find = find, money = money,
+    })
+    return ok and step or nil
+end
+
+--- Lay the line out at `top`. Returns how tall it is, or nil when hidden.
+function UI:ShowNextStep(step, top)
+    local line = self.nextLine
+    self.nextStep = step
+    if not (line and step) then
+        if line then line:Hide() end
+        return nil
+    end
+    line:ClearAllPoints()
+    line:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, top)
+    line:SetPoint("TOPRIGHT", self.body, "TOPRIGHT", 0, top)
+
+    local button = self.nextButton
+    local hasButton = step.button ~= nil and step.kind ~= "feed"
+    button:SetShown(hasButton)
+    local right = -12
+    if hasButton then
+        button.label:SetText(step.button)
+        local width = math.max(80, math.ceil(button.label:GetStringWidth() or 0) + 28)
+        button:SetWidth(width)
+        right = -(10 + width + 12)
+    elseif step.kind == "feed" then
+        right = -(10 + 90 + 12)
+    end
+
+    local text, sub = self.nextText, self.nextSub
+    text:SetText(step.text or "")
+    text:SetTextColor(Theme.Unpack(step.kind == "done" and "muted" or "text"))
+    text:ClearAllPoints()
+    text:SetPoint("TOPLEFT", line, "TOPLEFT", self.nextTextX, step.sub and -8 or -9)
+    text:SetPoint("RIGHT", line, "RIGHT", right, 0)
+    sub:SetShown(step.sub ~= nil)
+    sub:SetText(step.sub or "")
+    sub:ClearAllPoints()
+    sub:SetPoint("TOPLEFT", text, "BOTTOMLEFT", 0, -3)
+    sub:SetPoint("RIGHT", line, "RIGHT", right, 0)
+
+    -- A line too long for its room wraps, and the card grows with it.
+    local height = step.sub and NEXT_HEIGHT or NEXT_ONE
+    local textHeight = text.GetStringHeight and text:GetStringHeight()
+    local subHeight = step.sub and sub.GetStringHeight and sub:GetStringHeight()
+    if type(textHeight) == "number" then
+        local need = 8 + textHeight + (type(subHeight) == "number" and (3 + subHeight) or 0) + 9
+        height = math.max(height, math.ceil(need))
+    end
+    line:SetHeight(height)
+    line:Show()
+    return height
+end
+
+--- The line's button: Okay puts the low food line away, Show the Way points
+--- the arrow at the trainer or the beast. Feed is the secure button.
+function UI:DoNextStep()
+    local step = self.nextStep
+    if not step then return end
+    if step.kind == "food" then
+        local status = ns.PetStatus:Read()
+        ns.NextStep:Dismiss(status.name)
+        self:Refresh()
+    elseif step.kind == "train" and step.trainer then
+        if ns.BeastArrow then ns.BeastArrow:FollowPlace(step.trainer) end
+    elseif step.kind == "find" and step.beast then
+        if ns.Compendium then ns.Compendium:Pin(step.beast) end
+    end
 end
 
 --------------------------------------------------------------------------------
@@ -1294,7 +1430,10 @@ function UI:PlaceFeedButton(stack, beforeCombat)
     if InCombat() and not beforeCombat then return end
 
     local folded = ns.FoldWindow and ns.FoldWindow:IsFolded(self.frame)
-    if stack and self.frame and self.frame:IsShown() and not UI.Covered() and not folded then
+    local open = self.frame and self.frame:IsShown() and not UI.Covered() and not folded
+    self:PlaceNextFeed(stack and open and self.nextStep and self.nextStep.kind == "feed"
+        and self.nextStep.stack or nil)
+    if stack and open then
         -- While the pet is still eating it holds: "Eating (14s)".
         local left = ns.Food.Eating and ns.Food:Eating()
         button:SetAttribute("type", "macro")
@@ -1323,10 +1462,33 @@ function UI:PlaceFeedButton(stack, beforeCombat)
     self:PlaceVersion()
 end
 
+--- The Next Step line's Feed button, over the line's right end, or away.
+function UI:PlaceNextFeed(stack)
+    local button = self.nextFeedButton
+    if not button then return end
+    if stack and self.nextLine and self.nextLine:IsShown() then
+        local left = ns.Food.Eating and ns.Food:Eating()
+        button:SetAttribute("type", "macro")
+        button:SetAttribute("macrotext", not left and ns.Food:FeedMacro(stack) or nil)
+        button:SetText(left and L.Format("Eating (%ds)", left) or L["Feed"])
+        button:ClearAllPoints()
+        button:SetPoint("RIGHT", self.nextLine, "RIGHT", -10, 0)
+        button:SetFrameLevel(self.frame:GetFrameLevel() + 10)
+        button:Show()
+    else
+        button:Hide()
+        button:ClearAllPoints()
+        button:SetAttribute("macrotext", nil)
+    end
+end
+
 --- The ticker's countdown while the pet eats: only the words change.
 function UI:ShowEatingLeft(left)
+    if InCombat() then return end
+    local next = self.nextFeedButton
+    if next and next:IsShown() then next:SetText(L.Format("Eating (%ds)", left)) end
     local button = self.feedButton
-    if not (button and self.feedEating and button:IsShown()) or InCombat() then return end
+    if not (button and self.feedEating and button:IsShown()) then return end
     button:SetText(L.Format("Eating (%ds)", left))
 end
 
@@ -1680,6 +1842,11 @@ function UI:ShowStatus(status)
     self:ShowMeters(status)
     local y = -(HERO_HEIGHT + GAP)
 
+    local plan, trainer = self:SkillPlan()
+    local nextHeight = self:ShowNextStep(self:NextStepFor(status, plan, trainer), y)
+    self.nextExtra = nextHeight and (nextHeight + GAP) or 0
+    y = y - self.nextExtra
+
     local stats = ns.PetStatus:ReadStats()
     local stacks, foodEnd, fightEnd
     if status.foods then
@@ -1690,7 +1857,7 @@ function UI:ShowStatus(status)
         self.foodCard:Hide()
         fightEnd = self:ShowFight(stats, y, true)
     end
-    self:ShowSkillsUnder(y, stacks and stacks[1], foodEnd, fightEnd)
+    self:ShowSkillsUnder(y, stacks and stacks[1], foodEnd, fightEnd, plan, trainer)
     self:PlaceFeedButton(stacks and stacks[1] or nil)
 end
 
@@ -1698,16 +1865,13 @@ end
 --- are as tall as the fuller of them, the skills card fills what is left
 --- and the window grows to fit, never below its usual height. Without it,
 --- the cards fill the window as they always have.
-function UI:ShowSkillsUnder(top, feeding, foodEnd, fightEnd)
-    local plan = ns.PetSkills and ns.PetSkills:Current()
-    local trainer = plan and ns.PetSkills:Trainer()
-    if not plan and ns.DemonSkills then
-        plan = ns.DemonSkills:Current(self.demonPick)
-        trainer = plan and ns.DemonSkills:Trainer()
-    end
+function UI:ShowSkillsUnder(top, feeding, foodEnd, fightEnd, plan, trainer)
+    if plan == nil and trainer == nil then plan, trainer = self:SkillPlan() end
+    -- The Next Step line takes room the cards had: the window grows by it.
+    local floor = HEIGHT + (self.nextExtra or 0)
     if not (plan or trainer) then
         self.skillsCard:Hide()
-        self:SetPetHeight(HEIGHT)
+        self:SetPetHeight(floor)
         return
     end
     local cardsHeight = -(fightEnd or 0) + 6
@@ -1725,12 +1889,23 @@ function UI:ShowSkillsUnder(top, feeding, foodEnd, fightEnd)
     local skillsTop = top - cardsHeight - GAP
     local skillsHeight = self:ShowSkills(plan, trainer, skillsTop)
     if not skillsHeight then
-        self:SetPetHeight(math.max(HEIGHT, HEADER + GAP + (-top + cardsHeight) + FOOT))
+        self:SetPetHeight(math.max(floor, HEADER + GAP + (-top + cardsHeight) + FOOT))
         return
     end
     local needed = HEADER + GAP + (-skillsTop + skillsHeight) + FOOT
     self.skillsCard:SetPoint("BOTTOMRIGHT", self.body, "BOTTOMRIGHT", 0, 0)
-    self:SetPetHeight(math.max(HEIGHT, needed))
+    self:SetPetHeight(math.max(floor, needed))
+end
+
+--- The skills plan for the pet or demon out, and its nearest trainer.
+function UI:SkillPlan()
+    local plan = ns.PetSkills and ns.PetSkills:Current()
+    local trainer = plan and ns.PetSkills:Trainer()
+    if not plan and ns.DemonSkills then
+        plan = ns.DemonSkills:Current(self.demonPick)
+        trainer = plan and ns.DemonSkills:Trainer()
+    end
+    return plan, trainer
 end
 
 --- How tall the Pet tab needs to be. Every tab grows with it when it needs

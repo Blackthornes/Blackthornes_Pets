@@ -50,6 +50,7 @@ Sections there:
 - Shelves, dock places and the All Addons page
 - The swap gem (One Window toggle, 2026-11-19)
 - The look upgrade (2026-11-24)
+- The Next Step line (2026-11-26)
 
 ## Checking a change
 
