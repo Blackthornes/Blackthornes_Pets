@@ -53,6 +53,7 @@ Sections there:
 - The Skills Grid (2026-11-26)
 - The Beast Sheet (2026-11-26)
 - The Next Step line (2026-11-26)
+- Skills to Find (2026-11-26)
 
 ## Checking a change
 

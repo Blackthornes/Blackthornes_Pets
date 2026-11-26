@@ -209,7 +209,13 @@ function CompendiumUI:Build()
         CompendiumUI:SavePosition()
     end)
     frame:EnableMouseWheel(true)
-    frame:SetScript("OnMouseWheel", function(_, delta) CompendiumUI:ScrollBy(-delta) end)
+    frame:SetScript("OnMouseWheel", function(_, delta)
+        if CompendiumUI.view == "find" and ns.SkillsToFindUI then
+            ns.SkillsToFindUI:ScrollBy(-delta)
+        else
+            CompendiumUI:ScrollBy(-delta)
+        end
+    end)
 
     if type(UISpecialFrames) == "table" then
         table.insert(UISpecialFrames, "BlackthornesPetsCompendium")
@@ -228,6 +234,7 @@ function CompendiumUI:Build()
     self:BuildSheet()
     self.wideColumns = {}
     for i, column in ipairs(COLUMNS) do self.wideColumns[i] = { x = column.x, width = column.width } end
+    if ns.SkillsToFindUI then ns.SkillsToFindUI:Build(frame) end
 
     -- The house footer (the owner, 2026-10-29): the count on the left,
     -- the version small and faint on the right. What a click does is the
@@ -262,12 +269,21 @@ function CompendiumUI:BuildHeader()
     -- The house header (the owner, 2026-10-29): the search on the left past
     -- the portrait, which reaches 48 pixels into the window, then the family
     -- drop-down. What the old line under the plate said is on the hovers.
+    -- All Beasts | Skills to Find (the owner said build it from a mockup,
+    -- 2026-11-26): the second view is UI/SkillsToFind.lua.
+    local searchX = 48
+    if ns.SkillsToFindUI then
+        local switch = ns.SkillsToFindUI.CreateSwitch(header, function(key) CompendiumUI:ShowView(key) end)
+        switch:SetPoint("LEFT", header, "LEFT", 48, -2)
+        self.viewSwitch = switch
+        searchX = 48 + switch:GetWidth() + 14
+    end
     local search = Widgets.CreateSearchBox(header, L["Search beasts, zones or skills"], function(text)
         CompendiumUI.searchText = text
         CompendiumUI.offset = 0
         CompendiumUI:Refresh()
     end)
-    search:SetPoint("LEFT", header, "LEFT", 48, -2)
+    search:SetPoint("LEFT", header, "LEFT", searchX, -2)
     search:SetWidth(260)
     self.search = search
 
@@ -523,7 +539,7 @@ function CompendiumUI:OnTabSize(_, height)
     self.grip:SetHeight(visible * ROW_HEIGHT)
     if self.sheet then self.sheet:SetHeight(visible * ROW_HEIGHT + 6 + 20) end
     self.offset = math.min(self.offset or 0, math.max(0, #(self.lines or {}) - visible))
-    if self.frame:IsShown() then self:Draw() end
+    if self.frame:IsShown() then self:Refresh() end
 end
 
 --- A cell's words sit in the middle of the row, one line or two, level
@@ -1435,8 +1451,41 @@ function CompendiumUI:SyncControls()
     self:PaintHeadings()
 end
 
+--- Everything the All Beasts view shows, which Skills to Find puts away.
+function CompendiumUI:AllBeastsParts()
+    local parts = { self.search, self.familyDropdown, self.well, self.grip, self.arrowButton }
+    for _, box in pairs(self.ticks or {}) do parts[#parts + 1] = box end
+    for _, heading in ipairs(self.headings or {}) do parts[#parts + 1] = heading end
+    return parts
+end
+
+--- Switch between All Beasts and Skills to Find. `search`, with All Beasts,
+--- searches for it (a skill clicked in the Skills to Find list).
+function CompendiumUI:ShowView(key, search)
+    -- The Beast Sheet belongs to the beast list.
+    if key == "find" and self.CloseSheet then self:CloseSheet() end
+    self.view = key == "find" and "find" or "all"
+    if self.viewSwitch then self.viewSwitch:Pick(self.view) end
+    if search then
+        self.searchText = tostring(search)
+        if self.search then self.search:SetText(self.searchText) end
+        self.offset = 0
+    end
+    self:Refresh()
+end
+
 function CompendiumUI:Refresh()
     if not (self.frame and self.frame:IsShown()) then return end
+    local finding = self.view == "find" and ns.SkillsToFindUI ~= nil
+    for _, part in ipairs(self:AllBeastsParts()) do part:SetShown(not finding) end
+    if finding then
+        for _, row in ipairs(self.allRows or {}) do row:Hide() end
+        self.empty:Hide()
+        ns.SkillsToFindUI:Show()
+        self.footer:SetText(ns.SkillsToFindUI.hint or "")
+        return
+    end
+    if ns.SkillsToFindUI then ns.SkillsToFindUI:Hide() end
     self:SyncControls()
 
     self.lines = ns.Compendium:List(self:Filter())
@@ -1535,6 +1584,8 @@ end
 --- Open the compendium searching for `text` (a beast, a zone or a skill),
 --- from the first row.
 function CompendiumUI:ShowSearch(text)
+    self.view = "all"
+    if self.viewSwitch then self.viewSwitch:Pick("all") end
     self.searchText = tostring(text or ""):match("^%s*(.-)%s*$")
     self:Show()
     if self.search then self.search:SetText(self.searchText) end
