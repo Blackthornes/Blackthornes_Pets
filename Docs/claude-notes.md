@@ -1571,8 +1571,8 @@ and put away with the food card's in `PlaceFeedButton`, held while the pet
 eats); fewer than `Food.LOW_FOOD` pieces of food (Okay puts it away for that
 pet until the bags are restocked, this session only); a skill from a pet
 trainer or Beast Training the training points pay for (Show the Way to the
-trainer); a rank to find by taming (Show the Way pins the beast,
-`Compendium:Pin`); then "has everything for level N". A warlock gets the
+trainer); a rank to find by taming (Show the Way points the beast arrow
+at it, `CompendiumUI:AimArrow`, else pins it); then "has everything for level N". A warlock gets the
 line for a demon book the gold in the bags pays for. It reads only what the
 tab already read, on its redraw. The window grows by the line's height.
 

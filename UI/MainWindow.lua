@@ -870,7 +870,11 @@ function UI:DoNextStep()
     elseif step.kind == "train" and step.trainer then
         if ns.BeastArrow then ns.BeastArrow:FollowPlace(step.trainer) end
     elseif step.kind == "find" and step.beast then
-        if ns.Compendium then ns.Compendium:Pin(step.beast) end
+        -- The beast arrow, as the Compendium's Show the Way; the map pin
+        -- when the arrow can't point at it.
+        local window = ns.CompendiumUI
+        local aimed = window and window.AimArrow and window:AimArrow(step.beast)
+        if not aimed and ns.Compendium then ns.Compendium:Pin(step.beast) end
     end
 end
 
