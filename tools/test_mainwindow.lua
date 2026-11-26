@@ -117,8 +117,8 @@ suite.check("the name stops before the bars",
     UI.nameLabel._point[1] == "RIGHT" and UI.nameLabel._point[3] == "LEFT"
         and UI.nameLabel._point[4] < UI.meters.experience._point[4], UI.nameLabel._point[4])
 suite.check("the bar is its usual width", UI.meterBarWidth == 150, UI.meterBarWidth)
-suite.check("the cards start right under the top card", UI.foodCard._point[1] == "TOPLEFT"
-    and UI.foodCard._point[5] == -(88 + 10), UI.foodCard._point[5])
+suite.check("the cards start right under the top card and the Next Step line", UI.foodCard._point[1] == "TOPLEFT"
+    and UI.foodCard._point[5] == -(88 + 10) - (UI.nextExtra or 0), UI.foodCard._point[5])
 
 -- Long words beside a bar take room from the bar, never below its least.
 local wasHappy = ns.PetStatus.HappinessText

@@ -187,20 +187,23 @@ local function AuraAt(unit, index)
         if type(aura) ~= "table" then return nil end
         local okId, id = pcall(function() return Plain(aura.spellId) end)
         local okFrom, from = pcall(function() return Plain(aura.sourceUnit) end)
-        return { spellId = okId and id or nil, source = okFrom and from or nil }
+        local okEnds, ends = pcall(function() return Plain(aura.expirationTime) end)
+        return { spellId = okId and id or nil, source = okFrom and from or nil,
+            ends = okEnds and ends or nil }
     end
     if type(_G.UnitBuff) == "function" then
-        local ok, name, _, _, _, _, _, source, _, _, id = pcall(_G.UnitBuff, unit, index)
+        local ok, name, _, _, _, _, ends, source, _, _, id = pcall(_G.UnitBuff, unit, index)
         if not ok then return nil, true end
         if Plain(name) == nil then return nil end
-        return { spellId = Plain(id), source = Plain(source) }
+        return { spellId = Plain(id), source = Plain(source), ends = Plain(ends) }
     end
     return nil
 end
 
 -- Does this unit carry the warlock's own Soulstone? True, false, or nil
 -- when a buff could not be read and none seen was the Soulstone: not sure,
--- which is not "no".
+-- which is not "no". With true comes the buff's end time (GetTime's clock)
+-- when the game shows it.
 function Stones:HasSoulstone(unit)
     local unsure = false
     for index = 1, self.MOST_AURAS do
@@ -212,7 +215,7 @@ function Stones:HasSoulstone(unit)
         if aura.spellId == nil then
             unsure = true
         elseif self.SOUL_BUFFS[aura.spellId] and (aura.source == nil or aura.source == "player") then
-            return true
+            return true, aura.ends
         end
     end
     if unsure then return nil end
@@ -234,12 +237,28 @@ function Stones.Units()
     return units
 end
 
---- The unit that carries the warlock's Soulstone, or nil.
+--- The unit that carries the warlock's Soulstone, or nil. Its buff's end
+--- time comes second when the game shows it.
 function Stones:SoulstoneHolder()
     for _, unit in ipairs(self.Units()) do
-        if self:HasSoulstone(unit) then return unit end
+        local has, ends = self:HasSoulstone(unit)
+        if has then return unit, ends end
     end
     return nil
+end
+
+--- Seconds left on the Soulstone, or nil when it is on nobody or the game
+--- hides its time (a dungeon hides buffs).
+function Stones:SoulstoneLeft()
+    local unit, ends = self:SoulstoneHolder()
+    if not unit or type(ends) ~= "number" or ends <= 0 then return nil end
+    if type(GetTime) ~= "function" then return nil end
+    local ok, now = pcall(GetTime)
+    now = ok and Plain(now) or nil
+    if type(now) ~= "number" then return nil end
+    local left = ends - now
+    if left <= 0 then return nil end
+    return left
 end
 
 --- Is the Soulstone on anyone? True, false, or nil when it was seen on

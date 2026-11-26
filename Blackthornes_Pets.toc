@@ -41,6 +41,7 @@ Logic\Butler.lua
 Logic\Taming.lua
 Logic\PetSkills.lua
 Logic\DemonSkills.lua
+Logic\NextStep.lua
 Logic\SoulShards.lua
 Logic\Stones.lua
 Logic\PetXP.lua
@@ -76,8 +77,10 @@ UI\MainWindow.lua
 UI\FeedButton.lua
 UI\ShardTracker.lua
 UI\PetXPBar.lua
+UI\PetStrip.lua
 UI\FeedKey.lua
 UI\TamingTooltip.lua
+UI\SkillsToFind.lua
 UI\CompendiumWindow.lua
 UI\BeastArrow.lua
 UI\TravelCard.lua

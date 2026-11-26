@@ -366,6 +366,25 @@ out of combat; in a fight `buttonsWaiting` holds them for
 `PLAYER_REGEN_ENABLED`, and a button whose slot moved goes see-through.
 Shards stay a count. Tested in `tools/test_shardtracker.lua`.
 
+Soulstone time and Click to Make Stones (the owner said build it from a
+mockup, 2026-11-26, `pets-improve-6-warlock-stones`): while the Soulstone
+is on someone its slot shows the minutes left (`MinutesText`, green, orange
+under `LOW_TIME` 300 s) over "On <whole name>", read from the buff's
+`expirationTime` (`Stones:SoulstoneLeft`; `HasSoulstone` and
+`SoulstoneHolder` now also return the end time). The slot grows to fit the
+name, never cut, and the slots after it move along. A dungeon hides buffs,
+so there the time can't show and the slot keeps its count. On nobody with
+one in the bags it says "Ready". `ShardTracker:Tick` sets one timer for
+the next minute only while a time shows. The stone buttons now sit over
+the slots only while "Click to Make Stones:" is ticked (Pet page, under
+Tracker Size, shown once the tracker is on; `shardTrackerClicks`, account
+wide, never rename it, in `SETTING_KEYS`, not in `ns.DEFAULTS` so nil means
+"not yet set"). `ShardTracker:ClicksStart` sets it once at login: on for a
+player whose tracker was on before (they clicked stones since 2026-11-11),
+off for everyone else. The hover's make line is "Click to make one. Uses 1
+shard." `expirationTime` on Forever not yet seen in game. Tested in
+`tools/test_shardtracker.lua` and `tools/test_settings.lua`.
+
 
 ## The Pet XP bar
 
@@ -1625,3 +1644,90 @@ fold (`FoldWindow.Style`, `FoldWindow.Bar`, `FoldWindow.FitBar`). Font names
 use the keys `House##font`, `Game##font`, `Clear##font`, since "Clear" is a
 button's word elsewhere. Tested in `tools/test_housekit.lua` and
 `tools/test_foldwindow.lua`. Not yet seen in game.
+
+## The Next Step line (2026-11-26)
+
+The owner said build it from the mockup `Docs/mockups/pets-improve-5-next-step.html`
+(project files). One gold-edged line under the top card on the Pet tab says
+the best next thing to do and has one button for it. `Logic/NextStep.lua`
+picks it (`NextStep.Pick`), the most pressing first: the pet is hungry and
+there is food (Feed, a secure button of its own, `nextFeedButton`, placed
+and put away with the food card's in `PlaceFeedButton`, held while the pet
+eats); fewer than `Food.LOW_FOOD` pieces of food (Okay puts it away for that
+pet until the bags are restocked, this session only); a skill from a pet
+trainer or Beast Training the training points pay for (Show the Way to the
+trainer); a rank to find by taming (Show the Way points the beast arrow
+at it, `CompendiumUI:AimArrow`, else pins it); then "has everything for level N". A warlock gets the
+line for a demon book the gold in the bags pays for. It reads only what the
+tab already read, on its redraw. The window grows by the line's height.
+
+The ranks to find are worked out in `Logic/PetSkills.lua`, shared with the
+Compendium's Skills to Find view: `PetSkills:ToFind(known, level, family,
+hunterLevel, here)` lists ranks no trainer teaches and no free rank, that
+the pet lacks and the hunter has not learned (those go to Beast Training),
+as `now` (a beast you can tame now), `later` and `done`, with `have` of
+`of` ranks for its level. `ClosestBeast` picks one you can tame now, on the
+map, fewest zones away by Guide Me's zone borders (`ZonesAway`,
+`Travel.ZonePath`; another continent counts `PetSkills.FAR`), then the
+lowest level. `CurrentToFind` keeps its answer until the pet, its skills, a
+level, the zone or the Compendium's list change, or a spell is learned.
+Tested in `tools/test_nextstep.lua`. Not yet seen in game.
+
+## The Pet Strip (2026-11-26)
+
+A player asked on Discord for a pet status line; the owner said build it
+from `Docs/mockups/pets-improve-1-pet-strip.html` in the project files
+(his yes covered its words). `UI/PetStrip.lua` (`BlackthornesPetsStrip`):
+one small see-through strip of dark glass with the pet's face and level,
+its name and mood (a dot in the mood's colour), the best food with how
+many are carried and "About 5 hours", and "Level N", the part done and a
+thin bar in `xp` purple. Under the mouse it turns solid with a gold edge,
+grows, and shows Feed and the close gem; a pet below the feed warning's
+line shows Feed glowing without the mouse; food under `Food.LOW_FOOD`
+turns the count red (the name's quality colour gives way). While the strip
+shows, the feed and low food warnings still go to chat but leave out their
+card (`PetStrip:Showing()` in `PetStatus:CheckFeed` and `Food:CheckLow`).
+
+Nothing new is read from the game: `PetStatus:Update` and `Food:Update`
+hand it `(status, stacks)` as they do FeedKey, and each part (name and
+face, mood, food, XP, layout, Feed) is drawn again only when its key
+changed. Feed is a secure action button on UIParent
+(`BlackthornesPetsStripFeed`), laid over the strip's end by screen
+position out of combat only, put away at `PLAYER_REGEN_DISABLED`
+(`Strip.fighting`, since the lock comes a moment later) and back after;
+the strip never anchors it, so the strip drags even in a fight. It holds
+while the pet eats like the other Feed buttons.
+
+"About N hours" is the player's own feeding: each feed start
+(`Food:EatingChanged` calls `PetStrip:NoteFed`) teaches the gap since the
+last feed of the same pet this session, 25 s to 2 h, as a running average
+kept per character in `petFeedGap` (`{ avg, n }`, never rename); it shows
+after `GAP_FEEDS` (3) and times every piece of food the pet will eat.
+
+Off unless ticked: "Pet Strip:" (with its description) and "Strip
+Place:" (On Pet Frame first, then Free) under FEEDING on the Pet page,
+hunters only, and `/bpet strip [on|off|reset]`. Saved account wide, never
+rename: `petStrip`, `petStripPlace` (nil for On Pet Frame, "free"),
+`petStripX`/`petStripY`. On Pet Frame it sits under the game's pet frame
+(only read through `ns.PetFrameRect`), under the Pet XP bar when that is
+On Pet Frame and showing; Free starts on the shared top shelf
+(`strip.pets`), drags, and right-click puts it back. Window Locations
+resets it too. The Feed button above the quests and the Pet XP bar stay
+as they were. Tested in `tools/test_petstrip.lua`. Not yet seen in game.
+
+## Skills to Find (2026-11-26)
+
+The owner said build it from the mockup `Docs/mockups/pets-improve-3-skills-to-find.html`
+(project files). "All Beasts" and "Skills to Find" switch the Compendium tab
+between its beast list and `UI/SkillsToFind.lua` (`SkillsToFindUI`, the
+switch from `SkillsToFindUI.CreateSwitch`, `CompendiumUI:ShowView(key,
+search)`; session only, nothing saved). The view puts the search, family
+drop-down, boxes, headings and beast rows away (`CompendiumUI:AllBeastsParts`)
+and shows "NAME has X of Y skill ranks for level N." with a gold bar, then
+YOU CAN TAME THESE NOW (each rank, the closest beast, its level, where it
+lives and Show the Way, `CompendiumUI:AimArrow`), LATER ("At level N") and
+DONE, from `PetSkills:CurrentToFind` (see "The Next Step line"). A click on
+a rank opens All Beasts searching for the skill; the wheel scrolls. It draws
+when it opens, when a pet is called and when a spell is learned or a level
+gained, never on a timer. `CompendiumUI:ShowSearch` always opens All Beasts.
+Tested in `tools/test_skillstofind.lua`. Not yet seen in game.

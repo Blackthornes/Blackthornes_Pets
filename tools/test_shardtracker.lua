@@ -82,6 +82,67 @@ Tracker:ShowTooltip(Tracker.frame.slots[3])
 local tip = table.concat(GameTooltip._lines, " | ")
 suite.check("the hover says who has it", tip:find("On Ana Brightwood", 1, true) ~= nil, tip)
 
+-- The Soulstone's time and holder on the slot (2026-11-26).
+local timers = {}
+local realTimer = _G.C_Timer
+_G.C_Timer = { After = function(wait, fn) timers[#timers + 1] = { wait = wait, fn = fn } end }
+local clock = 1000
+_G.GetTime = function() return clock end
+buffs.party1 = { { spellId = 20707, sourceUnit = "player", expirationTime = clock + 18 * 60 - 20 } }
+slots = Tracker:Slots()
+suite.check("the time left is read", slots[3].left and math.abs(slots[3].left - (18 * 60 - 20)) < 0.01,
+    tostring(slots[3].left))
+suite.check("and who has it", slots[3].holder == "Ana Brightwood")
+Tracker:Refresh()
+local soul = Tracker.frame.slots[3]
+suite.check("the slot shows minutes", soul.count:GetText() == "18 min", soul.count:GetText())
+suite.check("in green", soul.count._color and math.abs(soul.count._color[1] - Tracker.GREEN[1]) < 0.01)
+suite.check("over the whole name", soul.sub:IsShown() and soul.sub:GetText() == "On Ana Brightwood",
+    tostring(soul.sub:GetText()))
+local wide = soul:GetWidth()
+suite.check("the slot grows to fit the name", wide > Tracker.SLOT, tostring(wide))
+suite.check("and so does the plaque", Tracker.frame:GetWidth()
+    == 2 * Tracker.SLOT + soul:GetWidth() + (Tracker.RIM + Tracker.PAD) * 2, tostring(Tracker.frame:GetWidth()))
+suite.check("one timer for the next minute", #timers == 1 and timers[1].wait > 39 and timers[1].wait < 41,
+    #timers .. " " .. tostring(timers[1] and timers[1].wait))
+Tracker:Refresh()
+suite.check("never two at once", #timers == 1)
+clock = clock + 14 * 60
+timers[1].fn()
+suite.check("under five minutes it turns orange", soul.count:GetText() == "4 min"
+    and math.abs(soul.count._color[1] - Tracker.ORANGE[1]) < 0.01, soul.count:GetText())
+suite.check("the next minute is asked for", #timers == 2)
+
+-- A dungeon hides the time: the name alone, and no timer.
+timers = {}
+Tracker.ticking = nil
+buffs.party1 = { { spellId = 20707, sourceUnit = "player",
+    expirationTime = setmetatable({}, { __tostring = function() error("secret value") end }) } }
+_G.issecretvalue = function(value) return type(value) == "table" end
+slots = Tracker:Slots()
+suite.check("a hidden time is no time", slots[3].onSomeone == true and slots[3].left == nil)
+Tracker:Refresh()
+suite.check("the count stays, with the name", soul.count:GetText() == "1"
+    and soul.sub:GetText() == "On Ana Brightwood", soul.count:GetText())
+suite.check("no timer without a time", #timers == 0)
+_G.issecretvalue = nil
+
+-- On nobody with one in the bags: Ready.
+buffs.party1 = nil
+slots = Tracker:Slots()
+suite.check("in the bags and on nobody is ready", slots[3].ready == true and not slots[3].holder)
+Tracker:Refresh()
+suite.check("the slot says Ready", soul.count:GetText() == "Ready" and not soul.sub:IsShown(),
+    soul.count:GetText())
+suite.check("and shrinks back to fit Ready", soul:GetWidth() < wide
+    and soul:GetWidth() >= 4 + Tracker.ICON + 4 + 6 + soul.count:GetStringWidth(), tostring(soul:GetWidth()))
+counts[5232] = 0
+slots = Tracker:Slots()
+suite.check("none in the bags is not ready", not slots[3].ready and slots[3].empty)
+counts[5232] = 1
+_G.C_Timer = realTimer
+_G.GetTime = nil
+
 -- Firestone once Create Firestone is learned, between Healthstone and Soulstone.
 known[17951] = true
 slots = Tracker:Slots()
@@ -113,7 +174,7 @@ suite.check("a Healthstone in the bags is used", act.type == "item" and act.item
 counts[5512] = 0
 act = Act("health")
 suite.check("no Healthstone makes one", act.type == "spell" and act.spell == "Spell 6202", tostring(act.spell))
-suite.check("and says so", act.words == "Click to make one.")
+suite.check("and says so", act.words == "Click to make one. Uses 1 shard.")
 known[11729] = true
 act = Act("health")
 suite.check("with the best rank known", act.spell == "Spell 11729", tostring(act.spell))
@@ -153,6 +214,13 @@ _G.C_Item.GetItemInfoInstant = nil
 counts[5522] = 0
 counts[5512] = 1
 
+-- Click to Make Stones: off for a new player, so no buttons.
+suite.check("clicks start off", not Tracker:ClicksOn())
+Tracker:Refresh()
+suite.check("no buttons while it is off", Tracker.frame.buttons[2] == nil)
+Tracker:SetClicks(true)
+suite.check("ticked, clicks are on", ns.db.shardTrackerClicks == true and Tracker:ClicksOn())
+
 -- The buttons: set out of combat, waiting in a fight.
 Tracker:Refresh()
 local button = Tracker.frame.buttons[2]
@@ -166,6 +234,25 @@ _G.InCombatLockdown = function() return false end
 Tracker:UpdateButtons()
 suite.check("after the fight it catches up", not Tracker.buttonsWaiting and button:GetAttribute("type") == "spell")
 counts[5512] = 1
+
+-- Unticked, the buttons go away.
+Tracker:SetClicks(false)
+suite.check("unticked, the button hides", not button:IsShown() and button:GetAttribute("type") == nil)
+Tracker:SetClicks(true)
+suite.check("ticked again, it is back", button:IsShown())
+
+-- A player who had the tracker on before keeps clicking; a new one starts off.
+ns.db.shardTrackerClicks, ns.db.shardTracker = nil, true
+Tracker:ClicksStart()
+suite.check("the tracker on before keeps clicks", ns.db.shardTrackerClicks == true)
+ns.db.shardTrackerClicks, ns.db.shardTracker = nil, false
+Tracker:ClicksStart()
+suite.check("a new player starts off", ns.db.shardTrackerClicks == false)
+ns.db.shardTrackerClicks = false
+ns.db.shardTracker = true
+Tracker:ClicksStart()
+suite.check("and only once", ns.db.shardTrackerClicks == false)
+ns.db.shardTrackerClicks = true
 
 -- Not a warlock: nothing.
 _G.UnitClass = function() return "Hunter", "HUNTER" end
