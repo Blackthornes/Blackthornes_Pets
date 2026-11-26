@@ -91,4 +91,26 @@ _G.issecretvalue = nil
 suite.check("asks issecretvalue when the client has it",
     text:find("pet health|r  (secret) / 100", 1, true), text)
 
+-- /bpet stable: every field of every pet the stable calls give.
+ns = env.Load()
+ns.HandleSlash("stable")
+suite.check("the stable check runs on a client with none of the calls",
+    env.ChatText():find("stabled|r  absent", 1, true), env.ChatText())
+ns = env.Load()
+_G.C_StableInfo = {
+    IsAtStableMaster = function() return true end,
+    GetActivePetList = function()
+        return { { name = "Shadowpaw", familyName = "Cat", level = 23, slotID = 1, abilities = { 17257, 16829 } } }
+    end,
+    GetStabledPetList = function() error("not at a stable") end,
+    GetStablePetInfo = function(slot) if slot == 1 then return { name = "Greyjaw" } end end,
+}
+ns.HandleSlash("stable")
+text = env.ChatText()
+suite.check("each pet on its own line, every field",
+    text:find("active 1|r  abilities={1:17257 2:16829}, familyName=Cat, level=23, name=Shadowpaw, slotID=1", 1, true), text)
+suite.check("a call that raises says so", text:find("stabled|r  raised", 1, true), text)
+suite.check("a slot with a pet is shown", text:find("slot 1|r  name=Greyjaw", 1, true), text)
+suite.check("and kept for Claude", ns.db.lastProbe and ns.db.lastProbe.check == "stable")
+
 suite.done()

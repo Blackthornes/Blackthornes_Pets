@@ -258,3 +258,79 @@ end
 ns.RegisterHiddenCommand("probe", function()
     ns.KeepCheck("probe", Probe.Run, Probe)
 end)
+
+--------------------------------------------------------------------------------
+-- The stable (2026-11-26, for the My Pets tab the owner said build once this
+-- shows it works): every field of every pet the stable calls give, each on
+-- its own line, and every stable slot. Run it at a stable master with the
+-- stable open, and once away from one.
+--------------------------------------------------------------------------------
+
+--- Every field of a table, sorted, a nested table shown as its own fields.
+local function AllFields(tbl)
+    local ok, text = pcall(function()
+        local keys = {}
+        for key in pairs(tbl) do keys[#keys + 1] = key end
+        table.sort(keys, function(a, b) return tostring(a) < tostring(b) end)
+        local parts = {}
+        for _, key in ipairs(keys) do
+            local value = tbl[key]
+            if type(value) == "table" then
+                local inner = {}
+                for k, v in pairs(value) do inner[#inner + 1] = Text(k) .. ":" .. (type(v) == "table" and "table" or Text(v)) end
+                table.sort(inner)
+                value = "{" .. table.concat(inner, " ") .. "}"
+            else
+                value = Text(value)
+            end
+            parts[#parts + 1] = Text(key) .. "=" .. value
+        end
+        return table.concat(parts, ", ")
+    end)
+    return ok and text or "(unreadable)"
+end
+
+--- Each pet of a list call, a line each.
+local function EachPet(label, path)
+    if not Has(path) then return Line(label, "absent") end
+    local ok, list = pcall(Resolve(path))
+    if not ok then return Line(label, "raised") end
+    if type(list) ~= "table" then return Line(label, Text(list)) end
+    local count = 0
+    for _ in pairs(list) do count = count + 1 end
+    Line(label, ("a list of %d"):format(count))
+    for index, pet in pairs(list) do
+        Line(("  %s %s"):format(label, Text(index)), type(pet) == "table" and AllFields(pet) or Text(pet))
+    end
+end
+
+function Probe:Stable()
+    ns.Print("stable check: what the stable calls give")
+    Line("at stable", Read("C_StableInfo.IsAtStableMaster"))
+    Line("pet out", Read("UnitName", "pet") .. "; " .. Read("UnitCreatureFamily", "pet") .. "; " .. Read("UnitLevel", "pet"))
+    Line("active pets", Read("C_StableInfo.GetNumActivePets"))
+    Line("stabled pets", Read("C_StableInfo.GetNumStablePets"))
+    Line("stable slots", Read("C_StableInfo.GetNumStableSlots"))
+    Line("next slot cost", Read("C_StableInfo.GetNextStableSlotCost"))
+    EachPet("active", "C_StableInfo.GetActivePetList")
+    EachPet("stabled", "C_StableInfo.GetStabledPetList")
+    -- By slot too: the classic stable numbers the pet out 0, then 1 and up.
+    if Has("C_StableInfo.GetStablePetInfo") then
+        for slot = 0, 6 do
+            local ok, a = pcall(Resolve("C_StableInfo.GetStablePetInfo"), slot)
+            if ok and a ~= nil then
+                Line(("slot %d"):format(slot), type(a) == "table" and AllFields(a) or Read("C_StableInfo.GetStablePetInfo", slot))
+            end
+        end
+    end
+    Line("stable food types", Read("C_StableInfo.GetStablePetFoodTypes", 1))
+    Line("player guid kind", (function()
+        local ok, guid = pcall(UnitGUID, "player")
+        local text = ok and Text(guid) or "raised"
+        return text:match("^(%a+)%-") or text
+    end)())
+end
+
+ns.RegisterHiddenCommand("stable", function()
+    ns.KeepCheck("stable", Probe.Stable, Probe)
+end)
