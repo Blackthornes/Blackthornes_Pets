@@ -68,7 +68,16 @@ local function Poke(control)
     -- A stepper: one step along, or one back at the top.
     if rawget(control, "SetValue") and rawget(control, "GetValue") and not rawget(control, "options")
         and not rawget(control, "SetChecked") and not rawget(control, "Toggle") then
+        -- Through its own arrows where it has them: a stepper with a step
+        -- above 2 snaps "one more" back to where it stood (Bar Width did,
+        -- and its key went unseen).
         local now = tonumber(control:GetValue()) or 0
+        local plus, minus = rawget(control, "plus"), rawget(control, "minus")
+        if plus and minus and plus.GetScript and plus:GetScript("OnClick") then
+            plus:GetScript("OnClick")(plus)
+            if tonumber(control:GetValue()) == now then minus:GetScript("OnClick")(minus) end
+            return true
+        end
         control:SetValue(now + 1)
         if tonumber(control:GetValue()) == now then control:SetValue(now - 1) end
         return true
@@ -128,6 +137,9 @@ end
 ns.db.textSize = "large"
 ns.db.muteSounds = true
 ns.db.someSavedData = { [123] = 4 }
+-- Bar Width was left out of the list once, so Set Default kept it.
+ns.PetXPBar:SetWidth(500)
+suite.check("the bar width is saved", ns.db.petXPBarWidth == 500)
 
 
 local reloads = 0
@@ -157,6 +169,8 @@ for _, key in ipairs(SettingsUI.CHAR_SETTING_KEYS or {}) do
         suite.check("back to how it started: char." .. key, false, tostring(ns.charDB[key]))
     end
 end
+suite.check("the bar width is back to how it started", ns.db.petXPBarWidth == nil
+    and ns.PetXPBar:Width() == ns.PetXPBar.WIDTH, tostring(ns.db.petXPBarWidth))
 suite.check("the game reloads once", reloads == 1, reloads)
 suite.check("the button is back to Set Default", button.armed == false
     and button.label:GetText() == "Set Default")
