@@ -110,7 +110,12 @@ local pinned
 local savedPin = C.Pin
 C.Pin = function(_, entry) pinned = entry end
 row:GetScript("OnClick")(row)
-suite.check("a plain click still pins the map", pinned == fang and not Arrow.IsOn())
+suite.check("a plain click opens the beast's sheet", UI.picked == fang and pinned == nil and not Arrow.IsOn())
+UI.sheet.pin:GetScript("OnClick")(UI.sheet.pin)
+suite.check("and Show on Map there pins the map", pinned == fang)
+UI:CloseSheet()
+row.entry = fang -- the list drew again as the sheet closed
+pinned = nil
 shift = true
 pinned = nil
 row:GetScript("OnClick")(row)

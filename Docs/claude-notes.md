@@ -1560,6 +1560,47 @@ shadowed. While it shows, each arrow's `ArrowUI.Words` asks
 longer read (left in saves). Tested in `tools/test_stepbox.lua` (the same in
 all five). Not yet seen in game.
 
+## The Skills Grid (2026-11-26)
+
+A player asked on Discord for a grid of pet skills; the owner said build it
+from `Docs/mockups/pets-improve-7-skills-grid.html` in the project files. A
+List / Grid switch sits at the right of the SKILLS heading for a hunter's
+pet (a demon keeps the list, and the switch hides). Grid shows one line per
+skill the pet knows or its family can learn (family skills first, then the
+ones every pet can learn, each in name order), one box per rank: solid gold
+the pet knows, a bright gold edge it can get now, dim for later
+(`UI.GRID_LOOK`; gold, not green, yellow and red). The note at the right is
+the next step (`UI.GridNote`): "Rank 3: pet trainer, 15 points", "Rank 4 at
+level 30" or "Rank 1: Tame a beast that knows it". A box's hover names the
+rank, how it stands, its pet level, cost and teacher (`UI.GridBoxLines`).
+A key under the grid says what the looks mean. A click on a beast skill opens
+the Compendium on it, as in the list.
+
+`PetSkills:Plan` builds the lines as `plan.grid` from the same loop as the
+lists (`PetSkills.GridRow`), so the two never disagree. The choice is
+`skillsView` ("list" or "grid", account wide, never rename), List unless
+picked, and joins Restore Defaults' `SETTING_KEYS`. Tested in
+`tools/test_skillsgrid.lua`.
+
+## The Beast Sheet (2026-11-26)
+
+The owner said build it from `Docs/mockups/pets-improve-4-beast-sheet.html`
+in the project files. A left click on a Compendium row opens a sheet beside
+the list (`CompendiumUI:OpenSheet`, the same side sheet idea as Equipment's
+Find Upgrades): the family icon, the name in its rank colour, "Rare Wolf,
+level 12", a small picture with the zone's name and a gold dot where the
+beast lives, then Speed (compared to your pet, read in a pcall:
+`PetSpeed`, `SpeedWords`), Eats (`DietWords`), Level ("You can tame it now"
+or "You can tame it at level 53", `TameWords`), what taming it teaches (a
+tag each, "New for you" beside a new one), and Show the Way and Show on Map
+(resting for a beast with no place). While it is open the list keeps Beast,
+Level, Speed and Teaches (`NARROW_KEYS`, `LayColumns`, `SetListRight`);
+Family and Where are on the sheet. The picked row is `glassActive` with a
+gold left edge (`PaintRow`). Its red gem, or a second click on the row,
+closes it (`CloseSheet`). Shift-click (the arrow) and the right-click menu
+are as they were; a plain click no longer pins the map (Show on Map does).
+Session only, nothing saved. Tested in `tools/test_beastsheet.lua`.
+
 ## The Pet Strip (2026-11-26)
 
 A player asked on Discord for a pet status line; the owner said build it
