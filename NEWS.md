@@ -23,6 +23,17 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.19.0
+
+- A new My Pets tab lists every pet you own, out and in the stable.
+- The Compendium has Skills to Find and a Beast Sheet for each beast.
+- The Pet tab has a Next Step line and an optional Pet Strip.
+- The Skills card has a List and Grid switch.
+- The Shard Tracker shows Soulstone time and holder.
+
+Fixes and changes:
+- The minimap button stays where a button drawer puts it.
+
 ## 1.18.5
 
 Fixes and changes:

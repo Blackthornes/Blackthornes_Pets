@@ -4,6 +4,20 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.19.0
+
+For WoW: Forever (interface 16001). A full restart is needed after updating.
+
+- **My Pets.** A new tab lists every pet a hunter owns, out and in the stable, with level, family, loyalty, food, speed and skills. Show Them opens Skills to Find for that pet.
+- **Skills to Find.** The Compendium tab switches between All Beasts and Skills to Find. Skills to Find lists the skill ranks your pet lacks and the closest beast that teaches each one, with Show the Way.
+- **Beast Sheet.** Click a beast in the Compendium to open a sheet beside the list: family, level, where it lives, speed, food, and what taming it teaches, with Show the Way and Show on Map.
+- **Next Step.** One line on the Pet tab says the best next thing to do, with one button. Warlocks see it for demon books.
+- **Pet Strip.** A small strip shows mood, food and experience with a Feed button. Turn it on with Pet Strip: on the Pet page or with `/bpet strip`. It is off unless ticked.
+- **Skills Grid.** A List and Grid switch on the Skills card shows each skill as a line and each rank as a box.
+- **Shard Tracker.** It shows Soulstone time and holder, and Click to Make Stones.
+- **Look.** The All Addons page has Font, Colors and Fold Gem rows, picked once for all five addons.
+- **Fix.** The minimap button stays where a button drawer puts it.
+
 ## 1.18.5
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
