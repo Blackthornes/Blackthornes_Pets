@@ -23,6 +23,11 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.19.1
+
+Fixes and changes:
+- The Compendium shows 39 more beasts that teach Forever's pet skills.
+
 ## 1.19.0
 
 - A new My Pets tab lists every pet you own, out and in the stable.

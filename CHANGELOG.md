@@ -4,6 +4,12 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.19.1
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **More beasts.** The Compendium shows 39 more beasts that teach Forever's pet skills, such as Dismember, Savage Rend, Pinch, Web, Swipe, Tendon Rip and Dust Cloud. Four of them are new to the list: Crazed Sandstrider, Venomhide Ravasaur, Old Vicejaw and Shore Crawler.
+
 ## 1.19.0
 
 For WoW: Forever (interface 16001). A full restart is needed after updating.
