@@ -86,6 +86,24 @@ local list = table.concat(names, ",")
 suite.check("the Giant Grizzled Bear teaches Swipe on Forever", list:find("Swipe1", 1, true), list)
 suite.check("a Forever skill is never listed twice", select(2, list:gsub("Swipe1", "")) == 1)
 
+-- Which beasts teach Forever's ranks (tools/forever_beasts.py --taught).
+local function Teaches(id, want)
+    local entry = C:Get(id)
+    for _, skill in ipairs(entry and C:Skills(entry) or {}) do
+        if skill.name .. skill.rank == want then return true end
+    end
+    return false
+end
+suite.check("a Classic crocolisk teaches Forever's Dismember", Teaches(1151, "Dismember2"))
+suite.check("a Classic owl keeps Classic's skills beside Mine!",
+    Teaches(7097, "Mine!4") and #C:Skills(C:Get(7097)) > 1)
+local ravasaur = C:Get(6508)
+suite.check("a beast Classic never let you tame is in the list, with its spot",
+    ravasaur and ravasaur.family == "Raptor" and ravasaur.zone == "Un'Goro Crater"
+    and ravasaur.forever == "found" and Teaches(6508, "Savage Rend5"))
+suite.check("a rare a typed find already named gets the new rank too",
+    Teaches(263348, "Dust Cloud3"))
+
 -- This account's own tame wins over everything else.
 ns.db.tamedBeasts = { [471] = { name = "Mother Fang", level = 11, zone = "Elwynn Forest", x = 63, y = 49,
     skills = { { name = "Bite", rank = 2 }, { name = "Web", rank = 1 } } } }

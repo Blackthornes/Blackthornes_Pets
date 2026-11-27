@@ -59,6 +59,9 @@ jobs:
       - name: The change checklist reads, and every item is whole
         run: python tools/test_checklist_for_change.py
 
+      - name: Which beasts teach each rank is read right
+        run: python tools/test_forever_beasts.py
+
       - name: House rules on this change (warns only, never fails)
         continue-on-error: true
         run: |

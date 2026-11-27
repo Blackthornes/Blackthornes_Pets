@@ -24,13 +24,27 @@ said:
   FOUND  New beasts, and new skills on old ones, that a published Forever
          source names. Typed below. Add a beast here only
          with a source that names it; never fill a gap by guessing.
+         `--taught <file>` adds more: which beasts teach each Beast
+         Training rank on Forever, a JSON list of rows
+         {"id": <the pet's spell>, "crs": [<creature id>, ...]}; a row
+         whose id is not a pet skill's rank is skipped. A beast
+         gets a rank only when nothing shipped already says it teaches a
+         rank of that skill (Classic's list, the rows typed below, a tame).
+         A rank the client's Beast Training does not list
+         (Data/PetTraining.lua) is left out. A beast Classic does not know
+         needs a name from Farmer's name lists (beside `--harvest`) and a
+         skill only one family learns, which gives its family; its spot
+         comes from the harvest. Rows added this way stay in the file on
+         later runs without `--taught`.
 
 Options:
     --stdout   print the file instead of writing it
 """
 
 import collections
+import json
 import os
+import re
 import sys
 
 from lupa import lua51
@@ -377,11 +391,151 @@ def shipped_seen(lua):
     return out
 
 
+def shipped_found(lua):
+    """creature id -> FOUND row, for rows in the shipped file that are not
+    typed above (added by `--taught`), and the skills such rows added to
+    typed ones."""
+    if not os.path.exists(OUTPUT):
+        return {}
+    lua.execute("ns = {}")
+    run_file(lua, OUTPUT)
+    store = lua.eval("ns.ForeverBeasts and ns.ForeverBeasts.FOUND")
+    typed = {f["id"]: f for f in FOUND if f.get("id")}
+    out = {}
+    for i in (store or {}):
+        r = store[i]
+        if not r.id:
+            continue
+        skills = [(r.skills[j].name, int(r.skills[j].rank)) for j in (r.skills or {})]
+        npc_id = int(r.id)
+        if npc_id in typed:
+            have = set(typed[npc_id].get("skills", []))
+            extra = [s for s in skills if s not in have]
+            if extra:
+                out[npc_id] = {"id": npc_id, "skills": extra}
+            continue
+        row = {"id": npc_id, "name": r.name, "skills": skills}
+        for key in ("family", "min", "max", "rank", "zone", "x", "y"):
+            if r[key] is not None:
+                row[key] = r[key]
+        out[npc_id] = row
+    return out
+
+
+def npc_names(harvest_path):
+    """creature id -> name, from Farmer's name lists beside its harvest."""
+    names = {}
+    folder = os.path.dirname(os.path.abspath(harvest_path))
+    for file in ("NpcNames.lua", "ForeverNpcNames.lua"):   # Forever's last
+        path = os.path.join(folder, file)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as f:
+            for m in re.finditer(r'^\s*\[(\d+)\]\s*=\s*"((?:[^"\\]|\\.)*)"', f.read(), re.M):
+                names[int(m.group(1))] = m.group(2).replace('\\"', '"')
+    return names
+
+
+def taught(lua, path, harvest_path, tamed, found):
+    """creature id -> FOUND row: the ranks each beast teaches on Forever that
+    nothing shipped says yet. `found` is what earlier runs added."""
+    with open(path, encoding="utf-8") as f:
+        rows = json.load(f)
+    lua.execute("ns = {}")
+    for file in ("BeastSkills.lua", "Compendium.lua", "PetTraining.lua"):
+        run_file(lua, os.path.join(ROOT, "Data", file))
+    data = lua.eval("ns")
+    spells = {int(k): (data.PetTrainingData.SPELLS[k][1], int(data.PetTrainingData.SPELLS[k][2]))
+              for k in data.PetTrainingData.SPELLS}
+    one_family = {}
+    for name in data.PetTrainingData.SKILLS:
+        fams = data.PetTrainingData.SKILLS[name].families
+        ids = [int(fams[i]) for i in fams] if fams else []
+        if len(ids) == 1 and data.CompendiumData.FAMILIES[ids[0]]:
+            one_family[name] = data.CompendiumData.FAMILIES[ids[0]][1]
+    classic = data.CompendiumData.BEASTS
+    classic_names = {classic[k].name for k in classic}
+
+    def known(npc_id):
+        have = set()
+        spells_of = data.BeastSkills.BEASTS[npc_id]
+        for i in (spells_of or {}):
+            sp = int(spells_of[i])
+            if sp in spells:
+                have.add(spells[sp])
+            elif data.BeastSkills.SKILLS[sp]:
+                have.add((data.BeastSkills.SKILLS[sp].name, int(data.BeastSkills.SKILLS[sp].rank)))
+        for f in FOUND:
+            if f.get("id") == npc_id:
+                have.update(f.get("skills", []))
+        have.update(tuple(s) for s in tamed.get(npc_id, {}).get("skills", []))
+        have.update(tuple(s) for s in found.get(npc_id, {}).get("skills", []))
+        return have
+
+    teach = collections.defaultdict(list)
+    left_out = set()
+    for r in rows:
+        if r.get("in_prof", 261) != 261 or not r.get("crs"):
+            continue
+        skill = spells.get(int(r["id"]))
+        if not skill:
+            if r.get("in_prof") == 261:
+                left_out.add(int(r["id"]))
+            continue
+        for npc_id in r.get("crs") or []:
+            npc_id = int(npc_id)
+            have = known(npc_id) | set(teach[npc_id])
+            if any(n == skill[0] for n, _ in have):
+                continue
+            teach[npc_id].append(skill)
+
+    names = npc_names(harvest_path) if harvest_path else {}
+    typed = {f["id"] for f in FOUND if f.get("id")}
+    new, skipped = {}, []
+    for npc_id, skills in teach.items():
+        if not skills:
+            continue
+        skills.sort(key=lambda s: (s[0], s[1]))
+        if npc_id in typed or npc_id in found or classic[npc_id]:
+            row = {"id": npc_id, "skills": skills}
+            if classic[npc_id] and npc_id not in typed and npc_id not in found:
+                row["name"] = classic[npc_id].name
+            new[npc_id] = row
+            continue
+        name = names.get(npc_id)
+        family = next((one_family[n] for n, _ in skills if n in one_family), None)
+        if not (name and family):
+            skipped.append(npc_id)
+            continue
+        new[npc_id] = {"id": npc_id, "name": name, "family": family, "skills": skills}
+    # A spot for a beast Classic never had, from Farmer's harvest. A name
+    # Classic also uses could be the other beast, so it gets none.
+    if harvest_path:
+        wanted = {r["name"] for r in new.values() if r.get("family") and r["name"] not in classic_names}
+        spots = harvest(lua, harvest_path, wanted)
+        for r in new.values():
+            if r.get("family") and r["name"] in spots:
+                r.update(spots[r["name"]])
+    return new, sorted(left_out), sorted(skipped)
+
+
+def merge_found(found, new):
+    for npc_id, row in new.items():
+        old = found.get(npc_id)
+        if not old:
+            found[npc_id] = row
+            continue
+        for s in row["skills"]:
+            if s not in old["skills"]:
+                old["skills"].append(s)
+    return found
+
+
 def skills_lua(skills):
     return "{ " + ", ".join(f"{{ name = {lua_string(n)}, rank = {r} }}" for n, r in skills) + " }"
 
 
-def render(seen, tamed):
+def render(seen, tamed, found=None):
     out = []
     w = out.append
     w("-- Blackthornes Pets -- Data/ForeverBeasts.lua")
@@ -430,8 +584,15 @@ def render(seen, tamed):
         w(f"    [{npc_id}] = {{ " + ", ".join(parts) + " },")
     w("}")
     w("")
-    w("ForeverBeasts.FOUND = {")
+    found = dict(found or {})
+    rows = []
     for f in FOUND:
+        if f.get("id") in found:
+            f = dict(f, skills=list(f.get("skills", [])) + found.pop(f["id"])["skills"])
+        rows.append(f)
+    rows += [found[k] for k in sorted(found)]
+    w("ForeverBeasts.FOUND = {")
+    for f in rows:
         parts = []
         if f.get("id"):
             parts.append(f"id = {f['id']}")
@@ -439,7 +600,7 @@ def render(seen, tamed):
         if f.get("family"):
             parts.append(f"family = {lua_string(f['family'])}")
         if f.get("min"):
-            parts.append(f"min = {f['min']}, max = {f['max']}")
+            parts.append(f"min = {int(f['min'])}, max = {int(f['max'])}")
         if f.get("rank"):
             assert f["rank"] in RANKS, f
             parts.append(f"rank = {lua_string(f['rank'])}")
@@ -467,6 +628,11 @@ def main(argv):
         i = args.index("--harvest")
         harvest_path = args[i + 1]
         del args[i:i + 2]
+    taught_path = None
+    if "--taught" in args:
+        i = args.index("--taught")
+        taught_path = args[i + 1]
+        del args[i:i + 2]
 
     lua = new_lua()
     names = compendium_names(lua)
@@ -485,13 +651,20 @@ def main(argv):
                 continue
             tamed[npc_id] = rec
 
-    text = render(seen, tamed)
+    found = shipped_found(lua)
+    if taught_path:
+        new, left_out, skipped = taught(lua, taught_path, harvest_path, tamed, found)
+        merge_found(found, new)
+        print(f"{len(new)} beasts taught ranks; ranks Beast Training does not list: "
+              f"{left_out or 'none'}; beasts with no name or family: {skipped or 'none'}")
+
+    text = render(seen, tamed, found)
     if to_stdout:
         print(text)
     else:
         with open(OUTPUT, "w", encoding="utf-8", newline="\n") as f:
             f.write(text)
-        print(f"{len(seen)} seen, {len(tamed)} tamed, {len(FOUND)} found written to "
+        print(f"{len(seen)} seen, {len(tamed)} tamed, {len(FOUND) + len([k for k in found if k not in {f.get('id') for f in FOUND}])} found written to "
               f"{os.path.relpath(OUTPUT, ROOT)}")
 
 
