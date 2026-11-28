@@ -23,6 +23,15 @@ tell a friend: no hype, no questions to the reader, no exclamation marks
 outside the thanks line, no dashes as punctuation, no "now you can". The
 tool prints a note for a shipped line that reads like an advert.
 
+## 1.19.2
+
+Fixes and changes:
+- My Pets no longer keeps a pet you let go or renamed as a second pet, and the stable slot line reads right.
+- Right-clicking the small Feed button puts it back without using food.
+- Skills to Find shows the pet you have out after you close and open the Compendium.
+- A fold gem on a window set to a round button no longer reads "Expand this window" at the wrong time.
+- The vendor window sits under the stack split pop-up and other buy pop-ups.
+
 ## 1.19.1
 
 Fixes and changes:

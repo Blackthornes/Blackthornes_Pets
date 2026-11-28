@@ -4,6 +4,16 @@ Versions follow [semantic versioning](https://semver.org): the middle number
 moves for new behaviour, the last for fixes alone. The newest version goes at
 the top; a release is refused if its version has no section here.
 
+## 1.19.2
+
+For WoW: Forever (interface 16001). `/reload` is enough after updating.
+
+- **Fix.** My Pets no longer keeps a pet you let go or renamed as a second pet, and the stable slot line reads right.
+- **Fix.** Right-clicking the small Feed button puts it back without using food.
+- **Fix.** Skills to Find shows the pet you have out after you close and open the Compendium.
+- **Fix.** A fold gem on a window set to a round button no longer reads "Expand this window" at the wrong time.
+- **Fix.** The vendor window sits under the stack split pop-up and other buy pop-ups.
+
 ## 1.19.1
 
 For WoW: Forever (interface 16001). `/reload` is enough after updating.
