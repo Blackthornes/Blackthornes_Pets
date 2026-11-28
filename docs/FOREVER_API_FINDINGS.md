@@ -238,3 +238,16 @@ out and a level 12 Scorpid in the stable:
 
 Not yet known: whether the two lists answer away from the stable. My Pets
 asks anyway and only marks a pet gone while `IsAtStableMaster()` is true.
+
+## The stack split pop-up's layer (2026-11-28)
+
+- Not read from the client yet. Blizzard's own UI files for retail and
+  Classic both build `StackSplitFrame` at strata `HIGH`, toplevel, and
+  leave `MerchantFrame` at the default, `MEDIUM`. Forever runs a retail
+  engine, so it most likely matches.
+- So the one window, `HIGH` and toplevel too, covered the pop-up whenever
+  it was raised last. Docked at the vendor it now takes the vendor
+  window's layer (read in a pcall; `MEDIUM` when that fails or is not under
+  `HIGH`). See "Vendor pop-ups on top" in Docs/claude-notes.md.
+- To check in game at a vendor: `/dump StackSplitFrame:GetFrameStrata()`
+  and `/dump MerchantFrame:GetFrameStrata()`.

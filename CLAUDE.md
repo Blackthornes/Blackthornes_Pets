@@ -56,6 +56,7 @@ Sections there:
 - The Pet Strip (2026-11-26)
 - Skills to Find (2026-11-26)
 - My Pets (2026-11-26)
+- Vendor pop-ups on top (2026-11-28)
 
 ## Checking a change
 
@@ -126,7 +127,7 @@ before leaning on one.
 - **Window spots.** Windows remember where they were dragged:
   `oneWindowDockSpots[place]`, `windowSpots[key]` and `foldedWindows[key]` (never rename),
   `SharedWindow.KeepSpot(frame, key)`, `windows reset` runs
-  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 17 (the round button, the swap gem, Butler at the vendor, no placing mid-drag, shelves,
+  `SharedWindow.ResetAllSpots`. SharedWindow.lua is FILE_VERSION 18 (the round button, the swap gem, Butler at the vendor, vendor pop-ups on top, no placing mid-drag, shelves,
   dock places, All Addons gear) and WhatsNew.lua FILE_VERSION 7.
 
 ## Big files (read these in pieces)
