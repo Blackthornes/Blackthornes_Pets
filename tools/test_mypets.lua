@@ -138,6 +138,20 @@ ns.CompendiumUI:ShowView("find")
 suite.check("the switch goes back to the pet out", ns.SkillsToFindUI.pet == nil)
 ns.CompendiumUI:Hide()
 
+-- Show Them, then the Compendium closed and opened again: the pet out.
+Window:ShowThem(stabled)
+suite.check("Show Them again", ns.SkillsToFindUI.pet == stabled)
+ns.CompendiumUI:Hide()
+ns.CompendiumUI:Show()
+suite.check("opened again, it is back on the pet out", ns.SkillsToFindUI.pet == nil)
+-- And once that pet is the one out, its own list.
+Window:ShowThem(stabled)
+stabled.active = true
+ns.SkillsToFindUI:Refresh()
+suite.check("called out, it is the pet out", ns.SkillsToFindUI.pet == nil)
+stabled.active = false
+ns.CompendiumUI:Hide()
+
 -- No pets yet: the empty line.
 GUID = "Player-1-0000F00D"
 _G.UnitGUID = function(unit) return unit == "player" and GUID or nil end
