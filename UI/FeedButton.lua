@@ -43,7 +43,9 @@ function FeedButton:Build()
     })
     button:SetLines(L["Feed"])
     button:SetFrameStrata("HIGH")
-    button:RegisterForClicks("AnyUp", "AnyDown")
+    -- The left button only: a right-click puts the button back (below) and
+    -- must not feed as well.
+    button:RegisterForClicks("LeftButtonUp", "LeftButtonDown")
     -- Feed on the mouse going up, so a drag does not feed first.
     button:SetAttribute("useOnKeyDown", false)
     button:SetMovable(true)

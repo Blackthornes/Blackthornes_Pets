@@ -1781,6 +1781,20 @@ Skills to Find for that pet (`CompendiumUI:ShowView("find", nil, pet)`,
 `SkillsToFindUI.pet`); the switch goes back to the pet out. No new setting.
 Tested in `tools/test_mypets.lua`. Not yet seen in game.
 
+Fixed 2026-11-28 (a bug pass; the owner said build): a pet let go or given
+a new name away from the stable stayed on the tab as a second pet, and the
+slots read "3 of 1". Now, when the pet out is one the save has never seen,
+the one that was out (`active`, not `gone`) is the same pet under a new name
+when the family matches (it keeps its record and skills; a `p:` key follows
+the name) and is marked `gone` when it does not. A pet let go with no new
+one called still shows until the next pet or stable visit: nothing tells a
+pet let go from one sent away. Two pets with one name and family: the
+skills go on the one out (`Find(..., true)`). Opening the Compendium afresh
+clears `SkillsToFindUI.pet`, and a stabled pet called out since is read
+live. The small Feed button takes left clicks only, so the right-click that
+puts it back no longer feeds. Tested in `tools/test_mypetsgone.lua`,
+`tools/test_mypets.lua` and `tools/test_feedbutton.lua`. Not yet seen in game.
+
 ## The note stack's own spot (2026-11-26)
 
 `UI/Notice.lua` (shared by all five) reads `windowSpots["shared.notice"]`

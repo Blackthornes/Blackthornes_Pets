@@ -307,6 +307,11 @@ function SkillsToFindUI:Refresh()
     local found, status, level
     -- A stabled pet picked on My Pets (Show Them), as it was last seen.
     local pet = self.pet
+    -- Called out since, it is the pet out: read live, not as last seen.
+    if pet and pet.active == true then
+        pet = nil
+        self.pet = nil
+    end
     if pet and ns.MyPets then
         found = ns.MyPets:ToFind(pet)
         status, level = { name = pet.name }, pet.level

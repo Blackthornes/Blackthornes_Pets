@@ -109,6 +109,12 @@ suite.check("and it stays there",
     point == "BOTTOMLEFT" and relativePoint == "BOTTOMLEFT" and x == 300 and y == 400,
     table.concat({ tostring(point), tostring(x), tostring(y) }, " "))
 
+-- A right-click puts it back and must not feed: only the left button is a
+-- click (the bug pass, 2026-11-28: it used one food).
+local clicks = table.concat(button._clicks or {}, " ")
+suite.check("only a left click feeds", clicks:find("Left") ~= nil and not clicks:find("Any")
+    and not clicks:find("Right"), clicks)
+
 _G.InCombatLockdown = function() return true end
 button:GetScript("OnMouseUp")(button, "RightButton")
 suite.check("a right-click in combat changes nothing", ns.charDB.feedButtonSpot ~= nil)

@@ -1536,6 +1536,9 @@ function CompendiumUI:Show()
     if ns.PetsTabs and ns.PetsTabs:Route("compendium") then return end
     self:Build()
     if not self.frame:IsShown() then
+        -- Opened afresh, Skills to Find is for the pet out again. Show Them
+        -- on My Pets names its stabled pet after this (ShowView).
+        if ns.SkillsToFindUI then ns.SkillsToFindUI.pet = nil end
         local how = ns.PetsTabs and ns.PetsTabs:Take(self)
         if not how then self:RestorePosition() end
         self.frame:Show()

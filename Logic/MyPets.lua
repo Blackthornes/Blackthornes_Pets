@@ -72,10 +72,24 @@ local function Now()
     return type(now) == "number" and now or 0
 end
 
---- The saved pet with this name and family, and its key, or nil.
-local function Find(pets, name, family)
+--- The saved pet with this name and family, and its key, or nil. Two pets
+--- can share both: `out` picks the one that was out, never one hidden.
+local function Find(pets, name, family, out)
+    local foundKey, found
     for key, pet in pairs(pets) do
-        if pet.name == name and pet.family == family then return key, pet end
+        if pet.name == name and pet.family == family then
+            if not out then return key, pet end
+            if pet.active == true and not pet.gone then return key, pet end
+            if not found or (found.gone and not pet.gone) then foundKey, found = key, pet end
+        end
+    end
+    return foundKey, found
+end
+
+--- The saved pet that was out when last seen, and its key, or nil.
+local function Out(pets)
+    for key, pet in pairs(pets) do
+        if pet.active == true and not pet.gone then return key, pet end
     end
     return nil
 end
@@ -171,10 +185,27 @@ function MyPets:ReadOut()
     if not (name and family) then return false end
     local record = self:Record(true)
     if not record then return false end
-    local key, pet = Find(record.pets, name, family)
+    local key, pet = Find(record.pets, name, family, true)
     if not pet then
-        key, pet = "p:" .. name .. ":" .. family, { name = name, family = family }
-        record.pets[key] = pet
+        -- A pet never seen before is out, away from the stable (there the
+        -- stable's own list names it first). A hunter carries one pet, so
+        -- the one that was out is no longer: given a new name when the
+        -- family is the same, and then it keeps its record; let go when
+        -- it is not, and then it is hidden like one gone from the stable.
+        local wasKey, was = Out(record.pets)
+        if was and was.family == family then
+            key, pet = wasKey, was
+            pet.name = name
+            if key:sub(1, 2) == "p:" then
+                record.pets[key] = nil
+                key = "p:" .. name .. ":" .. family
+                record.pets[key] = pet
+            end
+        else
+            if was then was.gone = true end
+            key, pet = "p:" .. name .. ":" .. family, { name = name, family = family }
+            record.pets[key] = pet
+        end
     end
     -- Only one pet is out.
     for _, other in pairs(record.pets) do
